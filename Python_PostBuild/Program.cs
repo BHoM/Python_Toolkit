@@ -14,6 +14,7 @@ namespace BH.PostBuild.Python
                 force = true;
 
             // Install python
+            Console.WriteLine("Installing python 3.7 embedded...");
             Compute.Install(force).Wait();
 
             // Check the installation was successful 
@@ -21,6 +22,7 @@ namespace BH.PostBuild.Python
                 throw new SystemException("Could not install Python");
 
             // Install pip
+            Console.WriteLine("Installing pip...");
             Compute.InstallPip();
 
             // Check the pip installation was successful 
@@ -35,6 +37,7 @@ namespace BH.PostBuild.Python
 
                 try
                 {
+                    Console.WriteLine($"Installing {module}");
                     Compute.PipInstall(module);
                 }
                 catch { }
