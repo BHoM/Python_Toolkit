@@ -65,10 +65,17 @@ namespace BH.Engine.Python
                     // allow pip on embedded python installation by unflagging python as embedded
                     // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
                     File.Delete(Path.Combine(Query.EmbeddedPythonHome(), PYTHON_VERSION + "._pth"));
-                    // Clean up
-                    File.Delete(targetPath);
+
                 }
-                catch { }
+                catch
+                {
+                }
+                finally
+                {
+                    // Clean up
+                    if (File.Exists(targetPath))
+                        File.Delete(targetPath);
+                }
             });
         }
 
