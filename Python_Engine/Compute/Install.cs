@@ -47,6 +47,9 @@ namespace BH.Engine.Python
             if (!force && Query.IsInstalled()) // python seems installed, so exit
                 return;
 
+            if (!Directory.Exists(Query.EmbeddedPythonHome()))
+                Directory.CreateDirectory(Query.EmbeddedPythonHome());
+
             await Task.Run(() =>
             {
                 string resourceName = typeof(Compute).Assembly.GetManifestResourceNames().FirstOrDefault(x => x.Contains(EMBEDDED_PYTHON));
