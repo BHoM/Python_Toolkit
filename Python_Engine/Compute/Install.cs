@@ -49,18 +49,24 @@ namespace BH.Engine.Python
 
             await Task.Run(() =>
             {
-                var assembly = typeof(Compute).Assembly;
-                var appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var zip = Path.Combine(appdata, $"{EMBEDDED_PYTHON}.zip");
-                var resource_name = EMBEDDED_PYTHON;
-                CopyEmbeddedResourceToFile(assembly, resource_name, zip, force);
+                string resourceName = typeof(Compute).Assembly.GetManifestResourceNames().FirstOrDefault(x => x.Contains(EMBEDDED_PYTHON));
+                if (resourceName == null)
+                    throw new FileNotFoundException($"No embedded python zip resource found for {resourceName}");
+
+                // Copy the python embedded zip file to AppData/Roaming/BHoM/
+                string targetFolder = Query.EmbeddedPythonHome();
+                string targetPath = targetFolder + ".zip";
+                CopyEmbeddedResourceToFile(resourceName, targetPath, force);
+
                 try
                 {
-                    ZipFile.ExtractToDirectory(zip, zip.Replace(".zip", ""));
+                    ZipFile.ExtractToDirectory(targetPath, targetPath.Replace(".zip", ""));
 
                     // allow pip on embedded python installation by unflagging python as embedded
                     // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
                     File.Delete(Path.Combine(Query.EmbeddedPythonHome(), PYTHON_VERSION + "._pth"));
+                    // Clean up
+                    File.Delete(targetPath);
                 }
                 catch { }
             });
