@@ -57,6 +57,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(TargetPath) false</PostBuildEvent>
+    <PostBuildEvent>rem $(TargetPath) calls the appitself to install python at compilation time
+$(TargetPath)</PostBuildEvent>
   </PropertyGroup>
 </Project>

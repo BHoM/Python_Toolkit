@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using BH.Engine.Python;
 
 namespace BH.PostBuild.Python
@@ -7,8 +8,13 @@ namespace BH.PostBuild.Python
     {
         static void Main(string[] args)
         {
+            // Parsing arguments
+            bool force = false;
+            if (args.Contains("--force"))
+                force = true;
+
             // Install python
-            Compute.Install().Wait();
+            Compute.Install(force).Wait();
 
             // Check the installation was successful 
             if (!Query.IsInstalled())
@@ -22,23 +28,17 @@ namespace BH.PostBuild.Python
                 throw new SystemException("Could not install pip");
 
             // Install most commonly used ml packages
+            foreach(string module in args)
+            {
+                if (module.Contains("--force"))
+                    continue;
 
-            if (args.Length <= 0 || !bool.Parse(args[0]))
-                return;
-
-            // Pillow
-            Compute.PipInstall("pillow");
-
-            // numpy
-            Compute.PipInstall("numpy");
-
-            // tensorflow
-            Compute.PipInstall("tensorflow", "2.0");
-
-            // pytorch
-            Compute.PipInstall("torch===1.4.0 torchvision===0.5.0 -f https://download.pytorch.org/whl/torch_stable.html");
-
-            //scikit learn
+                try
+                {
+                    Compute.PipInstall(module);
+                }
+                catch { }
+            }
         }
     }
 }
