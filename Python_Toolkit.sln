@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_Engine", "Python_Engine\Python_Engine.csproj", "{4A6B3805-35EE-4278-9701-CC1E0CD641F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_PostBuild", "Python_PostBuild\Python_PostBuild.csproj", "{830F827F-AC6F-4D27-9625-7756B65492B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{830F827F-AC6F-4D27-9625-7756B65492B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{830F827F-AC6F-4D27-9625-7756B65492B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{830F827F-AC6F-4D27-9625-7756B65492B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{830F827F-AC6F-4D27-9625-7756B65492B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

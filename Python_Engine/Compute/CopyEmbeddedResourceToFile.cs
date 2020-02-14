@@ -33,13 +33,14 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void CopyEmbeddedResourceToFile(Assembly assembly, string resourceName, string filePath, bool force = false)
+        public static void CopyEmbeddedResourceToFile(string resourceName, string targetPath, bool force = false)
         {
-            if (force || !File.Exists(filePath))
+            if (force || !File.Exists(targetPath)) 
             {
+                Assembly assembly = typeof(Compute).Assembly;
                 var key = assembly.GetManifestResourceNames().FirstOrDefault(x => x.Contains(resourceName));
                 using (Stream stream = assembly.GetManifestResourceStream(key))
-                using (var file = new FileStream(filePath, FileMode.Create))
+                using (var file = new FileStream(targetPath, FileMode.Create))
                 {
                     if (stream == null)
                         throw new ArgumentException($"Resource name '{resourceName}' not found!");
