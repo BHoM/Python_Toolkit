@@ -57,6 +57,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent>"$(TargetPath)" jupyter jupyterlab</PostBuildEvent>
   </PropertyGroup>
 </Project>
