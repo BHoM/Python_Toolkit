@@ -45,7 +45,7 @@ namespace BH.Engine.Python
             startInfo.Arguments = $"{commandMode} {command}";
             process.StartInfo = startInfo;
             process.Start();
-            //process.WaitForExit();
+            process.WaitForExit();
         }
 
         /***************************************************/
@@ -67,7 +67,6 @@ namespace BH.Engine.Python
                 process.StartInfo = startInfo;
                 process.Start();
             });
-            //process.WaitForExit();
         }
 
         /***************************************************/
