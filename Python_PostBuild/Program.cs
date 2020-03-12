@@ -29,15 +29,20 @@ namespace BH.PostBuild.Python
             if (!Query.IsPipInstalled())
                 throw new SystemException("Could not install pip");
 
+            // install project jupyter
+            Console.WriteLine("Installing jupyter...");
+            Compute.PipInstall("jupyter");
+            Compute.PipInstall("jupyterlab");
+
             // Install most commonly used ml packages
-            foreach(string module in args)
+            foreach (string module in args)
             {
                 if (module.Contains("--force"))
                     continue;
 
                 try
                 {
-                    Console.WriteLine($"Installing {module}");
+                    Console.WriteLine($"Installing {module}...");
                     Compute.PipInstall(module);
                 }
                 catch { }
