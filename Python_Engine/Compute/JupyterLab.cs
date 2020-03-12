@@ -32,11 +32,16 @@ namespace BH.Engine.Python
 
         public static void JupyterLab(int port = 7777, bool start = false)
         {
-            string path = Path.Combine(Query.EmbeddedPythonHome(), "Scripts");
+            string path = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "jupyter-lab.exe");
+            if (!File.Exists(path))
+                throw new FileNotFoundException("Cannot find jupyter lab", path);
+
+            path = Path.GetFullPath(path);
+            string configPath = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "jupyter_lab_config.py");
             if (start)
-                RunCommandAsync($"jupyter-lab.exe --port {port}", false, path);
+                RunCommandAsync($"cd ../../../../ && {path} --port {port} --config {configPath}", false);
         }
-        
+
         /***************************************************/
     }
 }
