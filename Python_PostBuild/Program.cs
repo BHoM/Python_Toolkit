@@ -37,13 +37,10 @@ namespace BH.PostBuild.Python
             // Install most commonly used ml packages
             foreach (string module in args)
             {
-                if (module.Contains("--force"))
-                    continue;
-
                 try
                 {
                     Console.WriteLine($"Installing {module}...");
-                    Compute.PipInstall(module);
+                    Compute.PipInstall(module, force: force);
                 }
                 catch { }
             }
