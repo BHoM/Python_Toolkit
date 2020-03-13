@@ -37,10 +37,7 @@ namespace BH.Engine.Python
                 throw new FileNotFoundException("Cannot find jupyter lab", path);
 
             if (directory == null || !Directory.Exists(directory))
-            {
-                path = Path.GetFullPath(path);
-                directory = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "jupyter_lab_config.py");
-            }
+                directory = "../../../../";
 
             if (start)
                 RunCommandAsync($"cd {directory} && {path} --port {port}", false);
