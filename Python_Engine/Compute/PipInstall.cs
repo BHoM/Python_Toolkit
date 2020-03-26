@@ -30,7 +30,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void PipInstall(string module_name, string version = "", bool force = false)
+        public static void PipInstall(string module_name, string version = "", bool force = false, string findLinks = "")
         {
             if (Query.IsModuleInstalled(module_name) && !force)
                 return;
@@ -40,7 +40,10 @@ namespace BH.Engine.Python
             if (version.Length > 0)
                 version = $"=={version}";
 
-            RunCommand($"{pipPath} install {module_name}{version} {forceInstall}");
+            if (findLinks != "")
+                findLinks = "-f " + findLinks;
+
+            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall}");
         }
 
         /***************************************************/

@@ -31,18 +31,19 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void RunCommand(string command,
-            bool hideWindows = true,
-            string startDirectory = null)
+        public static void RunCommand(string command, bool hideWindows = true, string startDirectory = null)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+
             if (hideWindows)
                 startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            startInfo.FileName = "cmd.exe";
             string commandMode = hideWindows ? "/C" : "/K";
+
+            startInfo.FileName = "cmd.exe";
             startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
             startInfo.Arguments = $"{commandMode} {command}";
+
             process.StartInfo = startInfo;
             process.Start();
             process.WaitForExit();
@@ -50,20 +51,21 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static async void RunCommandAsync(string command,
-            bool hideWindows = true,
-            string startDirectory = null)
+        public static async void RunCommandAsync(string command, bool hideWindows = true, string startDirectory = null)
         {
             await Task.Run(() =>
             {
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+
                 if (hideWindows)
                     startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                startInfo.FileName = "cmd.exe";
                 string commandMode = hideWindows ? "/C" : "/K";
+
+                startInfo.FileName = "cmd.exe";
                 startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
                 startInfo.Arguments = $"{commandMode} {command}";
+
                 process.StartInfo = startInfo;
                 process.Start();
             });

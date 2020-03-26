@@ -37,7 +37,12 @@ namespace BH.PostBuild.Python
 
             // install pytohn side of python_toolkit 
             Console.WriteLine("Installing python_toolkit in python...");
-            Compute.PipInstall("-e git+https://github.com/BHoM/Python_Toolkit.git");
+            Compute.PipInstall("-e git+https://github.com/BHoM/Python_Toolkit.git@MachineLearning#56-PythonFramework");
+
+            // install pytorch
+            Console.WriteLine("Installing pytorch");
+            Compute.PipInstall("torch", version: "1.4.0", findLinks: "https://download.pytorch.org/whl/torch_stable.html");
+            Compute.PipInstall("torchvision", version: "0.5.0", findLinks: "https://download.pytorch.org/whl/torch_stable.html");
 
             // Install most commonly used ml packages
             foreach (string module in args)
