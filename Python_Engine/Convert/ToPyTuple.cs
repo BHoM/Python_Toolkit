@@ -68,38 +68,5 @@ namespace BH.Engine.Python
         }
 
         /***************************************************/
-
-        public static PyTuple ToPyTuple<T>(ValueTuple<T> input)
-        {
-            PyObject[] array = new PyObject[1];
-            array[0] = IToPython(input.Item1);
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
-
-        public static PyTuple ToPyTuple<T>(ValueTuple<T, T> input)
-        {
-            PyObject[] array = new PyObject[2];
-            array[0] = IToPython(input.Item1);
-            array[1] = IToPython(input.Item2);
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
-
-        public static PyTuple ToPyTuple<T>(ValueTuple<T, T, T> input)
-        {
-            PyObject[] array = new PyObject[3];
-            array[0] = IToPython(input.Item1);
-            array[1] = IToPython(input.Item2);
-            array[2] = IToPython(input.Item3);
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
     }
 }
