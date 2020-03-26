@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using BH.Engine.Python;
 
@@ -33,6 +34,10 @@ namespace BH.PostBuild.Python
             Console.WriteLine("Installing jupyter...");
             Compute.PipInstall("jupyter");
             Compute.PipInstall("jupyterlab");
+
+            // install pytohn side of python_toolkit 
+            Console.WriteLine("Installing python_toolkit in python...");
+            Compute.PipInstall("-e git+https://github.com/BHoM/Python_Toolkit.git");
 
             // Install most commonly used ml packages
             foreach (string module in args)

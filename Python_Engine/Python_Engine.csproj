@@ -47,11 +47,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compute\CopyEmbeddedResourceToFile.cs" />
+    <Compile Include="Compute\Init.cs" />
     <Compile Include="Compute\Install.cs" />
     <Compile Include="Compute\InstallPip.cs" />
     <Compile Include="Compute\PipInstall.cs" />
     <Compile Include="Compute\RunCommand.cs" />
     <Compile Include="Compute\JupyterLab.cs" />
+    <Compile Include="Compute\Invoke.cs" />
+    <Compile Include="Convert\FromPIL.cs" />
+    <Compile Include="Convert\ToPyTuple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Query\EmbeddedPythonHome.cs" />

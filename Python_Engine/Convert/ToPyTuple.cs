@@ -22,6 +22,8 @@
 
 using Python.Runtime;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -31,95 +33,17 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static PyObject IToPython(object obj)
+        public static PyTuple IToPyTuple(object obj)
         {
             if (obj == null)
-                return Runtime.GetPyNone();
+                return new PyTuple();
 
-            return ToPython(obj as dynamic);
+            return ToPyTuple(obj as dynamic);
         }
 
         /***************************************************/
 
-        public static PyInt ToPython(int integer)
-        {
-            return new PyInt(integer);
-        }
-
-        /***************************************************/
-
-        public static PyLong ToPython(long integer64)
-        {
-            return new PyLong(integer64);
-        }
-
-        /***************************************************/
-
-        public static PyFloat ToPython(float floatingPoint)
-        {
-            return new PyFloat(floatingPoint);
-        }
-
-        /***************************************************/
-
-        public static PyFloat ToPython(double floatingPoint)
-        {
-            return new PyFloat(floatingPoint);
-        }
-
-        /***************************************************/
-
-        public static PyString ToPython(string text)
-        {
-            return new PyString(text);
-        }
-
-        /***************************************************/
-
-        public static PyObject ToPython(bool boolean)
-        {
-            if (boolean)
-                return new PyObject(Runtime.PyTrue);
-            else
-                return new PyObject(Runtime.PyFalse);
-        }
-
-        /***************************************************/
-
-        public static PyTuple ToPython(ValueTuple<int> input)
-        {
-            PyObject[] array = new PyObject[1];
-            array[0] = ToPython(input.Item1);
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
-
-        public static PyTuple ToPython(ValueTuple<int, int> input)
-        {
-            PyObject[] array = new PyObject[2];
-            array[0] = ToPython(input.Item1);
-            array[1] = ToPython(input.Item2);
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
-
-        public static PyTuple ToPython(ValueTuple<int, int, int> input)
-        {
-            PyObject[] array = new PyObject[3];
-            array[0] = ToPython(input.Item1);
-            array[1] = ToPython(input.Item2);
-            array[2] = ToPython(input.Item3);
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
-
-        public static PyList ToPython(Array input)
+        public static PyTuple ToPyTuple(Array input)
         {
             PyObject[] array = new PyObject[input.Length];
             for (int i = 0; i < input.Length; i++)
@@ -127,7 +51,53 @@ namespace BH.Engine.Python
                 array[i] = IToPython(input.GetValue(i));
             }
 
-            return new PyList(array);
+            return new PyTuple(array);
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPyTuple<T>(List<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count()];
+            for (int i = 0; i < input.Count(); i++)
+            {
+                array[i] = IToPython(input.ElementAt(i));
+            }
+
+            return new PyTuple(array);
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPyTuple<T>(ValueTuple<T> input)
+        {
+            PyObject[] array = new PyObject[1];
+            array[0] = IToPython(input.Item1);
+
+            return new PyTuple(array);
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPyTuple<T>(ValueTuple<T, T> input)
+        {
+            PyObject[] array = new PyObject[2];
+            array[0] = IToPython(input.Item1);
+            array[1] = IToPython(input.Item2);
+
+            return new PyTuple(array);
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPyTuple<T>(ValueTuple<T, T, T> input)
+        {
+            PyObject[] array = new PyObject[3];
+            array[0] = IToPython(input.Item1);
+            array[1] = IToPython(input.Item2);
+            array[2] = IToPython(input.Item3);
+
+            return new PyTuple(array);
         }
 
         /***************************************************/
