@@ -23,8 +23,6 @@
 using Python.Runtime;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
@@ -34,29 +32,14 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static PyObject Invoke(PyObject instanceOrModule, string method, Dictionary<string, object> args)
+        public static dynamic Invoke(PyObject instanceOrModule, string method, Dictionary<string, object> args)
         {
             PyTuple pyargs = Convert.ToPyTuple(new object[]
             {
                 args.FirstOrDefault().Value
             });
 
-            PyDict kwargs = new PyDict();
-
-            bool skip = true;
-            foreach (var item in args)
-            {
-                if (skip)
-                {
-                    skip = false;
-                    continue;
-                }
-
-                if (item.Value != null && !string.IsNullOrWhiteSpace(item.Value.ToString()))
-                {
-                    kwargs[item.Key] = Convert.IToPython(item.Value);
-                }
-            }
+            PyDict kwargs = ConverterExtension.ToPython(args) as PyDict;
 
             if (args.Count > 0)
                 return instanceOrModule.InvokeMethod(method, pyargs, kwargs);

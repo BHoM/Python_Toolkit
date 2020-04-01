@@ -31,52 +31,55 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static PyObject IToPython(object obj)
+        public static PyObject IToPython(dynamic obj)
         {
             if (obj == null)
                 return Runtime.GetPyNone();
 
-            return ToPython(obj as dynamic);
+            if (obj is PyObject)
+                return obj;
+
+            return ToPython(obj);
         }
 
         /***************************************************/
 
-        public static PyInt ToPython(int integer)
+        public static PyInt ToPython(this int integer)
         {
             return new PyInt(integer);
         }
 
         /***************************************************/
 
-        public static PyLong ToPython(long integer64)
+        public static PyLong ToPython(this long integer64)
         {
             return new PyLong(integer64);
         }
 
         /***************************************************/
 
-        public static PyFloat ToPython(float floatingPoint)
+        public static PyFloat ToPython(this float floatingPoint)
         {
             return new PyFloat(floatingPoint);
         }
 
         /***************************************************/
 
-        public static PyFloat ToPython(double floatingPoint)
+        public static PyFloat ToPython(this double floatingPoint)
         {
             return new PyFloat(floatingPoint);
         }
 
         /***************************************************/
 
-        public static PyString ToPython(string text)
+        public static PyString ToPython(this string text)
         {
             return new PyString(text);
         }
 
         /***************************************************/
 
-        public static PyObject ToPython(bool boolean)
+        public static PyObject ToPython(this bool boolean)
         {
             if (boolean)
                 return new PyObject(Runtime.PyTrue);
@@ -86,7 +89,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyTuple ToPython(ValueTuple<int> input)
+        public static PyTuple ToPython(this ValueTuple<int> input)
         {
             PyObject[] array = new PyObject[1];
             array[0] = ToPython(input.Item1);
@@ -96,7 +99,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyTuple ToPython(ValueTuple<int, int> input)
+        public static PyTuple ToPython(this ValueTuple<int, int> input)
         {
             PyObject[] array = new PyObject[2];
             array[0] = ToPython(input.Item1);
@@ -107,7 +110,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyTuple ToPython(ValueTuple<int, int, int> input)
+        public static PyTuple ToPython(this ValueTuple<int, int, int> input)
         {
             PyObject[] array = new PyObject[3];
             array[0] = ToPython(input.Item1);
@@ -119,7 +122,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyList ToPython(Array input)
+        public static PyList ToPython(this Array input)
         {
             PyObject[] array = new PyObject[input.Length];
             for (int i = 0; i < input.Length; i++)
