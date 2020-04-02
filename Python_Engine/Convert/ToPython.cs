@@ -22,6 +22,10 @@
 
 using Python.Runtime;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -89,6 +93,74 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        public static PyList ToPython<T>(this T[] input)
+        {
+            PyObject[] array = new PyObject[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                array[i] = IToPython(input[i]);
+            }
+
+            return new PyList(array);
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this List<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count];
+            for (int i = 0; i < input.Count; i++)
+            {
+                array[i] = IToPython(input[i]);
+            }
+
+            return new PyList(array);
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this IEnumerable<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count()];
+            for (int i = 0; i < input.Count(); i++)
+            {
+                array[i] = IToPython(input.ElementAt(i));
+            }
+
+            return new PyList(array);
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this IEnumerable<IEnumerable<T>> input)
+        {
+            return ConverterExtension.ToPython(input) as PyList;
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this T[,] input)
+        {
+            return ConverterExtension.ToPython(input) as PyList;
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this T[][] input)
+        {
+            return ConverterExtension.ToPython(input) as PyList;
+        }
+
+        /***************************************************/
+
+
+        public static PyDict ToPython(this Dictionary<string, object> dict)
+        {
+            return ConverterExtension.ToPython(dict) as PyDict;
+        }
+
+        /***************************************************/
+
         public static PyTuple ToPython(this ValueTuple<int> input)
         {
             PyObject[] array = new PyObject[1];
@@ -119,20 +191,7 @@ namespace BH.Engine.Python
 
             return new PyTuple(array);
         }
-
-        /***************************************************/
-
-        public static PyList ToPython(this Array input)
-        {
-            PyObject[] array = new PyObject[input.Length];
-            for (int i = 0; i < input.Length; i++)
-            {
-                array[i] = IToPython(input.GetValue(i));
-            }
-
-            return new PyList(array);
-        }
-
+        
         /***************************************************/
     }
 }
