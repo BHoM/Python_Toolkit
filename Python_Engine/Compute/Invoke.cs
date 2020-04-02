@@ -32,19 +32,37 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static dynamic Invoke(PyObject instanceOrModule, string method, Dictionary<string, object> args)
+        public static PyObject Invoke(PyObject instanceOrModule, string method, Dictionary<string, object> args)
         {
             PyTuple pyargs = Convert.ToPyTuple(new object[]
             {
                 args.FirstOrDefault().Value
             });
 
-            PyDict kwargs = ConverterExtension.ToPython(args) as PyDict;
+            PyDict kwargs = args.ToPython();
 
             if (args.Count > 0)
                 return instanceOrModule.InvokeMethod(method, pyargs, kwargs);
             else
                 return instanceOrModule.InvokeMethod(method);
+        }
+
+        /***************************************************/
+
+        public static PyObject Invoke(PyObject instanceOrModule, string method, object[] args, Dictionary<string, object> kwargs)
+        {
+            PyTuple pyargs = Convert.ToPyTuple(args);
+            PyDict pykwargs = Convert.ToPython(kwargs);
+            return instanceOrModule.InvokeMethod(method, pyargs, pykwargs);
+        }
+
+        /***************************************************/
+
+        public static PyObject Invoke(PyObject instanceOrModule, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
+        {
+            PyTuple pyargs = Convert.ToPyTuple(args);
+            PyDict pykwargs = Convert.ToPython(kwargs);
+            return instanceOrModule.InvokeMethod(method, pyargs, pykwargs);
         }
 
         /***************************************************/
