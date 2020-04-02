@@ -43,7 +43,20 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyTuple ToPyTuple(Array input)
+        public static PyTuple ToPyTuple<T>(IEnumerable<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count()];
+            for (int i = 0; i < input.Count(); i++)
+            {
+                array[i] = IToPython(input.ElementAt(i));
+            }
+
+            return new PyTuple(array);
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPyTuple<T>(T[] input)
         {
             PyObject[] array = new PyObject[input.Length];
             for (int i = 0; i < input.Length; i++)
