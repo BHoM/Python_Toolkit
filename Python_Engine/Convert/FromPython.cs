@@ -82,7 +82,7 @@ namespace BH.Engine.Python
             var dict = new Dictionary<object, dynamic>();
             foreach (PyObject pykey in pyDict.Keys())
             {
-                object key = IFromPython(pykey);
+                object key = FromPython(pykey);
                 dynamic value = FromPython<dynamic>(pyDict[pykey]);
                 dict.Add(key, value);
             }
@@ -95,7 +95,7 @@ namespace BH.Engine.Python
         {
             List<dynamic> cObject = new List<dynamic>();
             for (int i = 0; i < input.Length(); i++)
-                cObject[i] = IFromPython(input[i]);
+                cObject[i] = FromPython(input[i]);
             return cObject;
         }
 
@@ -105,7 +105,7 @@ namespace BH.Engine.Python
         {
             List<dynamic> cObject = new List<dynamic>();
             for (int i = 0; i < input.Length(); i++)
-                cObject[i] = IFromPython(input[i]);
+                cObject[i] = FromPython(input[i]);
             return cObject;
         }
 
