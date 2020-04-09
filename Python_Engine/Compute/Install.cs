@@ -42,7 +42,10 @@ namespace BH.Engine.Python
             if (Runtime.pyversion != "3.7")
                 throw new InvalidOperationException("You must compile Python.Runtime with PYTHON37 flag! Runtime version: " + Runtime.pyversion);
 
-            Environment.SetEnvironmentVariable("PATH", $"{Query.EmbeddedPythonHome()};" + Environment.GetEnvironmentVariable("PATH"));
+            string home = Query.EmbeddedPythonHome();
+            string path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
+            if (!path.Contains(home))
+                Environment.SetEnvironmentVariable("PATH", home + ";" + path, EnvironmentVariableTarget.User);
 
             if (!force && Query.IsInstalled()) // python seems installed, so exit
                 return;

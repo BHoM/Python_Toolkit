@@ -32,12 +32,12 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static object FromPython(this PyObject obj)
+        public static object IFromPython(this PyObject obj)
         {
             if (obj == null || obj.IsNone())
                 return Runtime.GetPyNone();
 
-            return Engine.Serialiser.Convert.FromJson(obj.ToString());
+            return FromPython(obj as dynamic);
         }
 
         /***************************************************/
@@ -82,7 +82,7 @@ namespace BH.Engine.Python
             var dict = new Dictionary<object, dynamic>();
             foreach (PyObject pykey in pyDict.Keys())
             {
-                object key = FromPython(pykey);
+                object key = IFromPython(pykey);
                 dynamic value = FromPython<dynamic>(pyDict[pykey]);
                 dict.Add(key, value);
             }
@@ -95,7 +95,7 @@ namespace BH.Engine.Python
         {
             List<dynamic> cObject = new List<dynamic>();
             for (int i = 0; i < input.Length(); i++)
-                cObject[i] = FromPython(input[i]);
+                cObject[i] = IFromPython(input[i]);
             return cObject;
         }
 
@@ -105,7 +105,7 @@ namespace BH.Engine.Python
         {
             List<dynamic> cObject = new List<dynamic>();
             for (int i = 0; i < input.Length(); i++)
-                cObject[i] = FromPython(input[i]);
+                cObject[i] = IFromPython(input[i]);
             return cObject;
         }
 
