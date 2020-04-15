@@ -35,9 +35,6 @@
       <HintPath>..\packages\BH.UI.Python.Runtime.3.7.4-alpha\lib\netstandard2.0\Python.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Serialiser_Engine">
-      <HintPath>..\..\BHoM_Engine\Build\Serialiser_Engine.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression.FileSystem" />
@@ -57,7 +54,6 @@
     <Compile Include="Compute\RunCommand.cs" />
     <Compile Include="Compute\JupyterLab.cs" />
     <Compile Include="Compute\Invoke.cs" />
-    <Compile Include="Convert\FromPIL.cs" />
     <Compile Include="Convert\FromPython.cs" />
     <Compile Include="Convert\ToPyTuple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
