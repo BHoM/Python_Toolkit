@@ -1,6 +1,6 @@
 ﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2019, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2020, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -22,6 +22,10 @@
 
 using Python.Runtime;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -31,54 +35,55 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static PyObject ToPython(object obj)
+        public static PyObject IToPython(dynamic obj)
         {
             if (obj == null)
                 return Runtime.GetPyNone();
-            switch (obj)
-            {
-                default: throw new NotImplementedException($"Type is not yet supported: { obj.GetType().Name}. Add it to 'ToPythonConversions'");
-            }
+
+            if (obj is PyObject)
+                return obj;
+
+            return ToPython(obj);
         }
 
         /***************************************************/
 
-        public static PyInt ToPython(int integer)
+        public static PyInt ToPython(this int integer)
         {
             return new PyInt(integer);
         }
 
         /***************************************************/
 
-        public static PyLong ToPython(long integer64)
+        public static PyLong ToPython(this long integer64)
         {
             return new PyLong(integer64);
         }
 
         /***************************************************/
 
-        public static PyFloat ToPython(float floatingPoint)
+        public static PyFloat ToPython(this float floatingPoint)
         {
             return new PyFloat(floatingPoint);
         }
 
         /***************************************************/
 
-        public static PyFloat ToPython(double floatingPoint)
+        public static PyFloat ToPython(this double floatingPoint)
         {
             return new PyFloat(floatingPoint);
         }
 
         /***************************************************/
 
-        public static PyString ToPython(string text)
+        public static PyString ToPython(this string text)
         {
             return new PyString(text);
         }
 
         /***************************************************/
 
-        public static PyObject ToPython(bool boolean)
+        public static PyObject ToPython(this bool boolean)
         {
             if (boolean)
                 return new PyObject(Runtime.PyTrue);
@@ -88,9 +93,77 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyTuple ToPython(ValueTuple<int> input)
+        public static PyList ToPython<T>(this T[] input)
         {
-            var array = new PyObject[1];
+            PyObject[] array = new PyObject[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                array[i] = IToPython(input[i]);
+            }
+
+            return new PyList(array);
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this List<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count];
+            for (int i = 0; i < input.Count; i++)
+            {
+                array[i] = IToPython(input[i]);
+            }
+
+            return new PyList(array);
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this IEnumerable<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count()];
+            for (int i = 0; i < input.Count(); i++)
+            {
+                array[i] = IToPython(input.ElementAt(i));
+            }
+
+            return new PyList(array);
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this IEnumerable<IEnumerable<T>> input)
+        {
+            return ConverterExtension.ToPython(input) as PyList;
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this T[,] input)
+        {
+            return ConverterExtension.ToPython(input) as PyList;
+        }
+
+        /***************************************************/
+
+        public static PyList ToPython<T>(this T[][] input)
+        {
+            return ConverterExtension.ToPython(input) as PyList;
+        }
+
+        /***************************************************/
+
+
+        public static PyDict ToPython(this Dictionary<string, object> dict)
+        {
+            return ConverterExtension.ToPython(dict) as PyDict;
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPython(this ValueTuple<int> input)
+        {
+            PyObject[] array = new PyObject[1];
             array[0] = ToPython(input.Item1);
 
             return new PyTuple(array);
@@ -98,9 +171,9 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyTuple ToPython(ValueTuple<int, int> input)
+        public static PyTuple ToPython(this ValueTuple<int, int> input)
         {
-            var array = new PyObject[2];
+            PyObject[] array = new PyObject[2];
             array[0] = ToPython(input.Item1);
             array[1] = ToPython(input.Item2);
 
@@ -109,29 +182,16 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyTuple ToPython(ValueTuple<int, int, int> input)
+        public static PyTuple ToPython(this ValueTuple<int, int, int> input)
         {
-            var array = new PyObject[3];
+            PyObject[] array = new PyObject[3];
             array[0] = ToPython(input.Item1);
             array[1] = ToPython(input.Item2);
             array[2] = ToPython(input.Item3);
 
             return new PyTuple(array);
         }
-
-        /***************************************************/
-
-        public static PyList ToPython(Array input)
-        {
-            var array = new PyObject[input.Length];
-            for (int i = 0; i < input.Length; i++)
-            {
-                array[i] = ToPython(input.GetValue(i));
-            }
-
-            return new PyList(array);
-        }
-
+        
         /***************************************************/
     }
 }

@@ -1,6 +1,6 @@
 ﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2019, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2020, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -20,30 +20,64 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System.IO;
+using Python.Runtime;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Convert
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void PipInstall(string module_name, string version = "", bool force = false, string findLinks = "")
+        public static PyTuple IToPyTuple(object obj)
         {
-            if (Query.IsModuleInstalled(module_name) && !force)
-                return;
+            if (obj == null)
+                return new PyTuple();
 
-            string pipPath = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip3");
-            string forceInstall = force ? "--force-reinstall" : "";
-            if (version.Length > 0)
-                version = $"=={version}";
+            return ToPyTuple(obj as dynamic);
+        }
 
-            if (findLinks != "")
-                findLinks = "-f " + findLinks;
+        /***************************************************/
 
-            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall}");
+        public static PyTuple ToPyTuple<T>(IEnumerable<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count()];
+            for (int i = 0; i < input.Count(); i++)
+            {
+                array[i] = IToPython(input.ElementAt(i));
+            }
+
+            return new PyTuple(array);
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPyTuple<T>(T[] input)
+        {
+            PyObject[] array = new PyObject[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                array[i] = IToPython(input.GetValue(i));
+            }
+
+            return new PyTuple(array);
+        }
+
+        /***************************************************/
+
+        public static PyTuple ToPyTuple<T>(List<T> input)
+        {
+            PyObject[] array = new PyObject[input.Count()];
+            for (int i = 0; i < input.Count(); i++)
+            {
+                array[i] = IToPython(input.ElementAt(i));
+            }
+
+            return new PyTuple(array);
         }
 
         /***************************************************/

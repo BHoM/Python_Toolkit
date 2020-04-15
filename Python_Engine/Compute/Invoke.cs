@@ -1,6 +1,6 @@
 ﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2019, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2020, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -20,8 +20,9 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System.Threading;
-using System.Threading.Tasks;
+using Python.Runtime;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -31,44 +32,37 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void RunCommand(string command, bool hideWindows = true, string startDirectory = null)
+        public static PyObject Invoke(PyObject instanceOrModule, string method, Dictionary<string, object> args)
         {
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+            PyTuple pyargs = Convert.ToPyTuple(new object[]
+            {
+                args.FirstOrDefault().Value
+            });
 
-            if (hideWindows)
-                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            string commandMode = hideWindows ? "/C" : "/K";
+            PyDict kwargs = args.ToPython();
 
-            startInfo.FileName = "cmd.exe";
-            startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
-            startInfo.Arguments = $"{commandMode} {command}";
-
-            process.StartInfo = startInfo;
-            process.Start();
-            process.WaitForExit();
+            if (args.Count > 0)
+                return instanceOrModule.InvokeMethod(method, pyargs, kwargs);
+            else
+                return instanceOrModule.InvokeMethod(method);
         }
 
         /***************************************************/
 
-        public static async void RunCommandAsync(string command, bool hideWindows = true, string startDirectory = null)
+        public static PyObject Invoke(PyObject instanceOrModule, string method, object[] args, Dictionary<string, object> kwargs)
         {
-            await Task.Run(() =>
-            {
-                System.Diagnostics.Process process = new System.Diagnostics.Process();
-                System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+            PyTuple pyargs = Convert.ToPyTuple(args);
+            PyDict pykwargs = Convert.ToPython(kwargs);
+            return instanceOrModule.InvokeMethod(method, pyargs, pykwargs);
+        }
 
-                if (hideWindows)
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                string commandMode = hideWindows ? "/C" : "/K";
+        /***************************************************/
 
-                startInfo.FileName = "cmd.exe";
-                startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
-                startInfo.Arguments = $"{commandMode} {command}";
-
-                process.StartInfo = startInfo;
-                process.Start();
-            });
+        public static PyObject Invoke(PyObject instanceOrModule, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
+        {
+            PyTuple pyargs = Convert.ToPyTuple(args);
+            PyDict pykwargs = Convert.ToPython(kwargs);
+            return instanceOrModule.InvokeMethod(method, pyargs, pykwargs);
         }
 
         /***************************************************/

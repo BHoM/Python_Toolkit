@@ -1,6 +1,6 @@
 ﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2019, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2020, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -20,7 +20,9 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System.IO;
+using Python.Runtime;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -30,20 +32,34 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void PipInstall(string module_name, string version = "", bool force = false, string findLinks = "")
+        public static PyObject Init(dynamic type, Dictionary<string, object> parameters)
         {
-            if (Query.IsModuleInstalled(module_name) && !force)
-                return;
+            PyTuple pyargs = Convert.ToPyTuple(new object[]
+            {
+                parameters.FirstOrDefault().Value
+            });
 
-            string pipPath = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip3");
-            string forceInstall = force ? "--force-reinstall" : "";
-            if (version.Length > 0)
-                version = $"=={version}";
+            PyDict kwargs = new PyDict();
 
-            if (findLinks != "")
-                findLinks = "-f " + findLinks;
+            bool skip = true;
+            foreach (var item in parameters)
+            {
+                if (skip)
+                {
+                    skip = false;
+                    continue;
+                }
 
-            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall}");
+                if (item.Value != null && !string.IsNullOrWhiteSpace(item.Value.ToString()))
+                {
+                    kwargs[item.Key] = Convert.IToPython(item.Value);
+                }
+            }
+
+            if (parameters.Count > 0)
+                return type.Invoke(pyargs, kwargs);
+            else
+                return type.Invoke(null, null);
         }
 
         /***************************************************/

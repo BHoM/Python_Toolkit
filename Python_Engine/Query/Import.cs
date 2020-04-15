@@ -1,6 +1,6 @@
 ﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2019, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2020, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -20,30 +20,25 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System.IO;
+using Python.Runtime;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void PipInstall(string module_name, string version = "", bool force = false, string findLinks = "")
+        public static PyObject Import(string moduleName)
         {
-            if (Query.IsModuleInstalled(module_name) && !force)
-                return;
-
-            string pipPath = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip3");
-            string forceInstall = force ? "--force-reinstall" : "";
-            if (version.Length > 0)
-                version = $"=={version}";
-
-            if (findLinks != "")
-                findLinks = "-f " + findLinks;
-
-            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall}");
+            PythonEngine.Initialize();
+            PyObject module = null;
+            using (Py.GIL())
+            {
+                module = Py.Import(moduleName);
+            }
+            return module;
         }
 
         /***************************************************/
