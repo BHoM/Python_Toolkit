@@ -32,7 +32,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static PyObject Invoke(PyObject instanceOrModule, string method, Dictionary<string, object> args)
+        public static PyObject Invoke(PyObject module, string method, Dictionary<string, object> args)
         {
             PyTuple pyargs = Convert.ToPyTuple(new object[]
             {
@@ -41,28 +41,36 @@ namespace BH.Engine.Python
 
             PyDict kwargs = args.ToPython();
 
+            if (method.Contains("."))
+            {
+                string[] chain = method.Split('.');
+                for (int i = 0; i < chain.Length - 1; i++)
+                    module = module.GetAttr(chain[i]);
+                method = chain[chain.Length - 1];
+            }
+
             if (args.Count > 0)
-                return instanceOrModule.InvokeMethod(method, pyargs, kwargs);
+                return module.InvokeMethod(method, pyargs, kwargs);
             else
-                return instanceOrModule.InvokeMethod(method);
+                return module.InvokeMethod(method);
         }
 
         /***************************************************/
 
-        public static PyObject Invoke(PyObject instanceOrModule, string method, object[] args, Dictionary<string, object> kwargs)
+        public static PyObject Invoke(PyObject module, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
         {
             PyTuple pyargs = Convert.ToPyTuple(args);
             PyDict pykwargs = Convert.ToPython(kwargs);
-            return instanceOrModule.InvokeMethod(method, pyargs, pykwargs);
-        }
 
-        /***************************************************/
+            if (method.Contains("."))
+            {
+                string[] chain = method.Split('.');
+                for (int i = 0; i < chain.Length - 1; i++)
+                    module = module.GetAttr(chain[i]);
+                method = chain[chain.Length - 1];
+            }
 
-        public static PyObject Invoke(PyObject instanceOrModule, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
-        {
-            PyTuple pyargs = Convert.ToPyTuple(args);
-            PyDict pykwargs = Convert.ToPython(kwargs);
-            return instanceOrModule.InvokeMethod(method, pyargs, pykwargs);
+            return module.InvokeMethod(method, pyargs, pykwargs);
         }
 
         /***************************************************/
