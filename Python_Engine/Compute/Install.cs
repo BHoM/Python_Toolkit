@@ -45,7 +45,8 @@ namespace BH.Engine.Python
             string home = Query.EmbeddedPythonHome();
             string path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
             if (!path.Contains(home))
-                Environment.SetEnvironmentVariable("PATH", home + ";" + path, EnvironmentVariableTarget.User);
+                Environment.SetEnvironmentVariable("PATH", path + ";" + home, EnvironmentVariableTarget.User);
+            //Environment.SetEnvironmentVariable("PATH", home + ";" + path, EnvironmentVariableTarget.User);
 
             if (!force && Query.IsInstalled()) // python seems installed, so exit
                 return;
