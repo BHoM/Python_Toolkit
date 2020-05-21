@@ -33,6 +33,7 @@ namespace BH.PostBuild.Python
             Console.WriteLine("Installing jupyter...");
             Compute.PipInstall("jupyter");
             Compute.PipInstall("jupyterlab");
+            Compute.PipInstall("pythonnet");
         }
     }
 }
