@@ -46,7 +46,24 @@ namespace BH.Engine.Python
             string path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
             if (!path.Contains(home))
                 Environment.SetEnvironmentVariable("PATH", path + ";" + home, EnvironmentVariableTarget.User);
-            //Environment.SetEnvironmentVariable("PATH", home + ";" + path, EnvironmentVariableTarget.User);
+
+            // make sure pyBHoM is imported at python startup
+            string startupCommand = "import pyBHoM";
+            string pythonStartup = Environment.GetEnvironmentVariable("PYTHONSTARTUP", EnvironmentVariableTarget.User);
+            // if no startup file is defined, write one
+            if (pythonStartup == null)
+            {
+                pythonStartup = Path.Combine(home, "startup.py");
+                Directory.CreateDirectory(home);
+                System.IO.File.WriteAllText(pythonStartup, startupCommand);
+                Environment.SetEnvironmentVariable("PYTHONSTARTUP", pythonStartup, EnvironmentVariableTarget.User);
+            }
+            // if it exists, and does not contain the pyBHoM command already, append it
+            else if (!File.ReadAllLines(pythonStartup).Contains(startupCommand))
+            {
+                using (StreamWriter file = new StreamWriter(pythonStartup, true))
+                    file.WriteLine(startupCommand);
+            }
 
             if (!force && Query.IsInstalled()) // python seems installed, so exit
                 return;
