@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using BH.Engine.Python;
 
@@ -34,6 +35,11 @@ namespace BH.PostBuild.Python
             Compute.PipInstall("jupyter");
             Compute.PipInstall("jupyterlab");
             Compute.PipInstall("pythonnet");
+
+            // install pyBHoM
+            Console.WriteLine("Installing MachineLearning_Engine...");
+            string pyBHoMPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "..");
+            Compute.PipInstall($"-e {pyBHoMPath}");  // Note: The PostBuilds are run from the Python_PostBuild/bin/Debug
         }
     }
 }
