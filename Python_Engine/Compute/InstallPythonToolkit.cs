@@ -72,6 +72,9 @@ namespace BH.Engine.Python
             Compute.PipInstall("jupyterlab");
             Compute.PipInstall("pythonnet");
 
+            //Install matplotlib for graphs
+            Compute.PipInstall("matplotlib");
+
             return true;
         }
 

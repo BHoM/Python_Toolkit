@@ -33,7 +33,8 @@ namespace BH.Engine.Python
 
         public static string EmbeddedPythonHome()
         {
-            var installDir = Path.Combine(@"C:\ProgramData", "BHoM", Compute.EMBEDDED_PYTHON);
+            var programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            var installDir = Path.Combine(programData, "BHoM", Compute.EMBEDDED_PYTHON);
             return installDir;
         }
 
