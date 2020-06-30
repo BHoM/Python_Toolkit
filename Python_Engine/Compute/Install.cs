@@ -78,7 +78,7 @@ namespace BH.Engine.Python
                 if (resourceName == null)
                     throw new FileNotFoundException($"No embedded python zip resource found for {resourceName}");
 
-                // Copy the python embedded zip file to AppData/Roaming/BHoM/
+                // Copy the python embedded zip file to ProgramData/BHoM/
                 string targetFolder = Query.EmbeddedPythonHome();
                 string targetPath = targetFolder + ".zip";
                 CopyEmbeddedResourceToFile(resourceName, targetPath, force);
