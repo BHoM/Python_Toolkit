@@ -85,6 +85,7 @@ namespace BH.Engine.Python
             installedPackages.Add("pythonnet");
             installedPackages.Add("matplotlib");
 
+            success = true;
             return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
         }
 
