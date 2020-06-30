@@ -78,7 +78,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)"  "C:\\ProgramData\\BHoM\\Assemblies\" /Y
-xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies\" /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
+xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

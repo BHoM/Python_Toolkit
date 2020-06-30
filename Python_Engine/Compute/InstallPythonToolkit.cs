@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using System.IO;
 using BH.oM.Reflection.Attributes;
 using System.ComponentModel;
+using BH.oM.Reflection;
 
 namespace BH.Engine.Python
 {
@@ -38,11 +39,14 @@ namespace BH.Engine.Python
             "This can take several minutes to complete")]
         [Input("run", "When you are ready to install Python, set this to true. Until this is set to true, this component will not run")]
         [Input("force", "If you have previously installed a version of Python Toolkit, you may need to force the component to run a new install. This can happen if your system loses files. This is set to false by default, which means if we can detect a previous Python install on your system we will not install Python this time. Set this to true to ignore this check")]
-        [Output("success", "True is Python Toolkit has been successfully installer, false otherwise")]
-        public static bool InstallPythonToolkit(bool run = false, bool force = false)
+        [MultiOutput(0, "success", "True is Python Toolkit has been successfully installer, false otherwise")]
+        [MultiOutput(1, "installedPackages", "A list of the Python packages which have been installed as part of this operation")]
+        public static Output<bool, List<string>> InstallPythonToolkit(bool run = false, bool force = false)
         {
+            bool success = false;
+            List<string> installedPackages = new List<string>();
             if (!run)
-                return false;
+                return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
 
             // Install python
             Console.WriteLine("Installing python 3.7 embedded...");
@@ -52,7 +56,7 @@ namespace BH.Engine.Python
             if (!Query.IsInstalled())
             {
                 BH.Engine.Reflection.Compute.RecordError("Coule not install Python");
-                return false;
+                return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
 
             // Install pip
@@ -63,7 +67,7 @@ namespace BH.Engine.Python
             if (!Query.IsPipInstalled())
             {
                 BH.Engine.Reflection.Compute.RecordError("Could not install pip");
-                return false;
+                return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
 
             // install project jupyter
@@ -75,7 +79,13 @@ namespace BH.Engine.Python
             //Install matplotlib for graphs
             Compute.PipInstall("matplotlib");
 
-            return true;
+            installedPackages.Add("Python 3.7");
+            installedPackages.Add("jupyter");
+            installedPackages.Add("jupyterlab");
+            installedPackages.Add("pythonnet");
+            installedPackages.Add("matplotlib");
+
+            return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
         }
 
     }
