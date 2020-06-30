@@ -52,7 +52,7 @@ namespace BH.Engine.Python
             string pythonStartup = Environment.GetEnvironmentVariable("PYTHONSTARTUP", EnvironmentVariableTarget.User);
 
             // if no startup file is defined, write one
-            if (pythonStartup == null)
+            if (pythonStartup == null || !Directory.Exists(home))
             {
                 pythonStartup = Path.Combine(home, "startup.py");
                 Directory.CreateDirectory(home);
