@@ -50,6 +50,7 @@ namespace BH.Engine.Python
             // make sure pyBHoM is imported at python startup
             string startupCommand = "import pyBHoM";
             string pythonStartup = Environment.GetEnvironmentVariable("PYTHONSTARTUP", EnvironmentVariableTarget.User);
+            pythonStartup = null;
             // if no startup file is defined, write one
             if (pythonStartup == null)
             {
