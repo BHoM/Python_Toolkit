@@ -50,7 +50,7 @@ namespace BH.Engine.Python
             // make sure pyBHoM is imported at python startup
             string startupCommand = "import pyBHoM";
             string pythonStartup = Environment.GetEnvironmentVariable("PYTHONSTARTUP", EnvironmentVariableTarget.User);
-            pythonStartup = null;
+
             // if no startup file is defined, write one
             if (pythonStartup == null)
             {
@@ -59,9 +59,9 @@ namespace BH.Engine.Python
                 System.IO.File.WriteAllText(pythonStartup, startupCommand);
                 Environment.SetEnvironmentVariable("PYTHONSTARTUP", pythonStartup, EnvironmentVariableTarget.User);
             }
-            // if it exists, and does not contain the pyBHoM command already, append it
             else if (!File.ReadAllLines(pythonStartup).Contains(startupCommand))
             {
+                // if it exists, and does not contain the pyBHoM command already, append it
                 using (StreamWriter file = new StreamWriter(pythonStartup, true))
                     file.WriteLine(startupCommand);
             }
