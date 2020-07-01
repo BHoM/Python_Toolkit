@@ -34,6 +34,12 @@ namespace BH.Engine.Python
 
         public static PyObject Invoke(PyObject module, string method, Dictionary<string, object> args)
         {
+            if(!Query.IsInstalled())
+            {
+                BH.Engine.Reflection.Compute.RecordError("The Python Toolkit has not been successfully installed. Please run the InstallPythonToolkit component to install the necessary dependencies to invoke Python methods within BHoM");
+                return null;
+            }
+
             PyTuple pyargs = Convert.ToPyTuple(new object[]
             {
                 args.FirstOrDefault().Value
