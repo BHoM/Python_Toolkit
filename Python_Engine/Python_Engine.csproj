@@ -75,6 +75,7 @@
   <ItemGroup>
     <None Include="Compute\ClimateCharts\Diurnal.py" />
     <None Include="Compute\ClimateCharts\__init__.py" />
+    <None Include="Compute\__init__.py" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

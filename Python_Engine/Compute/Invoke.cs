@@ -31,6 +31,14 @@ namespace BH.Engine.Python
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
+        public static PyObject Invoke(string method, params object[] args)
+        {
+            PyObject[] pyargs = new PyObject[args.Length];
+            for (int i = 0; i < args.Length; i++)
+                pyargs[i] = Convert.IToPython(args[i]);
+
+            return Python.Compute.Invoke(m_PyCompute, method, pyargs, null);
+        }
 
         public static PyObject Invoke(PyObject module, string method, Dictionary<string, object> args)
         {
@@ -75,15 +83,10 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static PyObject Invoke(string method, Dictionary<string, object> kwargs)
-        {
-            return Invoke(m_PyCompute, method, null, kwargs);
-        }
-
         /*************************************/
         /**** Private Fields              ****/
         /*************************************/
 
-        private static PyObject m_PyCompute = Engine.Python.Query.Import("Python_Toolkit.Compute");
+        private static PyObject m_PyCompute = Engine.Python.Query.Import("Python_Engine.Compute");
     }
 }

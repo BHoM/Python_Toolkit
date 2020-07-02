@@ -46,7 +46,7 @@ namespace BH.Engine.Python
                 { "tone_color", toneColor },
                 { "transparency", transparency }
             };
-            return Compute.Invoke("Diurnal.diurnal", kwargs).ToString();
+            return Compute.Invoke("Diurnal.diurnal", null, kwargs).ToString();
         }
 
         /*************************************/

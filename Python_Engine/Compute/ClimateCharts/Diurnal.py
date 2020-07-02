@@ -23,13 +23,15 @@
 import os
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use("agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 ANNUAL_DATETIME = pd.date_range(start="2018-01-01 00:30:00", freq="60T", periods=8760, closed="left")
 
 
-def diurnal(annual_values: np.ndarray, save_path: str, grouping: str="Daily", months: np.ndarray=np.arange(1, 13, 1), title: str=None, unit: str=None, color: str="black", tone_color: str="black", transparency=False):
+def diurnal(annual_values: np.ndarray=None, save_path: str=None, grouping: str="Daily", months: np.ndarray=np.arange(1, 13, 1), title: str=None, unit: str=None, color: str="black", tone_color: str="black", transparency=False):
     """ Create a histogram with summary table for the data passed
 
     Parameters
