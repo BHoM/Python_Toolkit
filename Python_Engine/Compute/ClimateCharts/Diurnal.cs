@@ -32,21 +32,9 @@ namespace BH.Engine.Python
 
         public static string PlotDiurnal(List<double> annualValues, string savePath, string grouping = "Daily", List<int> months = null, string title = null, string unit = null, string color = "black", string toneColor = "black", bool transparency = false)
         {
-            months = months ?? new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            months = months == null || months.Count == 0 ? new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 } : months;
 
-            Dictionary<string, object> kwargs = new Dictionary<string, object>
-            {
-                { "annual_values", annualValues },
-                { "save_path", savePath },
-                { "grouping", grouping },
-                { "months", months },
-                { "title", title },
-                { "unit", unit },
-                { "color", color },
-                { "tone_color", toneColor },
-                { "transparency", transparency }
-            };
-            return Compute.Invoke("Diurnal.diurnal", null, kwargs).ToString();
+            return Compute.Invoke("Diurnal.diurnal", annualValues, savePath, grouping, months, title, unit, color, toneColor, transparency).ToString();
         }
 
         /*************************************/
