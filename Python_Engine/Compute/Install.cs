@@ -37,10 +37,9 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static async Task Install(bool force = false)
+        public static bool Install(bool force = false)
         {
-            if (Runtime.pyversion != "3.7")
-                throw new InvalidOperationException("You must compile Python.Runtime with PYTHON37 flag! Runtime version: " + Runtime.pyversion);
+            bool success = true;
 
             string home = Query.EmbeddedPythonHome();
             string path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
@@ -67,41 +66,41 @@ namespace BH.Engine.Python
             }
 
             if (!force && Query.IsInstalled()) // python seems installed, so exit
-                return;
+                return success;
 
             if (!Directory.Exists(Query.EmbeddedPythonHome()))
                 Directory.CreateDirectory(Query.EmbeddedPythonHome());
 
-            await Task.Run(() =>
+            string resourceName = typeof(Compute).Assembly.GetManifestResourceNames().FirstOrDefault(x => x.Contains(EMBEDDED_PYTHON));
+            if (resourceName == null)
+                throw new FileNotFoundException($"No embedded python zip resource found for {resourceName}");
+
+            // Copy the python embedded zip file to ProgramData/BHoM/
+            string targetFolder = Query.EmbeddedPythonHome();
+            string targetPath = targetFolder + ".zip";
+            CopyEmbeddedResourceToFile(resourceName, targetPath, force);
+
+            try
             {
-                string resourceName = typeof(Compute).Assembly.GetManifestResourceNames().FirstOrDefault(x => x.Contains(EMBEDDED_PYTHON));
-                if (resourceName == null)
-                    throw new FileNotFoundException($"No embedded python zip resource found for {resourceName}");
+                ZipFile.ExtractToDirectory(targetPath, targetPath.Replace(".zip", ""));
 
-                // Copy the python embedded zip file to ProgramData/BHoM/
-                string targetFolder = Query.EmbeddedPythonHome();
-                string targetPath = targetFolder + ".zip";
-                CopyEmbeddedResourceToFile(resourceName, targetPath, force);
+                // allow pip on embedded python installation by unflagging python as embedded
+                // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
+                File.Delete(Path.Combine(Query.EmbeddedPythonHome(), PYTHON_VERSION + "._pth"));
 
-                try
-                {
-                    ZipFile.ExtractToDirectory(targetPath, targetPath.Replace(".zip", ""));
+            }
+            catch
+            {
+                success = false;
+            }
+            finally
+            {
+                // Clean up
+                if (File.Exists(targetPath))
+                    File.Delete(targetPath);
+            }
 
-                    // allow pip on embedded python installation by unflagging python as embedded
-                    // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
-                    File.Delete(Path.Combine(Query.EmbeddedPythonHome(), PYTHON_VERSION + "._pth"));
-
-                }
-                catch
-                {
-                }
-                finally
-                {
-                    // Clean up
-                    if (File.Exists(targetPath))
-                        File.Delete(targetPath);
-                }
-            });
+            return success;
         }
 
 

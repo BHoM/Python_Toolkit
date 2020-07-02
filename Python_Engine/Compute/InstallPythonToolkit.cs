@@ -50,7 +50,7 @@ namespace BH.Engine.Python
 
             // Install python
             Console.WriteLine("Installing python 3.7 embedded...");
-            Compute.Install(force).Wait();
+            Compute.Install(force);
 
             // Check the installation was successful 
             if (!Query.IsInstalled())
