@@ -21,3 +21,4 @@
 #
 
 from . import Diurnal
+from . import UTCI

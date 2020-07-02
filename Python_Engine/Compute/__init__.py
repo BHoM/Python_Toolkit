@@ -21,3 +21,4 @@
 #
 
 from .ClimateCharts import Diurnal
+from .ClimateCharts import UTCI
