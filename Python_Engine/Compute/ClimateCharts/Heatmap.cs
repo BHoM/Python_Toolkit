@@ -30,9 +30,9 @@ namespace BH.Engine.Python
         /**** Public Methods              ****/
         /*************************************/
 
-        public static string PlotDiurnal(List<double> annualValues, string savePath, string grouping = "Daily", List<int> months = null, string title = null, string unit = null, string color = "black", string toneColor = "black", bool transparency = false)
+        public static string PlotHeatmap(List<double> annualValues, string savePath, string title = null, string unit = null, List<double> vRange = null, string cmap = "viridis", string color = "black", string toneColor = "black", bool invertY = true, bool transparency = false)
         {
-            return Compute.Invoke("Diurnal.diurnal", annualValues, savePath, grouping, months, title, unit, color, toneColor, transparency).ToString();
+            return Compute.Invoke("Heatmap.heatmap", annualValues, savePath, title, unit, vRange, cmap, color, toneColor, invertY, transparency).ToString();
         }
 
         /*************************************/

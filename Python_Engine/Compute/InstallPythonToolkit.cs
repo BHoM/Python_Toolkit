@@ -147,6 +147,7 @@ namespace BH.Engine.Python
 
             Compute.PipInstall("numpy");
             Compute.PipInstall("pandas");
+            Compute.PipInstall("windrose");
 
             // install pyBHoM
             string pyBHoMpath = Path.Combine(Query.EmbeddedPythonHome(), "src", "Python_Toolkit");
@@ -159,6 +160,7 @@ namespace BH.Engine.Python
             installedPackages.Add("matplotlib");
             installedPackages.Add("numpy");
             installedPackages.Add("pandas");
+            installedPackages.Add("windrose");
             installedPackages.Add("pyBHoM");
 >>>>>>> I may have broken it, but updated the pip install packages
 
