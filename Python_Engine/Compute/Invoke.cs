@@ -74,5 +74,16 @@ namespace BH.Engine.Python
         }
 
         /***************************************************/
+
+        public static PyObject Invoke(string method, Dictionary<string, object> kwargs)
+        {
+            return Invoke(m_PyCompute, method, null, kwargs);
+        }
+
+        /*************************************/
+        /**** Private Fields              ****/
+        /*************************************/
+
+        private static PyObject m_PyCompute = Engine.Python.Query.Import("Python_Toolkit.Compute");
     }
 }
