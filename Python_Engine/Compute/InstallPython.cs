@@ -47,17 +47,22 @@ namespace BH.Engine.Python
             if (!path.Contains(home))
                 Environment.SetEnvironmentVariable("PATH", path + ";" + home, EnvironmentVariableTarget.User);
 
+            // create the python home directory
+            if (!Directory.Exists(Query.EmbeddedPythonHome()))
+                Directory.CreateDirectory(Query.EmbeddedPythonHome());
+
             // make sure pyBHoM is imported at python startup
             string startupCommand = "import pyBHoM";
             string pythonStartup = Environment.GetEnvironmentVariable("PYTHONSTARTUP", EnvironmentVariableTarget.User);
 
+            if (pythonStartup == null)
+                Environment.SetEnvironmentVariable("PYTHONSTARTUP", pythonStartup, EnvironmentVariableTarget.User);
+
             // if no startup file is defined, write one
-            if (pythonStartup == null || !Directory.Exists(home))
+            if (!File.Exists(pythonStartup))
             {
                 pythonStartup = Path.Combine(home, "startup.py");
-                Directory.CreateDirectory(home);
                 System.IO.File.WriteAllText(pythonStartup, startupCommand);
-                Environment.SetEnvironmentVariable("PYTHONSTARTUP", pythonStartup, EnvironmentVariableTarget.User);
             }
             else if (!File.ReadAllLines(pythonStartup).Contains(startupCommand))
             {
@@ -73,10 +78,6 @@ namespace BH.Engine.Python
             string pythonZip = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BHoM", $"{EMBEDDED_PYTHON}.zip");
             if (!File.Exists(pythonZip))
                 Compute.DownloadPython();
-
-            // create the python home directory
-            if (!Directory.Exists(Query.EmbeddedPythonHome()))
-                Directory.CreateDirectory(Query.EmbeddedPythonHome());
 
             // inflate the archive
             try
