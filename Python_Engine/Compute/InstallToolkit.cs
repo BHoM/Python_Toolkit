@@ -41,7 +41,7 @@ namespace BH.Engine.Python
         [Input("force", "If you have previously installed a version of Python Toolkit, you may need to force the component to run a new install. This can happen if your system loses files. This is set to false by default, which means if we can detect a previous Python install on your system we will not install Python this time. Set this to true to ignore this check")]
         [MultiOutput(0, "success", "True is Python Toolkit has been successfully installer, false otherwise")]
         [MultiOutput(1, "installedPackages", "A list of the Python packages which have been installed as part of this operation")]
-        public static Output<bool, List<string>> InstallPythonToolkit(bool run = false, bool force = false)
+        public static Output<bool, List<string>> InstallToolkit(bool run = false, bool force = false)
         {
             bool success = false;
             List<string> installedPackages = new List<string>();
@@ -50,7 +50,7 @@ namespace BH.Engine.Python
 
             // Install python
             Console.WriteLine("Installing python 3.7 embedded...");
-            Compute.Install(force);
+            Compute.InstallPython(force);
 
             // Check the installation was successful 
             if (!Query.IsInstalled())
