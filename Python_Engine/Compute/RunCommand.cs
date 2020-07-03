@@ -31,7 +31,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void RunCommand(string command, bool hideWindows = true, string startDirectory = null)
+        public static void RunCommand(string command, bool hideWindows = false, string startDirectory = null)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
