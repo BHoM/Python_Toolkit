@@ -37,10 +37,11 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static bool Install(bool force = false)
+        public static bool InstallPython(bool force = false)
         {
             bool success = true;
 
+            // add python to the PATH
             string home = Query.EmbeddedPythonHome();
             string path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
             if (!path.Contains(home))
@@ -68,21 +69,19 @@ namespace BH.Engine.Python
             if (!force && Query.IsInstalled()) // python seems installed, so exit
                 return success;
 
+            // download the python-embedded compressed archive
+            string pythonZip = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BHoM", $"{EMBEDDED_PYTHON}.zip");
+            if (!File.Exists(pythonZip))
+                Compute.DownloadPython();
+
+            // create the python home directory
             if (!Directory.Exists(Query.EmbeddedPythonHome()))
                 Directory.CreateDirectory(Query.EmbeddedPythonHome());
 
-            string resourceName = typeof(Compute).Assembly.GetManifestResourceNames().FirstOrDefault(x => x.Contains(EMBEDDED_PYTHON));
-            if (resourceName == null)
-                throw new FileNotFoundException($"No embedded python zip resource found for {resourceName}");
-
-            // Copy the python embedded zip file to ProgramData/BHoM/
-            string targetFolder = Query.EmbeddedPythonHome();
-            string targetPath = targetFolder + ".zip";
-            CopyEmbeddedResourceToFile(resourceName, targetPath, force);
-
+            // inflate the archive
             try
             {
-                ZipFile.ExtractToDirectory(targetPath, targetPath.Replace(".zip", ""));
+                ZipFile.ExtractToDirectory(pythonZip, pythonZip.Replace(".zip", ""));
 
                 // allow pip on embedded python installation by unflagging python as embedded
                 // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
@@ -96,8 +95,8 @@ namespace BH.Engine.Python
             finally
             {
                 // Clean up
-                if (File.Exists(targetPath))
-                    File.Delete(targetPath);
+                if (File.Exists(pythonZip))
+                    File.Delete(pythonZip);
             }
 
             return success;
