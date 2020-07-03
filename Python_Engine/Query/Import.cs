@@ -45,7 +45,7 @@ namespace BH.Engine.Python
             catch (PythonException e)
             {
                 BH.Engine.Reflection.Compute.RecordError(e.Message);
-                return null
+                return null;
             }
         }
 
