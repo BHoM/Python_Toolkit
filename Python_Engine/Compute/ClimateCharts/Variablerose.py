@@ -51,7 +51,20 @@ MASKS = {
 }
 
 
-def variablerose(annual_values: np.ndarray, annual_wind_direction: np.ndarray, save_path: str, bins: np.ndarray = 10, season_period: str = "Annual", time_period: str = "Daily", n_sector: int = 16, title: str = None, unit: str = None, cmap: str = "GnBu", tone_color: str = "black", transparency: str = False):
+def variablerose(
+    annual_values: np.ndarray, 
+    annual_wind_direction: np.ndarray, 
+    save_path: str, 
+    bins: np.ndarray = 10, 
+    season_period: str = "Annual", 
+    time_period: str = "Daily", 
+    n_sector: int = 16, 
+    title: str = None, 
+    unit: str = None, 
+    cmap: str = "GnBu", 
+    tone_color: str = "black", 
+    transparency: str = False
+    ):
     """ Generates a pseudo-windrose plot displaying other variables from a set of that variable and directions, with the ability to filter for specific time-periods.
 
     Parameters
@@ -97,8 +110,11 @@ def variablerose(annual_values: np.ndarray, annual_wind_direction: np.ndarray, s
     assert os.path.exists(os.path.dirname(save_path)), \
         "\"{}\" does not exist".format(os.path.abspath(os.path.dirname(save_path)))
 
-    assert (season_period in MASKS.keys()) & (time_period in MASKS.keys()), \
-        "\"{}\" not known as a filter for season/time periods. Choose from {}".format(season_period, list(MASKS.keys()))
+    assert season_period in MASKS.keys(), \
+        "\"{}\" not known as a filter for season periods. Choose from {}".format(season_period, list(MASKS.keys()))
+    
+    assert time_period in MASKS.keys(), \
+        "\"{}\" not known as a filter for time periods. Choose from {}".format(time_period, list(MASKS.keys()))
 
     # Construct a DataFrame containing the annual wind speeds and directions
     df = pd.DataFrame(index=ANNUAL_DATETIME)

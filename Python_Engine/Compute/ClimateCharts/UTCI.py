@@ -32,8 +32,15 @@ from matplotlib.dates import date2num, DateFormatter
 ANNUAL_DATETIME = pd.date_range(start="2018-01-01 00:30:00", freq="60T", periods=8760, closed="left")
 
 
-def utci(annual_values: np.ndarray, save_path: str, detailed: bool = False, title: str = None, tone_color: str = "black", invert_y: bool = False,
-                 transparency: bool = False):
+def utci(
+    annual_values: np.ndarray, 
+    save_path: str, 
+    detailed: bool = False, 
+    title: str = None, 
+    tone_color: str = "black", 
+    invert_y: bool = False,
+    transparency: bool = False
+    ):
     """ Generate a UTCI heatmap from a set of annual hourly values
 
     Parameters

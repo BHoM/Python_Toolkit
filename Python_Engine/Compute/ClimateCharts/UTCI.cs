@@ -30,9 +30,26 @@ namespace BH.Engine.Python
         /**** Public Methods              ****/
         /*************************************/
 
-        public static string PlotUTCI(List<double> annualValues, string savePath, bool detailed = false, string title = null, string toneColor = "black", bool invertY = true, bool transparency = false)
+        public static string PlotUTCI(
+            List<double> annualValues, 
+            string savePath, 
+            bool detailed = false, 
+            string title = null, 
+            string toneColor = "black", 
+            bool invertY = true, 
+            bool transparency = false
+            )
         {
-            return Compute.Invoke("UTCI.utci", annualValues, savePath, detailed, title, invertY, toneColor, transparency).ToString();
+            return Compute.Invoke(
+                "UTCI.utci", 
+                annualValues, 
+                savePath, 
+                detailed, 
+                title, 
+                toneColor,
+                invertY, 
+                transparency
+                ).ToString();
         }
 
         /*************************************/

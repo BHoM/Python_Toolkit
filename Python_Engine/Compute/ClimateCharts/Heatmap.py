@@ -31,9 +31,17 @@ from matplotlib.dates import date2num, DateFormatter
 ANNUAL_DATETIME = pd.date_range(start="2018-01-01 00:30:00", freq="60T", periods=8760, closed="left")
 
 
-def heatmap(annual_values: np.ndarray, save_path: str, title: str = None, unit: str = None,
-                 vrange: np.ndarray = None, cmap: str = 'viridis', tone_color: str = "black", invert_y: bool = False,
-                 transparency: bool = False):
+def heatmap(
+    annual_values: np.ndarray, 
+    save_path: str, 
+    title: str = None, 
+    unit: str = None,
+    vrange: np.ndarray = None, 
+    cmap: str = 'viridis', 
+    tone_color: str = "black", 
+    invert_y: bool = False,
+    transparency: bool = False
+    ):
     """ Generate a heatmap from a set of annual hourly values
 
     Parameters

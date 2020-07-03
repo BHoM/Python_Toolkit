@@ -30,9 +30,32 @@ namespace BH.Engine.Python
         /**** Public Methods              ****/
         /*************************************/
 
-        public static string PlotWindrose(List<double> annualWindSpeed, List<double> annualWindDirection, string savePath, string seasonPeriod = "Annual", string timePeriod = "Daily", int nSector = 16, string title = null, string cmap = "GnBu", string toneColor = "black", bool transparency = false)
+        public static string PlotWindrose(
+            List<double> annualWindSpeed, 
+            List<double> annualWindDirection, 
+            string savePath, 
+            string seasonPeriod = "Annual", 
+            string timePeriod = "Daily", 
+            int nSector = 16, 
+            string title = null, 
+            string cmap = "GnBu", 
+            string toneColor = "black", 
+            bool transparency = false
+            )
         {
-            return Compute.Invoke("Windrose.windrose", annualWindSpeed, annualWindDirection, savePath, seasonPeriod, timePeriod, nSector, title, cmap, toneColor, transparency).ToString();
+            return Compute.Invoke(
+                "Windrose.windrose", 
+                annualWindSpeed, 
+                annualWindDirection, 
+                savePath, 
+                seasonPeriod, 
+                timePeriod, 
+                nSector, 
+                title, 
+                cmap, 
+                toneColor, 
+                transparency
+                ).ToString();
         }
 
         /*************************************/
