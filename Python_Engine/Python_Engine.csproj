@@ -52,7 +52,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compute\CopyEmbeddedResourceToFile.cs" />
     <Compile Include="Compute\Init.cs" />
     <Compile Include="Compute\DownloadPython.cs" />
     <Compile Include="Compute\InstallPython.cs" />
