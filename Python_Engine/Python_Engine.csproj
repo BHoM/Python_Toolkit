@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Compute\CopyEmbeddedResourceToFile.cs" />
     <Compile Include="Compute\Init.cs" />
+    <Compile Include="Compute\DownloadPython.cs" />
     <Compile Include="Compute\InstallPython.cs" />
     <Compile Include="Compute\InstallPip.cs" />
     <Compile Include="Compute\InstallToolkit.cs" />
@@ -71,7 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <EmbeddedResource Include="Properties\python-3.7.3-embed-amd64.zip" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
