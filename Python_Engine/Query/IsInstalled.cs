@@ -50,8 +50,11 @@ namespace BH.Engine.Python
             if (!IsInstalled())
                 return false;
 
-            string moduleDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib", "site-packages", module);
-            return Directory.Exists(moduleDir) && File.Exists(Path.Combine(moduleDir, "__init__.py"));
+            string packagesDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib", "site-packages");
+            string moduleDir = Path.Combine(packagesDir, module);
+            bool installed = Directory.Exists(moduleDir) && File.Exists(Path.Combine(moduleDir, "__init__.py"));
+            installed |= File.Exists(Path.Combine(packagesDir, module.Replace("_", "-") + ".egg-link"));
+            return installed;
         }
 
         /***************************************************/
