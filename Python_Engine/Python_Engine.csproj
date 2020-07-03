@@ -54,7 +54,7 @@
   <ItemGroup>
     <Compile Include="Compute\CopyEmbeddedResourceToFile.cs" />
     <Compile Include="Compute\Init.cs" />
-    <Compile Include="Compute\Install.cs" />
+    <Compile Include="Compute\InstallPython.cs" />
     <Compile Include="Compute\InstallPip.cs" />
     <Compile Include="Compute\InstallPythonToolkit.cs" />
     <Compile Include="Compute\PipInstall.cs" />
