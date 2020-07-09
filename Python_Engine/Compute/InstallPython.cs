@@ -51,26 +51,6 @@ namespace BH.Engine.Python
             if (!Directory.Exists(Query.EmbeddedPythonHome()))
                 Directory.CreateDirectory(Query.EmbeddedPythonHome());
 
-            // make sure pyBHoM is imported at python startup
-            string startupCommand = "import pyBHoM";
-            string pythonStartup = Environment.GetEnvironmentVariable("PYTHONSTARTUP", EnvironmentVariableTarget.User);
-
-            if (pythonStartup == null)
-                Environment.SetEnvironmentVariable("PYTHONSTARTUP", pythonStartup, EnvironmentVariableTarget.User);
-
-            // if no startup file is defined, write one
-            if (!File.Exists(pythonStartup))
-            {
-                pythonStartup = Path.Combine(home, "startup.py");
-                System.IO.File.WriteAllText(pythonStartup, startupCommand);
-            }
-            else if (!File.ReadAllLines(pythonStartup).Contains(startupCommand))
-            {
-                // if it exists, and does not contain the pyBHoM command already, append it
-                using (StreamWriter file = new StreamWriter(pythonStartup, true))
-                    file.WriteLine(startupCommand);
-            }
-
             if (!force && Query.IsInstalled()) // python seems installed, so exit
                 return success;
 
