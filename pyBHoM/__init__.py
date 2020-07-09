@@ -26,7 +26,7 @@ import os
 import clr
 from glob import glob
 
-bhom_home = os.path.join(os.getenv("APPDATA"), "BHoM", "Assemblies")
+bhom_home = os.path.join(os.getenv("ALLUSERSPROFILE"), "BHoM", "Assemblies")
 sys.path.append(bhom_home)
 
 # add oM libraries
