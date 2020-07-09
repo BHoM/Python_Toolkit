@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using BH.oM.Reflection.Attributes;
 using System.ComponentModel;
 using BH.oM.Reflection;
+using System.IO;
 
 namespace BH.Engine.Python
 {
@@ -69,16 +70,22 @@ namespace BH.Engine.Python
             Console.WriteLine("Installing jupyter...");
             Compute.PipInstall("jupyter");
             Compute.PipInstall("jupyterlab");
+
+            // install pythonnet
             Compute.PipInstall("pythonnet");
 
             //Install matplotlib for graphs
             Compute.PipInstall("matplotlib");
+            // install pyBHoM
+            string pyBHoMpath = Path.Combine(Query.EmbeddedPythonHome(), "src", "Python_Toolkit");
+            Compute.PipInstall($"-e {pyBHoMpath}", force: force);
 
             installedPackages.Add("Python 3.7");
             installedPackages.Add("jupyter");
             installedPackages.Add("jupyterlab");
             installedPackages.Add("pythonnet");
             installedPackages.Add("matplotlib");
+            installedPackages.Add("pyBHoM");
 
             success = true;
             return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
