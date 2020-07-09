@@ -78,6 +78,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
-xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y</PostBuildEvent>
+xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
+xcopy "$(SolutionDir)*.py" "C:\\ProgramData\\BHoM\\python-3.7.3-embed-amd64\src\$(SolutionName)\" /Y /I /S /F</PostBuildEvent>
   </PropertyGroup>
 </Project>
