@@ -32,23 +32,30 @@ namespace BH.Engine.Python
 
         public static PyObject Import(string moduleName)
         {
+            PythonEngine.Initialize();
+            PyObject module = null;
+            using (Py.GIL())
+            {
+                module = Py.Import(moduleName);
+            }
+            return module;
+        }
+
+        /***************************************************/
+
+        public static PyObject TryImport(string moduleName)
+        {
             try
             {
-                PythonEngine.Initialize();
-                PyObject module = null;
-                using (Py.GIL())
-                {
-                    module = Py.Import(moduleName);
-                }
-                return module;
+                return Import(moduleName);
             }
             catch (PythonException e)
             {
-                BH.Engine.Reflection.Compute.RecordError(e.Message);
+                BH.Engine.Reflection.Compute.RecordNote(e.Message);
                 return null;
             }
         }
 
-        /***************************************************/
+
     }
 }
