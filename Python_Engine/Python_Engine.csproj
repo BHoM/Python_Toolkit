@@ -54,6 +54,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compute\ClimateCharts\Diurnal.cs" />
+    <Compile Include="Compute\ClimateCharts\Frequency.cs" />
+    <Compile Include="Compute\ClimateCharts\Heatmap.cs" />
+    <Compile Include="Compute\ClimateCharts\UTCI.cs" />
+    <Compile Include="Compute\ClimateCharts\Variablerose.cs" />
+    <Compile Include="Compute\ClimateCharts\Windrose.cs" />
     <Compile Include="Compute\Init.cs" />
     <Compile Include="Compute\DownloadPython.cs" />
     <Compile Include="Compute\InstallPython.cs" />
@@ -72,6 +78,14 @@
     <Compile Include="Query\IsInstalled.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Compute\ClimateCharts\Diurnal.py" />
+    <None Include="Compute\ClimateCharts\Frequency.py" />
+    <None Include="Compute\ClimateCharts\Heatmap.py" />
+    <None Include="Compute\ClimateCharts\UTCI.py" />
+    <None Include="Compute\ClimateCharts\Variablerose.py" />
+    <None Include="Compute\ClimateCharts\Windrose.py" />
+    <None Include="Compute\ClimateCharts\__init__.py" />
+    <None Include="Compute\__init__.py" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
