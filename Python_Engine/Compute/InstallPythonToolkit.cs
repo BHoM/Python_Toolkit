@@ -49,7 +49,7 @@ namespace BH.Engine.Python
             Compute.InstallPython(force);
 
             // Check the installation was successful 
-            if (!Query.IsInstalled())
+            if (!Query.IsPythonInstalled())
             {
                 BH.Engine.Reflection.Compute.RecordError("Coule not install Python");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };

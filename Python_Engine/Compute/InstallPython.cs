@@ -51,7 +51,7 @@ namespace BH.Engine.Python
             if (!Directory.Exists(Query.EmbeddedPythonHome()))
                 Directory.CreateDirectory(Query.EmbeddedPythonHome());
 
-            if (!force && Query.IsInstalled()) // python seems installed, so exit
+            if (!force && Query.IsPythonInstalled()) // python seems installed, so exit
                 return success;
 
             // download the python-embedded compressed archive
