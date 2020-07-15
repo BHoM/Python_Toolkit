@@ -67,7 +67,7 @@ namespace BH.Engine.Python
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
 
-            List<string> modules = new List<string>() { "jupyter", "jupyterlab", "pythonnet", "matplotlib" };
+            List<string> modules = new List<string>() { "jupyter", "jupyterlab", "pythonnet", "matplotlib", "numpy", "pandas" };
 
             // installing basic modules
             foreach(string module in modules)
