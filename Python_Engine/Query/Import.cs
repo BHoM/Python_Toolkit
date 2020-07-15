@@ -21,6 +21,8 @@
  */
 
 using Python.Runtime;
+using System;
+using System.IO;
 
 namespace BH.Engine.Python
 {
@@ -32,13 +34,15 @@ namespace BH.Engine.Python
 
         public static PyObject Import(string moduleName)
         {
+            // check if python is installed
+            if (!Query.IsPythonInstalled())
+                throw new Exception($"Cannot import module {moduleName} because no valid version of Python for the BHoM has been found.\n" +
+                    "Try installing Python and the Python_Toolkit using the Compute.InstallPythonToolkit component.\n" +
+                    "If the installation process fails, pleae consider reporting a bug at " +
+                    "https://github.com/BHoM/MachineLearning_Toolkit/issues/new?labels=type%3Abug&template=00_bug.md");
+            // if python fails to be initialised, it will throw an exception, which can be caught by the TryImport method
             PythonEngine.Initialize();
-            PyObject module = null;
-            using (Py.GIL())
-            {
-                module = Py.Import(moduleName);
-            }
-            return module;
+            return PythonEngine.ImportModule(moduleName);
         }
 
         /***************************************************/
@@ -51,7 +55,7 @@ namespace BH.Engine.Python
             }
             catch (PythonException e)
             {
-                BH.Engine.Reflection.Compute.RecordNote(e.Message);
+                BH.Engine.Reflection.Compute.RecordWarning(e.Message);
                 return null;
             }
         }
