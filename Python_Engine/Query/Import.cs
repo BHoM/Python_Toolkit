@@ -40,6 +40,14 @@ namespace BH.Engine.Python
                     "Try installing Python and the Python_Toolkit using the Compute.InstallPythonToolkit component.\n" +
                     "If the installation process fails, pleae consider reporting a bug at " +
                     "https://github.com/BHoM/MachineLearning_Toolkit/issues/new?labels=type%3Abug&template=00_bug.md");
+
+            //// Make sure that the BHoM is loading our bespoke python program
+            string pythonHome = Query.EmbeddedPythonHome();
+            string path = Environment.GetEnvironmentVariable("PATH");
+            Environment.SetEnvironmentVariable("PATH", pythonHome + ";" + path, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("PYTHONHOME", pythonHome, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("PYTHONPATH", Path.Combine(pythonHome, "python.exe"), EnvironmentVariableTarget.Process);
+
             // if python fails to be initialised, it will throw an exception, which can be caught by the TryImport method
             PythonEngine.Initialize();
             return PythonEngine.ImportModule(moduleName);
