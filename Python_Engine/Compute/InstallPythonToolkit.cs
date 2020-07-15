@@ -54,6 +54,7 @@ namespace BH.Engine.Python
                 BH.Engine.Reflection.Compute.RecordError("Coule not install Python");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
+            installedPackages.Add("Python 3.7");
 
             // Install pip
             Console.WriteLine("Installing pip...");
@@ -66,26 +67,25 @@ namespace BH.Engine.Python
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
 
-            // install project jupyter
-            Console.WriteLine("Installing jupyter...");
-            Compute.PipInstall("jupyter");
-            Compute.PipInstall("jupyterlab");
+            List<string> modules = new List<string>() { "jupyter", "jupyterlab", "pythonnet", "matplotlib" };
 
-            // install pythonnet
-            Compute.PipInstall("pythonnet");
+            // installing basic modules
+            foreach(string module in modules)
+            {
+                Console.WriteLine($"Installing {module}");
+                Compute.PipInstall(module);
+                if (Query.IsModuleInstalled(module))
+                    installedPackages.Add(module);
+            }
 
-            //Install matplotlib for graphs
-            Compute.PipInstall("matplotlib");
-            // install pyBHoM
+            // install Python_Toolkit
             string pyBHoMpath = Path.Combine(Query.EmbeddedPythonHome(), "src", "Python_Toolkit");
             Compute.PipInstall($"-e {pyBHoMpath}", force: force);
-
-            installedPackages.Add("Python 3.7");
-            installedPackages.Add("jupyter");
-            installedPackages.Add("jupyterlab");
-            installedPackages.Add("pythonnet");
-            installedPackages.Add("matplotlib");
-            installedPackages.Add("pyBHoM");
+            foreach(string module in new List<string>() { "pyBHoM", "Python_Engine"})
+            {
+                if (Query.IsModuleInstalled(module))
+                    installedPackages.Add(module);
+            }
 
             success = true;
             return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
