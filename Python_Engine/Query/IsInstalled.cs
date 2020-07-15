@@ -30,7 +30,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static bool IsInstalled()
+        public static bool IsPythonInstalled()
         {
             return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "python.exe"));
 
@@ -47,7 +47,7 @@ namespace BH.Engine.Python
 
         public static bool IsModuleInstalled(string module)
         {
-            if (!IsInstalled())
+            if (!IsPythonInstalled())
                 return false;
 
             string packagesDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib", "site-packages");
