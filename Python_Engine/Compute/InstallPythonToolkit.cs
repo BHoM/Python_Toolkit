@@ -85,6 +85,12 @@ namespace BH.Engine.Python
             if (Query.IsModuleInstalled(m))
                 installedPackages.Add(m);
 
+            ///////////////////////////// TEMPORARY
+            ///
+            Compute.PipInstall($" git+https://github.com/python-windrose/windrose", force: force);
+
+            //////////////////////////////////////
+
             success = true;
             return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
         }
