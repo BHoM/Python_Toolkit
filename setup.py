@@ -23,11 +23,11 @@
 from distutils.core import setup
 
 setup(
-    name='pyBHoM',
+    name='Python_Toolkit',
     description='Python bindings of the Buildings and Habitats object Model',
     author='Eduardo Pignatelli',
     author_email='info@bhom.xyz',
     license='LGPLv3',
-    packages=["pyBHoM"],
-    version="3.1.0.0",
+    packages=["Python_Engine", "Python_Engine.Compute"],
+    version="3.3.0.0",
     )
