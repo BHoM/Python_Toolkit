@@ -70,7 +70,7 @@ namespace BH.Engine.Python
             List<string> modules = new List<string>() { "jupyter", "jupyterlab", "pythonnet", "matplotlib" };
 
             // installing basic modules
-            foreach(string module in modules)
+            foreach (string module in modules)
             {
                 Console.WriteLine($"Installing {module}");
                 Compute.PipInstall(module);
@@ -79,13 +79,11 @@ namespace BH.Engine.Python
             }
 
             // install Python_Toolkit
-            string pyBHoMpath = Path.Combine(Query.EmbeddedPythonHome(), "src", "Python_Toolkit");
-            Compute.PipInstall($"-e {pyBHoMpath}", force: force);
-            foreach(string module in new List<string>() { "pyBHoM", "Python_Engine"})
-            {
-                if (Query.IsModuleInstalled(module))
-                    installedPackages.Add(module);
-            }
+            string mod = "Python_Toolkit";
+            string pyToolkitPath = Path.Combine(Query.EmbeddedPythonHome(), "src", mod);
+            Compute.PipInstall($"-e {pyToolkitPath}", force: force);
+            if (Query.IsModuleInstalled(mod))
+                installedPackages.Add(mod);
 
             success = true;
             return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
