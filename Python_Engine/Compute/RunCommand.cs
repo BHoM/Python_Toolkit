@@ -20,7 +20,6 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace BH.Engine.Python
@@ -31,7 +30,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void RunCommand(string command, bool hideWindows = false, string startDirectory = null)
+        public static void RunCommand(string command, bool hideWindows = false, string startDirectory = null, bool powershell = false)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
@@ -42,7 +41,10 @@ namespace BH.Engine.Python
 
             startInfo.FileName = "cmd.exe";
             startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
-            startInfo.Arguments = $"{commandMode} {command} & exit";
+            string arguments = $"{commandMode} {command} & exit";
+            if (powershell)
+                arguments = $"powershell -command '{arguments}'";
+            startInfo.Arguments = arguments;
 
             process.StartInfo = startInfo;
             process.Start();
@@ -51,7 +53,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static async void RunCommandAsync(string command, bool hideWindows = true, string startDirectory = null)
+        public static async void RunCommandAsync(string command, bool hideWindows = true, string startDirectory = null, bool powershell = false)
         {
             await Task.Run(() =>
             {
@@ -64,7 +66,10 @@ namespace BH.Engine.Python
 
                 startInfo.FileName = "cmd.exe";
                 startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
-                startInfo.Arguments = $"{commandMode} {command} & exit";
+                string arguments = $"{commandMode} {command} & exit";
+                if (powershell)
+                    arguments = $"powershell -command '{arguments}'";
+                startInfo.Arguments = arguments;
 
                 process.StartInfo = startInfo;
                 process.Start();
