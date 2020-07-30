@@ -1,13 +1,25 @@
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
-# BHoM
+## Install me
+To install the Python_Toolkit:
+1. Compile:  
+    1. [BHoM](https://github.com/BHoM/BHoM)  
+    1. [BHoM_Engine](https://github.com/BHoM/BHoM_Engine)  
+    1. [BHoM_Adapter](https://github.com/BHoM/BHoM_Adapter)   
+    1. [BHoM_UI](https://github.com/BHoM/BHoM_UI)  
+	  1. [Rhinoceros_Toolkit](https://github.com/BHoM/Rhinoceros_Toolkit)  
+	  1. [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit)  
+	  1. Python_Toolkit (this repo)
+1. Open ai UI of your choice (e.g. Grasshopper)
+1. Run the `InstallPythonToolkit` component and wait for the installation to finish.
+1. he installation has succeeded if the packages installed are:
+	  - Python 3.7
+  	- jupyter
+  	- matplotlib
+  	- Python_Toolkit
+1. Restart your UI
 
-A great place to start is reading our Wiki [here](https://github.com/BHoM/documentation/wiki) including pages like the [Structure of the BHoM](https://github.com/BHoM/documentation/wiki/Structure-of-the-BHoM) and [Using the BHoM](https://github.com/BHoM/documentation/wiki/Using-the-BHoM).
-
-## Quick start ##
-
-Try the [installer](http://bhom.xyz/assets/installers/v2.1/BHoM%20Alpha%20v2.1.0.5%20Installer.exe) and a selection of [sample scripts](https://github.com/BHoM/samples).
-
-
+To check that all went ok you can run the component `BH.Engine.Python.Compute.Import` with input a string `Python_Toolkit`,
+and check that it succeed without errors
 
 ## Building the BHoM and the Toolkits from Source ##
 You will need the following to build BHoM:
@@ -15,37 +27,6 @@ You will need the following to build BHoM:
 - Microsoft Visual Studio 2013 or higher
 - Microsoft .NET Framework 4.0 and above (included with Visual Studio 2013)
 - Note that there are no software - specific dependencies (only operating system relevant), this is specific: BHoM is a software agnostic object model.
-
-
-### Clone and build the Core BHoM Repos
-
-In the following build order:
-- [BHoM](https://github.com/BHoM/BHoM)
-- [BHoM_Engine](https://github.com/BHoM/BHoM_Engine)
-- [BHoM_Adapter](https://github.com/BHoM/BHoM_Adapter)
-- [BHoM_UI](https://github.com/BHoM/BHoM_UI)
-
-- [Socket_Toolkit](https://github.com/BHoM/Socket_Toolkit)
-- [Mongo_Toolkit](https://github.com/BHoM/Mongo_Toolkit)
-
-
-Build as many as you like of your chosen Interop Toolkits:
-- [Revit_Toolkit](https://github.com/BHoM/Revit_Toolkit)
-- [Robot_Toolkit](https://github.com/BHoM/Robot_Toolkit)
-- [ETABS_Toolkit](https://github.com/BHoM/ETABS_Toolkit)
-- [Lusas_Toolkit](https://github.com/BHoM/Lusas_Toolkit)
-- [GSA_Toolkit](https://github.com/BHoM/GSA_Toolkit)
-- [TAS_Toolkit](https://github.com/BHoM/TAS_Toolkit)
-- [XML_Toolkit](https://github.com/BHoM/XML_Toolkit)
-
-Then build as many User Interface Repositories as you like:
-- [Rhinoceros_Toolkit](https://github.com/BHoM/Rhinoceros_Toolkit) & [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit) (you need both)
-- [Dynamo_Toolkit](https://github.com/BHoM/Dynamo_Toolkit)
-- [Excel_Toolkit](https://github.com/BHoM/Excel_Toolkit)
-
-
-You are good to go! 
-
 
 
 ## Want to contribute? ##
