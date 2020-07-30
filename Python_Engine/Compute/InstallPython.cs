@@ -41,13 +41,6 @@ namespace BH.Engine.Python
         {
             bool success = true;
 
-            // add python to the PATH
-            string home = Query.EmbeddedPythonHome();
-            string path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
-            if (!path.Contains(home))
-                Environment.SetEnvironmentVariable("PATH", path + ";" + home, EnvironmentVariableTarget.User);
-
-            // create the python home directory
             if (!Directory.Exists(Query.EmbeddedPythonHome()))
                 Directory.CreateDirectory(Query.EmbeddedPythonHome());
 
