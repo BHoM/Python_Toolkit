@@ -21,6 +21,19 @@ To install the Python_Toolkit:
 To check that all went ok you can run the component `BH.Engine.Python.Compute.Import` with input a string `Python_Toolkit`,
 and check that it succeed without errors
 
+## Installation structure
+There are two main events to install the toolkit:
+1. Compiling the toolkit. This does two things:
+	- It builds the dynamic libraries required by .NET and copies them to C:\ProgramData\BHoM\Assemblies
+	- It packs the python files in the toolkit and copies them to C:\ProgramData\BHoM\python-3.7.3-embed-amd64\src
+2. Installing the Toolkit from the UI. This is performed by running the `InstallPythonToolkit` method. This will:
+	- Download Python and install python
+	- Download and install `pip`
+	- Install the necessary packages (e.g. `jupyter`)
+	- Install the python bindings of the Python_Engine from C:\ProgramData\BHoM\python-3.7.3-embed-amd64\src.
+	  This contains all the code that is currently developed in the toolkit in python.
+
+
 ## Building the BHoM and the Toolkits from Source ##
 You will need the following to build BHoM:
 
