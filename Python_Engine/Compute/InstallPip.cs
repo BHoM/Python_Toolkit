@@ -20,6 +20,7 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using System;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -37,17 +38,17 @@ namespace BH.Engine.Python
 
             try
                 {
-                    string libDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib");
+                    string libDir = Path.Combine(Query.EmbeddedPythonHome(), "Scripts");
                     if (!Directory.Exists(libDir))
                         Directory.CreateDirectory(libDir);
 
-                    RunCommand($"cd {libDir} && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
-                    RunCommand($"cd {Query.EmbeddedPythonHome()} && python.exe Lib\\get-pip.py");
+                    RunCommand($"curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
+                    RunCommand($"{Query.EmbeddedPythonHome()}\\python.exe get-pip.py");
                     return true;
                 }
-                catch
+                catch (Exception e)
                 {
-                    throw new FileNotFoundException("pip is not installed");
+                    throw new FileNotFoundException($"pip installation failed: {e.Message}");
                 }
         }
 

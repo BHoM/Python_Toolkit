@@ -40,26 +40,27 @@ namespace BH.Engine.Python
         public static bool InstallPython(bool force = false)
         {
             bool success = true;
+            string pythonHome = Query.EmbeddedPythonHome();
 
-            if (!Directory.Exists(Query.EmbeddedPythonHome()))
-                Directory.CreateDirectory(Query.EmbeddedPythonHome());
+            if (!Directory.Exists(pythonHome))
+                Directory.CreateDirectory(pythonHome);
 
             if (!force && Query.IsPythonInstalled()) // python seems installed, so exit
                 return success;
 
             // download the python-embedded compressed archive
-            string pythonZip = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BHoM", $"{EMBEDDED_PYTHON}.zip");
+            string pythonZip = Path.Combine(pythonHome, $"{PYTHON_VERSION}.zip");
             if (!File.Exists(pythonZip))
                 Compute.DownloadPython();
 
             // inflate the archive
             try
             {
-                ZipFile.ExtractToDirectory(pythonZip, pythonZip.Replace(".zip", ""));
+                ZipFile.ExtractToDirectory(pythonZip, pythonHome);
 
                 // allow pip on embedded python installation by unflagging python as embedded
                 // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
-                File.Delete(Path.Combine(Query.EmbeddedPythonHome(), PYTHON_VERSION + "._pth"));
+                File.Delete(Path.Combine(pythonHome, PYTHON_VERSION + "._pth"));
 
             }
             catch
