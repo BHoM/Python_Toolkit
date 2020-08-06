@@ -41,15 +41,13 @@ namespace BH.Engine.Python
         {
             bool success = false;
             List<string> installedPackages = new List<string>();
+
             if (!run)
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
 
             // Install python
             Console.WriteLine("Installing python 3.7 embedded...");
-            Compute.InstallPython(force);
-
-            // Check the installation was successful 
-            if (!Query.IsPythonInstalled())
+            if (!Compute.InstallPython(force))
             {
                 BH.Engine.Reflection.Compute.RecordError("Coule not install Python");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
@@ -58,10 +56,7 @@ namespace BH.Engine.Python
 
             // Install pip
             Console.WriteLine("Installing pip...");
-            Compute.InstallPip();
-
-            // Check the pip installation was successful 
-            if (!Query.IsPipInstalled())
+            if (!Compute.InstallPip())
             {
                 BH.Engine.Reflection.Compute.RecordError("Could not install pip");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
