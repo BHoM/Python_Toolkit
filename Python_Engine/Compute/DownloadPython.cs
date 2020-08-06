@@ -43,8 +43,7 @@ namespace BH.Engine.Python
             if (!Directory.Exists(home))
                 Directory.CreateDirectory(home);
 
-            string destination = Path.Combine(home, $"{PYTHON_VERSION}.zip");
-
+            string destination = Path.Combine(home, $"python.zip");
             RunCommand($"curl {EMBEDDED_PYTHON_URL} -o {destination}");
             return true;
         }
