@@ -49,7 +49,7 @@ namespace BH.Engine.Python
                 return success;
 
             // download the python-embedded compressed archive
-            string pythonZip = Path.Combine(pythonHome, $"{PYTHON_VERSION}.zip");
+            string pythonZip = Path.Combine(pythonHome, $"python.zip");
             if (!File.Exists(pythonZip))
                 Compute.DownloadPython();
 
