@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Compute\Init.cs" />
     <Compile Include="Compute\DownloadPython.cs" />
+    <Compile Include="Compute\SetPythonHome.cs" />
     <Compile Include="Compute\InstallPython.cs" />
     <Compile Include="Compute\InstallPip.cs" />
     <Compile Include="Compute\InstallPythonToolkit.cs" />
