@@ -20,48 +20,33 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using Python.Runtime;
 using System;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Python.Runtime;
 
 namespace BH.Engine.Python
 {
-    public static partial class Query
+    public static partial class Compute
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static PyObject Import(string moduleName)
+        public static bool SetPythonHome()
         {
-            // check if python is installed
-            if (!Query.IsPythonInstalled())
-                throw new Exception($"Cannot import module {moduleName} because no valid version of Python for the BHoM has been found.\n" +
-                    "Try installing Python and the Python_Toolkit using the Compute.InstallPythonToolkit component.\n" +
-                    "If the installation process fails, pleae consider reporting a bug at " +
-                    "https://github.com/BHoM/MachineLearning_Toolkit/issues/new?labels=type%3Abug&template=00_bug.md");
-
-            // Make sure that the BHoM is loading our bespoke python program
-            Compute.SetPythonHome();
-
-            // if python fails to be initialised, it will throw an exception, which can be caught by the TryImport method
-            PythonEngine.Initialize();
-            return PythonEngine.ImportModule(moduleName);
+            string pythonHome = Query.EmbeddedPythonHome();
+            string path = Environment.GetEnvironmentVariable("PATH");
+            Environment.SetEnvironmentVariable("PATH", pythonHome + ";" + path, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("PYTHONHOME", pythonHome, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("PYTHONPATH", Path.Combine(pythonHome, "python.exe"), EnvironmentVariableTarget.Process);
+            return true;
         }
 
         /***************************************************/
-
-        public static PyObject TryImport(string moduleName)
-        {
-            try
-            {
-                return Import(moduleName);
-            }
-            catch (PythonException e)
-            {
-                BH.Engine.Reflection.Compute.RecordWarning(e.Message);
-                return null;
-            }
-        }
     }
 }
