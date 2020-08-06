@@ -42,7 +42,7 @@ namespace BH.Engine.Python
 
             startInfo.FileName = "cmd.exe";
             startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
-            startInfo.Arguments = $"{commandMode} {command} & exit";
+            startInfo.Arguments = $"{commandMode} {command} && exit";
 
             process.StartInfo = startInfo;
             process.Start();
@@ -64,7 +64,7 @@ namespace BH.Engine.Python
 
                 startInfo.FileName = "cmd.exe";
                 startInfo.WorkingDirectory = startDirectory ?? Query.EmbeddedPythonHome();
-                startInfo.Arguments = $"{commandMode} {command} & exit";
+                startInfo.Arguments = $"{commandMode} {command} && exit";
 
                 process.StartInfo = startInfo;
                 process.Start();
