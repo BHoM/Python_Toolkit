@@ -37,19 +37,19 @@ namespace BH.Engine.Python
                 return true;
 
             try
-                {
-                    string libDir = Path.Combine(Query.EmbeddedPythonHome(), "Scripts");
-                    if (!Directory.Exists(libDir))
-                        Directory.CreateDirectory(libDir);
+            {
+                string libDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib");
+                if (!Directory.Exists(libDir))
+                    Directory.CreateDirectory(libDir);
 
-                    RunCommand($"curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
-                    RunCommand($"{Query.EmbeddedPythonHome()}\\python.exe get-pip.py");
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    throw new FileNotFoundException($"pip installation failed: {e.Message}");
-                }
+                RunCommand($"cd {libDir} && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py");
+                RunCommand($"cd {Query.EmbeddedPythonHome()} && python.exe Lib\\get-pip.py");
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new FileNotFoundException($"pip installation failed: {e.Message}");
+            }
         }
 
         /***************************************************/

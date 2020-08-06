@@ -42,10 +42,12 @@ namespace BH.Engine.Python
             bool success = true;
             string pythonHome = Query.EmbeddedPythonHome();
 
+            // setup directories
             if (!Directory.Exists(pythonHome))
                 Directory.CreateDirectory(pythonHome);
 
-            if (!force && Query.IsPythonInstalled()) // python seems installed, so exit
+            // exit if python is already installed and installation is not forced
+            if (!force && Query.IsPythonInstalled())
                 return success;
 
             // download the python-embedded compressed archive
@@ -61,7 +63,6 @@ namespace BH.Engine.Python
                 // allow pip on embedded python installation by unflagging python as embedded
                 // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
                 File.Delete(Path.Combine(pythonHome, PYTHON_VERSION + "._pth"));
-
             }
             catch
             {
