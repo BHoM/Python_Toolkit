@@ -43,11 +43,12 @@ namespace BH.Engine.Python
             if (!Directory.Exists(home))
                 Directory.CreateDirectory(home);
 
-            string destination = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BHoM", $"{EMBEDDED_PYTHON}.zip");
+            string destination = Path.Combine(home, $"{PYTHON_VERSION}.zip");
 
             RunCommand($"curl {EMBEDDED_PYTHON_URL} -o {destination}");
             return true;
         }
+
 
         /***************************************************/
         /**** Public Fields                             ****/
