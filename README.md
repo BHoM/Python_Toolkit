@@ -16,7 +16,7 @@ To install the Python_Toolkit:
   	- jupyter
   	- matplotlib
   	- Python_Toolkit
-1. Restart your UI
+1. Restart your UI - if using Grasshopper, restart Rhinoceros and Grasshopper
 
 To check that all went ok you can run the component `BH.Engine.Python.Compute.Import` with input a string `Python_Toolkit`,
 and check that it succeed without errors
