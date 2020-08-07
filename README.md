@@ -10,7 +10,7 @@ To install the Python_Toolkit:
 	  1. [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit)  
 	  1. Python_Toolkit (this repo)
 1. Open a UI of your choice (e.g. Grasshopper)
-1. Run the `InstallPythonToolkit` component and wait for the installation to finish.
+1. Run the `BH.Engine.Python.Compute.InstallPythonToolkit` component and wait for the installation to finish.
 1. The installation has succeeded if the install packages include:
 	  - Python 3.7
   	- jupyter
