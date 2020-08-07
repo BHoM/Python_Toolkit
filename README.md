@@ -18,7 +18,7 @@ To install the Python_Toolkit:
   	- Python_Toolkit
 1. Restart your UI - if using Grasshopper, restart Rhinoceros and Grasshopper
 
-To check that all went ok you can run the component `BH.Engine.Python.Compute.Import` with input a string `Python_Toolkit`,
+To check whether all went well you can run the component `BH.Engine.Python.Compute.Import` with a input of a string as `Python_Toolkit`,
 and check that it succeed without errors
 
 ## Installation structure
