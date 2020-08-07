@@ -9,7 +9,7 @@ To install the Python_Toolkit:
 	  1. [Rhinoceros_Toolkit](https://github.com/BHoM/Rhinoceros_Toolkit)  
 	  1. [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit)  
 	  1. Python_Toolkit (this repo)
-1. Open ai UI of your choice (e.g. Grasshopper)
+1. Open a UI of your choice (e.g. Grasshopper)
 1. Run the `InstallPythonToolkit` component and wait for the installation to finish.
 1. he installation has succeeded if the packages installed are:
 	  - Python 3.7
