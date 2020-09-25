@@ -35,8 +35,32 @@ namespace BH.Engine.Python
         public static object IFromPython(this PyObject obj)
         {
             if (obj == null || obj.IsNone())
-                return Runtime.GetPyNone();
+                return null;
 
+            IntPtr handle = obj.Handle;
+
+            if (PyInt.IsIntType(obj))
+                return FromPython(new PyInt(obj));
+            else if (PyLong.IsLongType(obj))
+                return FromPython(new PyLong(obj));
+            else if (PyFloat.IsFloatType(obj))
+                return FromPython(new PyFloat(obj));
+            else if (PyString.IsStringType(obj))
+                return FromPython(new PyString(obj));
+            else if (PyList.IsListType(obj))
+                return FromPython(new PyList(obj));
+            else if (PyDict.IsDictType(obj))
+                return FromPython(new PyDict(obj));
+            else if (PyTuple.IsTupleType(obj))
+                return FromPython(new PyTuple(obj));
+            else if (obj.IsIterable())
+                return FromPython(new PyIter(obj));
+            else if (Runtime.PyBool_Check(handle))
+                return obj.As<bool>();
+            else if (Runtime.PyNumber_Check(handle))
+                return FromPython(new PyFloat(Runtime.PyNumber_Float(handle)));
+
+            throw new Exception($"WHAT THE FUCK IS THIS {obj}");
             return FromPython(obj as dynamic);
         }
 
@@ -83,7 +107,7 @@ namespace BH.Engine.Python
             foreach (PyObject pykey in pyDict.Keys())
             {
                 object key = IFromPython(pykey);
-                dynamic value = FromPython<dynamic>(pyDict[pykey]);
+                dynamic value = IFromPython(pyDict[pykey]);
                 dict.Add(key, value);
             }
             return dict;
@@ -91,24 +115,35 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static List<dynamic> FromPython(this PyTuple input)
+        public static List<object> FromPython(this PyTuple input)
         {
-            List<dynamic> cObject = new List<dynamic>();
-            for (int i = 0; i < input.Length(); i++)
-                cObject[i] = IFromPython(input[i]);
+            List<object> cObject = new List<object>();
+            foreach (PyObject item in input)
+                cObject.Add(IFromPython(item));
             return cObject;
         }
 
         /***************************************************/
 
-        public static List<dynamic> FromPython(this PyList input)
+        public static List<object> FromPython(this PyList input)
         {
-            List<dynamic> cObject = new List<dynamic>();
-            for (int i = 0; i < input.Length(); i++)
-                cObject[i] = IFromPython(input[i]);
+            List<object> cObject = new List<object>();
+            foreach (PyObject item in input)
+                cObject.Add(IFromPython(item));
             return cObject;
         }
 
         /***************************************************/
+
+        public static List<object> FromPython(this PyIter input)
+        {
+            List<object> cObject = new List<object>();
+            foreach(PyObject item in input)
+                cObject.Add(IFromPython(item));
+            return cObject;
+        }
+
+        /***************************************************/
+
     }
 }
