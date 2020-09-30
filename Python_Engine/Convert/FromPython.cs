@@ -60,7 +60,6 @@ namespace BH.Engine.Python
             else if (Runtime.PyNumber_Check(handle))
                 return FromPython(new PyFloat(Runtime.PyNumber_Float(handle)));
 
-            throw new Exception($"WHAT THE FUCK IS THIS {obj}");
             return FromPython(obj as dynamic);
         }
 
@@ -145,5 +144,12 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        private static object FromPython(this object obj)
+        {
+            Engine.Reflection.Compute.RecordError($"Cannot convert from Python object of type {obj.GetType()}");
+            return null;
+        }
+
+        /***************************************************/
     }
 }
