@@ -60,27 +60,25 @@ namespace BH.Engine.Python
                 }
             }
 
-            // Make sure that the BHoM is loading our bespoke python program
-            Compute.SetPythonHome();
-
-            // if python fails to be initialised, it will throw an exception, which can be caught by the TryImport method
-            PythonEngine.Initialize();
+            if (!m_Initialised)
+            {
+                // Make sure that the BHoM is loading our bespoke python program
+                Compute.SetPythonHome();
+                // if python fails to be initialised, it will throw an exception, which can be caught by the TryImport method
+                PythonEngine.Initialize();
+                m_Initialised = true;
+            }
             return PythonEngine.ImportModule(moduleName);
         }
 
+
+        /***************************************************/
+        /**** Private Fields                            ****/
         /***************************************************/
 
-        public static PyObject TryImport(string moduleName)
-        {
-            try
-            {
-                return Import(moduleName);
-            }
-            catch (PythonException e)
-            {
-                BH.Engine.Reflection.Compute.RecordWarning(e.Message);
-                return null;
-            }
-        }
+        private static bool m_Initialised = false;
+
+        /***************************************************/
+
     }
 }
