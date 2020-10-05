@@ -191,16 +191,7 @@ namespace BH.Engine.Python
 
             return new PyTuple(array);
         }
-
+        
         /***************************************************/
-
-        private static PyObject ToPython(this object obj)
-        {
-            Engine.Reflection.Compute.RecordError($"Cannot convert to Python object of type {obj.GetType()}");
-            return null;
-        }
-
-        /***************************************************/
-
     }
 }
