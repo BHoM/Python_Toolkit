@@ -50,8 +50,6 @@ namespace BH.Engine.Python
             if (!IsPythonInstalled())
                 return false;
 
-            module = module.Split('.')[0];
-
             string packagesDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib", "site-packages");
             string moduleDir = Path.Combine(packagesDir, module);
             bool installed = Directory.Exists(moduleDir) && File.Exists(Path.Combine(moduleDir, "__init__.py"));

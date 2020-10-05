@@ -22,10 +22,7 @@
 
 using Python.Runtime;
 using System;
-using System.Windows.Forms;
 using System.IO;
-using BH.oM.Reflection;
-using System.Collections.Generic;
 
 namespace BH.Engine.Python
 {
@@ -39,26 +36,10 @@ namespace BH.Engine.Python
         {
             // check if python is installed
             if (!Query.IsPythonInstalled())
-            {
-                string installMessage = $"Cannot import module {moduleName} because no valid version of Python for the BHoM has been found.\n" +
-                "Do you want to install the Python_Toolkit?";
-                DialogResult confirmResult = MessageBox.Show(installMessage, "Python not found", MessageBoxButtons.YesNoCancel);
-
-                if (confirmResult == DialogResult.Yes)
-                {
-                    Output<bool, List<string>> result = Compute.InstallPythonToolkit(true);
-                    Reflection.Compute.RecordWarning("Python has been installed, please restart the UI");
-                }
-                else
-                {
-                    string errorMessage = $"Cannot import module {moduleName}" +
-                                           "Try installing Python and the Python_Toolkit using the Compute.InstallPythonToolkit component.\n" +
-                                           "and the MachineLearning_Toolkit using the Compute.InstallMachineLearning_Toolkit component.\n" +
-                                           "If the installation process fails, pleae consider reporting a bug at " +
-                                           "https://github.com/BHoM/MachineLearning_Toolkit/issues/new?labels=type%3Abug&template=00_bug.md";
-                    throw new Exception(errorMessage);
-                }
-            }
+                throw new Exception($"Cannot import module {moduleName} because no valid version of Python for the BHoM has been found.\n" +
+                    "Try installing Python and the Python_Toolkit using the Compute.InstallPythonToolkit component.\n" +
+                    "If the installation process fails, pleae consider reporting a bug at " +
+                    "https://github.com/BHoM/MachineLearning_Toolkit/issues/new?labels=type%3Abug&template=00_bug.md");
 
             // Make sure that the BHoM is loading our bespoke python program
             Compute.SetPythonHome();
