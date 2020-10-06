@@ -6,19 +6,19 @@ To install the Python_Toolkit:
     1. [BHoM_Engine](https://github.com/BHoM/BHoM_Engine)  
     1. [BHoM_Adapter](https://github.com/BHoM/BHoM_Adapter)   
     1. [BHoM_UI](https://github.com/BHoM/BHoM_UI)  
-	  1. [Rhinoceros_Toolkit](https://github.com/BHoM/Rhinoceros_Toolkit)  
-	  1. [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit)  
-	  1. Python_Toolkit (this repo)
+    1. [Rhinoceros_Toolkit](https://github.com/BHoM/Rhinoceros_Toolkit) (Using Rhino and Grasshopper as an example of UI platform) 
+    1. [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit)  
+    1. Python_Toolkit (this repo)
 1. Open a UI of your choice (e.g. Grasshopper)
 1. Run the `BH.Engine.Python.Compute.InstallPythonToolkit` component and wait for the installation to finish.
 1. The installation has succeeded if the install packages include:
-	  - Python 3.7
-  	- jupyter
+	- Python 3.7
+  	- jupyterlab
   	- matplotlib
   	- Python_Toolkit
-1. Restart your UI - if using Grasshopper, restart Rhinoceros and Grasshopper
+1. Restart your UI (if using Grasshopper, recompute the script)
 
-To check whether all went well you can run the component `BH.Engine.Python.Compute.Import` with a input of a string as `Python_Toolkit`,
+To check whether all went well you can run the component `BH.Engine.Python.Compute.Import` with a input of a string as `Python_Engine`,
 and check that it succeed without errors
 
 ## Installation structure
@@ -29,8 +29,8 @@ There are two main events to install the toolkit:
 2. Installing the Toolkit from the UI. This is performed by running the `InstallPythonToolkit` method. This will:
 	- Download Python and install python
 	- Download and install `pip`
-	- Install the necessary packages (e.g. `jupyter`)
-	- Install the python bindings of the Python_Engine from C:\ProgramData\BHoM\python-3.7.3-embed-amd64\src.
+	- Install the necessary packages (e.g. `jupyterlab`)
+	- Install the python bindings of the Python_Toolkit from C:\ProgramData\BHoM\python-3.7.3-embed-amd64\src.
 	  This contains all the code that is currently developed in the toolkit in python.
 
 
