@@ -29,5 +29,5 @@ setup(
     author_email='info@bhom.xyz',
     license='LGPLv3',
     packages=["Python_Engine", "Python_Engine.Compute"],
-    version="3.3.0.0",
+    version="4.0.0.0",
     )
