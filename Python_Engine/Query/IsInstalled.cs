@@ -55,7 +55,7 @@ namespace BH.Engine.Python
             string packagesDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib", "site-packages");
             string moduleDir = Path.Combine(packagesDir, module);
             bool installed = Directory.Exists(moduleDir) && File.Exists(Path.Combine(moduleDir, "__init__.py"));
-            installed |= File.Exists(Path.Combine(packagesDir, module.Replace("_", "-") + ".egg-link"));
+            installed |= File.Exists(Path.Combine(packagesDir, module.Split('_')[0] + "-Toolkit.egg-link"));
             return installed;
         }
 
