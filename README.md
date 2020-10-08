@@ -10,28 +10,28 @@ To install the Python_Toolkit:
     1. [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit)  
     1. Python_Toolkit (this repo)
 1. Open a UI of your choice (e.g. Grasshopper)
-1. Run the `BH.Engine.Python.Compute.InstallPythonToolkit` component and wait for the installation to finish.
+1. Run the `BH.Engine.Python.Compute.InstallPythonToolkit` component and wait for the installation to finish
 1. The installation has succeeded if the install packages include:
 	- Python 3.7
   	- jupyterlab
   	- matplotlib
   	- Python_Toolkit
-1. Restart your UI (if using Grasshopper, recompute the script)
+1. Restart your UI or recompute the script
 
-To check whether all went well you can run the component `BH.Engine.Python.Compute.Import` with a input of a string as `Python_Engine`,
+To check whether all went well you can run the component `BH.Engine.Python.Compute.Import` with an input of a string as `Python_Engine`,
 and check that it succeed without errors
 
 ## Installation structure
 There are two main events to install the toolkit:
 1. Compiling the toolkit. This does two things:
 	- It builds the dynamic libraries required by .NET and copies them to C:\ProgramData\BHoM\Assemblies
-	- It packs the python files in the toolkit and copies them to C:\ProgramData\BHoM\python-3.7.3-embed-amd64\src
+	- It packs the python files in the toolkit and copies them to C:\ProgramData\BHoM\Extensions\Python\src
 2. Installing the Toolkit from the UI. This is performed by running the `InstallPythonToolkit` method. This will:
 	- Download Python and install python
 	- Download and install `pip`
 	- Install the necessary packages (e.g. `jupyterlab`)
-	- Install the python bindings of the Python_Toolkit from C:\ProgramData\BHoM\python-3.7.3-embed-amd64\src.
-	  This contains all the code that is currently developed in the toolkit in python.
+	- Install the python bindings of the Python_Toolkit from C:\ProgramData\BHoM\Extensions\Python\src
+	  This contains all the code that is currently developed in the toolkit in python
 
 
 ## Building the BHoM and the Toolkits from Source ##

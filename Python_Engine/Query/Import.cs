@@ -47,7 +47,7 @@ namespace BH.Engine.Python
                 if (confirmResult == DialogResult.Yes)
                 {
                     Output<bool, List<string>> result = Compute.InstallPythonToolkit(true);
-                    Reflection.Compute.RecordWarning("Python has been installed, please restart the UI or recompute the script if using Grasshopper.");
+                    Reflection.Compute.RecordWarning("Python has been installed, please restart the UI or recompute the script.");
                 }
                 else
                 {
