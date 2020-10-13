@@ -6,7 +6,7 @@ To install the Python_Toolkit:
     1. [BHoM_Engine](https://github.com/BHoM/BHoM_Engine)  
     1. [BHoM_Adapter](https://github.com/BHoM/BHoM_Adapter)   
     1. [BHoM_UI](https://github.com/BHoM/BHoM_UI)  
-    1. [Rhinoceros_Toolkit](https://github.com/BHoM/Rhinoceros_Toolkit) (Using Rhino and Grasshopper as an example of UI platform) 
+    1. [Rhinoceros_Toolkit](https://github.com/BHoM/Rhinoceros_Toolkit) 
     1. [Grasshopper_Toolkit](https://github.com/BHoM/Grasshopper_Toolkit)  
     1. Python_Toolkit (this repo)
 1. Open a UI of your choice (e.g. Grasshopper)
