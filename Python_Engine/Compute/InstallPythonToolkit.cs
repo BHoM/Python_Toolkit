@@ -31,8 +31,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Installs the necessary pre-requisites to use the Python Toolkit fully. This will install Python 3.7 to your system, to the C:/ProgramData/BHoM folder.\n" +
-            "This can take several minutes to complete")]
+        [Description("Installs the necessary pre-requisites to use the Python Toolkit fully. This will install Python 3.7 to your system, to the C:/ProgramData/BHoM folder.\nThis can take several minutes to complete")]
         [Input("run", "When you are ready to install Python, set this to true. Until this is set to true, this component will not run")]
         [Input("force", "If you have previously installed a version of Python Toolkit, you may need to force the component to run a new install. This can happen if your system loses files. This is set to false by default, which means if we can detect a previous Python install on your system we will not install Python this time. Set this to true to ignore this check")]
         [MultiOutput(0, "success", "True is Python Toolkit has been successfully installer, false otherwise")]
@@ -49,7 +48,7 @@ namespace BH.Engine.Python
             Console.WriteLine("Installing python 3.7 embedded...");
             if (!Compute.InstallPython(force))
             {
-                BH.Engine.Reflection.Compute.RecordError("Coule not install Python");
+                BH.Engine.Reflection.Compute.RecordError("Could not install Python");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
             installedPackages.Add("Python 3.7");
@@ -62,7 +61,7 @@ namespace BH.Engine.Python
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
 
-            List<string> modules = new List<string>() { "jupyter", "jupyterlab", "pythonnet", "matplotlib" };
+            List<string> modules = new List<string>() { "jupyterlab", "pythonnet", "matplotlib", "black", "virtualenv" };
 
             // installing basic modules
             foreach (string module in modules)
