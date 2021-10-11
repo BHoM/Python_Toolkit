@@ -37,7 +37,9 @@ namespace BH.Engine.Python
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
 
             if (hideWindows)
+            {
                 startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            }
             string commandMode = hideWindows ? "/C" : "/K";
 
             startInfo.FileName = "cmd.exe";

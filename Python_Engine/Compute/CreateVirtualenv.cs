@@ -35,63 +35,54 @@ namespace BH.Engine.Python
         /***************************************************/
 
         [Description("Create a Python environment.")]
-        [Input("directory", "The directory in which the environment should be created.")]
         [Input("name", "The name of the environment to be created.")]
+        [Input("directory", "The directory in which the environment should be created.")]
         [Input("packages", "A list of packages, in the usual Pip format (if a version is included, it should be written as \"package_name==0.0.0\"). If no version is given, then the most recent version available will be used.")]
-        [Input("force", "If the environment already exists, remove and recreate it.")]
         [Input("run", "Set to True to create the environment.")]
         [MultiOutput(0, "success", "True if environment creation is successful, false if otherwise.")]
         [MultiOutput(1, "executable", "The path to the environments Python executable.")]
-        public static Output<bool, string> CreateVirtualenv(string directory, string name, List<string> packages = null, bool force = false, bool run = false)
+        public static Output<bool, string> CreateVirtualenv(string name, List<string> packages = null, bool run = false)
         {
+            string envsDir = Directory.CreateDirectory(Path.Combine(Query.EmbeddedPythonHome(), "envs")).FullName;
+
             // Construct the paths used herein
-            string environmentPath = Path.Combine(directory, name);
+            string environmentPath = Path.Combine(envsDir, name);
             string envPythonExecutable = Path.Combine(environmentPath, "Scripts", "python.exe");
             string basePythonExecutable = Path.Combine(Python.Query.EmbeddedPythonHome(), "python.exe");
 
-            if (File.Exists(envPythonExecutable))
+            if (Directory.Exists(environmentPath))
             {
-                BH.Engine.Reflection.Compute.RecordWarning("An environment with that name already exists in the given directory.");
+                BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{name}\" already exists. If you run this method it will be overwritten!");
             }
 
             if (run)
             {
-                if (Directory.Exists(directory))
+                // remove the old version of this environment (if it exists)
+                if (Directory.Exists(environmentPath))
                 {
-                    if (!force && File.Exists(envPythonExecutable))
-                    {
-                        return new Output<bool, string>() { Item1 = false, Item2 = envPythonExecutable };
-                    }
-                    else if (force)
-                    {
-                        Directory.Delete(environmentPath, true);
-                    }
+                    Directory.Delete(environmentPath, true);
                 }
 
-                // Create the new environment
+                // create the new environment
                 RunCommand(command: $"{basePythonExecutable} -m virtualenv \"{environmentPath}\"");
 
                 // Install ipykernel and requested packages new environment
-                List<string> toInstall = new List<string>() { "ipykernel" };
-                foreach (string package in packages)
+                if (packages is null)
                 {
-                    toInstall.Add(package);
+                    packages = new List<string>();
                 }
-                Compute.PipInstall(envPythonExecutable, toInstall, false, "", true);
+                Compute.PipInstall(envPythonExecutable, packages, false, "", true);
 
-                // Create a requirements.txt file to associate with this environment.
-                string requirements = Path.Combine(directory, "requirements.txt");
+                // Create a requirements.txt file to record this environments setup.
+                string requirements = Path.Combine(environmentPath, "requirements.txt");
                 RunCommand($"{envPythonExecutable} -m pip freeze > {requirements}");
-
-                // Add environment python kernel to base environment directory
-                RunCommand($"{basePythonExecutable} -m ipykernel install --name \"{name}\" --prefix=\"{directory}\"");
 
                 return new Output<bool, string>() { Item1 = true, Item2 = envPythonExecutable };
             }
-
-            return new Output<bool, string>() { Item1 = false, Item2 = "" }; ;
+            return new Output<bool, string>() { Item1 = false, Item2 = "" };
         }
 
         /***************************************************/
+
     }
 }
