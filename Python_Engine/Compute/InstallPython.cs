@@ -49,7 +49,10 @@ namespace BH.Engine.Python
 
             // exit if python is already installed and installation is not forced
             if (!force && Query.IsPythonInstalled())
+            {
+                Compute.TidyEmbeddedPython();
                 return success;
+            }
 
             // download the python-embedded compressed archive
             string pythonZip = Path.Combine(pythonHome, $"python.zip");
@@ -77,18 +80,7 @@ namespace BH.Engine.Python
             }
 
             // fix to move pyd and dll files into DLL folder
-            if (!File.Exists(Path.Combine(pythonHome, $"DLLs")))
-                Directory.CreateDirectory(Path.Combine(pythonHome, $"DLLs"));
-            List<string> filesToMove = new List<string>();
-            filesToMove.AddRange(Directory.GetFiles(pythonHome, "*.dll"));
-            filesToMove.AddRange(Directory.GetFiles(pythonHome, "*.pyd"));
-            foreach (string file in filesToMove)
-            {
-                if (!file.Contains("python3") && !file.Contains("vcruntime"))
-                {
-                    File.Move(file, Path.Combine(Path.GetDirectoryName(file), "DLLs", Path.GetFileName(file)));
-                }
-            }
+            Compute.TidyEmbeddedPython();
 
             return success;
         }
