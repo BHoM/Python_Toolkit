@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -73,6 +74,20 @@ namespace BH.Engine.Python
                 // Clean up
                 if (File.Exists(pythonZip))
                     File.Delete(pythonZip);
+            }
+
+            // fix to move pyd and dll files into DLL folder
+            if (!File.Exists(Path.Combine(pythonHome, $"DLLs")))
+                Directory.CreateDirectory(Path.Combine(pythonHome, $"DLLs"));
+            List<string> filesToMove = new List<string>();
+            filesToMove.AddRange(Directory.GetFiles(pythonHome, "*.dll"));
+            filesToMove.AddRange(Directory.GetFiles(pythonHome, "*.pyd"));
+            foreach (string file in filesToMove)
+            {
+                if (!file.Contains("python3") && !file.Contains("vcruntime"))
+                {
+                    File.Move(file, Path.Combine(Path.GetDirectoryName(file), "DLLs", Path.GetFileName(file)));
+                }
             }
 
             return success;

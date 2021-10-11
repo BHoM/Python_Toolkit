@@ -20,6 +20,7 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using System.Collections.Generic;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -45,7 +46,30 @@ namespace BH.Engine.Python
 
             string verboseFlag = verbose ? "--verbose" : "";
 
-            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall} {verboseFlag}");
+            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location");
+        }
+
+        public static void PipInstall(string pythonExecutable, List<string> packages, bool force = false, string findLinks = "", bool verbose = true)
+        {
+            if (packages.Count == 0)
+            {
+                return;
+            }
+
+            string forceInstall = force ? "--force-reinstall" : "";
+
+            if (findLinks != "")
+                findLinks = "-f " + findLinks;
+
+            string verboseFlag = verbose ? "--verbose" : "";
+
+            string cmd = "";
+            foreach (string package in packages)
+            {
+                cmd += $" {package}";
+            }
+
+            RunCommand($"{pythonExecutable} -m pip install {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location {cmd}");
         }
 
         /***************************************************/
