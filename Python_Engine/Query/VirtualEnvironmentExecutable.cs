@@ -33,12 +33,12 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Get the directory for the given name's virtualenv.")]
-        [Input("name", "The name of the virtualenv.")]
-        [Output("path", "The full path for the named virtualenv.")]
-        public static string VirtualenvPath(string name)
+        [Description("Get the Python executable for the given virtual environment.")]
+        [Input("name", "The name of the virtual environment.")]
+        [Output("path", "The full path for the named virtual environments Python executable.")]
+        public static string VirtualEnvironmentExecutable(string name)
         {
-            return Path.Combine(Query.EmbeddedPythonHome(), "envs", name);
+            return Path.Combine(Query.VirtualEnvironmentPath(name), "Scripts", "python.exe");
         }
 
         /***************************************************/

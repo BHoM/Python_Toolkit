@@ -56,7 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compute\TidyEmbeddedPython.cs" />
-    <Compile Include="Compute\CreateVirtualenv.cs" />
+    <Compile Include="Compute\CreateVirtualEnvironment.cs" />
     <Compile Include="Compute\Init.cs" />
     <Compile Include="Compute\DownloadPython.cs" />
     <Compile Include="Compute\SetPythonHome.cs" />
@@ -72,8 +72,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Query\EmbeddedPythonExecutable.cs" />
-    <Compile Include="Query\VirtualenvExecutable.cs" />
-    <Compile Include="Query\VirtualenvPath.cs" />
+    <Compile Include="Query\VirtualEnvironmentExecutable.cs" />
+    <Compile Include="Query\VirtualEnvironmentPath.cs" />
     <Compile Include="Query\EmbeddedPythonHome.cs" />
     <Compile Include="Query\Import.cs" />
     <Compile Include="Query\IsInstalled.cs" />
