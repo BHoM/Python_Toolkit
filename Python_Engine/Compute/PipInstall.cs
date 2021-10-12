@@ -58,7 +58,7 @@ namespace BH.Engine.Python
 
             string forceInstall = force ? "--force-reinstall" : "";
 
-            if (findLinks != "")
+            if (findLinks != "" && !findLinks.StartsWith("-f "))
                 findLinks = "-f " + findLinks;
 
             string verboseFlag = verbose ? "--verbose" : "";
