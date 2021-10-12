@@ -51,7 +51,7 @@ namespace BH.Engine.Python
 
         public static void PipInstall(string pythonExecutable, List<string> packages, bool force = false, string findLinks = "", bool verbose = true)
         {
-            if (packages.Count == 0)
+            if (packages == null || packages.Count == 0)
             {
                 return;
             }
