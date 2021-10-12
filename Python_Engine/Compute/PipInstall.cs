@@ -69,7 +69,7 @@ namespace BH.Engine.Python
                 cmd += $" {package}";
             }
 
-            RunCommand($"{pythonExecutable} -m pip install {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location {cmd}");
+            RunCommand($"{pythonExecutable} -m pip install {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location {cmd}", hideWindows: true);
         }
 
         /***************************************************/

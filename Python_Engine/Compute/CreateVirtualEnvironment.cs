@@ -38,11 +38,14 @@ namespace BH.Engine.Python
         [Input("name", "The name of the environment to be created.")]
         [Input("directory", "The directory in which the environment should be created.")]
         [Input("packages", "A list of packages, in the usual Pip format (if a version is included, it should be written as \"package_name==0.0.0\"). If no version is given, then the most recent version available will be used.")]
+        [Input("force", "Force the creation of the environment (overwrites any existing environment with the same name).")]
         [Input("run", "Set to True to create the environment.")]
         [MultiOutput(0, "success", "True if environment creation is successful, false if otherwise.")]
         [MultiOutput(1, "executable", "The path to the environments Python executable.")]
-        public static Output<bool, string> CreateVirtualEnvironment(string name, List<string> packages = null, bool run = false)
+        public static Output<bool, string> CreateVirtualEnvironment(string name, List<string> packages = null, bool force = false, bool run = false)
         {
+            BH.Engine.Reflection.Compute.RecordNote("This process can take some time as it will download any packages needed for this environment!");
+
             string envsDir = Directory.CreateDirectory(Path.Combine(Query.EmbeddedPythonHome(), "envs")).FullName;
 
             // Construct the paths used herein
@@ -50,21 +53,29 @@ namespace BH.Engine.Python
             string envPythonExecutable = Path.Combine(environmentPath, "Scripts", "python.exe");
             string basePythonExecutable = Path.Combine(Python.Query.EmbeddedPythonHome(), "python.exe");
 
-            if (Directory.Exists(environmentPath))
+            if (File.Exists(Query.VirtualEnvironmentExecutable(name)))
             {
-                BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{name}\" already exists. If you run this method it will be overwritten!");
-            }
+                if (force && !run)
+                {
+                    BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{name}\" already exists. If you run this method it will be overwritten!");
+                }
 
-            if (run)
-            {
-                // remove the old version of this environment (if it exists)
-                if (Directory.Exists(environmentPath))
+                if (!force && run)
+                {
+                    BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{name}\" already existed and is being used. If you want to recreate or update this environment, set \"force\" to True!");
+                    return new Output<bool, string>() { Item1 = false, Item2 = envPythonExecutable };
+                }
+
+                if (force && run)
                 {
                     Directory.Delete(environmentPath, true);
                 }
-
+            }
+            
+            if (run)
+            {
                 // create the new environment
-                RunCommand(command: $"{basePythonExecutable} -m virtualenv \"{environmentPath}\"");
+                RunCommand(command: $"{basePythonExecutable} -m virtualenv \"{environmentPath}\"", hideWindows: true);
 
                 // Install ipykernel and requested packages new environment
                 if (packages == null)
@@ -75,7 +86,7 @@ namespace BH.Engine.Python
 
                 // Create a requirements.txt file to record this environments setup.
                 string requirements = Path.Combine(environmentPath, "requirements.txt");
-                RunCommand($"{envPythonExecutable} -m pip freeze > {requirements}");
+                RunCommand($"{envPythonExecutable} -m pip freeze > {requirements}", hideWindows: true);
 
                 return new Output<bool, string>() { Item1 = true, Item2 = envPythonExecutable };
             }
