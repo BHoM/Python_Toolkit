@@ -34,14 +34,14 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Create a Python environment.")]
+        [Description("Create a virtual Python environment.")]
         [Input("name", "The name of the environment to be created.")]
         [Input("directory", "The directory in which the environment should be created.")]
         [Input("packages", "A list of packages, in the usual Pip format (if a version is included, it should be written as \"package_name==0.0.0\"). If no version is given, then the most recent version available will be used.")]
         [Input("run", "Set to True to create the environment.")]
         [MultiOutput(0, "success", "True if environment creation is successful, false if otherwise.")]
         [MultiOutput(1, "executable", "The path to the environments Python executable.")]
-        public static Output<bool, string> CreateVirtualenv(string name, List<string> packages = null, bool run = false)
+        public static Output<bool, string> CreateVirtualEnvironment(string name, List<string> packages = null, bool run = false)
         {
             string envsDir = Directory.CreateDirectory(Path.Combine(Query.EmbeddedPythonHome(), "envs")).FullName;
 

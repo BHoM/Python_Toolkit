@@ -33,7 +33,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Move *.dll and *.pyd files in the base Python environment into a DLL folder.")]
+        [Description("Move *.dll and *.pyd files in the base Python environment into a DLL folder in that base environments root directory. This enables \"virtualenv\" to function properly as it expects a non-embeddable version of Python which would create this DLL folder by default.")]
         public static void TidyEmbeddedPython()
         {
             string pythonHome = Query.EmbeddedPythonHome();
