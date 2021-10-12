@@ -67,7 +67,7 @@ namespace BH.Engine.Python
                 RunCommand(command: $"{basePythonExecutable} -m virtualenv \"{environmentPath}\"");
 
                 // Install ipykernel and requested packages new environment
-                if (packages is null)
+                if (packages == null)
                 {
                     packages = new List<string>();
                 }
