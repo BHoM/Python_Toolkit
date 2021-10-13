@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -31,6 +32,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Install Pip into the base BHom Python environment.")]
         public static bool InstallPip()
         {
             if (Query.IsPipInstalled())
@@ -48,7 +50,7 @@ namespace BH.Engine.Python
             }
             catch (Exception e)
             {
-                throw new FileNotFoundException($"pip installation failed: {e.Message}");
+                throw new FileNotFoundException($"pip installation failed: {e.Message}.");
             }
         }
 

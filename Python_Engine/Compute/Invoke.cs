@@ -20,8 +20,10 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Reflection.Attributes;
 using Python.Runtime;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace BH.Engine.Python
@@ -32,6 +34,11 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Invoke the Python method for the given module, with the given arguments.")]
+        [Input("module", "The Python module to which the method is associated.")]
+        [Input("method", "The method to be invoked.")]
+        [Input("args", "Arguments to be passed to the named method.")]
+        [Output("pyObject", "A Python runtime invocation method.")]
         public static PyObject Invoke(PyObject module, string method, Dictionary<string, object> args)
         {
             PyTuple pyargs = Convert.ToPyTuple(new object[]
@@ -57,6 +64,12 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Invoke the Python method for the given module, with the given arguments.")]
+        [Input("module", "The Python module to which the method is associated.")]
+        [Input("method", "The method to be invoked.")]
+        [Input("args", "Arguments to be passed to the named method.")]
+        [Input("kwargs", "Keyword arguments to be passed to the named method.")]
+        [Output("pyObject", "A Python runtime invocation method.")]
         public static PyObject Invoke(PyObject module, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
         {
             PyTuple pyargs = Convert.ToPyTuple(args);

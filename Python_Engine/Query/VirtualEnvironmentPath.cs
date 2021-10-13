@@ -33,12 +33,18 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Get the directory for the virtual environment for the given name.")]
-        [Input("name", "The name of the virtual environment.")]
+        [Description("Get the directory of the virtual environment for the given environment name.")]
+        [Input("virtualenvName", "The name of the virtual environment.")]
         [Output("path", "The full path for the named virtual environment.")]
-        public static string VirtualEnvironmentPath(string name)
+        public static string VirtualEnvironmentPath(this string virtualenvName)
         {
-            return Path.Combine(Query.EmbeddedPythonHome(), "envs", name);
+            string environmentPath = Path.Combine(Query.EmbeddedPythonHome(), "envs", virtualenvName);
+            if (!Directory.Exists(environmentPath))
+            {
+                BH.Engine.Reflection.Compute.RecordWarning("This environment does not currently exist.");
+            }
+
+            return environmentPath;
         }
 
         /***************************************************/

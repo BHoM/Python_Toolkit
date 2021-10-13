@@ -23,6 +23,7 @@
 using Python.Runtime;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace BH.Engine.Python
@@ -33,6 +34,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyTuple IToPyTuple(object obj)
         {
             if (obj == null)
@@ -43,6 +45,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyTuple ToPyTuple<T>(IEnumerable<T> input)
         {
             PyObject[] array = new PyObject[input.Count()];
@@ -56,6 +59,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyTuple ToPyTuple<T>(T[] input)
         {
             PyObject[] array = new PyObject[input.Length];
@@ -69,6 +73,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyTuple ToPyTuple<T>(List<T> input)
         {
             PyObject[] array = new PyObject[input.Count()];

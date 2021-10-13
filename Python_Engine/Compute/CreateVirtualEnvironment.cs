@@ -35,34 +35,34 @@ namespace BH.Engine.Python
         /***************************************************/
 
         [Description("Create a virtual Python environment.")]
-        [Input("name", "The name of the environment to be created.")]
+        [Input("environmentName", "The name of the environment to be created.")]
         [Input("directory", "The directory in which the environment should be created.")]
         [Input("packages", "A list of packages, in the usual Pip format (if a version is included, it should be written as \"package_name==0.0.0\"). If no version is given, then the most recent version available will be used.")]
         [Input("force", "Force the creation of the environment (overwrites any existing environment with the same name).")]
         [Input("run", "Set to True to create the environment.")]
         [MultiOutput(0, "success", "True if environment creation is successful, false if otherwise.")]
         [MultiOutput(1, "executable", "The path to the environments Python executable.")]
-        public static Output<bool, string> CreateVirtualEnvironment(string name, List<string> packages = null, bool force = false, bool run = false)
+        public static Output<bool, string> CreateVirtualEnvironment(string environmentName, List<string> packages = null, bool force = false, bool run = false)
         {
             BH.Engine.Reflection.Compute.RecordNote("This process can take some time as it will download any packages needed for this environment!");
 
             string envsDir = Directory.CreateDirectory(Path.Combine(Query.EmbeddedPythonHome(), "envs")).FullName;
 
             // Construct the paths used herein
-            string environmentPath = Path.Combine(envsDir, name);
+            string environmentPath = Path.Combine(envsDir, environmentName);
             string envPythonExecutable = Path.Combine(environmentPath, "Scripts", "python.exe");
             string basePythonExecutable = Path.Combine(Python.Query.EmbeddedPythonHome(), "python.exe");
 
-            if (File.Exists(Query.VirtualEnvironmentExecutable(name)))
+            if (File.Exists(Query.VirtualEnvironmentExecutable(environmentName)))
             {
                 if (force && !run)
                 {
-                    BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{name}\" already exists. If you run this method it will be overwritten!");
+                    BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{environmentName}\" already exists. If you run this method it will be overwritten!");
                 }
 
                 if (!force && run)
                 {
-                    BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{name}\" already existed and is being used. If you want to recreate or update this environment, set \"force\" to True!");
+                    BH.Engine.Reflection.Compute.RecordWarning($"An environment called \"{environmentName}\" already existed and is being used. If you want to recreate or update this environment, set \"force\" to True!");
                     return new Output<bool, string>() { Item1 = false, Item2 = envPythonExecutable };
                 }
 
@@ -82,7 +82,7 @@ namespace BH.Engine.Python
                 {
                     packages = new List<string>();
                 }
-                Compute.PipInstall(envPythonExecutable, packages, false, "", true);
+                Compute.PipInstall(packages, environmentName, false, "", true);
 
                 // Create a requirements.txt file to record this environments setup.
                 string requirements = Path.Combine(environmentPath, "requirements.txt");
