@@ -20,15 +20,11 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Python.Runtime;
+using BH.oM.Reflection.Attributes;
 
 namespace BH.Engine.Python
 {
@@ -38,6 +34,9 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Install the base BHoM Python environment.")]
+        [Input("", "Set to True to force installation/re-installation of the base BHoM Python environment.")]
+        [Output("success", "True if installation was successful.")]
         public static bool InstallPython(bool force = false)
         {
             bool success = true;
@@ -72,27 +71,18 @@ namespace BH.Engine.Python
             {
                 success = false;
             }
-            finally
+
+            // clean up
+            if (File.Exists(pythonZip))
             {
-                // Clean up
-                if (File.Exists(pythonZip))
-                    File.Delete(pythonZip);
+                File.Delete(pythonZip);
             }
 
-            // fix to move pyd and dll files into DLL folder
+            // fix to move PYD and DLL files into DLL folder, enabling use of virtualenv
             Compute.TidyEmbeddedPython();
 
             return success;
         }
-
-
-        /***************************************************/
-        /**** Public Fields                             ****/
-        /***************************************************/
-
-        public const string EMBEDDED_PYTHON = "python-3.7.3-embed-amd64";
-
-        public const string PYTHON_VERSION = "python37";
 
         /***************************************************/
     }

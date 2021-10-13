@@ -21,12 +21,14 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using BH.oM.Reflection.Attributes;
 using Python.Runtime;
 
 namespace BH.Engine.Python
@@ -37,6 +39,8 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Set the System Environment Variables for Python.")]
+        [Output("bool", "Outputs True once run.")]
         public static bool SetPythonHome()
         {
             string pythonHome = Query.EmbeddedPythonHome();

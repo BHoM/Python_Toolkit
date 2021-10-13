@@ -20,14 +20,8 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System;
+using System.ComponentModel;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Python.Runtime;
 
 namespace BH.Engine.Python
 {
@@ -37,6 +31,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Download the current BHoM embedded version of Python.")]
         public static bool DownloadPython()
         {
             string home = Query.EmbeddedPythonHome();
@@ -48,12 +43,15 @@ namespace BH.Engine.Python
             return true;
         }
 
-
         /***************************************************/
         /**** Public Fields                             ****/
         /***************************************************/
 
+        [Description("The current version of Python used for the base BHoM Python environment.")]
         public const string EMBEDDED_PYTHON_URL = @"https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-amd64.zip";
+
+        [Description("The string representation for the version of Python used for the base BHoM Python environment.")]
+        public const string PYTHON_VERSION = "python37";
 
         /***************************************************/
     }

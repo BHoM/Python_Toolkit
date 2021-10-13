@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using System.IO;
 using BH.oM.Reflection;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace BH.Engine.Python
 {
@@ -35,7 +36,8 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static PyObject Import(string moduleName)
+        [Description("Import a Python module into the BHoM.")]
+        public static PyObject Import(this string moduleName)
         {
             // check if python is installed
             if (!Query.IsPythonInstalled())

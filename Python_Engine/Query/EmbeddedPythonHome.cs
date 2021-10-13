@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -31,10 +32,11 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Return the base BHoM Python environment directory.")]
         public static string EmbeddedPythonHome()
         {
-            var programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            var installDir = Path.Combine(programData, "BHoM", "Extensions", "Python");
+            string programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string installDir = Path.Combine(programData, "BHoM", "Extensions", "Python");
             return installDir;
         }
 

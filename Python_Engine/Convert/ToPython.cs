@@ -23,6 +23,7 @@
 using Python.Runtime;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyObject IToPython(dynamic obj)
         {
             if (obj == null)
@@ -48,6 +50,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyInt ToPython(this int integer)
         {
             return new PyInt(integer);
@@ -55,6 +58,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyLong ToPython(this long integer64)
         {
             return new PyLong(integer64);
@@ -62,6 +66,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyFloat ToPython(this float floatingPoint)
         {
             return new PyFloat(floatingPoint);
@@ -69,6 +74,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyFloat ToPython(this double floatingPoint)
         {
             return new PyFloat(floatingPoint);
@@ -76,6 +82,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyString ToPython(this string text)
         {
             return new PyString(text);
@@ -83,6 +90,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyObject ToPython(this bool boolean)
         {
             if (boolean)
@@ -93,6 +101,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyList ToPython<T>(this T[] input)
         {
             PyObject[] array = new PyObject[input.Length];
@@ -106,6 +115,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyList ToPython<T>(this List<T> input)
         {
             PyObject[] array = new PyObject[input.Count];
@@ -119,6 +129,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyList ToPython<T>(this IEnumerable<T> input)
         {
             PyObject[] array = new PyObject[input.Count()];
@@ -132,6 +143,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyList ToPython<T>(this IEnumerable<IEnumerable<T>> input)
         {
             return ConverterExtension.ToPython(input) as PyList;
@@ -139,6 +151,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyList ToPython<T>(this T[,] input)
         {
             return ConverterExtension.ToPython(input) as PyList;
@@ -146,6 +159,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyList ToPython<T>(this T[][] input)
         {
             return ConverterExtension.ToPython(input) as PyList;
@@ -153,7 +167,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-
+        [Description("Convert a .NET object into a Python object.")]
         public static PyDict ToPython(this Dictionary<string, object> dict)
         {
             return ConverterExtension.ToPython(dict) as PyDict;
@@ -161,6 +175,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyTuple ToPython(this ValueTuple<int> input)
         {
             PyObject[] array = new PyObject[1];
@@ -171,6 +186,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyTuple ToPython(this ValueTuple<int, int> input)
         {
             PyObject[] array = new PyObject[2];
@@ -182,6 +198,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         public static PyTuple ToPython(this ValueTuple<int, int, int> input)
         {
             PyObject[] array = new PyObject[3];
@@ -194,9 +211,10 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a .NET object into a Python object.")]
         private static PyObject ToPython(this object obj)
         {
-            Engine.Reflection.Compute.RecordError($"Cannot convert to Python object of type {obj.GetType()}");
+            Engine.Reflection.Compute.RecordError($"Cannot convert to Python object of type {obj.GetType()}.");
             return null;
         }
 

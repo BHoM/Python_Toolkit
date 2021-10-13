@@ -27,27 +27,23 @@ using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Start a Jupyter interactive  coding environment.")]
-        [Input("port", "The port on which to run the Jupyter environment.")]
-        [Input("directory", "The directory in which to start the Jupyter environment.")]
-        [Input("start", "Set to True to start the Jupyter environment.")]
-        public static void JupyterLab(int port = 7777, string directory = null, bool start = false)
+        [Description("Check to see if named virtual environment already exists.")]
+        [Input("virtualenvName", "The name of the virtual environment.")]
+        [Output("exists", "True if the named virtual environment exists.")]
+        public static bool VirtualEnvironmentExists(this string virtualenvName)
         {
-            string path = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "jupyter-lab.exe");
-            if (!File.Exists(path))
-                throw new FileNotFoundException("Cannot find jupyter lab", path);
-
-            if (directory == null || !Directory.Exists(directory))
-                directory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-            if (start)
-                RunCommandAsync($"cd {directory} && {path} --port {port}", false);
+            bool exists = File.Exists(virtualenvName.VirtualEnvironmentExecutable());
+            if (!exists)
+            {
+                BH.Engine.Reflection.Compute.RecordWarning($"The virtual environment named {virtualenvName} does not exist.");
+            }
+            return exists;
         }
 
         /***************************************************/

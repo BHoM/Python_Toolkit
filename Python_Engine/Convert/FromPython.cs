@@ -23,6 +23,7 @@
 using Python.Runtime;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace BH.Engine.Python
 {
@@ -32,6 +33,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static object IFromPython(this PyObject obj)
         {
             if (obj == null || obj.IsNone())
@@ -65,6 +67,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static T FromPython<T>(this PyObject obj)
         {
             return obj.As<T>();
@@ -72,6 +75,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static int FromPython(this PyInt integer)
         {
             return integer.ToInt32();
@@ -79,6 +83,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static long FromPython(this PyLong integer64)
         {
             return integer64.ToInt64();
@@ -86,6 +91,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static double FromPython(this PyFloat floatingPoint)
         {
             return floatingPoint.As<double>();
@@ -93,6 +99,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static string FromPython(this PyString text)
         {
             return text.As<string>();
@@ -100,6 +107,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static Dictionary<object, dynamic> FromPython(this PyDict pyDict)
         {
             var dict = new Dictionary<object, dynamic>();
@@ -114,6 +122,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static List<object> FromPython(this PyTuple input)
         {
             List<object> cObject = new List<object>();
@@ -124,6 +133,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static List<object> FromPython(this PyList input)
         {
             List<object> cObject = new List<object>();
@@ -134,6 +144,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         public static List<object> FromPython(this PyIter input)
         {
             List<object> cObject = new List<object>();
@@ -144,9 +155,10 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Convert a Python data-type object into a .NET data-type object.")]
         private static object FromPython(this object obj)
         {
-            Engine.Reflection.Compute.RecordError($"Cannot convert from Python object of type {obj.GetType()}");
+            Engine.Reflection.Compute.RecordError($"Cannot convert from Python object of type {obj.GetType()}.");
             return null;
         }
 

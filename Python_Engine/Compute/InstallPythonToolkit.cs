@@ -31,11 +31,11 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Installs the necessary pre-requisites to use the Python Toolkit fully. This will install Python 3.7 to your system, to the C:/ProgramData/BHoM folder.\nThis can take several minutes to complete")]
-        [Input("run", "When you are ready to install Python, set this to true. Until this is set to true, this component will not run")]
-        [Input("force", "If you have previously installed a version of Python Toolkit, you may need to force the component to run a new install. This can happen if your system loses files. This is set to false by default, which means if we can detect a previous Python install on your system we will not install Python this time. Set this to true to ignore this check")]
-        [MultiOutput(0, "success", "True is Python Toolkit has been successfully installer, false otherwise")]
-        [MultiOutput(1, "installedPackages", "A list of the Python packages which have been installed as part of this operation")]
+        [Description("Installs the necessary pre-requisites to use the Python Toolkit fully. This will install Python 3.7 to your system, to the C:/ProgramData/BHoM folder.\nThis can take several minutes to complete.")]
+        [Input("run", "When you are ready to install Python, set this to true. Until this is set to true, this component will not run.")]
+        [Input("force", "If you have previously installed a version of Python Toolkit, you may need to force the component to run a new install. This can happen if your system loses files. This is set to false by default, which means if we can detect a previous Python install on your system we will not install Python this time. Set this to true to ignore this check.")]
+        [MultiOutput(0, "success", "True if Python Toolkit has been successfully installer, false otherwise.")]
+        [MultiOutput(1, "installedPackages", "A list of the Python packages which have been installed as part of this operation.")]
         public static Output<bool, List<string>> InstallPythonToolkit(bool run = false, bool force = false)
         {
             bool success = false;
@@ -45,44 +45,37 @@ namespace BH.Engine.Python
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
 
             // Install python
-            Console.WriteLine("Installing python 3.7 embedded...");
+            Console.WriteLine("Installing Python ...");
             if (!Compute.InstallPython(force))
             {
-                BH.Engine.Reflection.Compute.RecordError("Could not install Python");
+                BH.Engine.Reflection.Compute.RecordError("Could not install Python.");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
-            installedPackages.Add("Python 3.7");
+            installedPackages.Add("Python");
 
             // Install pip
             Console.WriteLine("Installing pip...");
             if (!Compute.InstallPip())
             {
-                BH.Engine.Reflection.Compute.RecordError("Could not install pip");
+                BH.Engine.Reflection.Compute.RecordError("Could not install pip.");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
 
-            List<string> modules = new List<string>() { "jupyterlab", "pythonnet", "matplotlib", "black", "virtualenv" };
-
-            // installing basic modules
-            foreach (string module in modules)
-            {
-                Console.WriteLine($"Installing {module}");
-                Compute.PipInstall(module);
-                if (Query.IsModuleInstalled(module))
-                    installedPackages.Add(module);
-            }
+            // installing base BHoM Python environment packages
+            List<string> packages = new List<string>() { "pythonnet", "virtualenv", "jupyterlab" };
+            Compute.PipInstall(packages, force: force);
 
             // install Python_Toolkit
             string mod = "Python_Toolkit";
             string pyToolkitPath = Path.Combine(Query.EmbeddedPythonHome(), "src", mod);
-            Compute.PipInstall($"-e {pyToolkitPath}", force: force);
+            string frc = force ? "--force-reinstall" : "";
+            RunCommand($"{Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip3")} install {pyToolkitPath} {frc}");
             if (Query.IsModuleInstalled(mod))
                 installedPackages.Add(mod);
 
             success = true;
             return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
         }
-
     }
 }
 

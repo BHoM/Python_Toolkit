@@ -20,8 +20,10 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Reflection.Attributes;
 using Python.Runtime;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace BH.Engine.Python
@@ -32,6 +34,10 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Initialise the Python code.")]
+        [Input("type", "The data-type to be initialised.")]
+        [Input("parameters", "A set of method parameters.")]
+        [Output("pyObject", "A Python runtime invocation.")]
         public static PyObject Init(dynamic type, Dictionary<string, object> parameters)
         {
             PyTuple pyargs = Convert.ToPyTuple(new object[]

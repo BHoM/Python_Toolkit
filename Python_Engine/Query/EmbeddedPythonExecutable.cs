@@ -20,7 +20,7 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System;
+using System.ComponentModel;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -31,10 +31,10 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Return the base BHoM Python environment executable.")]
         public static string EmbeddedPythonExecutable()
         {
-            var programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            var executable = Path.Combine(programData, "BHoM", "Extensions", "Python", "python.exe");
+            string executable = Path.Combine(Query.EmbeddedPythonHome(), "python.exe");
             return executable;
         }
 

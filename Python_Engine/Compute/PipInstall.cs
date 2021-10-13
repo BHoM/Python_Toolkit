@@ -20,7 +20,10 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Reflection.Attributes;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -31,29 +34,32 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static void PipInstall(string module_name, string version = "", bool force = false, string findLinks = "", bool verbose = true)
-        {
-            if (Query.IsModuleInstalled(module_name) && !force)
-                return;
-
-            string pipPath = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip3");
-            string forceInstall = force ? "--force-reinstall" : "";
-            if (version.Length > 0)
-                version = $"=={version}";
-
-            if (findLinks != "")
-                findLinks = "-f " + findLinks;
-
-            string verboseFlag = verbose ? "--verbose" : "";
-
-            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location");
-        }
-
-        public static void PipInstall(string pythonExecutable, List<string> packages, bool force = false, string findLinks = "", bool verbose = true)
+        [Description("Using Pip, install a Python package/s.")]
+        [Input("packages", "A list of packages to be installed, including version information (in the format \"<packageName>==<versionInfo>\".")]
+        [Input("environmentName", "The name of the Python environment to which the packages should be installed. If left blank, this defaults to the base BHoM Python environment.")]
+        [Input("force", "Set to True to force installation of this version, overwriting any existing package and version already installed.")]
+        [Input("findLinks", "Set the location/s in which to look for certain packages.")]
+        [Input("verbose", "Set to False to hide output.")]
+        public static void PipInstall(List<string> packages, string environmentName = null, bool force = false, string findLinks = "", bool verbose = true)
         {
             if (packages == null || packages.Count == 0)
             {
                 return;
+            }
+
+            // set the environment executable used to install the package/s
+            string environmentExecutable;
+            if (environmentName == null)
+            {
+                environmentExecutable = Query.EmbeddedPythonExecutable();
+            }
+            else
+            {
+                if (!environmentName.VirtualEnvironmentExists())
+                {
+                    return;
+                }
+                environmentExecutable = environmentName.VirtualEnvironmentExecutable();
             }
 
             string forceInstall = force ? "--force-reinstall" : "";
@@ -63,13 +69,7 @@ namespace BH.Engine.Python
 
             string verboseFlag = verbose ? "--verbose" : "";
 
-            string cmd = "";
-            foreach (string package in packages)
-            {
-                cmd += $" {package}";
-            }
-
-            RunCommand($"{pythonExecutable} -m pip install {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location {cmd}", hideWindows: true);
+            RunCommand($"{environmentExecutable} -m pip install {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location {String.Join(" ", packages)}", hideWindows: true);
         }
 
         /***************************************************/

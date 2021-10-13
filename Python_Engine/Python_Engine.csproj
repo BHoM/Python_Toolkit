@@ -72,6 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Query\EmbeddedPythonExecutable.cs" />
+    <Compile Include="Query\VirtualEnvironmentExists.cs" />
     <Compile Include="Query\VirtualEnvironmentExecutable.cs" />
     <Compile Include="Query\VirtualEnvironmentPath.cs" />
     <Compile Include="Query\EmbeddedPythonHome.cs" />

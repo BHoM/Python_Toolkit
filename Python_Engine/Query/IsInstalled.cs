@@ -20,6 +20,7 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using System.ComponentModel;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -30,6 +31,7 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Return True if BHoM Python is already installed.")]
         public static bool IsPythonInstalled()
         {
             return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "python.exe"));
@@ -38,6 +40,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [Description("Return True if Pip is installed to the base BHoM Python environment.")]
         public static bool IsPipInstalled()
         {
             return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip.exe"));
@@ -45,7 +48,8 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
-        public static bool IsModuleInstalled(string module)
+        [Description("Return True if the named package is installed in the base BHoM Python environment.")]
+        public static bool IsModuleInstalled(this string module)
         {
             if (!IsPythonInstalled())
                 return false;
