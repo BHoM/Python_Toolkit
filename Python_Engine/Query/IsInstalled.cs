@@ -31,23 +31,6 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Return True if BHoM Python is already installed.")]
-        public static bool IsPythonInstalled()
-        {
-            return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "python.exe"));
-
-        }
-
-        /***************************************************/
-
-        [Description("Return True if Pip is installed to the base BHoM Python environment.")]
-        public static bool IsPipInstalled()
-        {
-            return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip.exe"));
-        }
-
-        /***************************************************/
-
         [Description("Return True if the named package is installed in the base BHoM Python environment.")]
         public static bool IsModuleInstalled(this string module)
         {

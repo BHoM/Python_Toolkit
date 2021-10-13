@@ -62,14 +62,13 @@ namespace BH.Engine.Python
             }
 
             // installing base BHoM Python environment packages
-            List<string> packages = new List<string>() { "pythonnet", "virtualenv", "jupyterlab" };
+            List<string> packages = new List<string>() { "pythonnet", "virtualenv", "jupyterlab", "matplotlib" };
             Compute.PipInstall(packages, force: force);
 
             // install Python_Toolkit
             string mod = "Python_Toolkit";
             string pyToolkitPath = Path.Combine(Query.EmbeddedPythonHome(), "src", mod);
-            string frc = force ? "--force-reinstall" : "";
-            RunCommand($"{Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip3")} install {pyToolkitPath} {frc}");
+            Compute.PipInstallOld($"-e {pyToolkitPath}", force: force);
             if (Query.IsModuleInstalled(mod))
                 installedPackages.Add(mod);
 

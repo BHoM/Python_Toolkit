@@ -20,69 +20,30 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using Python.Runtime;
+using BH.oM.Reflection.Attributes;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
+using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Convert
+    public static partial class Query
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Convert a .NET object into a Python object.")]
-        public static PyTuple IToPyTuple(this object obj)
+        [Description("Check to see if named virtual environment already exists.")]
+        [Input("virtualenvName", "The name of the virtual environment.")]
+        [Output("exists", "True if the named virtual environment exists.")]
+        public static bool IsVirtualEnvironmentInstalled(this string virtualenvName)
         {
-            if (obj == null)
-                return new PyTuple();
-
-            return ToPyTuple(obj as dynamic);
-        }
-
-        /***************************************************/
-
-        [Description("Convert a .NET object into a Python object.")]
-        public static PyTuple ToPyTuple<T>(this IEnumerable<T> input)
-        {
-            PyObject[] array = new PyObject[input.Count()];
-            for (int i = 0; i < input.Count(); i++)
+            bool exists = File.Exists(virtualenvName.VirtualEnvironmentExecutable());
+            if (!exists)
             {
-                array[i] = IToPython(input.ElementAt(i));
+                BH.Engine.Reflection.Compute.RecordWarning($"The virtual environment named {virtualenvName} does not exist.");
             }
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
-
-        [Description("Convert a .NET object into a Python object.")]
-        public static PyTuple ToPyTuple<T>(this T[] input)
-        {
-            PyObject[] array = new PyObject[input.Length];
-            for (int i = 0; i < input.Length; i++)
-            {
-                array[i] = IToPython(input.GetValue(i));
-            }
-
-            return new PyTuple(array);
-        }
-
-        /***************************************************/
-
-        [Description("Convert a .NET object into a Python object.")]
-        public static PyTuple ToPyTuple<T>(this List<T> input)
-        {
-            PyObject[] array = new PyObject[input.Count()];
-            for (int i = 0; i < input.Count(); i++)
-            {
-                array[i] = IToPython(input.ElementAt(i));
-            }
-
-            return new PyTuple(array);
+            return exists;
         }
 
         /***************************************************/

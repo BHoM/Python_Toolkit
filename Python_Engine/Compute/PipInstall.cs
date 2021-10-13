@@ -55,7 +55,7 @@ namespace BH.Engine.Python
             }
             else
             {
-                if (!environmentName.VirtualEnvironmentExists())
+                if (!environmentName.IsVirtualEnvironmentInstalled())
                 {
                     return;
                 }
@@ -70,6 +70,26 @@ namespace BH.Engine.Python
             string verboseFlag = verbose ? "--verbose" : "";
 
             RunCommand($"{environmentExecutable} -m pip install {findLinks} {forceInstall} {verboseFlag} --no-warn-script-location {String.Join(" ", packages)}", hideWindows: true);
+        }
+
+        /***************************************************/
+
+        public static void PipInstallOld(string module_name, string version = "", bool force = false, string findLinks = "", bool verbose = true)
+        {
+            if (Query.IsModuleInstalled(module_name) && !force)
+                return;
+
+            string pipPath = Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip3");
+            string forceInstall = force ? "--force-reinstall" : "";
+            if (version.Length > 0)
+                version = $"=={version}";
+
+            if (findLinks != "")
+                findLinks = "-f " + findLinks;
+
+            string verboseFlag = verbose ? "--verbose" : "";
+
+            RunCommand($"{pipPath} install {module_name}{version} {findLinks} {forceInstall} {verboseFlag}");
         }
 
         /***************************************************/
