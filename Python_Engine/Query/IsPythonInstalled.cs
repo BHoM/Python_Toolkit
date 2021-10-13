@@ -33,17 +33,11 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Check to see if named virtual environment already exists.")]
-        [Input("virtualenvName", "The name of the virtual environment.")]
-        [Output("exists", "True if the named virtual environment exists.")]
-        public static bool VirtualEnvironmentExists(this string virtualenvName)
+        [Description("Return True if BHoM Python is already installed.")]
+        public static bool IsPythonInstalled()
         {
-            bool exists = File.Exists(virtualenvName.VirtualEnvironmentExecutable());
-            if (!exists)
-            {
-                BH.Engine.Reflection.Compute.RecordWarning($"The virtual environment named {virtualenvName} does not exist.");
-            }
-            return exists;
+            return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "python.exe"));
+
         }
 
         /***************************************************/

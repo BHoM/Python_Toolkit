@@ -67,7 +67,7 @@ namespace BH.Engine.Python
         public static string RunCommand(string environmentName, string pythonScript, List<string> args = null, bool hideWindows = true)
         {
             // check that environment exists
-            if (!environmentName.VirtualEnvironmentExists())
+            if (!environmentName.IsVirtualEnvironmentInstalled())
             {
                 return "";
             }

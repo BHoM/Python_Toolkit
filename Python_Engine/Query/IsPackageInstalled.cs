@@ -22,66 +22,54 @@
 
 using System.ComponentModel;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using BH.oM.Reflection.Attributes;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Install the base BHoM Python environment.")]
-        [Input("force", "Set to True to force installation/re-installation of the base BHoM Python environment.")]
-        [Output("success", "True if installation was successful.")]
-        public static bool InstallPython(bool force = false)
+        [Description("Return True if named Python package is installed in given environment.")]
+        public static bool IsPackageInstalled(string package, string environmentName = null)
         {
-            bool success = true;
-            string pythonHome = Query.EmbeddedPythonHome();
-
-            // setup directories
-            if (!Directory.Exists(pythonHome))
-                Directory.CreateDirectory(pythonHome);
-
-            // exit if python is already installed and installation is not forced
-            if (!force && Query.IsPythonInstalled())
+            // get the associated executable with which to run Pip
+            string environmentExecutable = Query.EmbeddedPythonExecutable();
+            if (environmentName == null)
             {
-                Compute.TidyEmbeddedPython();
-                return success;
+                BH.Engine.Reflection.Compute.RecordNote("Checking for existence of {package} in the base BHoM Python environment.");
+            }
+            else
+            {
+                if (!environmentName.IsVirtualEnvironmentInstalled())
+                {
+                    return false;
+                }
+                environmentExecutable = environmentName.VirtualEnvironmentExecutable();
             }
 
-            // download the python-embedded compressed archive
-            string pythonZip = Path.Combine(pythonHome, $"python.zip");
-            if (!File.Exists(pythonZip))
-                Compute.DownloadPython();
+            // run check
+            string cmd = $"{environmentExecutable} -m pip show {package}";
+            System.Diagnostics.Process p = new System.Diagnostics.Process();
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.FileName = "cmd.exe";
+            p.StartInfo.Arguments = $"/C {cmd}";
+            p.Start();
 
-            // inflate the archive
-            try
+            // To avoid deadlocks, always read the output stream first and then wait.  
+            string output = p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+
+            if (output.Contains("WARNING: Package(s) not found:"))
             {
-                ZipFile.ExtractToDirectory(pythonZip, pythonHome);
-
-                // allow pip on embedded python installation by unflagging python as embedded
-                // see https://github.com/pypa/pip/issues/4207#issuecomment-281236055
-                File.Delete(Path.Combine(pythonHome, PYTHON_VERSION + "._pth"));
+                return false;
             }
-            catch
-            {
-                success = false;
-            }
-
-            // clean up
-            if (File.Exists(pythonZip))
-            {
-                File.Delete(pythonZip);
-            }
-
-            // fix to move PYD and DLL files into DLL folder, enabling use of virtualenv
-            Compute.TidyEmbeddedPython();
-
-            return success;
+            
+            return true;
         }
 
         /***************************************************/
