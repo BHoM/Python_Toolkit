@@ -33,14 +33,22 @@
 //        /***************************************************/
 
 //        [Description("Move *.dll and *.pyd files in the base Python environment into a DLL folder in that base environments root directory. This enables \"virtualenv\" to function properly as it expects a non-embeddable version of Python which would create this DLL folder by default.")]
-//        private static bool SetUpEnvironment(string environmentDirectory)
+//        public static void TidyEmbeddedPython()
 //        {
-//            // https://dev.to/fpim/setting-up-python-s-windows-embeddable-distribution-properly-1081
+//            string pythonHome = Query.EmbeddedPythonHome();
 
-//            // get pip install script
-//            string pipInstallerPy = Compute.DownloadFile("https://bootstrap.pypa.io/get-pip.py");
-
-//            return true;
+//            if (!File.Exists(Path.Combine(pythonHome, $"DLLs")))
+//                Directory.CreateDirectory(Path.Combine(pythonHome, $"DLLs"));
+//            List<string> filesToMove = new List<string>();
+//            filesToMove.AddRange(Directory.GetFiles(pythonHome, "*.dll"));
+//            filesToMove.AddRange(Directory.GetFiles(pythonHome, "*.pyd"));
+//            foreach (string file in filesToMove)
+//            {
+//                if (!file.Contains("python3") && !file.Contains("vcruntime"))
+//                {
+//                    File.Move(file, Path.Combine(Path.GetDirectoryName(file), "DLLs", Path.GetFileName(file)));
+//                }
+//            }
 //        }
 
 //        /***************************************************/

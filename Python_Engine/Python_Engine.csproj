@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BHoM, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\BHoM.dll</HintPath>
+    </Reference>
     <Reference Include="Python.Runtime, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\BH.UI.Python.Runtime.3.7.4-alpha\lib\netstandard2.0\Python.Runtime.dll</HintPath>
       <Private>True</Private>
@@ -55,6 +59,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compute\SetUpEnvironment.cs" />
+    <Compile Include="Create\EnvironmentDirectory.cs" />
+    <Compile Include="Create\RootDirectory.cs" />
+    <Compile Include="Create\PythonEnvironment.cs" />
+    <Compile Include="Compute\DownloadFile.cs" />
+    <Compile Include="InstallPythonTG.cs" />
+    <Compile Include="Compute\RunCommandBool.cs" />
+    <Compile Include="Compute\RunCommandStdout.cs" />
+    <Compile Include="Compute\RunPythonScript.cs" />
     <Compile Include="Compute\TidyEmbeddedPython.cs" />
     <Compile Include="Compute\CreateVirtualEnvironment.cs" />
     <Compile Include="Compute\Init.cs" />
@@ -69,8 +82,11 @@
     <Compile Include="Compute\Invoke.cs" />
     <Compile Include="Convert\FromPython.cs" />
     <Compile Include="Convert\ToPyTuple.cs" />
+    <Compile Include="EmbeddableURL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Convert\ToPython.cs" />
+    <Compile Include="Query\InstalledPackages.cs" />
+    <Compile Include="Query\PythonExecutable.cs" />
     <Compile Include="Query\EmbeddedPythonExecutable.cs" />
     <Compile Include="Query\IsPipInstalled.cs" />
     <Compile Include="Query\IsPythonInstalled.cs" />
@@ -88,6 +104,12 @@
   <ItemGroup>
     <Content Include="Compute\__init__.py" />
     <Content Include="__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Python_oM\Python_oM.csproj">
+      <Project>{3BF9F725-F1CA-432F-A549-557324CAFB91}</Project>
+      <Name>Python_oM</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

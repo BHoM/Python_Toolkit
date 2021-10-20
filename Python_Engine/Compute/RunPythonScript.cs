@@ -21,22 +21,36 @@
 // */
 
 //using BH.oM.Reflection.Attributes;
-//using System;
+//using System.Collections.Generic;
 //using System.ComponentModel;
 //using System.IO;
 
 //namespace BH.Engine.Python
 //{
-//    public static partial class Query
+//    public static partial class Compute
 //    {
 //        /***************************************************/
 //        /**** Public Methods                            ****/
 //        /***************************************************/
 
-//        [Description("Return True if Pip is installed to the base BHoM Python environment.")]
-//        public static bool IsPipInstalled()
+//        [Description("Run a Python script using a given environment, with the arguments given.")]
+//        [Input("pythonExecutable", "The Python executable with which to run the Python script.")]
+//        [Input("pythonScript", "The full path to the Python script.")]
+//        [Input("args", "A list of arguments to be passed to the Python script.")]
+//        [Output("result", "The stdout data from the executed Python script.")]
+//        public static string RunPythonScript(string pythonExecutable, string pythonScript, List<string> args = null)
 //        {
-//            return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip.exe"));
+//            // Check that script exists at given path
+//            if (!File.Exists(pythonScript))
+//            {
+//                Reflection.Compute.RecordError($"Python script does not exist at {pythonScript}.");
+//            }
+
+//            // construct command to be run
+//            string cmd = $"{pythonExecutable} {pythonScript} {string.Join(" ", args)}";
+
+//            // run the command
+//            return RunCommandStdout(cmd);
 //        }
 
 //        /***************************************************/
