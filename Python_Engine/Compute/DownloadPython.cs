@@ -1,59 +1,59 @@
-/*
- * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2021, the respective contributors. All rights reserved.
- *
- * Each contributor holds copyright over their respective contributions.
- * The project versioning (Git) records all such contribution source information.
- *                                           
- *                                                                              
- * The BHoM is free software: you can redistribute it and/or modify         
- * it under the terms of the GNU Lesser General Public License as published by  
- * the Free Software Foundation, either version 3.0 of the License, or          
- * (at your option) any later version.                                          
- *                                                                              
- * The BHoM is distributed in the hope that it will be useful,              
- * but WITHOUT ANY WARRANTY; without even the implied warranty of               
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 
- * GNU Lesser General Public License for more details.                          
- *                                                                            
- * You should have received a copy of the GNU Lesser General Public License     
- * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
- */
+///*
+// * This file is part of the Buildings and Habitats object Model (BHoM)
+// * Copyright (c) 2015 - 2021, the respective contributors. All rights reserved.
+// *
+// * Each contributor holds copyright over their respective contributions.
+// * The project versioning (Git) records all such contribution source information.
+// *                                           
+// *                                                                              
+// * The BHoM is free software: you can redistribute it and/or modify         
+// * it under the terms of the GNU Lesser General Public License as published by  
+// * the Free Software Foundation, either version 3.0 of the License, or          
+// * (at your option) any later version.                                          
+// *                                                                              
+// * The BHoM is distributed in the hope that it will be useful,              
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of               
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 
+// * GNU Lesser General Public License for more details.                          
+// *                                                                            
+// * You should have received a copy of the GNU Lesser General Public License     
+// * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
+// */
 
-using System.ComponentModel;
-using System.IO;
+//using System.ComponentModel;
+//using System.IO;
 
-namespace BH.Engine.Python
-{
-    public static partial class Compute
-    {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
+//namespace BH.Engine.Python
+//{
+//    public static partial class Compute
+//    {
+//        /***************************************************/
+//        /**** Public Methods                            ****/
+//        /***************************************************/
 
-        [Description("Download the current BHoM embedded version of Python.")]
-        public static bool DownloadPython()
-        {
-            string home = Query.EmbeddedPythonHome();
-            if (!Directory.Exists(home))
-                Directory.CreateDirectory(home);
+//        [Description("Download the current BHoM embedded version of Python.")]
+//        public static bool DownloadPython()
+//        {
+//            string home = Query.EmbeddedPythonHome();
+//            if (!Directory.Exists(home))
+//                Directory.CreateDirectory(home);
 
-            string destination = Path.Combine(home, $"python.zip");
-            RunCommand($"curl {EMBEDDED_PYTHON_URL} -o {destination}");
-            return true;
-        }
+//            string destination = Path.Combine(home, $"python.zip");
+//            RunCommandStdout($"curl {EMBEDDED_PYTHON_URL} -o {destination}");
+//            return true;
+//        }
 
-        /***************************************************/
-        /**** Public Fields                             ****/
-        /***************************************************/
+//        /***************************************************/
+//        /**** Public Fields                             ****/
+//        /***************************************************/
 
-        [Description("The current version of Python used for the base BHoM Python environment.")]
-        public const string EMBEDDED_PYTHON_URL = @"https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-amd64.zip";
+//        [Description("The current version of Python used for the base BHoM Python environment.")]
+//        public const string EMBEDDED_PYTHON_URL = @"https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-amd64.zip";
 
-        [Description("The string representation for the version of Python used for the base BHoM Python environment.")]
-        public const string PYTHON_VERSION = "python37";
+//        [Description("The string representation for the version of Python used for the base BHoM Python environment.")]
+//        public const string PYTHON_VERSION = "python37";
 
-        /***************************************************/
-    }
-}
+//        /***************************************************/
+//    }
+//}
 

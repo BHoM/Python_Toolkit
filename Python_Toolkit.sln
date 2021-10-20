@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		setup.py = setup.py
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_oM", "Python_oM\Python_oM.csproj", "{3BF9F725-F1CA-432F-A549-557324CAFB91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
