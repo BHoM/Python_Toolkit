@@ -38,7 +38,7 @@ namespace BH.Engine.Python
         [Output("pythonExecutable", "The executable associated with the given BHoM Python environment.")]
         public static string PythonExecutable(this PythonEnvironment pythonEnvironment)
         {
-            string environmentDirectory = pythonEnvironment.EnvironmentDirectory();
+            string environmentDirectory = Query.EnvironmentDirectory(pythonEnvironment);
             string executable = Path.Combine(environmentDirectory, "python.exe");
             if (File.Exists(executable))
             {

@@ -42,13 +42,34 @@ namespace BH.Engine.Python
         // TODO - split environment creation methods up into smaller parts to make more manageable
         public static PythonEnvironment PythonEnvironment(string name, string version, List<string> packages = null)
         {
+            // todo prevent bhom error flaggin here
+            PythonEnvironment installedEnvironment = Query.PythonEnvironment(name);
+            //
+            if (!(installedEnvironment is null))
+            {
+                string installedVersion = Query.PythonEnvironment(name).Version();
+                if (installedVersion != version)
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"This environment already exists, but is a different version of Python to the version given: {installedVersion} != {version}.");
+                    return null;
+                }
+
+                foreach (string pkg in packages)
+                {
+                    if (!installedEnvironment.IsPackageInstalled(pkg))
+                    {
+                        return null;
+                    }
+                }
+            }
+
             PythonEnvironment pythonEnvironment = new PythonEnvironment
             {
                 Name = name
             };
 
             // create environment directory
-            string environmentDirectory = pythonEnvironment.EnvironmentDirectory();
+            string environmentDirectory = Create.EnvironmentDirectory(pythonEnvironment);
 
             // download the target version of Python
             string embeddablePythonZip = Compute.DownloadFile(Query.EmbeddableURL(version));
@@ -69,31 +90,49 @@ namespace BH.Engine.Python
             }
 
             // remove _pth file
-            // string pthFile = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList().First();
-            // string pthText = File.Delete(pthFile);
+            List<string> pthFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
+            foreach (string pthFile in pthFiles)
+            {
+                try
+                {
+                    File.Delete(pthFile);
+                }
+                catch (Exception e)
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"{pthFile} not found to be deleted: {e}.");
+                }
+            }
 
             // move pyd and dll files to DLLs directory
-            string[] filesToMove = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToArray();
-            // TODO - move files
-            string zipFile = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith(".zip")).First();
-            File.Delete(zipFile);
-
-            string tempDir = Path.Combine(environmentDirectory, "temp");
-            string newDir = Path.Combine(environmentDirectory, Path.GetFileName(zipFile));
-            System.IO.Compression.ZipFile.ExtractToDirectory(embeddablePythonZip, tempDir);
+            string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(environmentDirectory, "DLLs")).FullName;
+            List<string> libFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
+            foreach (string libFile in libFiles)
+            {
+                string newLibFile = Path.Combine(libDirectory, Path.GetFileName(libFile));
+                try
+                {
+                    File.Move(libFile, newLibFile);
+                }
+                catch (Exception e)
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"{libFile} not capable of being moved to {newLibFile}: {e}.");
+                }
+            }
             
-            System.IO.Directory.Move(tempDir, newDir);
-
             // install packages using Pip
             if (!packages?.Any() != true)
             {
-                foreach (string package in packages)
+                if (!Compute.RunCommandBool($"{pythonEnvironment.PythonExecutable()} -m pip install --no-warn-script-location {String.Join(" ", packages)} && exit", hideWindows: true))
                 {
-                    if (!Compute.RunCommandBool($"{pythonEnvironment.PythonExecutable()} -m pip install --no-warn-script-location {package} && exit"))
-                    {
-                        BH.Engine.Reflection.Compute.RecordError($"{package} not installed for some reason.");
-                    }
+                    BH.Engine.Reflection.Compute.RecordError($"Packages not installed for some reason.");
                 }
+                //foreach (string package in packages)
+                //{
+                //    if (!Compute.RunCommandBool($"{pythonEnvironment.PythonExecutable()} -m pip install --no-warn-script-location {package} && exit", hideWindows: true))
+                //    {
+                //        BH.Engine.Reflection.Compute.RecordError($"{package} not installed for some reason.");
+                //    }
+                //}
             }
 
             return pythonEnvironment;
