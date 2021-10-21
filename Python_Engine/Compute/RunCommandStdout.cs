@@ -52,6 +52,7 @@ namespace BH.Engine.Python
             }
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.Arguments = $"{commandMode} {command}";
             process.Start();

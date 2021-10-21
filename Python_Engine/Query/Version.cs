@@ -22,10 +22,8 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -35,22 +33,43 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("List the available packages within the given BHoM Python environment.")]
+        [Description("Return the Python version of the current BHoM Python environment.")]
         [Input("pythonEnvironment", "A BHoM Python environment.")]
-        [Output("packages", "A list of installed packages.")]
-        public static List<string> InstalledPackages(this PythonEnvironment pythonEnvironment)
+        [Output("version", "The version of Python installed in the given Python environment.")]
+        public static string Version(this PythonEnvironment pythonEnvironment)
         {
-            string tempPackageFile = Path.Combine(Path.GetTempPath(), "packages.txt");
-            string command = $"{pythonEnvironment.PythonExecutable()} -m pip freeze > {tempPackageFile}";
-            Compute.RunCommandBool(command, hideWindows: true);
+            string command = $"{pythonEnvironment.PythonExecutable()} --version";
+            string versionString = Compute.RunCommandStdout(command, hideWindows: true);
 
-            List<string> installedPackages = new List<string>(File.ReadAllLines(tempPackageFile));
-            File.Delete(tempPackageFile);
+            return versionString.Split(' ').Last();
+        }
 
-            return installedPackages;
+        /***************************************************/
+
+        [Description("Return the version of the given package in the given BHoM Python environment.")]
+        [Input("pythonEnvironment", "A BHoM Python environment.")]
+        [Input("package", "The package to query the version of.")]
+        [Output("version", "The version of package in the given Python environment.")]
+        public static string Version(this PythonEnvironment pythonEnvironment, string package)
+        {
+            string command = $"{pythonEnvironment.PythonExecutable()} -m pip show {package}";
+            string[] versionStrings = Compute.RunCommandStdout(command, hideWindows: true).Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string p in versionStrings)
+            {
+                if (p.Contains("WARNING: Package(s) not found"))
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"{package} package not installed.");
+                    break;
+                }
+                if (p.Contains("Version:"))
+                {
+                    return p.Split().Last();
+                }
+            }
+            return null;
         }
 
         /***************************************************/
     }
 }
-

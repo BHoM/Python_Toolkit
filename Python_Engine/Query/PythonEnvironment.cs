@@ -22,8 +22,6 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -35,19 +33,24 @@ namespace BH.Engine.Python
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("List the available packages within the given BHoM Python environment.")]
-        [Input("pythonEnvironment", "A BHoM Python environment.")]
-        [Output("packages", "A list of installed packages.")]
-        public static List<string> InstalledPackages(this PythonEnvironment pythonEnvironment)
+        [Description("Return the Python environment for the given BHoM Python environment.")]
+        [Input("name", "The name of the BHoM Python environment to search for.")]
+        [Output("pythonEnvironment", "The BHoM Python environment.")]
+        public static PythonEnvironment PythonEnvironment(string name)
         {
-            string tempPackageFile = Path.Combine(Path.GetTempPath(), "packages.txt");
-            string command = $"{pythonEnvironment.PythonExecutable()} -m pip freeze > {tempPackageFile}";
-            Compute.RunCommandBool(command, hideWindows: true);
-
-            List<string> installedPackages = new List<string>(File.ReadAllLines(tempPackageFile));
-            File.Delete(tempPackageFile);
-
-            return installedPackages;
+            PythonEnvironment pyenv = new PythonEnvironment()
+            { 
+                Name = name
+            };
+            if (Directory.Exists(Path.Combine(pyenv.RootDirectory, name)))
+            {
+                return pyenv;
+            }
+            else
+            {
+                BH.Engine.Reflection.Compute.RecordError($"This environment does not exist.");
+                return null;
+            }
         }
 
         /***************************************************/

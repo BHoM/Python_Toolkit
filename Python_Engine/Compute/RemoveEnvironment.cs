@@ -22,35 +22,35 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Query
+    public static partial class Compute
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("List the available packages within the given BHoM Python environment.")]
-        [Input("pythonEnvironment", "A BHoM Python environment.")]
-        [Output("packages", "A list of installed packages.")]
-        public static List<string> InstalledPackages(this PythonEnvironment pythonEnvironment)
+        [Description("Remove the given BHoM Python environment.")]
+        [Input("pythonEnvironment", "The name of the BHoM Python environment.")]
+        [Output("success", "True if environment successfully removed.")]
+        public static bool RemoveEnvironment(this PythonEnvironment pythonEnvironment)
         {
-            string tempPackageFile = Path.Combine(Path.GetTempPath(), "packages.txt");
-            string command = $"{pythonEnvironment.PythonExecutable()} -m pip freeze > {tempPackageFile}";
-            Compute.RunCommandBool(command, hideWindows: true);
-
-            List<string> installedPackages = new List<string>(File.ReadAllLines(tempPackageFile));
-            File.Delete(tempPackageFile);
-
-            return installedPackages;
+            try
+            {
+                Directory.Delete(Query.EnvironmentDirectory(pythonEnvironment), true);
+            }
+            catch (System.Exception e)
+            {
+                BH.Engine.Reflection.Compute.RecordError($"Cannot remove the environment: {e}.");
+                return false;
+            }
+            
+            return true;
         }
 
         /***************************************************/
     }
 }
-

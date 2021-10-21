@@ -27,9 +27,9 @@ using System.Linq;
 
 namespace BH.Engine.Python
 {
-    public static partial class Create
+    public static partial class Query
     {
-        [Description("Create the BHoM Python environment directory.")]
+        [Description("Query the BHoM Python environment directory.")]
         [Input("pythonEnvironment", "A BHoM Python environment object.")]
         [Output("environmentDirectory", "The full path to the BHoM Python environment.")]
         public static string EnvironmentDirectory(this PythonEnvironment pythonEnvironment)
@@ -40,15 +40,12 @@ namespace BH.Engine.Python
                 return null;
             }
 
-            if (pythonEnvironment.Name.Any(x => System.Char.IsWhiteSpace(x)))
-            {
-                BH.Engine.Reflection.Compute.RecordError($"The given PythonEnvironment name cannot contain whitespace characters.");
-                return null;
-            }
-
             string environmentDirectory = System.IO.Path.Combine(pythonEnvironment.RootDirectory, pythonEnvironment.Name);
-            System.IO.Directory.CreateDirectory(environmentDirectory);
 
+            if (!System.IO.Directory.Exists(environmentDirectory))
+            {
+                BH.Engine.Reflection.Compute.RecordError("This Python environment doesn't seem to be installed.");
+            }
             return environmentDirectory;
         }
     }
