@@ -34,13 +34,15 @@ namespace BH.Engine.Python
 
         [Description("Download a file using CURL.")]
         [Input("url", "URL to file.")]
+        [Input("directory", "The directory into which the file should be saved.")]
+        [Input("force", "If the file already exists, overwrite it.")]
         [Output("file", "The path to the downloaded file.")]
-        public static string DownloadFile(string url, string directory = null)
+        public static string DownloadFile(string url, string directory = null, bool force = false)
         {
             directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
             string downloadedFile = Path.Combine(directory, Path.GetFileName(url));
 
-            if (File.Exists(downloadedFile))
+            if (File.Exists(downloadedFile) && !force)
             {
                 return downloadedFile;
             }
