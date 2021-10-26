@@ -38,13 +38,23 @@ namespace BH.Engine.Python
         [Input("name", "The name of the directory into which Python will be installed.")]
         [Input("version", "The version of Python to be installed.")]
         [Input("packages", "A list of packages to be installed into this Python environment.")]
+        [Input("force", "If the environment already exists recreate it rather than re-using it.")]
         [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
-        // TODO - split environment creation methods up into smaller parts to make more manageable
-        public static PythonEnvironment PythonEnvironment(string name, string version, List<string> packages = null)
+        public static PythonEnvironment PythonEnvironment(string name, string version, List<string> packages = null, bool force = false)
         {
-            // todo prevent bhom error flaggin here
+
+            // force the user to be specific with their package versioning.
+            foreach (string package in packages)
+            {
+                if (!package.Contains("=="))
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"BHoM Python environments should be specific with the version of a Python package being used. Your {package} package must include a version number.");
+                    return null;
+                }
+            }
+
             PythonEnvironment installedEnvironment = Query.PythonEnvironment(name);
-            //
+
             if (!(installedEnvironment is null))
             {
                 string installedVersion = Query.PythonEnvironment(name).Version();
@@ -78,7 +88,6 @@ namespace BH.Engine.Python
             System.IO.Compression.ZipFile.ExtractToDirectory(embeddablePythonZip, environmentDirectory);
 
             // set up the environment following inflation of the embeddable zip
-            // TODO - see https://dev.to/fpim/setting-up-python-s-windows-embeddable-distribution-properly-1081
             string pipInstallerPy = Compute.DownloadFile("https://bootstrap.pypa.io/get-pip.py");
 
             // run the pip installer
@@ -103,7 +112,7 @@ namespace BH.Engine.Python
                 }
             }
 
-            // move pyd and dll files to DLLs directory
+            // move PYD and DLL files to DLLs directory
             string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(environmentDirectory, "DLLs")).FullName;
             List<string> libFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
             foreach (string libFile in libFiles)

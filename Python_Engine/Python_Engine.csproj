@@ -35,10 +35,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\BHoM.dll</HintPath>
     </Reference>
-    <Reference Include="Python.Runtime, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BH.UI.Python.Runtime.3.7.4-alpha\lib\netstandard2.0\Python.Runtime.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Reflection_Engine">
       <HintPath>C:\ProgramData\BHoM\Assemblies\Reflection_Engine.dll</HintPath>
       <Private>False</Private>
@@ -60,54 +56,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compute\RemoveEnvironment.cs" />
-    <Compile Include="Compute\SetUpEnvironment.cs" />
     <Compile Include="Query\EnvironmentDirectory.cs" />
     <Compile Include="Create\EnvironmentDirectory.cs" />
     <Compile Include="Create\RootDirectory.cs" />
     <Compile Include="Create\PythonEnvironment.cs" />
     <Compile Include="Compute\DownloadFile.cs" />
-    <Compile Include="InstallPythonTG.cs" />
     <Compile Include="Compute\RunCommandBool.cs" />
     <Compile Include="Compute\RunCommandStdout.cs" />
     <Compile Include="Compute\RunPythonScript.cs" />
-    <Compile Include="Compute\TidyEmbeddedPython.cs" />
-    <Compile Include="Compute\CreateVirtualEnvironment.cs" />
-    <Compile Include="Compute\Init.cs" />
-    <Compile Include="Compute\DownloadPython.cs" />
-    <Compile Include="Compute\SetPythonHome.cs" />
-    <Compile Include="Compute\InstallPython.cs" />
-    <Compile Include="Compute\InstallPip.cs" />
-    <Compile Include="Compute\InstallPythonToolkit.cs" />
-    <Compile Include="Compute\PipInstall.cs" />
-    <Compile Include="Compute\RunCommand.cs" />
-    <Compile Include="Compute\JupyterLab.cs" />
-    <Compile Include="Compute\Invoke.cs" />
-    <Compile Include="Convert\FromPython.cs" />
-    <Compile Include="Convert\ToPyTuple.cs" />
     <Compile Include="EmbeddableURL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Query\PythonEnvironment.cs" />
     <Compile Include="Query\Version.cs" />
     <Compile Include="Query\InstalledPackages.cs" />
     <Compile Include="Query\PythonExecutable.cs" />
-    <Compile Include="Query\EmbeddedPythonExecutable.cs" />
-    <Compile Include="Query\IsPipInstalled.cs" />
-    <Compile Include="Query\IsPythonInstalled.cs" />
     <Compile Include="Query\IsPackageInstalled.cs" />
-    <Compile Include="Query\IsVirtualEnvironmentInstalled.cs" />
-    <Compile Include="Query\VirtualEnvironmentExecutable.cs" />
-    <Compile Include="Query\VirtualEnvironmentPath.cs" />
-    <Compile Include="Query\EmbeddedPythonHome.cs" />
-    <Compile Include="Query\Import.cs" />
-    <Compile Include="Query\IsInstalled.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Compute\__init__.py" />
-    <Content Include="__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Python_oM\Python_oM.csproj">
@@ -115,10 +81,11 @@
       <Name>Python_oM</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Convert\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
-xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
-xcopy "$(SolutionDir)*.py" "C:\\ProgramData\\BHoM\\Extensions\\Python\\src\\$(SolutionName)\" /Y /I /S /F</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)"  "C:\\ProgramData\\BHoM\\Assemblies" /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
