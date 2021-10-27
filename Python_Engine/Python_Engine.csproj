@@ -55,10 +55,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compute\DeleteDirectory.cs" />
     <Compile Include="Compute\RemoveEnvironment.cs" />
     <Compile Include="Query\EnvironmentDirectory.cs" />
     <Compile Include="Create\EnvironmentDirectory.cs" />
-    <Compile Include="Create\RootDirectory.cs" />
     <Compile Include="Create\PythonEnvironment.cs" />
     <Compile Include="Compute\DownloadFile.cs" />
     <Compile Include="Compute\RunCommandBool.cs" />
