@@ -32,7 +32,7 @@ namespace BH.Engine.Python
         [Description("Create the BHoM Python environment directory.")]
         [Input("pythonEnvironment", "A BHoM Python environment object.")]
         [Output("environmentDirectory", "The full path to the BHoM Python environment.")]
-        public static string EnvironmentDirectory(this PythonEnvironment pythonEnvironment)
+        private static string EnvironmentDirectory(this PythonEnvironment pythonEnvironment)
         {
             if (System.String.IsNullOrEmpty(pythonEnvironment.Name))
             {

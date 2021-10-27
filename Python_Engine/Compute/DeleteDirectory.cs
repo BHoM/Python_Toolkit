@@ -22,26 +22,56 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+using System;
 using System.ComponentModel;
-using System.Linq;
+using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Query
+    public static partial class Compute
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        [Description("Return the Python version of the current BHoM Python environment.")]
-        [Input("pythonEnvironment", "A BHoM Python environment.")]
-        [Output("version", "The version of Python installed in the given Python environment.")]
-        public static string Version(this PythonEnvironment pythonEnvironment)
+        [Description("Delete a directory, including subdirectories and files, while removing read-only attributes of files in order to avoid exceptions.")]
+        [Input("directory", "The directory to delete.")]
+        [Output("success", "True if directory no longer exists.")]
+        private static bool DeleteDirectory(string directory)
         {
-            string command = $"{pythonEnvironment.PythonExecutable()} --version";
-            string versionString = Compute.RunCommandStdout(command, hideWindows: true);
+            // logic to ensure only environment directories in the BHoM Python root directory can be deleted!
+            DirectoryInfo rootDirectory = new DirectoryInfo(new PythonEnvironment().RootDirectory);
+            DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+            if (!String.Equals(directoryInfo.Parent.FullName, rootDirectory.FullName, StringComparison.OrdinalIgnoreCase))
+            {
+                BH.Engine.Reflection.Compute.RecordError("Only BHoM Python environment directories can be removed using this method. This is for your own safety!");
+                return false;
+            }
 
-            return versionString.Split(' ').Last().Trim();
+            string[] files = Directory.GetFiles(directory);
+            string[] dirs = Directory.GetDirectories(directory);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(directory, false);
+
+            if (Directory.Exists(directory))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         /***************************************************/

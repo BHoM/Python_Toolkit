@@ -20,40 +20,67 @@
 // * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
 // */
 
-//using BH.oM.Reflection.Attributes;
-//using System.Collections.Generic;
-//using System.ComponentModel;
-//using System.IO;
+using BH.oM.Python;
+using BH.oM.Reflection.Attributes;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 
-//namespace BH.Engine.Python
-//{
-//    public static partial class Compute
-//    {
-//        /***************************************************/
-//        /**** Public Methods                            ****/
-//        /***************************************************/
+namespace BH.Engine.Python
+{
+    public static partial class Compute
+    {
+        /***************************************************/
+        /**** Public Methods                            ****/
+        /***************************************************/
 
-//        [Description("Run a Python script using a given environment, with the arguments given.")]
-//        [Input("pythonExecutable", "The Python executable with which to run the Python script.")]
-//        [Input("pythonScript", "The full path to the Python script.")]
-//        [Input("args", "A list of arguments to be passed to the Python script.")]
-//        [Output("result", "The stdout data from the executed Python script.")]
-//        public static string RunPythonScript(string pythonExecutable, string pythonScript, List<string> args = null)
-//        {
-//            // Check that script exists at given path
-//            if (!File.Exists(pythonScript))
-//            {
-//                Reflection.Compute.RecordError($"Python script does not exist at {pythonScript}.");
-//            }
+        //[Description("Run a Python script using a given environment, with the arguments given.")]
+        //[Input("pythonExecutable", "The Python executable with which to run the Python script.")]
+        //[Input("pythonScript", "The full path to the Python script.")]
+        //[Input("args", "A list of arguments to be passed to the Python script.")]
+        //[Output("result", "The stdout data from the executed Python script.")]
+        //public static string RunPythonScript(string pythonExecutable, string pythonScript, List<string> args = null)
+        //{
+        //    // Check that script exists at given path
+        //    if (!File.Exists(pythonScript))
+        //    {
+        //        Reflection.Compute.RecordError($"Python script does not exist at {pythonScript}.");
+        //    }
 
-//            // construct command to be run
-//            string cmd = $"{pythonExecutable} {pythonScript} {string.Join(" ", args)}";
+        //    // construct command to be run
+        //    string cmd = $"{pythonExecutable} {pythonScript} {string.Join(" ", args)}";
 
-//            // run the command
-//            return RunCommandStdout(cmd);
-//        }
+        //    // run the command
+        //    return RunCommandStdout(cmd);
+        //}
 
-//        /***************************************************/
-//    }
-//}
+        /***************************************************/
 
+        [Description("Run a string containing Python code and return the output.")]
+        [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
+        [Input("pythonScript", "The string containing the Python script.")]
+        [Output("result", "The stdout data from the executed Python script.")]
+        public static string RunPythonScript(PythonEnvironment pythonEnvironment, string pythonScript)
+        {
+            string pythonExecutable = pythonEnvironment.PythonExecutable();
+
+            if (!pythonScript.Contains("print"))
+            {
+                BH.Engine.Reflection.Compute.RecordWarning("Nothing is being passed to Stdout in the Python script, so nothing will be returned from this method.");
+            }
+
+            // place pythonScript into a temporary .py file ready to reference and run, then call using the passed executable
+            string scriptFile = Path.Combine(Path.GetTempPath(), "_BHoM_PythonScript.py");
+            using (StreamWriter outputFile = new StreamWriter(scriptFile))
+            {
+                outputFile.WriteLine(pythonScript);
+            }
+
+            string cmd = $"{pythonExecutable} {scriptFile}";
+
+            return RunCommandStdout(cmd, hideWindows: true);
+        }
+
+        /***************************************************/
+    }
+}
