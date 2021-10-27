@@ -39,13 +39,21 @@ namespace BH.Engine.Python
         public static string PythonExecutable(this PythonEnvironment pythonEnvironment)
         {
             string environmentDirectory = Query.EnvironmentDirectory(pythonEnvironment);
-            string executable = Path.Combine(environmentDirectory, "python.exe");
-            if (File.Exists(executable))
+            string[] files = Directory.GetFiles(environmentDirectory, "python.exe", SearchOption.AllDirectories);
+            if (files.Length == 1)
             {
-                return executable;
+                return files[0];
             }
-            BH.Engine.Reflection.Compute.RecordError($"No Python executable was found in {environmentDirectory}.");
-            return null;
+            else if (files.Length > 1)
+            {
+                BH.Engine.Reflection.Compute.RecordError($"More than one Python executable was found in {environmentDirectory}!");
+                return null;
+            }
+            else
+            {
+                BH.Engine.Reflection.Compute.RecordError($"No Python executable was found in {environmentDirectory}.");
+                return null;
+            }
         }
 
         /***************************************************/

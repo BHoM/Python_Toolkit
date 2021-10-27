@@ -41,7 +41,7 @@ namespace BH.Engine.Python
             string command = $"{pythonEnvironment.PythonExecutable()} --version";
             string versionString = Compute.RunCommandStdout(command, hideWindows: true);
 
-            return versionString.Split(' ').Last();
+            return versionString.Split(' ').Last().Trim();
         }
 
         /***************************************************/

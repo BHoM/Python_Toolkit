@@ -38,17 +38,16 @@ namespace BH.Engine.Python
         [Output("pythonEnvironment", "The BHoM Python environment.")]
         public static PythonEnvironment PythonEnvironment(string name)
         {
-            PythonEnvironment pyenv = new PythonEnvironment()
+            PythonEnvironment pythonEnvironment = new PythonEnvironment()
             { 
                 Name = name
             };
-            if (Directory.Exists(Path.Combine(pyenv.RootDirectory, name)))
+            if (Directory.Exists(Path.Combine(pythonEnvironment.RootDirectory, name)))
             {
-                return pyenv;
+                return pythonEnvironment;
             }
             else
             {
-                BH.Engine.Reflection.Compute.RecordError($"This environment does not exist.");
                 return null;
             }
         }

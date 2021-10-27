@@ -48,103 +48,120 @@ namespace BH.Engine.Python
             {
                 if (!package.Contains("=="))
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"BHoM Python environments should be specific with the version of a Python package being used. Your {package} package must include a version number.");
+                    BH.Engine.Reflection.Compute.RecordError($"BHoM Python environments should be specific with the version of each package being used. Your {package} package must include a version number.");
                     return null;
                 }
             }
 
-            PythonEnvironment installedEnvironment = Query.PythonEnvironment(name);
+            // Query existing environment if it already exists
+            PythonEnvironment existingEnvironment = Query.PythonEnvironment(name);
 
-            if (!(installedEnvironment is null))
+            if (!(existingEnvironment is null))
             {
-                string installedVersion = Query.PythonEnvironment(name).Version();
-                if (installedVersion != version)
+                string existingVersion = Query.Version(existingEnvironment);
+                if (!String.Equals(version, existingVersion, StringComparison.OrdinalIgnoreCase))
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"This environment already exists, but is a different version of Python to the version given: {installedVersion} != {version}.");
-                    return null;
-                }
-
-                foreach (string pkg in packages)
-                {
-                    if (!installedEnvironment.IsPackageInstalled(pkg))
+                    if (force)
                     {
+                        Compute.RemoveEnvironment(existingEnvironment);
+                        return Create.PythonEnvironment(name, version, packages);
+
+                    }
+                    else
+                    {
+                        BH.Engine.Reflection.Compute.RecordError($"The requested environment already exists, but the version of Python does not match the requested version ({version}!={existingVersion}). Set force to True to recreate this environment with the given version.");
                         return null;
                     }
                 }
-            }
-
-            PythonEnvironment pythonEnvironment = new PythonEnvironment
-            {
-                Name = name
-            };
-
-            // create environment directory
-            string environmentDirectory = Create.EnvironmentDirectory(pythonEnvironment);
-
-            // download the target version of Python
-            string embeddablePythonZip = Compute.DownloadFile(Query.EmbeddableURL(version));
-
-            // extract embeddable python into environment directory
-            System.IO.Compression.ZipFile.ExtractToDirectory(embeddablePythonZip, environmentDirectory);
-
-            // set up the environment following inflation of the embeddable zip
-            string pipInstallerPy = Compute.DownloadFile("https://bootstrap.pypa.io/get-pip.py");
-
-            // run the pip installer
-            string installPipCommand = $"{pythonEnvironment.PythonExecutable()} {pipInstallerPy} && exit";
-            if (!Compute.RunCommandBool(installPipCommand, hideWindows: true))
-            {
-                BH.Engine.Reflection.Compute.RecordError($"Pip installation did not work using the command {installPipCommand}.");
-                return null;
-            }
-
-            // remove _pth file
-            List<string> pthFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
-            foreach (string pthFile in pthFiles)
-            {
-                try
+                else
                 {
-                    File.Delete(pthFile);
+                    foreach (string package in packages)
+                    {
+                        if (!existingEnvironment.IsPackageInstalled(package))
+                        {
+                            if (force)
+                            {
+                                Compute.RemoveEnvironment(existingEnvironment);
+                                return Create.PythonEnvironment(name, version, packages);
+                            }
+                            else
+                            {
+                                BH.Engine.Reflection.Compute.RecordError($"The requested environment already exists, but its packages do no match the requested package versions. Set force to True to recreate this environment with the new package versions.");
+                                return null;
+                            }
+                        }
+                    }
                 }
-                catch (Exception e)
-                {
-                    BH.Engine.Reflection.Compute.RecordError($"{pthFile} not found to be deleted: {e}.");
-                }
+                return existingEnvironment;
             }
-
-            // move PYD and DLL files to DLLs directory
-            string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(environmentDirectory, "DLLs")).FullName;
-            List<string> libFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
-            foreach (string libFile in libFiles)
+            else
             {
-                string newLibFile = Path.Combine(libDirectory, Path.GetFileName(libFile));
-                try
+                PythonEnvironment pythonEnvironment = new PythonEnvironment
                 {
-                    File.Move(libFile, newLibFile);
-                }
-                catch (Exception e)
-                {
-                    BH.Engine.Reflection.Compute.RecordError($"{libFile} not capable of being moved to {newLibFile}: {e}.");
-                }
-            }
-            
-            // install packages using Pip
-            if (!packages?.Any() != true)
-            {
-                if (!Compute.RunCommandBool($"{pythonEnvironment.PythonExecutable()} -m pip install --no-warn-script-location {String.Join(" ", packages)} && exit", hideWindows: true))
-                {
-                    BH.Engine.Reflection.Compute.RecordError($"Packages not installed for some reason.");
-                }
-                //foreach (string package in packages)
-                //{
-                //    if (!Compute.RunCommandBool($"{pythonEnvironment.PythonExecutable()} -m pip install --no-warn-script-location {package} && exit", hideWindows: true))
-                //    {
-                //        BH.Engine.Reflection.Compute.RecordError($"{package} not installed for some reason.");
-                //    }
-                //}
-            }
+                    Name = name
+                };
 
-            return pythonEnvironment;
+                // create environment directory
+                string environmentDirectory = Create.EnvironmentDirectory(pythonEnvironment);
+
+                // download the target version of Python
+                string embeddablePythonZip = Compute.DownloadFile(Query.EmbeddableURL(version));
+
+                // extract embeddable python into environment directory
+                System.IO.Compression.ZipFile.ExtractToDirectory(embeddablePythonZip, environmentDirectory);
+
+                // set up the environment following inflation of the embeddable zip
+                string pipInstallerPy = Compute.DownloadFile("https://bootstrap.pypa.io/get-pip.py");
+
+                // run the pip installer
+                string installPipCommand = $"{pythonEnvironment.PythonExecutable()} {pipInstallerPy} && exit";
+                if (!Compute.RunCommandBool(installPipCommand, hideWindows: true))
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"Pip installation did not work using the command {installPipCommand}.");
+                    return null;
+                }
+
+                // remove _pth file
+                List<string> pthFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
+                foreach (string pthFile in pthFiles)
+                {
+                    try
+                    {
+                        File.Delete(pthFile);
+                    }
+                    catch (Exception e)
+                    {
+                        BH.Engine.Reflection.Compute.RecordError($"{pthFile} not found to be deleted: {e}.");
+                    }
+                }
+
+                // move PYD and DLL files to DLLs directory
+                string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(environmentDirectory, "DLLs")).FullName;
+                List<string> libFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
+                foreach (string libFile in libFiles)
+                {
+                    string newLibFile = Path.Combine(libDirectory, Path.GetFileName(libFile));
+                    try
+                    {
+                        File.Move(libFile, newLibFile);
+                    }
+                    catch (Exception e)
+                    {
+                        BH.Engine.Reflection.Compute.RecordError($"{libFile} not capable of being moved to {newLibFile}: {e}.");
+                    }
+                }
+
+                // install packages using Pip
+                if (!packages?.Any() != true)
+                {
+                    if (!Compute.RunCommandBool($"{pythonEnvironment.PythonExecutable()} -m pip install --no-warn-script-location {String.Join(" ", packages)} && exit", hideWindows: true))
+                    {
+                        BH.Engine.Reflection.Compute.RecordError($"Packages not installed for some reason.");
+                    }
+                }
+
+                return pythonEnvironment;
+            }
         }
     }
 }

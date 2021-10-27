@@ -41,86 +41,24 @@ namespace BH.Engine.Python
         [Output("isInstalled", "True if package is installed.")]
         public static bool IsPackageInstalled(this PythonEnvironment pythonEnvironment, string package)
         {
-            // get the installed packages
-            Dictionary<string, string> installedPackages = new Dictionary<string, string>();
-            foreach (string pkg in pythonEnvironment.InstalledPackages())
+            if (!package.Contains("=="))
             {
-                string[] pkgDetails = pkg.Split(new string[] { "==" }, System.StringSplitOptions.RemoveEmptyEntries);
-                installedPackages.Add(pkgDetails.First(), pkgDetails.Last());
+                BH.Engine.Reflection.Compute.RecordError($"BHoM Python environments should be specific with the version of each package being used. Your {package} package must include a version number.");
+                return false;
             }
 
-            // determine the queried package (and version if it is included)
-            string packageName = package.Split(new string[] { "==" }, System.StringSplitOptions.RemoveEmptyEntries).First();
-            string packageVersion = null;
-            if (package.Contains("=="))
-            {
-                packageVersion = package.Split(new string[] { "==" }, System.StringSplitOptions.RemoveEmptyEntries).Last();
-            }
+            List<string> installedPackages = pythonEnvironment.InstalledPackages();
 
-            // check for presence of package
-            if (installedPackages.ContainsKey(packageName))
+            if (installedPackages.Contains(package))
             {
-                if (installedPackages[packageName] == packageVersion)
-                {
-                    return true;
-                }
-                else
-                {
-                    if (package.Contains("=="))
-                    {
-                        BH.Engine.Reflection.Compute.RecordError($"{package} is installed, but the current version does not match the requested version.");
-                        return false;
-                    }
-                    else
-                    {
-                        BH.Engine.Reflection.Compute.RecordWarning($"{package} is installed, but requested package doesn't specify version.");
-                    }
-                }
                 return true;
+            }
+            else
+            {
+                BH.Engine.Reflection.Compute.RecordNote($"{package} not present in given environment.");
             }
             return false;
         }
-
-        //        [Description("Return True if named Python package is installed in given environment.")]
-        //        public static bool IsPackageInstalled(string package, string environmentName = null)
-        //        {
-        //            // get the associated executable with which to run Pip
-        //            string environmentExecutable = Query.EmbeddedPythonExecutable();
-        //            if (environmentName == null)
-        //            {
-        //                BH.Engine.Reflection.Compute.RecordNote("Checking for existence of {package} in the base BHoM Python environment.");
-        //            }
-        //            else
-        //            {
-        //                if (!environmentName.IsVirtualEnvironmentInstalled())
-        //                {
-        //                    return false;
-        //                }
-        //                environmentExecutable = environmentName.VirtualEnvironmentExecutable();
-        //            }
-
-        //            // run check
-        //            string cmd = $"{environmentExecutable} -m pip show {package}";
-        //            System.Diagnostics.Process p = new System.Diagnostics.Process();
-        //            p.StartInfo.CreateNoWindow = true;
-        //            p.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-        //            p.StartInfo.UseShellExecute = false;
-        //            p.StartInfo.RedirectStandardOutput = true;
-        //            p.StartInfo.FileName = "cmd.exe";
-        //            p.StartInfo.Arguments = $"/C {cmd}";
-        //            p.Start();
-
-        //            // To avoid deadlocks, always read the output stream first and then wait.  
-        //            string output = p.StandardOutput.ReadToEnd();
-        //            p.WaitForExit();
-
-        //            if (output.Contains("WARNING: Package(s) not found:"))
-        //            {
-        //                return false;
-        //            }
-
-        //            return true;
-        //        }
 
         /***************************************************/
     }
