@@ -38,6 +38,7 @@ namespace BH.Engine.Python
         [Output("success", "True if environment successfully removed.")]
         public static bool RemoveEnvironment(this PythonEnvironment pythonEnvironment)
         {
+            // TODO - change file permissions to not be read-only - see SO post Cannot delete directory wit Directoyr.Deleter(path, true) post for details for recursive directory deletion!
             try
             {
                 Directory.Delete(Query.EnvironmentDirectory(pythonEnvironment), true);
