@@ -31,7 +31,7 @@ namespace BH.Engine.Python
         [Description("Get the URL for the embeddable package containing the given version of Python.")]
         [Input("version", "The version of Python to retrieve the URL. This should be in the format \"MAJOR.MINOR.PATCH\".")]
         [Output("url", "The url for the matching Python version.")]
-        public static string EmbeddableURL(string version)
+        public static string EmbeddableURL(this string pythonVersion)
         {
             Dictionary<string, string> versions = new Dictionary<string, string>()
             {
@@ -75,14 +75,13 @@ namespace BH.Engine.Python
             };
 
             // check that passed version is found/known
-            if (!versions.ContainsKey(version))
+            if (!versions.ContainsKey(pythonVersion))
             {
-                BH.Engine.Reflection.Compute.RecordError($"Python {version} not found as an installable version of Python.");
+                BH.Engine.Reflection.Compute.RecordError($"Python {pythonVersion} not found as an installable version of Python.");
                 return "";
             }
 
-            return versions[version];
+            return versions[pythonVersion];
         }
     }
 }
-

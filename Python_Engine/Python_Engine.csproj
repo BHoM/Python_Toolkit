@@ -55,7 +55,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compute\DeleteDirectory.cs" />
     <Compile Include="Compute\RemoveEnvironment.cs" />
     <Compile Include="Query\EnvironmentDirectory.cs" />
     <Compile Include="Create\EnvironmentDirectory.cs" />
@@ -64,7 +63,7 @@
     <Compile Include="Compute\RunCommandBool.cs" />
     <Compile Include="Compute\RunCommandStdout.cs" />
     <Compile Include="Compute\RunPythonScript.cs" />
-    <Compile Include="EmbeddableURL.cs" />
+    <Compile Include="Query\EmbeddableURL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\PythonEnvironment.cs" />
     <Compile Include="Query\Version.cs" />
