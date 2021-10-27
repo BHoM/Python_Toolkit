@@ -24,6 +24,7 @@ using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -38,13 +39,17 @@ namespace BH.Engine.Python
         [Output("success", "True if environment successfully removed.")]
         public static bool RemoveEnvironment(this PythonEnvironment pythonEnvironment)
         {
+            DirectoryInfo directory = new DirectoryInfo(pythonEnvironment.EnvironmentDirectory());
+
             try
             {
-                Compute.DeleteDirectory(Query.EnvironmentDirectory(pythonEnvironment));
+                directory.EnumerateFiles().ToList().ForEach(f => f.Delete());
+                directory.EnumerateDirectories().ToList().ForEach(d => d.Delete(true));
+                directory.Delete();
             }
             catch (System.Exception e)
             {
-                BH.Engine.Reflection.Compute.RecordError($"Cannot remove the environment: {e}.");
+                BH.Engine.Reflection.Compute.RecordError($"Cannot fully remove the environment: {e}. Try manually deleting the {directory.FullName} directory.");
                 return false;
             }
             

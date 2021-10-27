@@ -36,7 +36,7 @@ namespace BH.Engine.Python
         [Description("Return the Python environment for the given BHoM Python environment.")]
         [Input("name", "The name of the BHoM Python environment to search for.")]
         [Output("pythonEnvironment", "The BHoM Python environment.")]
-        public static PythonEnvironment PythonEnvironment(string name)
+        public static PythonEnvironment PythonEnvironment(this string name)
         {
             PythonEnvironment pythonEnvironment = new PythonEnvironment()
             { 
