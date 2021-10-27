@@ -91,3 +91,7 @@ Alligator/Alligator_REMOTE_9848.csproj
 # Exceptions #
 ##############
 !/lib/*.dll
+
+# VSCode User File #
+####################
+.vscode/
