@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Compute\RemoveEnvironment.cs" />
     <Compile Include="Compute\RunPythonString.cs" />
+    <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentDirectory.cs" />
     <Compile Include="Create\EnvironmentDirectory.cs" />
     <Compile Include="Create\PythonEnvironment.cs" />
