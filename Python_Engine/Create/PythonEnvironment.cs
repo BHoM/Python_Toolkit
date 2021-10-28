@@ -154,7 +154,8 @@ namespace BH.Engine.Python
                 // install packages using Pip
                 if (!packages?.Any() != true)
                 {
-                    if (!Compute.RunCommandBool($"{pythonEnvironment.PythonExecutable()} -m pip install --no-warn-script-location {String.Join(" ", packages)} && exit", hideWindows: true))
+                    string command = $"{Query.PythonExecutable(pythonEnvironment)} -m pip install --no-warn-script-location {String.Join(" ", packages)} > {Path.Combine(Query.EnvironmentDirectory(pythonEnvironment), "package_install.log")} && exit";
+                    if (!Compute.RunCommandBool(command, hideWindows: true))
                     {
                         BH.Engine.Reflection.Compute.RecordError($"Packages not installed for some reason.");
                     }

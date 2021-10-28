@@ -29,6 +29,6 @@ namespace BH.oM.Python
     public class PythonEnvironment : BHoMObject
     {
         [Description("The root directory for all BHoM Python environments.")]
-        public virtual string RootDirectory { get; set; } = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData), "BHoM", "Extensions", "Python");
+        public virtual string RootDirectory { get; set; } = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData), "BHoM", "Extensions", "PythonEnvironments");
     }
 }

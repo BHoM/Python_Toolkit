@@ -86,6 +86,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)"  "C:\\ProgramData\\BHoM\\Assemblies" /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
+
+:: create infrastructure necessary to support Python environments
+if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
+if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
+if not exist "C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py" type nul&gt;"C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py"
+
+</PostBuildEvent>
   </PropertyGroup>
 </Project>
