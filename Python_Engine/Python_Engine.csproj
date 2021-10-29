@@ -43,6 +43,9 @@
       <HintPath>C:\ProgramData\BHoM\Assemblies\Reflection_oM.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Serialiser_Engine">
+      <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\Serialiser_Engine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression.FileSystem" />
@@ -56,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compute\RemoveEnvironment.cs" />
+    <Compile Include="Compute\RunPythonMethod.cs" />
     <Compile Include="Compute\RunPythonString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentDirectory.cs" />
@@ -85,6 +89,11 @@
   <ItemGroup>
     <Folder Include="Convert\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Python\example.py" />
+    <Content Include="Python\ToBHoM.py" />
+    <Content Include="Python\__init__.py" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
@@ -94,6 +103,8 @@ if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\Progr
 if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
 if not exist "C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py" type nul&gt;"C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py"
 
-</PostBuildEvent>
+:: Move Python code over to toolkit extensions folder, redirecting output to temp log file to silence it
+robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /s /purge /xf "*.pyc" /xd "\__pycache__\" &gt; output.log
+del output.log</PostBuildEvent>
   </PropertyGroup>
 </Project>
