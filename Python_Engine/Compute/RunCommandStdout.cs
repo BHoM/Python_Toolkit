@@ -39,7 +39,7 @@ namespace BH.Engine.Python
         [Input("hideWindows", "Set to True to hide cmd windows.")]
         [Input("startDirectory", "The directory in which the command should be run.")]
         [Output("stdout", "The StandardOutput from the command that was run. If the process failed, then StandardError will be returned here instead.")]
-        public static string RunCommandStdout(string command, bool hideWindows = false, string startDirectory = null)
+        public static string RunCommandStdout(string command, bool hideWindows = true, string startDirectory = null)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
 
