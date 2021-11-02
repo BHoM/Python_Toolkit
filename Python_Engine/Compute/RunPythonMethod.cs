@@ -23,6 +23,7 @@
 using BH.oM.Base;
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -31,10 +32,6 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
         [Description("Run a BHoM Python method and return the output as a custom object.")]
         [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
         [Input("method", "The Python method to be called.")]
@@ -75,7 +72,5 @@ namespace BH.Engine.Python
 
             return Serialiser.Convert.FromJson(File.ReadAllText(tempFile)) as CustomObject;
         }
-
-        /***************************************************/
     }
 }

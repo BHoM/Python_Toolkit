@@ -22,6 +22,7 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -30,32 +31,31 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
         [Description("Remove the given BHoM Python environment.")]
         [Input("pythonEnvironment", "The name of the BHoM Python environment.")]
+        [Input("run", "Set to True to remove environment.")]
         [Output("success", "True if environment successfully removed.")]
-        public static bool RemoveEnvironment(this PythonEnvironment pythonEnvironment)
+        public static bool RemoveEnvironment(this PythonEnvironment pythonEnvironment, bool run = false)
         {
-            DirectoryInfo directory = new DirectoryInfo(pythonEnvironment.EnvironmentDirectory());
+            if (run)
+            {
+                DirectoryInfo directory = new DirectoryInfo(pythonEnvironment.EnvironmentDirectory());
 
-            try
-            {
-                directory.EnumerateFiles().ToList().ForEach(f => f.Delete());
-                directory.EnumerateDirectories().ToList().ForEach(d => d.Delete(true));
-                directory.Delete();
+                try
+                {
+                    directory.EnumerateFiles().ToList().ForEach(f => f.Delete());
+                    directory.EnumerateDirectories().ToList().ForEach(d => d.Delete(true));
+                    directory.Delete();
+                }
+                catch (System.Exception e)
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"Cannot fully remove the environment. You may have the directory, or a file within it open in another program. Original error code: {e}");
+                    return false;
+                }
+
+                return true;
             }
-            catch (System.Exception e)
-            {
-                BH.Engine.Reflection.Compute.RecordError($"Cannot fully remove the environment: {e}. Try manually deleting the {directory.FullName} directory.");
-                return false;
-            }
-            
-            return true;
+            return false;
         }
-
-        /***************************************************/
     }
 }

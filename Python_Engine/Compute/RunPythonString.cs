@@ -22,6 +22,7 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -30,10 +31,6 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
         [Description("Run a string containing Python code and return the output.")]
         [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
         [Input("pythonString", "The string containing the Python script.")]
@@ -58,7 +55,5 @@ namespace BH.Engine.Python
 
             return RunCommandStdout(cmd, hideWindows: true);
         }
-
-        /***************************************************/
     }
 }

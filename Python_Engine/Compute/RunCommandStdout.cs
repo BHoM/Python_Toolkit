@@ -21,19 +21,13 @@
  */
 
 using BH.oM.Reflection.Attributes;
-using System.Collections.Generic;
+
 using System.ComponentModel;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
         [Description("Run a command via CMD and return stdout.")]
         [Input("command", "The command to be run.")]
         [Input("hideWindows", "Set to True to hide cmd windows.")]
@@ -69,7 +63,5 @@ namespace BH.Engine.Python
 
             return stdout;
         }
-
-        /***************************************************/
     }
 }

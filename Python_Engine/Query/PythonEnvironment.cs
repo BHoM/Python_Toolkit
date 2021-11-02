@@ -22,37 +22,27 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
-using System.IO;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
-        [Description("Return the Python environment for the given BHoM Python environment.")]
+        [Description("Return the Python environment for the names BHoM Python environment.")]
         [Input("name", "The name of the BHoM Python environment to search for.")]
         [Output("pythonEnvironment", "The BHoM Python environment.")]
-        public static PythonEnvironment PythonEnvironment(this string name)
+        public static PythonEnvironment LoadPythonEnvironment(this string name)
         {
-            PythonEnvironment pythonEnvironment = new PythonEnvironment()
-            { 
+            PythonEnvironment pythonEnvironment = new PythonEnvironment
+            {
                 Name = name
             };
-            if (Directory.Exists(Path.Combine(pythonEnvironment.RootDirectory, name)))
-            {
-                return pythonEnvironment;
-            }
-            else
-            {
-                return null;
-            }
-        }
+            pythonEnvironment.Version = Version(pythonEnvironment);
+            pythonEnvironment.Packages = InstalledPackages(pythonEnvironment);
 
-        /***************************************************/
+            return pythonEnvironment;
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-///*
+//
 // * This file is part of the Buildings and Habitats object Model (BHoM)
 // * Copyright (c) 2015 - 2021, the respective contributors. All rights reserved.
 // *
@@ -18,30 +18,43 @@
 // *                                                                            
 // * You should have received a copy of the GNU Lesser General Public License     
 // * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
-// */
+// 
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
-        [Description("Run a string containing Python code and return the output.")]
-        [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
-        [Input("pythonScript", "A path to a Python script.")]
-        [Output("result", "The stdout data from the executed Python script.")]
-        public static string RunPythonScript(PythonEnvironment pythonEnvironment, string pythonScript)
+        [Description("Determine whether one list of PythonPackages matches another list of PythonPackages.")]
+        [Input("packages1", "The first list of PythonPackages.")]
+        [Input("packages2", "The second list of PythonPackages.")]
+        [Output("matching", "True if the lists match.")]
+        public static bool DoPackagesMatch(this List<PythonPackage> packages1, List<PythonPackage> packages2)
         {
-            string pythonExecutable = pythonEnvironment.PythonExecutable();
+            bool contains = true;
+            
+            foreach (PythonPackage pkg1 in packages1)
+            {
+                if (!packages2.PackageInList(pkg1))
+                {
+                    contains = false;
+                }
+            }
 
-            string cmd = $"{pythonExecutable} {pythonScript}";
+            foreach (PythonPackage pkg2 in packages2)
+            {
+                if (!packages1.PackageInList(pkg2))
+                {
+                    contains = false;
+                }
+            }
 
-            return RunCommandStdout(cmd, hideWindows: true);
+            return contains;
         }
     }
 }

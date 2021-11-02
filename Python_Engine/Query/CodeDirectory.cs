@@ -22,8 +22,8 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
-using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -40,7 +40,7 @@ namespace BH.Engine.Python
                 return null;
             }
 
-            string codeDirectory = System.IO.Path.Combine(pythonEnvironment.CodeDirectory, pythonEnvironment.Name);
+            string codeDirectory = System.IO.Path.Combine(Query.CodesDirectory(), pythonEnvironment.Name);
 
             if (!System.IO.Directory.Exists(codeDirectory))
             {

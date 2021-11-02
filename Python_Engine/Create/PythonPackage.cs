@@ -22,34 +22,40 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
 using System.Linq;
+using System;
 
 namespace BH.Engine.Python
 {
     public static partial class Create
     {
-        [Description("Create the BHoM Python environment directory.")]
-        [Input("pythonEnvironment", "A BHoM Python environment object.")]
-        [Output("environmentDirectory", "The full path to the BHoM Python environment.")]
-        private static string EnvironmentDirectory(this PythonEnvironment pythonEnvironment)
+        [Description("Create a BHoM Python package, with additional checks to ensure that it is a valid object.")]
+        [Input("name", "The name of the Python package, used to install via Pip.")]
+        [Input("version", "The version of the package.")]
+        [Output("package", "A BHoM PythonPackage object.")]
+        public static PythonPackage PythonPackage(string name, string version)
         {
-            if (System.String.IsNullOrEmpty(pythonEnvironment.Name))
+            if (name == "" || version == "")
             {
-                BH.Engine.Reflection.Compute.RecordError($"The given PythonEnvironment hasn't got a name.");
+                BH.Engine.Reflection.Compute.RecordError($"The package name or version is not valid.");
                 return null;
             }
 
-            if (pythonEnvironment.Name.Any(x => System.Char.IsWhiteSpace(x)))
+            if (name.Any(x => Char.IsWhiteSpace(x)))
             {
-                BH.Engine.Reflection.Compute.RecordError($"The given PythonEnvironment name cannot contain whitespace characters.");
+                BH.Engine.Reflection.Compute.RecordError($"A PythonPackage name cannot contain whitespace characters.");
                 return null;
             }
 
-            string environmentDirectory = System.IO.Path.Combine(pythonEnvironment.RootDirectory, pythonEnvironment.Name);
-            System.IO.Directory.CreateDirectory(environmentDirectory);
+            if (version.Any(x => Char.IsWhiteSpace(x)))
+            {
+                BH.Engine.Reflection.Compute.RecordError($"A PythonPackage version cannot contain whitespace characters.");
+                return null;
+            }
 
-            return environmentDirectory;
+            return new PythonPackage() { Name = name, Version = version };
         }
     }
 }

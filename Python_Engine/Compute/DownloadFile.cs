@@ -21,6 +21,7 @@
  */
 
 using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
 using System.IO;
 
@@ -28,15 +29,11 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
         [Description("Download a file using CURL.")]
         [Input("url", "URL to file.")]
         [Input("directory", "The directory into which the file should be saved.")]
         [Input("force", "If the file already exists, overwrite it.")]
-        [Output("file", "The path to the downloaded file.")]
+        [Output("path", "The path to the downloaded file.")]
         public static string DownloadFile(string url, string directory = null, bool force = false)
         {
             directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
@@ -56,7 +53,5 @@ namespace BH.Engine.Python
 
             return null;
         }
-
-        /***************************************************/
     }
 }

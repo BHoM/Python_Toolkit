@@ -22,43 +22,39 @@
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
-        [Description("Query the given BHoM Python environment for existence of the given package.")]
-        [Input("pythonEnvironment", "The BHoM Python environment.")]
-        [Input("package", "The package to check the environment for.")]
-        [Output("isInstalled", "True if package is installed.")]
-        public static bool IsPackageInstalled(this PythonEnvironment pythonEnvironment, string package)
+        [Description("Query for the existence of a BHoM Python environment.")]
+        [Input("pythonEnvironment", "The PythonEnvironment to check for.")]
+        [Output("isInstalled", "True if environment is installed.")]
+        public static bool IsInstalled(this PythonEnvironment pythonEnvironment)
         {
-            if (!package.Contains("=="))
+            if (!Directory.Exists(Path.Combine(Query.EnvironmentsDirectory(), pythonEnvironment.Name)) && !File.Exists(Path.Combine(Query.EnvironmentsDirectory(), pythonEnvironment.Name, "python.exe")))
             {
-                BH.Engine.Reflection.Compute.RecordError($"BHoM Python environments should be specific with the version of each package being used. Your {package} package must include a version number.");
                 return false;
             }
+            return true;
+        }
 
-            List<string> installedPackages = pythonEnvironment.InstalledPackages();
-
-            if (installedPackages.Contains(package))
+        [Description("Query for the existence of a package in a given BHoM Python environment.")]
+        [Input("pythonEnvironment", "The PythonEnvironment to check for a specific PythonPackage.")]
+        [Input("package", "A BHoM PythonPackage object.")]
+        [Output("isInstalled", "True if package is installed.")]
+        public static bool IsInstalled(this PythonEnvironment pythonEnvironment, PythonPackage package)
+        {
+            List<PythonPackage> packages = pythonEnvironment.InstalledPackages();
+            if (packages.PackageInList(package))
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
-
-        /***************************************************/
     }
 }

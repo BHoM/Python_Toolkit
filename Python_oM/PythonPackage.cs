@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
  * Copyright (c) 2015 - 2021, the respective contributors. All rights reserved.
  *
@@ -20,42 +20,15 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
 
+using BH.oM.Base;
 using System.ComponentModel;
-using System.IO;
 
-namespace BH.Engine.Python
+namespace BH.oM.Python
 {
-    public static partial class Query
+    public class PythonPackage : BHoMObject
     {
-        [Description("Return the Python executable for the given BHoM Python environment.")]
-        [Input("pythonEnvironment", "A BHoM Python environment object.")]
-        [Output("pythonExecutable", "The executable associated with the given BHoM Python environment.")]
-        public static string PythonExecutable(this PythonEnvironment pythonEnvironment)
-        {
-            string environmentDirectory = Query.EnvironmentDirectory(pythonEnvironment);
-            if (!Directory.Exists(environmentDirectory))
-            {
-                return null;
-            }
-            string[] files = Directory.GetFiles(environmentDirectory, "python.exe", SearchOption.AllDirectories);
-            if (files.Length == 1)
-            {
-                return files[0];
-            }
-            else if (files.Length > 1)
-            {
-                BH.Engine.Reflection.Compute.RecordError($"More than one Python executable was found in {environmentDirectory}!");
-                return files[0];
-            }
-            else
-            {
-                BH.Engine.Reflection.Compute.RecordError($"No Python executable was found in {environmentDirectory}.");
-                return null;
-            }
-        }
+        [Description("The version of Python package.")]
+        public virtual string Version { get; set; } = "";
     }
 }
-
