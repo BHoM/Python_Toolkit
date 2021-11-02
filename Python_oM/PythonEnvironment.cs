@@ -22,16 +22,18 @@
 
 
 using BH.oM.Base;
+using BH.oM.Python.Enums;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace BH.oM.Python
 {
     public class PythonEnvironment : BHoMObject
     {
-        [Description("The root directory for all BHoM Python environments.")]
-        public virtual string RootDirectory { get; set; } = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData), "BHoM", "Extensions", "PythonEnvironments");
+        [Description("The version of Python used for this PythonEnvironment.")]
+        public virtual PythonVersion Version { get; set; } = PythonVersion.Undefined;
 
-        [Description("The root directory for all BHoM Python code.")]
-        public virtual string CodeDirectory { get; set; } = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData), "BHoM", "Extensions", "PythonCode");
+        [Description("A list of packages installed in this PythonEnvironment")]
+        public virtual List<PythonPackage> Packages { get; set; } = new List<PythonPackage>();
     }
 }

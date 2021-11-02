@@ -26,28 +26,40 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
         [Description("List the available packages within the given BHoM Python environment.")]
         [Input("pythonEnvironment", "A BHoM Python environment.")]
         [Output("packages", "A list of installed packages.")]
-        public static List<string> InstalledPackages(this PythonEnvironment pythonEnvironment)
+        public static List<PythonPackage> InstalledPackages(this PythonEnvironment pythonEnvironment)
         {
             string tempPackageFile = Path.Combine(Path.GetTempPath(), "packages.txt");
             string command = $"{pythonEnvironment.PythonExecutable()} -m pip freeze > {tempPackageFile}";
+            
             Compute.RunCommandBool(command, hideWindows: true);
 
             List<string> installedPackages = new List<string>(File.ReadAllLines(tempPackageFile));
             File.Delete(tempPackageFile);
 
-            return installedPackages;
+            List<PythonPackage> packages = new List<PythonPackage>();
+            foreach (string pkgString in installedPackages)
+            {
+                string[] parts = pkgString.Split(new string[] { "==" }, StringSplitOptions.None);
+
+                packages.Add(
+                    new PythonPackage()
+                    {
+                        Name = parts.First(),
+                        Version = parts.Last(),
+                    }
+                );
+            }
+
+            return packages;
         }
 
         /***************************************************/

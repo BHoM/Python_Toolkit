@@ -20,8 +20,10 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Python.Enums;
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
 using System.Linq;
 
@@ -29,21 +31,22 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
-
         [Description("Return the Python version of the current BHoM Python environment.")]
         [Input("pythonEnvironment", "A BHoM Python environment.")]
         [Output("version", "The version of Python installed in the given Python environment.")]
-        public static string Version(this PythonEnvironment pythonEnvironment)
+        public static PythonVersion Version(this PythonEnvironment pythonEnvironment)
         {
             string command = $"{pythonEnvironment.PythonExecutable()} --version";
-            string versionString = Compute.RunCommandStdout(command, hideWindows: true);
-
-            return versionString.Split(' ').Last().Trim();
+            string output = Compute.RunCommandStdout(command, hideWindows: true);
+            if (output.StartsWith("'--version"))
+            {
+                return PythonVersion.Undefined;
+            }
+            else
+            {
+                string versionString = $"v{output.Split(' ').Last().Trim().Replace(".", "_")}";
+                return (PythonVersion)System.Enum.Parse(typeof(PythonVersion), versionString);
+            }
         }
-
-        /***************************************************/
     }
 }

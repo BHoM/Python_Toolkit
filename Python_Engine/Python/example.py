@@ -7,7 +7,7 @@ def example_method(a: int, b: int):
     """
     This is an example method.
     """
-    return [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]]
+    return "hello there"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

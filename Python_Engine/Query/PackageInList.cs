@@ -1,4 +1,4 @@
-///*
+//
 // * This file is part of the Buildings and Habitats object Model (BHoM)
 // * Copyright (c) 2015 - 2021, the respective contributors. All rights reserved.
 // *
@@ -18,30 +18,33 @@
 // *                                                                            
 // * You should have received a copy of the GNU Lesser General Public License     
 // * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
-// */
+// 
 
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
-
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
-        [Description("Run a string containing Python code and return the output.")]
-        [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
-        [Input("pythonScript", "A path to a Python script.")]
-        [Output("result", "The stdout data from the executed Python script.")]
-        public static string RunPythonScript(PythonEnvironment pythonEnvironment, string pythonScript)
+        [Description("Query for the existence of a PythonPackage in a list of PythonPackages.")]
+        [Input("packages", "A list of PythonPackages.")]
+        [Input("package", "A BHoM PythonPackage to check for in the input list.")]
+        [Output("isContaining", "True if package is in input list.")]
+        public static bool PackageInList(this List<PythonPackage> packages, PythonPackage package)
         {
-            string pythonExecutable = pythonEnvironment.PythonExecutable();
-
-            string cmd = $"{pythonExecutable} {pythonScript}";
-
-            return RunCommandStdout(cmd, hideWindows: true);
+            foreach (PythonPackage pkg in packages)
+            {
+                if ((pkg.Name == package.Name) && (pkg.Version == package.Version))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

@@ -28,7 +28,7 @@ class ToBHoM(object):
     """Decorator method to serialise data output from Python method into a BHoM readable JSON format."""
 
     def __init__(self):
-        self.filename = Path(gettempdir()) / f"bhom_python_{uuid4()}.json"
+        self.filename = Path(f"C:/Temp/bhom_python_{uuid4()}.json")
         self.method_input = input
 
     def __call__(self, func):
