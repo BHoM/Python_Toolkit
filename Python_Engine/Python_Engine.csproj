@@ -110,7 +110,10 @@ if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\Progr
 if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
 if not exist "C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py" type nul&gt;"C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py"
 
-:: Move Python code over to toolkit extensions folder, redirecting output to temp log file to silence it
+:: remove any existing within target directory for current toolkits Python code
+if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /S /Q
+
+:: move Python code over to toolkit extensions folder, redirecting output to temp log file to silence it
 robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /s /purge /xf "*.pyc" /xd "\__pycache__\" &gt; output.log
 del output.log</PostBuildEvent>
   </PropertyGroup>
