@@ -41,34 +41,29 @@ namespace BH.Engine.Python
         [Output("pythonEnvironment", "The BHoM PythonEnvironment object, now with more packages!")]
         public static PythonEnvironment InstallPythonPackages(this PythonEnvironment pythonEnvironment, List<PythonPackage> packages, bool force = false, bool run = false)
         {
-            if (run)
+            if (!run)
+                return null;
+            if (Query.LoadPythonEnvironment(pythonEnvironment.Name) == null)
             {
-                if (Query.LoadPythonEnvironment(pythonEnvironment.Name) == null)
-                {
-                    BH.Engine.Reflection.Compute.RecordError("The environment given doesn't exist.");
-                    return null;
-                }
-
-                List<string> packagesStrings = new List<string>();
-                foreach (PythonPackage package in packages)
-                {
-                    packagesStrings.Add(package.GetString());
-                }
-                if (packagesStrings.Count() > 0)
-                {
-                    string command = $"{Query.PythonExecutable(pythonEnvironment)} -m pip install --no-warn-script-location{(force ? " --force-reinstall" : "")} {String.Join(" ", packagesStrings)} > {Path.Combine(pythonEnvironment.EnvironmentDirectory(), "package_install.log")} && exit";
-                    if (!Compute.RunCommandBool(command, hideWindows: true))
-                    {
-                        BH.Engine.Reflection.Compute.RecordError($"Packages not installed for some reason.");
-                        return null;
-                    }
-                }
-                return pythonEnvironment;
-            }
-            else
-            {
+                BH.Engine.Reflection.Compute.RecordError("The environment given doesn't exist.");
                 return null;
             }
+
+            List<string> packagesStrings = new List<string>();
+            foreach (PythonPackage package in packages)
+            {
+                packagesStrings.Add(package.GetString());
+            }
+            if (packagesStrings.Count() > 0)
+            {
+                string command = $"{Query.PythonExecutable(pythonEnvironment)} -m pip install --no-warn-script-location{(force ? " --force-reinstall" : "")} {String.Join(" ", packagesStrings)} > {Path.Combine(pythonEnvironment.EnvironmentDirectory(), "package_install.log")} && exit";
+                if (!Compute.RunCommandBool(command, hideWindows: true))
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"Packages not installed for some reason.");
+                    return null;
+                }
+            }
+            return pythonEnvironment;
         }
     }
 }
