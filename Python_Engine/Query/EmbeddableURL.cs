@@ -33,7 +33,7 @@ namespace BH.Engine.Python
         [Description("Get the URL for the embeddable package containing the given version of Python.")]
         [Input("version", "The version of Python to retrieve the URL.")]
         [Output("url", "The url for the matching Python version.")]
-        public static string EmbeddableURL(this PythonVersion pythonVersion)
+        public static string EmbeddableURL(this PythonVersion version)
         {
             Dictionary<PythonVersion, string> versions = new Dictionary<PythonVersion, string>()
             {
@@ -76,7 +76,7 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_10_0, "https://www.python.org/ftp/python/3.10.0/python-3.10.0-embed-amd64.zip" },
             };
 
-            return versions[pythonVersion];
+            return versions[version];
         }
     }
 }
