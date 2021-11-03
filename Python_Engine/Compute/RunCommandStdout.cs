@@ -58,10 +58,10 @@ namespace BH.Engine.Python
 
             if (process.ExitCode != 0)
             {
-                return stderr;
+                return stderr.Trim();
             }
 
-            return stdout;
+            return stdout.Trim();
         }
     }
 }
