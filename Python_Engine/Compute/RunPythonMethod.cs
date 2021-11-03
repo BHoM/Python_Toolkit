@@ -68,7 +68,7 @@ namespace BH.Engine.Python
                 }
             }
 
-            string tempFile = RunCommandStdout(cmd, hideWindows: true).Trim();
+            string tempFile = RunCommandStdout(cmd, hideWindows: true);
 
             return Serialiser.Convert.FromJson(File.ReadAllText(tempFile)) as CustomObject;
         }
