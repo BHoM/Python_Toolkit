@@ -27,7 +27,7 @@ using System.ComponentModel;
 
 namespace BH.Engine.Python
 {
-    public static partial class Create
+    public static partial class Convert
     {
         [Description("Get the string representation of BHoM PythonPackage object.")]
         [Input("package", "A BHoM PythonPackage object.")]

@@ -20,13 +20,16 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
  */
 
+using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("The location where Python_Toolkit associated code and environments resides.")]
+        [Description("The location where Python_Toolkit associated code and environments reside.")]
+        [Output("The location where Python_Toolkit associated code and environments resides")]
         public static string RootDirectory()
         {
             return @"C:\ProgramData\BHoM\Extensions";

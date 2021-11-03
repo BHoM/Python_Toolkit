@@ -20,6 +20,8 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
  */
 
+using BH.oM.Reflection.Attributes;
+
 using System.ComponentModel;
 using System.IO;
 
@@ -28,6 +30,7 @@ namespace BH.Engine.Python
     public static partial class Query
     {
         [Description("The location where any Python_Toolkit generated environments code resides.")]
+        [Output("The location where all BHoM Python code for toolkits is stored.")]
         public static string CodesDirectory()
         { 
             return Path.Combine(Query.RootDirectory(), "PythonCode");
