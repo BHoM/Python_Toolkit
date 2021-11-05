@@ -20,28 +20,85 @@
 // * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
 // */
 
+using BH.oM.Base;
 using BH.oM.Python;
 using BH.oM.Reflection.Attributes;
 
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Run a string containing Python code and return the output.")]
+        [Description("Run a Python script using the given BHoM PythonEnvironment, and return a BHoM object containing results.")]
         [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
-        [Input("pythonScript", "A path to a Python script.")]
-        [Output("result", "The stdout data from the executed Python script.")]
-        public static string RunPythonScript(PythonEnvironment pythonEnvironment, string pythonScript)
+        [Input("pythonScript", "A path to a Python script (a *.py file containing a __main__ executable function).")]
+        [Input("arguments", "A list of optional arguments to pass to the script.")]
+        [Output("obj", "A BHoM CustomObject containing results from this script.")]
+        public static CustomObject RunPythonScript(PythonEnvironment pythonEnvironment, string pythonScript, List<string> arguments = null)
         {
             string pythonExecutable = pythonEnvironment.PythonExecutable();
+            if (pythonExecutable is null)
+            {
+                return null;
+            }
+
+            if (!File.Exists(pythonScript))
+            {
+                BH.Engine.Reflection.Compute.RecordError($"{pythonScript} does not exist.");
+                return null;
+            }
+
+            string contents = File.ReadAllText(pythonScript);
+            List<string> executableStrings = new List<string>()
+            {
+                "if __name__ == \"__main__\":",
+                "if __name__ is \"__main__\":",
+                "if __name__ == '__main__':",
+                "if __name__ is '__main__':",
+                "if __name__ == \'__main__\':",
+                "if __name__ is \'__main__\':",
+            };
+            if (!executableStrings.Any(contents.Contains))
+            {
+                BH.Engine.Reflection.Compute.RecordError($"The script passed does not seem to be directly executable using Python. It should contain an 'if __name__ == \"__main__\"' to enable the file to be called directly.");
+                return null;
+            }
 
             string cmd = $"{pythonExecutable} {pythonScript}";
+            if (arguments.Count > 0)
+            {
+                for (int i = 0; i < arguments.Count; i++)
+                {
+                    cmd += $" {arguments[i]}";
+                }
+            }
 
-            return RunCommandStdout(cmd, hideWindows: true);
+            string tempFile = RunCommandStdout(cmd, hideWindows: true);
+            string tempFileContent = File.ReadAllText(tempFile);
+
+            // TODO - determine if -h was passed, if the output was erroneous, or if it's a valid output type
+
+            try
+            {
+                return Serialiser.Convert.FromJson(File.ReadAllText(tempFile)) as CustomObject;
+            }
+            catch (System.Exception)
+            {
+                // return error that cannot be serialised into the object
+                BH.Engine.Reflection.Compute.RecordError("Something else entirely.");
+                CustomObject co = new CustomObject()
+                {
+                    CustomData = new Dictionary<string, object>()
+                    { 
+                        { "output", (object)File.ReadAllText(tempFile) } 
+                    }
+                };
+                return co;
+            }
         }
     }
 }

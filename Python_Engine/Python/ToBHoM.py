@@ -4,6 +4,7 @@ import sys
 from datetime import datetime, date
 from pathlib import Path
 import numpy as np
+import inspect
 import pandas as pd
 from uuid import uuid4
 import socket
@@ -32,7 +33,7 @@ class ToBHoM(object):
         self.method_input = input
 
     def __call__(self, func):
-        """Serialise the output of the function to a json file
+        """Serialise the output of the function to a JSON file
 
         Args:
             func (method): A Python function that returns an object that is JSON serialisable.
@@ -54,13 +55,13 @@ class ToBHoM(object):
                 "Data": result,
                 "EndTime": end_time,
                 "Errors": [str(i) for i in errors],
-                "FileName": Path(__file__).as_posix(),
+                "FileName": Path(inspect.getfile(func)).as_posix(),
                 "SelectedItem": func.__name__,
                 "StartTime": start_time,
                 "UI": Path(sys.executable).as_posix(),
                 "UiVersion": sys.version,
             }
-            # TODO - make this json dump into an in-memory location to save on file IO overhead.
+            # TODO - make this JSON dump into an in-memory location to save on file IO overhead.
             with open(self.filename, "w+") as fp:
                 dump(d, fp, cls=CustomEncoder)
 

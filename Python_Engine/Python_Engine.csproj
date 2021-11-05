@@ -67,7 +67,6 @@
     <Compile Include="Compute\InstallPythonPackages.cs" />
     <Compile Include="Compute\InstallPythonEnvironment.cs" />
     <Compile Include="Compute\RemoveEnvironment.cs" />
-    <Compile Include="Compute\RunPythonMethod.cs" />
     <Compile Include="Compute\RunPythonString.cs" />
     <Compile Include="Create\PythonPackage.cs" />
     <Compile Include="Query\CodesDirectory.cs" />
@@ -103,7 +102,8 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Python\example.py" />
+    <Content Include="Python\example2.py" />
+    <Content Include="Python\example1.py" />
     <Content Include="Python\ToBHoM.py" />
     <Content Include="Python\__init__.py" />
   </ItemGroup>
