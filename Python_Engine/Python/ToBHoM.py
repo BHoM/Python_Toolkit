@@ -22,6 +22,8 @@ class CustomEncoder(JSONEncoder):
             return obj.to_dict()
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
+        if isinstance(obj, Path):
+            return obj.as_posix()
         return JSONEncoder.default(self, obj)
 
 
