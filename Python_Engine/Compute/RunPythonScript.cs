@@ -78,26 +78,30 @@ namespace BH.Engine.Python
             }
 
             string tempFile = RunCommandStdout(cmd, hideWindows: true);
-            string tempFileContent = File.ReadAllText(tempFile);
 
-            // TODO - determine if -h was passed, if the output was erroneous, or if it's a valid output type
-
-            try
+            if (!File.Exists(tempFile))
             {
-                return Serialiser.Convert.FromJson(File.ReadAllText(tempFile)) as CustomObject;
-            }
-            catch (System.Exception)
-            {
-                // return error that cannot be serialised into the object
-                BH.Engine.Reflection.Compute.RecordError("Something else entirely.");
-                CustomObject co = new CustomObject()
+                if (arguments.Contains("-h"))
+                {
+                    BH.Engine.Reflection.Compute.RecordNote($"It looks like you've asked for some documentation. Here it is!");
+                }
+                else
+                {
+                    BH.Engine.Reflection.Compute.RecordError($"Something went wrong! Here is the error message returned by the Python code.");
+                }
+                
+                return new CustomObject()
                 {
                     CustomData = new Dictionary<string, object>()
-                    { 
-                        { "output", (object)File.ReadAllText(tempFile) } 
+                    {
+                        { "output", (object)tempFile }
                     }
                 };
-                return co;
+            }
+            else
+            {
+                string tempFileContent = File.ReadAllText(tempFile);
+                return Serialiser.Convert.FromJson(tempFileContent) as CustomObject;
             }
         }
     }
