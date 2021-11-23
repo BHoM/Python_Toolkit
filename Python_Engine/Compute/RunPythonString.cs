@@ -35,7 +35,7 @@ namespace BH.Engine.Python
         [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
         [Input("pythonString", "The string containing the Python script.")]
         [Output("result", "The stdout data from the executed Python script.")]
-        public static string RunPythonString(PythonEnvironment pythonEnvironment, string pythonString)
+        public static string RunPythonString(this PythonEnvironment pythonEnvironment, string pythonString)
         {
             string pythonExecutable = pythonEnvironment.PythonExecutable();
 

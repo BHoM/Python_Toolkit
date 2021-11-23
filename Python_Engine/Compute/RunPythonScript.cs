@@ -38,7 +38,7 @@ namespace BH.Engine.Python
         [Input("pythonScript", "A path to a Python script (a *.py file containing a __main__ executable function).")]
         [Input("arguments", "A list of optional arguments to pass to the script.")]
         [Output("obj", "A BHoM CustomObject containing results from this script.")]
-        public static CustomObject RunPythonScript(PythonEnvironment pythonEnvironment, string pythonScript, List<string> arguments = null)
+        public static CustomObject RunPythonScript(this PythonEnvironment pythonEnvironment, string pythonScript, List<string> arguments = null)
         {
             string pythonExecutable = pythonEnvironment.PythonExecutable();
             if (pythonExecutable is null)
@@ -87,7 +87,7 @@ namespace BH.Engine.Python
                 }
                 else
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"Something went wrong! Here is the error message returned by the Python code.");
+                    BH.Engine.Reflection.Compute.RecordError($"Something went wrong! The object returned contains the error message given by the Python code.");
                 }
                 
                 return new CustomObject()

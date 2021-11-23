@@ -69,6 +69,7 @@
     <Compile Include="Compute\RemoveEnvironment.cs" />
     <Compile Include="Compute\RunPythonString.cs" />
     <Compile Include="Create\PythonPackage.cs" />
+    <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\CodesDirectory.cs" />
     <Compile Include="Query\EnvironmentsDirectory.cs" />
     <Compile Include="Query\ToolkitName.cs" />
