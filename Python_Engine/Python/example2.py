@@ -8,7 +8,7 @@ from typing import Dict, List, Union
 
 @ToBHoM()
 def example_method_2(save_path: Path, n_steps: int = 25) -> Path:
-    """ An example method to generate a chart.
+    """ An example method to generates a chart and returns a dictionary.
 
     Arguments:
         save_path (Path): The path where the generated chart should be saved.

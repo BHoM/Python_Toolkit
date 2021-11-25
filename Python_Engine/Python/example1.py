@@ -4,7 +4,7 @@ import argparse
 
 @ToBHoM()
 def example_method_1(a: int = 23, b: int = 42) -> str:
-    """ An example method to generate some text.
+    """ An example method that generates and returns some text.
 
     Arguments:
         a (int): The first number. Default is 23.
