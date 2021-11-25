@@ -63,9 +63,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compute\InstallPythonToolkit.cs" />
-    <Compile Include="Compute\InstallPythonPackages.cs" />
     <Compile Include="Compute\InstallPythonEnvironment.cs" />
+    <Compile Include="Compute\InstallPythonPackages.cs" />
+    <Compile Include="Compute\InstallToolkitPythonEnvironment.cs" />
     <Compile Include="Compute\RemoveEnvironment.cs" />
     <Compile Include="Compute\RunPythonString.cs" />
     <Compile Include="Create\PythonPackage.cs" />
