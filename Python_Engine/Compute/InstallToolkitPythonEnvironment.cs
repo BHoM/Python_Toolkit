@@ -39,6 +39,8 @@ namespace BH.Engine.Python
         [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
         public static PythonEnvironment InstallToolkitPythonEnvironment(this PythonEnvironment pythonEnvironment, bool force = false, bool run = false)
         {
+            BH.Engine.Reflection.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name}.");
+
             if (!run)
                 return null;
 
