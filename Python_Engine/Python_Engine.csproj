@@ -38,7 +38,7 @@
     </Reference>
     <Reference Include="Python.Runtime, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\Python.Runtime.dll</HintPath>
+      <HintPath>C:\ProgramData\BHoM\Assemblies\ProgramData\BHoM\Assemblies\Python.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Reflection_Engine">
