@@ -99,6 +99,7 @@
     <ProjectReference Include="..\Python_oM\Python_oM.csproj">
       <Project>{3BF9F725-F1CA-432F-A549-557324CAFB91}</Project>
       <Name>Python_oM</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
