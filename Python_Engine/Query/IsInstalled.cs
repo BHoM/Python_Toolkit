@@ -56,5 +56,38 @@ namespace BH.Engine.Python
             }
             return false;
         }
+
+        /***************************************************/
+
+        public static bool IsPythonInstalled()
+        {
+            return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "python.exe"));
+
+        }
+
+        /***************************************************/
+
+        public static bool IsPipInstalled()
+        {
+            return File.Exists(Path.Combine(Query.EmbeddedPythonHome(), "Scripts", "pip.exe"));
+        }
+
+        /***************************************************/
+
+        public static bool IsModuleInstalled(string module)
+        {
+            if (!IsPythonInstalled())
+                return false;
+
+            module = module.Split('.')[0];
+
+            string packagesDir = Path.Combine(Query.EmbeddedPythonHome(), "Lib", "site-packages");
+            string moduleDir = Path.Combine(packagesDir, module);
+            bool installed = Directory.Exists(moduleDir) && File.Exists(Path.Combine(moduleDir, "__init__.py"));
+            installed |= File.Exists(Path.Combine(packagesDir, module.Split('_')[0] + "-Toolkit.egg-link"));
+            return installed;
+        }
+
+        /***************************************************/
     }
 }

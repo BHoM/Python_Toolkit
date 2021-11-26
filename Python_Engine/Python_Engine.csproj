@@ -36,6 +36,11 @@
       <HintPath>C:\ProgramData\BHoM\Assemblies\BHoM.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Python.Runtime, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\Python.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Reflection_Engine">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\ProgramData\BHoM\Assemblies\Reflection_Engine.dll</HintPath>
@@ -63,15 +68,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compute\DownloadPython.cs" />
+    <Compile Include="Compute\Init.cs" />
+    <Compile Include="Compute\InstallPip.cs" />
+    <Compile Include="Compute\InstallPython.cs" />
     <Compile Include="Compute\InstallPythonEnvironment.cs" />
     <Compile Include="Compute\InstallPythonPackages.cs" />
+    <Compile Include="Compute\InstallPythonToolkit.cs" />
     <Compile Include="Compute\InstallToolkitPythonEnvironment.cs" />
+    <Compile Include="Compute\Invoke.cs" />
+    <Compile Include="Compute\JupyterLab.cs" />
+    <Compile Include="Compute\PipInstall.cs" />
     <Compile Include="Compute\RemoveEnvironment.cs" />
+    <Compile Include="Compute\RunCommand.cs" />
     <Compile Include="Compute\RunPythonString.cs" />
+    <Compile Include="Compute\SetPythonHome.cs" />
+    <Compile Include="Convert\ToPython.cs" />
+    <Compile Include="Convert\ToPyTuple.cs" />
+    <Compile Include="Convert\FromPython.cs" />
     <Compile Include="Create\PythonPackage.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\CodesDirectory.cs" />
+    <Compile Include="Query\EmbeddedPythonHome.cs" />
     <Compile Include="Query\EnvironmentsDirectory.cs" />
+    <Compile Include="Query\Import.cs" />
     <Compile Include="Query\ToolkitName.cs" />
     <Compile Include="Query\RootDirectory.cs" />
     <Compile Include="Convert\GetString.cs" />
@@ -104,10 +124,16 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Compute\__init__.py" />
+    <Content Include="Convert\__init__.py" />
+    <Content Include="Create\__init__.py" />
+    <Content Include="Modify\__init__.py" />
     <Content Include="Python\example2.py" />
     <Content Include="Python\example1.py" />
     <Content Include="Python\ToBHoM.py" />
     <Content Include="Python\__init__.py" />
+    <Content Include="Query\__init__.py" />
+    <Content Include="__init__.py" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
