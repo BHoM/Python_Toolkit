@@ -137,6 +137,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
+xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
 
 :: create infrastructure necessary to support Python environments
 if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
