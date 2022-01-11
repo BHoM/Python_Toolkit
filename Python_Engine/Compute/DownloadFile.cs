@@ -20,7 +20,7 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 using System.IO;
@@ -49,7 +49,7 @@ namespace BH.Engine.Python
                 return downloadedFile;
             }
 
-            BH.Engine.Reflection.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
+            BH.Engine.Base.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
 
             return null;
         }

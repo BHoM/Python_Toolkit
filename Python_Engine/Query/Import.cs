@@ -24,7 +24,7 @@ using Python.Runtime;
 using System;
 using System.Windows.Forms;
 using System.IO;
-using BH.oM.Reflection;
+using BH.oM.Base;
 using System.Collections.Generic;
 
 namespace BH.Engine.Python
@@ -47,7 +47,7 @@ namespace BH.Engine.Python
                 if (confirmResult == DialogResult.Yes)
                 {
                     Output<bool, List<string>> result = Compute.InstallPythonToolkit(true);
-                    Reflection.Compute.RecordWarning("Python has been installed, please restart the UI or recompute the script.");
+                    Base.Compute.RecordWarning("Python has been installed, please restart the UI or recompute the script.");
                 }
                 else
                 {

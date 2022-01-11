@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 using System.IO;
@@ -49,7 +49,7 @@ namespace BH.Engine.Python
                 }
                 catch (System.Exception e)
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"Cannot fully remove the environment. You may have the directory, or a file within it open in another program. Original error code: {e}");
+                    BH.Engine.Base.Compute.RecordError($"Cannot fully remove the environment. You may have the directory, or a file within it open in another program. Original error code: {e}");
                     return false;
                 }
 

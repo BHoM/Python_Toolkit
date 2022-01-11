@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 
@@ -36,7 +36,7 @@ namespace BH.Engine.Python
         {
             if (System.String.IsNullOrEmpty(pythonEnvironment.Name))
             {
-                BH.Engine.Reflection.Compute.RecordError($"The given PythonEnvironment hasn't got a name.");
+                BH.Engine.Base.Compute.RecordError($"The given PythonEnvironment hasn't got a name.");
                 return null;
             }
 
@@ -44,7 +44,7 @@ namespace BH.Engine.Python
 
             if (!System.IO.Directory.Exists(codeDirectory))
             {
-                BH.Engine.Reflection.Compute.RecordError("This toolkits Python code doesn't seem to be installed.");
+                BH.Engine.Base.Compute.RecordError("This toolkits Python code doesn't seem to be installed.");
             }
             return codeDirectory;
         }

@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -39,7 +39,7 @@ namespace BH.Engine.Python
         [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
         public static PythonEnvironment InstallToolkitPythonEnvironment(this PythonEnvironment pythonEnvironment, bool force = false, bool run = false)
         {
-            BH.Engine.Reflection.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name}.");
+            BH.Engine.Base.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name}.");
 
             if (!run)
                 return null;
@@ -52,7 +52,7 @@ namespace BH.Engine.Python
                 {
                     if (existingEnvironment.Version != pythonEnvironment.Version)
                     {
-                        BH.Engine.Reflection.Compute.RecordError($"An environment exists with the given name, but its Python version does not match the given version. To overwrite this existing environment set \"force\" to True.");
+                        BH.Engine.Base.Compute.RecordError($"An environment exists with the given name, but its Python version does not match the given version. To overwrite this existing environment set \"force\" to True.");
                         return null;
                     }
 
@@ -62,7 +62,7 @@ namespace BH.Engine.Python
                     {
                         if (!existingPackages.PackageInList(pkg))
                         {
-                            BH.Engine.Reflection.Compute.RecordError($"An environment exists with the given name, but it doesn't contain {pkg.GetString()}. To overwrite this existing environment set \"force\" to True.");
+                            BH.Engine.Base.Compute.RecordError($"An environment exists with the given name, but it doesn't contain {pkg.GetString()}. To overwrite this existing environment set \"force\" to True.");
                             return null;
                         }
                     }
@@ -89,7 +89,7 @@ namespace BH.Engine.Python
             string installPipCommand = $"{pythonEnvironment.PythonExecutable()} {pipInstallerPy} && exit";
             if (!Compute.RunCommandBool(installPipCommand, hideWindows: true))
             {
-                BH.Engine.Reflection.Compute.RecordError($"Pip installation did not work using the command {installPipCommand}.");
+                BH.Engine.Base.Compute.RecordError($"Pip installation did not work using the command {installPipCommand}.");
                 return null;
             }
 
@@ -103,7 +103,7 @@ namespace BH.Engine.Python
                 }
                 catch (Exception e)
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"{pthFile} not found to be deleted: {e}.");
+                    BH.Engine.Base.Compute.RecordError($"{pthFile} not found to be deleted: {e}.");
                     return null;
                 }
             }
@@ -120,7 +120,7 @@ namespace BH.Engine.Python
                 }
                 catch (Exception e)
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"{libFile} not capable of being moved to {newLibFile}: {e}.");
+                    BH.Engine.Base.Compute.RecordError($"{libFile} not capable of being moved to {newLibFile}: {e}.");
                     return null;
                 }
             }

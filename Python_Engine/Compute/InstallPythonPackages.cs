@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ namespace BH.Engine.Python
                 return null;
             if (Query.LoadPythonEnvironment(pythonEnvironment.Name) == null)
             {
-                BH.Engine.Reflection.Compute.RecordError("The environment given doesn't exist.");
+                BH.Engine.Base.Compute.RecordError("The environment given doesn't exist.");
                 return null;
             }
 
@@ -59,7 +59,7 @@ namespace BH.Engine.Python
                 string command = $"{Query.PythonExecutable(pythonEnvironment)} -m pip install --no-warn-script-location{(force ? " --force-reinstall" : "")} {String.Join(" ", packagesStrings)} > {Path.Combine(pythonEnvironment.EnvironmentDirectory(), "package_install.log")} && exit";
                 if (!Compute.RunCommandBool(command, hideWindows: true))
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"Packages not installed for some reason.");
+                    BH.Engine.Base.Compute.RecordError($"Packages not installed for some reason.");
                     return null;
                 }
             }
