@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,7 +41,7 @@ namespace BH.Engine.Python
 
             if (!pythonString.Contains("print"))
             {
-                BH.Engine.Reflection.Compute.RecordWarning("Nothing is being passed to Stdout in the Python script, so nothing will be returned from this method.");
+                BH.Engine.Base.Compute.RecordWarning("Nothing is being passed to Stdout in the Python script, so nothing will be returned from this method.");
             }
 
             // place pythonScript into a temporary .py file ready to reference and run, then call using the passed executable

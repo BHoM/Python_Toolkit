@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 
@@ -36,7 +36,7 @@ namespace BH.Engine.Python
         {
             if (package.Name == "" || package.Version == "")
             {
-                BH.Engine.Reflection.Compute.RecordError("The package is not valid as it does not contain either a name or version.");
+                BH.Engine.Base.Compute.RecordError("The package is not valid as it does not contain either a name or version.");
                 return "";
             }
             return $"{package.Name}=={package.Version}";
@@ -49,7 +49,7 @@ namespace BH.Engine.Python
         {
             if (pythonEnvironment.Name == "" || pythonEnvironment.Version == oM.Python.Enums.PythonVersion.Undefined)
             {
-                BH.Engine.Reflection.Compute.RecordError("The environment is not valid as it does not contain either a name or version.");
+                BH.Engine.Base.Compute.RecordError("The environment is not valid as it does not contain either a name or version.");
                 return "";
             }
             return $"Environment: {pythonEnvironment.Name}\nVersion: {pythonEnvironment.Version}\nLocation: {Query.EnvironmentDirectory(pythonEnvironment)}";

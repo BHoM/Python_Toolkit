@@ -22,7 +22,7 @@
 
 using BH.oM.Base;
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,7 +48,7 @@ namespace BH.Engine.Python
 
             if (!File.Exists(pythonScript))
             {
-                BH.Engine.Reflection.Compute.RecordError($"{pythonScript} does not exist.");
+                BH.Engine.Base.Compute.RecordError($"{pythonScript} does not exist.");
                 return null;
             }
 
@@ -64,7 +64,7 @@ namespace BH.Engine.Python
             };
             if (!executableStrings.Any(contents.Contains))
             {
-                BH.Engine.Reflection.Compute.RecordError($"The script passed does not seem to be directly executable using Python. It should contain an 'if __name__ == \"__main__\"' to enable the file to be called directly.");
+                BH.Engine.Base.Compute.RecordError($"The script passed does not seem to be directly executable using Python. It should contain an 'if __name__ == \"__main__\"' to enable the file to be called directly.");
                 return null;
             }
 
@@ -83,11 +83,11 @@ namespace BH.Engine.Python
             {
                 if (arguments.Contains("-h"))
                 {
-                    BH.Engine.Reflection.Compute.RecordNote($"It looks like you've asked for some documentation. Here it is!");
+                    BH.Engine.Base.Compute.RecordNote($"It looks like you've asked for some documentation. Here it is!");
                 }
                 else
                 {
-                    BH.Engine.Reflection.Compute.RecordError($"Something went wrong! The object returned contains the error message given by the Python code.");
+                    BH.Engine.Base.Compute.RecordError($"Something went wrong! The object returned contains the error message given by the Python code.");
                 }
                 
                 return new CustomObject()

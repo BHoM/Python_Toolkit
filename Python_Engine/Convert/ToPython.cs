@@ -196,7 +196,7 @@ namespace BH.Engine.Python
 
         private static PyObject ToPython(this object obj)
         {
-            Engine.Reflection.Compute.RecordError($"Cannot convert to Python object of type {obj.GetType()}");
+            Engine.Base.Compute.RecordError($"Cannot convert to Python object of type {obj.GetType()}");
             return null;
         }
 

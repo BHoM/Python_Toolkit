@@ -22,7 +22,7 @@
 
 using BH.oM.Python.Enums;
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,13 +43,13 @@ namespace BH.Engine.Python
         {
             if (name.Any(x => Char.IsWhiteSpace(x)))
             {
-                BH.Engine.Reflection.Compute.RecordError($"A BHoM PythonEnvironment name cannot contain whitespace characters.");
+                BH.Engine.Base.Compute.RecordError($"A BHoM PythonEnvironment name cannot contain whitespace characters.");
                 return null;
             }
 
             if (version == PythonVersion.Undefined)
             {
-                BH.Engine.Reflection.Compute.RecordError($"The Python version chosen cannot be \"Undefined\".");
+                BH.Engine.Base.Compute.RecordError($"The Python version chosen cannot be \"Undefined\".");
                 return null;
             }
 

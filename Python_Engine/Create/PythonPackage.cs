@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Python;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 using System.Linq;
@@ -39,19 +39,19 @@ namespace BH.Engine.Python
         {
             if (name == "" || version == "")
             {
-                BH.Engine.Reflection.Compute.RecordError($"The package name or version is not valid.");
+                BH.Engine.Base.Compute.RecordError($"The package name or version is not valid.");
                 return null;
             }
 
             if (name.Any(x => Char.IsWhiteSpace(x)))
             {
-                BH.Engine.Reflection.Compute.RecordError($"A PythonPackage name cannot contain whitespace characters.");
+                BH.Engine.Base.Compute.RecordError($"A PythonPackage name cannot contain whitespace characters.");
                 return null;
             }
 
             if (version.Any(x => Char.IsWhiteSpace(x)))
             {
-                BH.Engine.Reflection.Compute.RecordError($"A PythonPackage version cannot contain whitespace characters.");
+                BH.Engine.Base.Compute.RecordError($"A PythonPackage version cannot contain whitespace characters.");
                 return null;
             }
 

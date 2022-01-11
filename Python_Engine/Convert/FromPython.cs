@@ -146,7 +146,7 @@ namespace BH.Engine.Python
 
         private static object FromPython(this object obj)
         {
-            Engine.Reflection.Compute.RecordError($"Cannot convert from Python object of type {obj.GetType()}");
+            Engine.Base.Compute.RecordError($"Cannot convert from Python object of type {obj.GetType()}");
             return null;
         }
 

@@ -22,9 +22,9 @@
 
 using System;
 using System.Collections.Generic;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 using System.ComponentModel;
-using BH.oM.Reflection;
+using BH.oM.Base;
 using System.IO;
 
 namespace BH.Engine.Python
@@ -49,7 +49,7 @@ namespace BH.Engine.Python
             Console.WriteLine("Installing python 3.7 embedded...");
             if (!Compute.InstallPython(force))
             {
-                BH.Engine.Reflection.Compute.RecordError("Coule not install Python");
+                BH.Engine.Base.Compute.RecordError("Coule not install Python");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
             installedPackages.Add("Python 3.7");
@@ -58,7 +58,7 @@ namespace BH.Engine.Python
             Console.WriteLine("Installing pip...");
             if (!Compute.InstallPip())
             {
-                BH.Engine.Reflection.Compute.RecordError("Could not install pip");
+                BH.Engine.Base.Compute.RecordError("Could not install pip");
                 return new Output<bool, List<string>> { Item1 = success, Item2 = installedPackages };
             }
 
