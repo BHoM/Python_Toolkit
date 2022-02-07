@@ -46,6 +46,7 @@ namespace BH.Engine.Python
                 new PythonPackage(){ Name="pymongo", Version="3.12.1" },
                 new PythonPackage(){ Name="SQLAlchemy", Version="1.4.27" },
                 new PythonPackage(){ Name="pyodbc", Version="4.0.32" },
+                new PythonPackage(){ Name="jupyterlab", Version="3.2.9" },
             };
 
             PythonEnvironment pythonEnvironment = Create.PythonEnvironment(Query.ToolkitName(), version, packages);

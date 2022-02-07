@@ -29,6 +29,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System;
+using static System.Environment;
+using BH.Adapter.File;
 
 namespace BH.Engine.Python
 {
@@ -59,6 +61,28 @@ namespace BH.Engine.Python
                 Version = version,
                 Packages = packages,
             };
+        }
+
+        [Description("Create a BHoM Python environment from an environment.json config file.")]
+        [Input("config", "The path to the environment.json config file.")]
+        [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
+        public static PythonEnvironment PythonEnvironment(string configJSON)
+        {
+            // load the json
+            string jsonStr = System.IO.File.ReadAllText(configJSON);
+            BH.oM.Base.CustomObject obj = (BH.oM.Base.CustomObject)BH.Engine.Serialiser.Convert.FromJson(jsonStr);
+            string version = (string)BH.Engine.Base.Query.PropertyValue(obj, "version");
+            List<Dictionary<string, string>> packages = (List<Dictionary<string, string>>)BH.Engine.Base.Query.PropertyValue(obj, "packages");
+
+            // convert to the correct dtypes
+            // TODO - Convert teh string repr of the version into the Enum Python version
+            // TODO - Convert the package dicts into the PythonPackage objects
+
+            // populate the PythonEnvironment
+            PythonEnvironment env = new PythonEnvironment();
+
+            return env;
+
         }
     }
 }
