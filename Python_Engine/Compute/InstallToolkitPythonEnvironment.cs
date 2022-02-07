@@ -44,6 +44,9 @@ namespace BH.Engine.Python
             if (!run)
                 return null;
 
+            // check that base environment exists, and if not - create it!
+            //PythonEnvironment basePythonEnvironment = new PythonEnvironment("Python_Toolkit", );
+
             // load existing environment if it matches the requested environment
             PythonEnvironment existingEnvironment = Query.LoadPythonEnvironment(pythonEnvironment.Name);
             if (existingEnvironment.IsInstalled())
