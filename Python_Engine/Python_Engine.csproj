@@ -80,7 +80,6 @@
     <Compile Include="Compute\InstallPythonEnvironment.cs" />
     <Compile Include="Compute\InstallPythonPackages.cs" />
     <Compile Include="Compute\InstallPythonToolkit.cs" />
-    <Compile Include="Compute\InstallToolkitPythonEnvironment.cs" />
     <Compile Include="Compute\Invoke.cs" />
     <Compile Include="Compute\JupyterLab.cs" />
     <Compile Include="Compute\PipInstall.cs" />
