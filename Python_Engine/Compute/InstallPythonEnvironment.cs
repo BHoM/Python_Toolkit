@@ -25,11 +25,115 @@ using BH.oM.Base.Attributes;
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [Description("Install the BHoM Python environment.")]
+        [Input("pythonEnvironment", "A BHoM Python environment.")]
+        [Input("force", "If the environment already exists recreate it rather than re-using it.")]
+        [Input("run", "Set to True to run the PythonEnvironment installer.")]
+        [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
+        public static PythonEnvironment InstallPythonEnvironment(this PythonEnvironment pythonEnvironment, bool force = false, bool run = false)
+        {
+            if (!run)
+            {
+                BH.Engine.Base.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name} if it doesn not exist, or return the eixtsing environment if it does.");
+                return null;
+            }
+
+            // load existing environment if it matches the requested environment
+            PythonEnvironment existingEnvironment = Query.LoadPythonEnvironment(pythonEnvironment.Name);
+            if (existingEnvironment.IsInstalled())
+            {
+                if (!force)
+                {
+                    if (existingEnvironment.Version != pythonEnvironment.Version)
+                    {
+                        BH.Engine.Base.Compute.RecordError($"An environment exists with the given name, but its Python version does not match the given version. To overwrite this existing environment set \"force\" to True.");
+                        return null;
+                    }
+
+                    // check that the existing environment contains the packages requested
+                    List<PythonPackage> existingPackages = existingEnvironment.Packages;
+                    foreach (PythonPackage pkg in pythonEnvironment.Packages)
+                    {
+                        if (!existingPackages.PackageInList(pkg))
+                        {
+                            BH.Engine.Base.Compute.RecordError($"An environment exists with the given name, but it doesn't contain {pkg.GetString()}. To overwrite this existing environment set \"force\" to True.");
+                            return null;
+                        }
+                    }
+                    return existingEnvironment;
+                }
+                else
+                {
+                    existingEnvironment.RemoveEnvironment(true);
+                }
+            }
+
+            // create the new environment directory
+            string environmentDirectory = pythonEnvironment.EnvironmentDirectory();
+            System.IO.Directory.CreateDirectory(environmentDirectory);
+
+            // download the target version of Python
+            string embeddablePythonZip = Compute.DownloadFile(pythonEnvironment.Version.EmbeddableURL());
+
+            // extract embeddable python into environment directory
+            System.IO.Compression.ZipFile.ExtractToDirectory(embeddablePythonZip, environmentDirectory);
+
+            // run the pip installer
+            string pipInstallerPy = Compute.DownloadFile("https://bootstrap.pypa.io/get-pip.py");
+            string installPipCommand = $"{pythonEnvironment.PythonExecutable()} {pipInstallerPy} && exit";
+            if (!Compute.RunCommandBool(installPipCommand, hideWindows: true))
+            {
+                BH.Engine.Base.Compute.RecordError($"Pip installation did not work using the command {installPipCommand}.");
+                return null;
+            }
+
+            // remove _pth file
+            List<string> pthFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
+            foreach (string pthFile in pthFiles)
+            {
+                try
+                {
+                    File.Delete(pthFile);
+                }
+                catch (Exception e)
+                {
+                    BH.Engine.Base.Compute.RecordError($"{pthFile} not found to be deleted: {e}.");
+                    return null;
+                }
+            }
+
+            // move PYD and DLL files to DLLs directory
+            string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(environmentDirectory, "DLLs")).FullName;
+            List<string> libFiles = System.IO.Directory.GetFiles(environmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
+            foreach (string libFile in libFiles)
+            {
+                string newLibFile = Path.Combine(libDirectory, Path.GetFileName(libFile));
+                try
+                {
+                    File.Move(libFile, newLibFile);
+                }
+                catch (Exception e)
+                {
+                    BH.Engine.Base.Compute.RecordError($"{libFile} not capable of being moved to {newLibFile}: {e}.");
+                    return null;
+                }
+            }
+
+            // install packages using Pip
+            pythonEnvironment = pythonEnvironment.InstallPythonPackages(pythonEnvironment.Packages, force: true, run: true);
+
+            return pythonEnvironment;
+
+        }
+
         [Description("Install the default BHoM Python_Toolkit environment.")]
         [Input("run", "Set to True to run the PythonEnvironment installer.")]
         [Input("force", "If the environment already exists recreate it rather than re-using it.")]
@@ -37,9 +141,12 @@ namespace BH.Engine.Python
         [Output("pythonEnvironment", "The default BHoM Python_Toolkit environment object.")]
         public static PythonEnvironment InstallPythonEnvironment(bool run = false, bool force = false, string configJSON = @"C:\ProgramData\BHoM\Settings\Python\Python_Toolkit.json")
         {
-            PythonEnvironment pythonEnvironment = Create.PythonEnvironment(configJSON);
+            // Install base Python environment if it doesnt already exist
+            PythonEnvironment basePythonEnvironment = Create.PythonEnvironment(@"C:\ProgramData\BHoM\Settings\Python\Python_Toolkit.json");
+            basePythonEnvironment.InstallPythonEnvironment(force, run);
 
-            return pythonEnvironment.InstallToolkitPythonEnvironment(force, run);
+            PythonEnvironment toolkitPythonEnvironment = Create.PythonEnvironment(configJSON);
+            return toolkitPythonEnvironment.InstallPythonEnvironment(force, run);
         }
     }
 }
