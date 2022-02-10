@@ -33,25 +33,13 @@ namespace BH.Engine.Python
         [Description("Install the default BHoM Python_Toolkit environment.")]
         [Input("run", "Set to True to run the PythonEnvironment installer.")]
         [Input("force", "If the environment already exists recreate it rather than re-using it.")]
+        [Input("configJSON", "Path to a config JSON containing Python environment configuration.")]
         [Output("pythonEnvironment", "The default BHoM Python_Toolkit environment object.")]
-        public static PythonEnvironment InstallPythonEnvironment(bool run = false, bool force = false)
+        public static PythonEnvironment InstallPythonEnvironment(bool run = false, bool force = false, string configJSON = @"C:\ProgramData\BHoM\Settings\Python\Python_Toolkit.json")
         {
-            oM.Python.Enums.PythonVersion version = oM.Python.Enums.PythonVersion.v3_9_7;
+            PythonEnvironment pythonEnvironment = Create.PythonEnvironment(configJSON);
 
-            List<PythonPackage> packages = new List<PythonPackage>()
-            {
-                new PythonPackage(){ Name="pandas", Version="1.3.4" },
-                new PythonPackage(){ Name="numpy", Version="1.21.3" },
-                new PythonPackage(){ Name="matplotlib", Version="3.4.3" },
-                new PythonPackage(){ Name="pymongo", Version="3.12.1" },
-                new PythonPackage(){ Name="SQLAlchemy", Version="1.4.27" },
-                new PythonPackage(){ Name="pyodbc", Version="4.0.32" },
-                new PythonPackage(){ Name="jupyterlab", Version="3.2.9" },
-            };
-
-            PythonEnvironment pythonEnvironment = Create.PythonEnvironment(Query.ToolkitName(), version, packages);
-
-            return Python.Compute.InstallToolkitPythonEnvironment(pythonEnvironment, force, run);
+            return pythonEnvironment.InstallToolkitPythonEnvironment(force, run);
         }
     }
 }
