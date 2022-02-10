@@ -100,8 +100,17 @@ namespace BH.oM.Python.Enums
         v3_9_6,
         [Description("3.9.7")]
         v3_9_7,
+        [Description("3.9.8")]
+        v3_9_8,
+        [Description("3.9.9")]
+        v3_9_9,
+        [Description("3.9.10")]
+        v3_9_10,
         [Description("3.10.0")]
         v3_10_0,
+        [Description("3.10.1")]
+        v3_10_1,
+        [Description("3.10.2")]
+        v3_10_2,
     }
 }
-

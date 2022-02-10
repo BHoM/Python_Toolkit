@@ -68,21 +68,35 @@ namespace BH.Engine.Python
         [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
         public static PythonEnvironment PythonEnvironment(string configJSON)
         {
+            string environmentName = System.IO.Path.GetFileNameWithoutExtension(configJSON);
+
             // load the json
             string jsonStr = System.IO.File.ReadAllText(configJSON);
             BH.oM.Base.CustomObject obj = (BH.oM.Base.CustomObject)BH.Engine.Serialiser.Convert.FromJson(jsonStr);
-            string version = (string)BH.Engine.Base.Query.PropertyValue(obj, "version");
-            List<Dictionary<string, string>> packages = (List<Dictionary<string, string>>)BH.Engine.Base.Query.PropertyValue(obj, "packages");
 
-            // convert to the correct dtypes
-            // TODO - Convert teh string repr of the version into the Enum Python version
-            // TODO - Convert the package dicts into the PythonPackage objects
+            string versionString = (string)BH.Engine.Base.Query.PropertyValue(obj.CustomData, "Version");
+            PythonVersion environmentVersion = (PythonVersion)Enum.Parse(typeof(PythonVersion), $"v{versionString.Replace(".", "_")}");
+
+            List<object> pkgObjects = (List<object>)BH.Engine.Base.Query.PropertyValue(obj.CustomData, "Packages");
+            List<PythonPackage> environmentPackages = new List<PythonPackage>();
+            foreach (object pkgObject in pkgObjects)
+            {
+                string pkgName = (string)BH.Engine.Base.Query.PropertyValue((BH.oM.Base.CustomObject)pkgObject, "Name");
+                string pkgVersion = (string)BH.Engine.Base.Query.PropertyValue((BH.oM.Base.CustomObject)pkgObject, "Version");
+                environmentPackages.Add(
+                        new PythonPackage() { Name = pkgName, Version = pkgVersion }
+                    );
+            }
 
             // populate the PythonEnvironment
-            PythonEnvironment env = new PythonEnvironment();
+            PythonEnvironment pythonEnvironment = new PythonEnvironment()
+            {
+                Name = environmentName,
+                Version = environmentVersion,
+                Packages = environmentPackages
+            };
 
-            return env;
-
+            return pythonEnvironment;
         }
     }
 }

@@ -73,7 +73,12 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_9_5, "https://www.python.org/ftp/python/3.9.5/python-3.9.5-embed-amd64.zip" },
                 { PythonVersion.v3_9_6, "https://www.python.org/ftp/python/3.9.6/python-3.9.6-embed-amd64.zip" },
                 { PythonVersion.v3_9_7, "https://www.python.org/ftp/python/3.9.7/python-3.9.7-embed-amd64.zip" },
+                { PythonVersion.v3_9_8, "https://www.python.org/ftp/python/3.9.8/python-3.9.8-embed-amd64.zip" },
+                { PythonVersion.v3_9_9, "https://www.python.org/ftp/python/3.9.9/python-3.9.9-embed-amd64.zip" },
+                { PythonVersion.v3_9_10, "https://www.python.org/ftp/python/3.9.10/python-3.9.10-embed-amd64.zip" },
                 { PythonVersion.v3_10_0, "https://www.python.org/ftp/python/3.10.0/python-3.10.0-embed-amd64.zip" },
+                { PythonVersion.v3_10_1, "https://www.python.org/ftp/python/3.10.1/python-3.10.1-embed-amd64.zip" },
+                { PythonVersion.v3_10_2, "https://www.python.org/ftp/python/3.10.2/python-3.10.2-embed-amd64.zip" },
             };
 
             return versions[version];
