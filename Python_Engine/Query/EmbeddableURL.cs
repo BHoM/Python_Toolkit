@@ -37,15 +37,6 @@ namespace BH.Engine.Python
         {
             Dictionary<PythonVersion, string> versions = new Dictionary<PythonVersion, string>()
             {
-                { PythonVersion.v3_6_0, "https://www.python.org/ftp/python/3.6.0/python-3.6.0-embed-amd64.zip" },
-                { PythonVersion.v3_6_1, "https://www.python.org/ftp/python/3.6.1/python-3.6.1-embed-amd64.zip" },
-                { PythonVersion.v3_6_2, "https://www.python.org/ftp/python/3.6.2/python-3.6.2-embed-amd64.zip" },
-                { PythonVersion.v3_6_3, "https://www.python.org/ftp/python/3.6.3/python-3.6.3-embed-amd64.zip" },
-                { PythonVersion.v3_6_4, "https://www.python.org/ftp/python/3.6.4/python-3.6.4-embed-amd64.zip" },
-                { PythonVersion.v3_6_5, "https://www.python.org/ftp/python/3.6.5/python-3.6.5-embed-amd64.zip" },
-                { PythonVersion.v3_6_6, "https://www.python.org/ftp/python/3.6.6/python-3.6.6-embed-amd64.zip" },
-                { PythonVersion.v3_6_7, "https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip" },
-                { PythonVersion.v3_6_8, "https://www.python.org/ftp/python/3.6.8/python-3.6.8-embed-amd64.zip" },
                 { PythonVersion.v3_7_0, "https://www.python.org/ftp/python/3.7.0/python-3.7.0-embed-amd64.zip" },
                 { PythonVersion.v3_7_1, "https://www.python.org/ftp/python/3.7.1/python-3.7.1-embed-amd64.zip" },
                 { PythonVersion.v3_7_3, "https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-amd64.zip" },
