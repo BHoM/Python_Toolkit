@@ -90,6 +90,7 @@
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Convert\ToPyTuple.cs" />
     <Compile Include="Convert\FromPython.cs" />
+    <Compile Include="Create\PythonRequirementsTxt.cs" />
     <Compile Include="Create\PythonPackage.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\CodesDirectory.cs" />
