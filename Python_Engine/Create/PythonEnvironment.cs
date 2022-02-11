@@ -29,7 +29,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System;
-using static System.Environment;
 using BH.Adapter.File;
 
 namespace BH.Engine.Python
