@@ -37,7 +37,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="BHoM_Adapter">
-      <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\BHoM_Adapter.dll</HintPath>
+      <HintPath>C:\ProgramData\BHoM\Assemblies\BHoM_Adapter.dll</HintPath>
     </Reference>
     <Reference Include="BHoM_Engine">
       <HintPath>C:\ProgramData\BHoM\Assemblies\BHoM_Engine.dll</HintPath>
@@ -45,7 +45,7 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="File_Adapter">
-      <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\File_Adapter.dll</HintPath>
+      <HintPath>C:\ProgramData\BHoM\Assemblies\File_Adapter.dll</HintPath>
     </Reference>
     <Reference Include="Python.Runtime, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
