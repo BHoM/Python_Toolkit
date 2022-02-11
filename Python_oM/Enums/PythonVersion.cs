@@ -28,24 +28,6 @@ namespace BH.oM.Python.Enums
     {
         [Description("Undefined")]
         Undefined,
-        [Description("3.6.0")]
-        v3_6_0,
-        [Description("3.6.1")]
-        v3_6_1,
-        [Description("3.6.2")]
-        v3_6_2,
-        [Description("3.6.3")]
-        v3_6_3,
-        [Description("3.6.4")]
-        v3_6_4,
-        [Description("3.6.5")]
-        v3_6_5,
-        [Description("3.6.6")]
-        v3_6_6,
-        [Description("3.6.7")]
-        v3_6_7,
-        [Description("3.6.8")]
-        v3_6_8,
         [Description("3.7.0")]
         v3_7_0,
         [Description("3.7.1")]
