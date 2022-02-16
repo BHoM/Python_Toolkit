@@ -63,7 +63,7 @@ namespace BH.Engine.Python
         }
 
         [Description("Create a BHoM Python environment from an environment.json config file.")]
-        [Input("config", "The path to the environment.json config file.")]
+        [Input("configJSON", "The path to the environment.json config file.")]
         [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
         public static PythonEnvironment PythonEnvironment(string configJSON)
         {
