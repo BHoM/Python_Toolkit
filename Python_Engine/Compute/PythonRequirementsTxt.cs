@@ -31,7 +31,7 @@ using System.Text;
 
 namespace BH.Engine.Python
 {
-    public static partial class Create
+    public static partial class Compute
     {
         [Description("Create a requirements.txt file for use in creating a Python envrionment outside of BHoM.")]
         [Input("pythonEnvironment", " A BHoM PythonEnvironment object.")]
