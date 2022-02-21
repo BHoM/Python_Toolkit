@@ -1,4 +1,2 @@
 BHoM/BHoM
 BHoM/BHoM_Engine
-BHoM/BHoM_Adapter
-BHoM/File_Toolkit
