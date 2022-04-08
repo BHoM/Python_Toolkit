@@ -44,7 +44,7 @@ namespace BH.Engine.Python
 
             if (!System.IO.Directory.Exists(codeDirectory))
             {
-                BH.Engine.Base.Compute.RecordError("This toolkits Python code doesn't seem to be installed.");
+                BH.Engine.Base.Compute.RecordError("This toolkit's Python code doesn't seem to be installed.");
             }
             return codeDirectory;
         }

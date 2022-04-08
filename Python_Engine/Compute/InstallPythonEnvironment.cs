@@ -42,7 +42,7 @@ namespace BH.Engine.Python
         {
             if (!run)
             {
-                BH.Engine.Base.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name} if it doesn not exist, or return the eixtsing environment if it does.");
+                BH.Engine.Base.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name} if it doesn't exist, or return the existing environment if it does.");
                 return null;
             }
 
