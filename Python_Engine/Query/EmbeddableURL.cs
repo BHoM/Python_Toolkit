@@ -39,6 +39,7 @@ namespace BH.Engine.Python
             {
                 { PythonVersion.v3_7_0, "https://www.python.org/ftp/python/3.7.0/python-3.7.0-embed-amd64.zip" },
                 { PythonVersion.v3_7_1, "https://www.python.org/ftp/python/3.7.1/python-3.7.1-embed-amd64.zip" },
+                { PythonVersion.v3_7_2, "https://www.python.org/ftp/python/3.7.2/python-3.7.2.post1-embed-amd64.zip" },
                 { PythonVersion.v3_7_3, "https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-amd64.zip" },
                 { PythonVersion.v3_7_4, "https://www.python.org/ftp/python/3.7.4/python-3.7.4-embed-amd64.zip" },
                 { PythonVersion.v3_7_5, "https://www.python.org/ftp/python/3.7.5/python-3.7.5-embed-amd64.zip" },

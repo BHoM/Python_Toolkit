@@ -32,6 +32,14 @@
         {
             "Name": "jupyterlab",
             "Version": "3.2.9"
+        },
+        {
+            "Name": "jupyterlab_widgets",
+            "Version": "1.0.2"
+        },
+        {
+            "Name": "black",
+            "Version": "22.3.0"
         }
     ]
 }
