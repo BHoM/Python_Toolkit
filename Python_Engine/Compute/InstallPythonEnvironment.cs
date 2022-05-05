@@ -38,12 +38,11 @@ namespace BH.Engine.Python
         [Input("force", "If the environment already exists recreate it rather than re-using it.")]
         [Input("run", "Set to True to run the PythonEnvironment installer.")]
         [Output("pythonEnvironment", "A BHoM PythonEnvironment object.")]
-        [PreviousVersion("5.1", "BH.Engine.Python.Compute.InstallToolkitPythonEnvironment(BH.oM.Python.PythonEnvironment, System.Boolean, System.Boolean)")]
         public static PythonEnvironment InstallPythonEnvironment(this PythonEnvironment pythonEnvironment, bool force = false, bool run = false)
         {
             if (!run)
             {
-                BH.Engine.Base.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name} if it doesn not exist, or return the eixtsing environment if it does.");
+                BH.Engine.Base.Compute.RecordNote($"This component will install a Python environment for {pythonEnvironment.Name} if it doesn't exist, or return the existing environment if it does.");
                 return null;
             }
 
@@ -140,7 +139,6 @@ namespace BH.Engine.Python
         [Input("force", "If the environment already exists recreate it rather than re-using it.")]
         [Input("configJSON", "Path to a config JSON containing Python environment configuration.")]
         [Output("pythonEnvironment", "The default BHoM Python_Toolkit environment object.")]
-        [PreviousVersion("5.1", "BH.Engine.Python.Compute.InstallPythonEnvironment(System.Boolean, System.Boolean)")]
         public static PythonEnvironment InstallPythonEnvironment(bool run = false, bool force = false, string configJSON = @"C:\ProgramData\BHoM\Settings\Python\Python_Toolkit.json")
         {
             // Install base Python environment if it doesnt already exist
