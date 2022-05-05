@@ -46,6 +46,9 @@ namespace BH.Engine.Python
                 return null;
             }
 
+            string basePythonExe = $"{Query.EnvironmentsDirectory()}\\Python_Toolkit\\python.exe";
+            string basePythonDir = $"{Query.EnvironmentsDirectory()}\\Python_Toolkit";
+
             // load existing environment if it matches the requested environment
             PythonEnvironment existingEnvironment = Query.LoadPythonEnvironment(pythonEnvironment.Name);
             if (existingEnvironment.IsInstalled())
@@ -129,6 +132,56 @@ namespace BH.Engine.Python
 
             // install packages using Pip
             pythonEnvironment = pythonEnvironment.InstallPythonPackages(pythonEnvironment.Packages, force: true, run: true);
+
+            // prepend PythonCode directory to Jupyter Notebook Path
+            string ipythonPrependCmd = $"\"{basePythonExe}\" -m IPython profile create\n";
+            string ipythonPrependBatPath = System.IO.Path.Combine(Path.GetTempPath(), "ipython_path_prepend.bat");
+            File.WriteAllText(ipythonPrependBatPath, ipythonPrependCmd);
+            System.Diagnostics.Process ipythonPrependProcess = new System.Diagnostics.Process();
+            ipythonPrependProcess.StartInfo = new System.Diagnostics.ProcessStartInfo(
+                "cmd.exe", "/c " + ipythonPrependBatPath
+            ) {
+                CreateNoWindow = true, 
+                UseShellExecute = false, 
+                RedirectStandardError = true, 
+                RedirectStandardOutput = true 
+            };
+            ipythonPrependProcess.Start();
+            ipythonPrependProcess.WaitForExit();
+            File.Delete(ipythonPrependBatPath);
+            File.WriteAllText(
+                $"C:\\Users\\{System.Environment.UserName}\\.ipython\\profile_default\\ipython_config.py", 
+                $"c.InteractiveShellApp.exec_lines = ['import sys; sys.path.insert(0, r\"{Query.CodesDirectory()}\")']"
+            );
+            File.WriteAllText(
+                $"C:\\Users\\{System.Environment.UserName}\\.ipython\\profile_default\\startup\\bhom_python_code.py",
+                $"import sys; sys.path.insert(0, r\"{Query.CodesDirectory()}\")"
+            );
+
+            // register environment with ipykernel
+            if (pythonEnvironment.Name != "Python_Toolkit")
+            {
+                // create the kernel for the python environment being installed and point towards the environment executable
+                string kernelCreateCmd = $"\"{basePythonExe}\" -m ipykernel install --name={pythonEnvironment.Name} --prefix \"{basePythonDir}\"\n";
+                string kernelCreateBatPath = System.IO.Path.Combine(Path.GetTempPath(), "ipykernel_register.bat");
+                File.WriteAllText(kernelCreateBatPath, kernelCreateCmd);
+                System.Diagnostics.ProcessStartInfo kernelProcessInfo = new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c " + kernelCreateBatPath);
+                kernelProcessInfo.CreateNoWindow = true;
+                kernelProcessInfo.UseShellExecute = false;
+                kernelProcessInfo.RedirectStandardError = true;
+                kernelProcessInfo.RedirectStandardOutput = true;
+                System.Diagnostics.Process kernelProcess = new System.Diagnostics.Process();
+                kernelProcess.StartInfo = kernelProcessInfo;
+                kernelProcess.Start();
+                kernelProcess.WaitForExit();
+                File.Delete(kernelCreateBatPath);
+
+                // modify kernel.json to set the path to be that of the current pythonEnvironments executable
+                string kernelConfigFile = $"{basePythonDir}\\share\\jupyter\\kernels\\{pythonEnvironment.Name.ToLower()}\\kernel.json";
+                string text = File.ReadAllText(kernelConfigFile);
+                text = text.Replace("C:\\\\ProgramData\\\\BHoM\\\\Extensions\\\\PythonEnvironments\\\\Python_Toolkit\\\\python.exe", $"C:\\\\ProgramData\\\\BHoM\\\\Extensions\\\\PythonEnvironments\\\\{pythonEnvironment.Name}\\\\python.exe");
+                File.WriteAllText(kernelConfigFile, text);
+            }
 
             return pythonEnvironment;
 
