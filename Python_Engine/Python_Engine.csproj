@@ -41,7 +41,7 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="File_Engine, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="File_Engine">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\ProgramData\BHoM\Assemblies\File_Engine.dll</HintPath>
       <Private>False</Private>
