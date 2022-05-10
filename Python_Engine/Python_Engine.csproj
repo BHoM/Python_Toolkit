@@ -43,7 +43,8 @@
     </Reference>
     <Reference Include="File_Engine, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\ProgramData\BHoM\Assemblies\File_Engine.dll</HintPath>
+      <HintPath>C:\ProgramData\BHoM\Assemblies\File_Engine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Python.Runtime, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
