@@ -20,7 +20,6 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
  */
 
-using BH.oM.Python;
 using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
@@ -29,12 +28,11 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("Query the BHoM Python environment directory.")]
-        [Input("pythonEnvironment", "A BHoM Python environment object.")]
-        [Output("environmentDirectory", "The full path to the BHoM Python environment.")]
-        public static string EnvironmentDirectory(this PythonEnvironment pythonEnvironment)
+        [Description("The location where Python_Toolkit associated code and environments reside.")]
+        [Output("The location where Python_Toolkit associated code and environments resides")]
+        public static string ExtensionsDirectory()
         {
-            return System.IO.Path.Combine(Query.EnvironmentsDirectory(), pythonEnvironment.Name);
+            return @"C:\ProgramData\BHoM\Extensions";
         }
     }
 }

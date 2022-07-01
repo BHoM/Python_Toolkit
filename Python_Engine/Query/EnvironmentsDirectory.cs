@@ -33,7 +33,7 @@ namespace BH.Engine.Python
         [Output("The location where any Python_Toolkit generated environments reside.")]
         public static string EnvironmentsDirectory()
         {
-            return Path.Combine(Query.RootDirectory(), "PythonEnvironments");
+            return Path.Combine(Query.ExtensionsDirectory(), "PythonEnvironments");
         }
     }
 }
