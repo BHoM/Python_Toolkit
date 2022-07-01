@@ -24,7 +24,7 @@ using System.ComponentModel;
 
 namespace BH.oM.Python.Enums
 {
-    public enum PythonVersion
+    public enum Version
     {
         [Description("Undefined")]
         Undefined,
