@@ -72,10 +72,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compute\InstallPythonVersion.cs" />
+    <Compile Include="Compute\RequirementsFile.cs" />
     <Compile Include="Compute\DownloadPython.cs" />
     <Compile Include="Compute\Init.cs" />
     <Compile Include="Compute\InstallPip.cs" />
     <Compile Include="Compute\InstallPython.cs" />
+    <Compile Include="Compute\InstallEnvironment.cs" />
     <Compile Include="Compute\InstallPythonEnvironment.cs" />
     <Compile Include="Compute\InstallPythonPackages.cs" />
     <Compile Include="Compute\InstallPythonToolkit.cs" />
@@ -90,6 +93,7 @@
     <Compile Include="Convert\ToPyTuple.cs" />
     <Compile Include="Convert\FromPython.cs" />
     <Compile Include="Compute\PythonRequirementsTxt.cs" />
+    <Compile Include="Create\Environment.cs" />
     <Compile Include="Create\PythonPackage.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\CodesDirectory.cs" />
@@ -112,6 +116,8 @@
     <Compile Include="Query\PackageInList.cs" />
     <Compile Include="Query\IsInstalled.cs" />
     <Compile Include="Query\PythonEnvironment.cs" />
+    <Compile Include="Query\ExecutableVersion.cs" />
+    <Compile Include="Query\ValidEnvironmentName.cs" />
     <Compile Include="Query\Version.cs" />
     <Compile Include="Query\InstalledPackages.cs" />
     <Compile Include="Query\PythonExecutable.cs" />

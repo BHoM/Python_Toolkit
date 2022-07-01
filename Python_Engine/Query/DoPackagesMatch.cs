@@ -25,6 +25,7 @@ using BH.oM.Base.Attributes;
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 
 namespace BH.Engine.Python
 {
@@ -56,6 +57,20 @@ namespace BH.Engine.Python
 
             return contains;
         }
+
+        [Description("Determine whether the packages available for a given Python executable match those listed in a given \"requirements.txt\" file.")]
+        [Input("executable", "The path to a Python executable.")]
+        [Input("requirementsFile", "The path to a \requirements.txt\" file.")]
+        [Output("matching", "True if the lists match.")]
+        public static bool DoPackagesMatch(string executable, string requirementsFile)
+        {
+            string exeRequiremnts = File.ReadAllText(Compute.RequirementsFile(executable));
+            string proposedRequirements = File.ReadAllText(requirementsFile);
+
+            if (exeRequiremnts != proposedRequirements)
+                return false;
+
+            return true;
+        }
     }
 }
-
