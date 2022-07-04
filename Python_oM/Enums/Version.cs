@@ -32,6 +32,8 @@ namespace BH.oM.Python.Enums
         v3_7_0,
         [Description("3.7.1")]
         v3_7_1,
+        [Description("3.7.2")]
+        v3_7_2,
         [Description("3.7.3")]
         v3_7_3,
         [Description("3.7.4")]
@@ -94,5 +96,11 @@ namespace BH.oM.Python.Enums
         v3_10_1,
         [Description("3.10.2")]
         v3_10_2,
+        [Description("3.10.3")]
+        v3_10_3,
+        [Description("3.10.4")]
+        v3_10_4,
+        [Description("3.10.5")]
+        v3_10_5,
     }
 }
