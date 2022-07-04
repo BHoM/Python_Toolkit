@@ -67,9 +67,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compute\CopyDirectory.cs" />
+    <Compile Include="Compute\InstallPackages.cs" />
+    <Compile Include="Compute\InstallEnvironment.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
+    <Compile Include="Query\CodeDirectory.cs" />
+    <Compile Include="Query\PythonToolkitEnvironment.cs" />
+    <Compile Include="Query\Environment.cs" />
+    <Compile Include="Query\ValidEnvironmentName.cs" />
     <Compile Include="Query\EnvironmentsDirectory.cs" />
+    <Compile Include="Query\EmbeddableURL.cs" />
     <Compile Include="Query\ExtensionsDirectory.cs" />
+    <Compile Include="Query\Packages.cs" />
+    <Compile Include="Query\Version.cs" />
     <Compile Include="Query\ToolkitName.cs" />
     <Compile Include="Compute\DownloadFile.cs" />
     <Compile Include="Compute\RunCommandBool.cs" />
@@ -94,6 +104,7 @@
     <Content Include="Python\example2.py" />
     <Content Include="Python\example1.py" />
     <Content Include="Python\ToBHoM.py" />
+    <Content Include="Python\requirements.txt" />
     <Content Include="Python\__init__.py" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -29,11 +29,11 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("The location where any BHoM generated Python environments reside.")]
-        [Output("The location where any BHoM generated Python environments reside.")]
-        public static string EnvironmentsDirectory()
+        [Description("The location where any BHoM generated Python code resides.")]
+        [Output("The location where any BHoM generated Python code resides.")]
+        public static string CodeDirectory()
         {
-            return Path.Combine(Query.ExtensionsDirectory(), "PythonEnvironments");
+            return Path.Combine(Query.ExtensionsDirectory(), "PythonCode");
         }
     }
 }
