@@ -1,14 +1,19 @@
-﻿from ToBHoM import ToBHoM
+﻿import sys
+sys.path.insert(0, "C:/ProgramData/BHoM/Extensions/PythonEnvironments/Lib/site-packages/Python_Toolkit")
+from ToBHoM import ToBHoM
 
 import argparse
 
 @ToBHoM()
-def example_method_1(a: int = 23, b: int = 42) -> str:
-    """ An example method that generates and returns some text.
+def example_method_1(a: float = 23, b: int = 42) -> str:
+    """ An example method that generates and returns some text. 
+    This method is also decorated with a ToBHoM method, which 
+    pushes its output into a JSON for use in downstream BHoM 
+    operations.
 
     Arguments:
-        a (int): The first number. Default is 23.
-        b (int): The second number. Default is 42.
+        a (float, optional): The first number. Default is 23.
+        b (int, optional): The second number. Default is 42.
 
     Returns:
         string: Some really interesting text.
@@ -19,7 +24,7 @@ def example_method_1(a: int = 23, b: int = 42) -> str:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-a', required=False, help='An int value', type=int, default=23)
+    parser.add_argument('-a', required=False, help='An int value', type=float, default=23)
     parser.add_argument('-b', required=False, help='Another int value', type=int, default=42)
     args = parser.parse_args()
     

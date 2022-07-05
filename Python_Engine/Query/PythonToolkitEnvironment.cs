@@ -39,7 +39,6 @@ namespace BH.Engine.Python
             string environmentDir = Path.Combine(EnvironmentsDirectory(), toolkitName);
             string codeDir = Path.Combine(CodeDirectory(), toolkitName);
             string packagesDir = Path.Combine(environmentDir, "Lib", "site-packages");
-            string exe = Path.Combine(EnvironmentsDirectory(), toolkitName, "python.exe");
             string requirementsTxt = Path.Combine(codeDir, "requirements.txt");
 
             if (Query.Environment(toolkitName) == null)
@@ -52,6 +51,8 @@ namespace BH.Engine.Python
                     toolkitName,
                     requirementsTxt
                 );
+                if (env == null)
+                    return null;
 
                 // copy code from PythonCode into Environment
                 Compute.CopyDirectory(codeDir, Path.Combine(packagesDir, toolkitName), true);
@@ -64,7 +65,7 @@ namespace BH.Engine.Python
             return new oM.Python.Environment()
             {
                 Name = toolkitName,
-                Executable = exe,
+                Executable = Path.Combine(environmentDir, "python.exe"),
             };
         }
     }

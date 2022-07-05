@@ -29,8 +29,8 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("The location where any BHoM generated Python code resides.")]
-        [Output("The location where any BHoM generated Python code resides.")]
+        [Description("The path where any BHoM generated Python code is placed prior to inclusion in a BHoM Python Environment.")]
+        [Output("The path where any BHoM generated Python code is placed prior to inclusion in a BHoM Python Environment.")]
         public static string CodeDirectory()
         {
             return Path.Combine(Query.ExtensionsDirectory(), "PythonCode");
