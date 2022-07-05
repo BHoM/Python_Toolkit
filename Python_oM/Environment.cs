@@ -28,8 +28,11 @@ using System.ComponentModel;
 
 namespace BH.oM.Python
 {
-    public class Environment : BHoMObject
+    public class Environment : IObject
     {
+        [Description("The name of this BHoM Python Environment.")]
+        public virtual string Name { get; set; } = string.Empty;
+
         [Description("The path to this Python Environments executable.")]
         public virtual string Executable { get; set; } = string.Empty;
     }
