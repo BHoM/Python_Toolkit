@@ -36,25 +36,27 @@ namespace BH.Engine.Python
         [Description("Install Python of the given version into a target directory.")]
         [Input("version", "The version of Python to install.")]
         [Input("name", "The name for this Python Environment.")]
-        [Input("requirementsTxt", "A PIP requirments file.")]
+        [Input("additionalPackage", "A directory containing an additional Python package to be installed into this environment.")]
         [Input("directory", "The directory into which Python will be installed. By default, this value is C:/ProgramData/BHoM/Extensions/PythonEnvironments.")]
-        [Output("executable", "The executable for the installed Python environment.")]
-        public static oM.Python.Environment InstallEnvironment(oM.Python.Enums.Version version, string name, string requirementsTxt = null, string directory = "C:/ProgramData/BHoM/Extensions/PythonEnvironments")
+        [Output("env", "The installed BHoM Python environment.")]
+        public static oM.Python.PythonEnvironment InstallPythonEnvironment(oM.Python.Enums.PythonVersion version, string name, string additionalPackage = null, string directory = "C:/ProgramData/BHoM/Extensions/PythonEnvironments")
         {
             if (!Query.ValidEnvironmentName(name))
-                return null;
-
-            string targetDirectory = Path.Combine(directory, name);
-
-            if (!Directory.Exists(targetDirectory))
-                Directory.CreateDirectory(targetDirectory);
-
-            if (File.Exists(Path.Combine(targetDirectory, "requirements.txt")) || Directory.EnumerateFileSystemEntries(targetDirectory).Any())
             {
-                BH.Engine.Base.Compute.RecordError($"{targetDirectory} is not empty or contains a \"requirements.txt\" file. Installing Python here might cause problems. Either remove files from this directory and try again, or choose a different install location.");
+                BH.Engine.Base.Compute.RecordError("Invalid BHoM PythonEnvironment name.");
                 return null;
             }
-            File.Copy(requirementsTxt, Path.Combine(targetDirectory, "requirements.txt"), true);
+
+            if (Query.EnvironmentExists(name))
+            {
+                BH.Engine.Base.Compute.RecordError($"A BHoM Python Environment named {name} already exists.");
+                return null;
+            }
+
+            // create the directory in which Python will be installed
+            string targetDirectory = Path.Combine(directory, name);
+            if (!Directory.Exists(targetDirectory))
+                Directory.CreateDirectory(targetDirectory);
 
             // download the target version of Python
             string embeddablePythonZip = Compute.DownloadFile(version.EmbeddableURL());
@@ -104,12 +106,18 @@ namespace BH.Engine.Python
                 }
             }
 
-            oM.Python.Environment env = new oM.Python.Environment(){ Name = name, Executable = executable };
+            // install additional Python code
+            if (additionalPackage != null)
+            {
+                string result = Compute.InstallLocalPackage(executable, additionalPackage);
+            }
 
-            if (requirementsTxt != null)
-                env.InstallPackages(requirementsTxt);
+            // install ipykernel and register environment with the base BHoM Python environment
+            Compute.InstallPackages(executable, new List<string>() { "ipykernel" });
+            string kernelCreateCmd = $"{Modify.AddQuotesIfRequired(executable)} -m ipykernel install --name={name}";
+            string kernelRegistry = Compute.RunCommandStdout(kernelCreateCmd);
 
-            return env;
+            return new oM.Python.PythonEnvironment(){ Name = name, Executable = executable };
         }
     }
 }

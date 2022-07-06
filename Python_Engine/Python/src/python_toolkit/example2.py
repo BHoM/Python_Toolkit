@@ -1,12 +1,12 @@
-﻿import sys
-sys.path.insert(0, "C:/ProgramData/BHoM/Extensions/PythonEnvironments/Lib/site-packages/Python_Toolkit")
-from ToBHoM import ToBHoM
+﻿import argparse
+from pathlib import Path
+from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
-from pathlib import Path
-from typing import Dict, List, Union
+
+from python_toolkit.to_bhom import ToBHoM
+
 
 @ToBHoM()
 def example_method_2(save_path: Path, n_steps: int = 25) -> Path:

@@ -25,6 +25,7 @@ using BH.oM.Python;
 using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System;
 
@@ -39,7 +40,6 @@ namespace BH.Engine.Python
         {
             if (name.Any(x => Char.IsWhiteSpace(x)))
             {
-                BH.Engine.Base.Compute.RecordError($"A BHoM Python Environment name cannot contain whitespace characters.");
                 return false;
             }
             return true;

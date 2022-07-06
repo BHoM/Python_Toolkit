@@ -24,35 +24,28 @@ using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Download a file using CURL.")]
-        [Input("url", "URL to file.")]
-        [Input("directory", "The directory into which the file should be saved.")]
-        [Input("force", "If the file already exists, overwrite it.")]
-        [Output("path", "The path to the downloaded file.")]
-        private static string DownloadFile(string url, string directory = null, bool force = false)
+        [Description("Delete a directory and its contents.")]
+        [Input("dir", "The directory to be removed.")]
+        private static void DeleteDirectory(string dir)
         {
-            directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
-            string downloadedFile = Path.Combine(directory, Path.GetFileName(url));
+            DirectoryInfo dirInfo = new DirectoryInfo(dir);
 
-            if (File.Exists(downloadedFile) && !force)
+            try
             {
-                return downloadedFile;
+                dirInfo.EnumerateFiles().ToList().ForEach(f => f.Delete());
+                dirInfo.EnumerateDirectories().ToList().ForEach(d => d.Delete(true));
+                dirInfo.Delete();
             }
-
-            if (RunCommandBool($"curl {url} -o {downloadedFile} && exit", hideWindows: true))
+            catch (System.Exception e)
             {
-                return downloadedFile;
+                BH.Engine.Base.Compute.RecordError($"Cannot fully remove the environment. You may have the directory, or a file within it open in another program. Original error code: {e}");
             }
-
-            BH.Engine.Base.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
-
-            return null;
         }
     }
 }
-

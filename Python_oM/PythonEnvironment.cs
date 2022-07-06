@@ -20,39 +20,21 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.oM.Base.Attributes;
 
+using BH.oM.Base;
+using BH.oM.Python.Enums;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 
-namespace BH.Engine.Python
+namespace BH.oM.Python
 {
-    public static partial class Compute
+    public class PythonEnvironment : IObject
     {
-        [Description("Download a file using CURL.")]
-        [Input("url", "URL to file.")]
-        [Input("directory", "The directory into which the file should be saved.")]
-        [Input("force", "If the file already exists, overwrite it.")]
-        [Output("path", "The path to the downloaded file.")]
-        private static string DownloadFile(string url, string directory = null, bool force = false)
-        {
-            directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
-            string downloadedFile = Path.Combine(directory, Path.GetFileName(url));
+        [Description("The name of this BHoM Python Environment.")]
+        public virtual string Name { get; set; } = string.Empty;
 
-            if (File.Exists(downloadedFile) && !force)
-            {
-                return downloadedFile;
-            }
-
-            if (RunCommandBool($"curl {url} -o {downloadedFile} && exit", hideWindows: true))
-            {
-                return downloadedFile;
-            }
-
-            BH.Engine.Base.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
-
-            return null;
-        }
+        [Description("The path to this Python Environments executable.")]
+        public virtual string Executable { get; set; } = string.Empty;
     }
 }
 

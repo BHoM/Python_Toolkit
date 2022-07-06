@@ -20,21 +20,25 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Python;
+using BH.oM.Base.Attributes;
 
-using BH.oM.Base;
-using BH.oM.Python.Enums;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 
-namespace BH.oM.Python
+namespace BH.Engine.Python
 {
-    public class Environment : IObject
+    public static partial class Compute
     {
-        [Description("The name of this BHoM Python Environment.")]
-        public virtual string Name { get; set; } = string.Empty;
-
-        [Description("The path to this Python Environments executable.")]
-        public virtual string Executable { get; set; } = string.Empty;
+        [Description("Run a Jupyter Lab instance from the base BHoM Python Environment.")]
+        [Input("run", "The Python environment with which to run the Python script.")]
+        [Input("port", "The port on whcih to run the Jupyter Lab instance.")]
+        public static void JupyterLab(bool run, int port = 8888)
+        {
+            string command = $"cd C:/ && {Compute.PythonToolkitEnvironment(true).Executable} -m jupyter lab --port={port}";
+            //RunCommandAsync(command, hideWindows: false);
+            RunCommandStdout(command);
+        }
     }
 }
-

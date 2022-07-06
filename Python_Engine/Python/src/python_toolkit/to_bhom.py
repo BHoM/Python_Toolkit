@@ -1,4 +1,5 @@
 ﻿from __future__ import annotations
+
 from json import JSONEncoder, dump
 import sys
 from datetime import datetime, date
