@@ -24,35 +24,42 @@ using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Download a file using CURL.")]
-        [Input("url", "URL to file.")]
-        [Input("directory", "The directory into which the file should be saved.")]
-        [Input("force", "If the file already exists, overwrite it.")]
-        [Output("path", "The path to the downloaded file.")]
-        private static string DownloadFile(string url, string directory = null, bool force = false)
+        [Description("Install/query the Python_Toolkit BHoM Python Environment.")]
+        [Input("run", "Run the installation process for the BHoM Python Environment.")]
+        [Input("force", "Force reinstallation of this BHoM Python Environment.")]
+        [Output("env", "A BHoM Python Environment.")]
+        public static oM.Python.PythonEnvironment PythonToolkitEnvironment(bool run = false, bool force = false)
         {
-            directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
-            string downloadedFile = Path.Combine(directory, Path.GetFileName(url));
+            string toolkitName = Query.ToolkitName();
+            string toolkitEnvironmentDirectory = Path.Combine(Query.EnvironmentsDirectory(), toolkitName);
 
-            if (File.Exists(downloadedFile) && !force)
+            if (run)
             {
-                return downloadedFile;
+                if (Query.EnvironmentExists(toolkitName) && !force)
+                {
+                    return new oM.Python.PythonEnvironment()
+                    {
+                        Name = Query.ToolkitName(),
+                        Executable = Path.Combine(Query.EnvironmentsDirectory(), toolkitName, "python.exe"),
+                    };
+                }
+
+                if (Query.EnvironmentExists(toolkitName) && force)
+                    Compute.DeleteDirectory(toolkitEnvironmentDirectory);
+
+                return Compute.InstallPythonEnvironment(
+                    version: oM.Python.Enums.PythonVersion.v3_10_5,
+                    name: toolkitName,
+                    additionalPackage: Path.Combine(Query.CodeDirectory(), toolkitName)
+                );
             }
-
-            if (RunCommandBool($"curl {url} -o {downloadedFile} && exit", hideWindows: true))
-            {
-                return downloadedFile;
-            }
-
-            BH.Engine.Base.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
-
             return null;
         }
     }
 }
-

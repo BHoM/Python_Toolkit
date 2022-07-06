@@ -20,33 +20,39 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Python;
 using BH.oM.Base.Attributes;
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Query
+    public static partial class Compute
     {
-        [Description("Return an already created BHoM Python Environment.")]
-        [Input("name", "The name of the BHoM Python Environment to return.")]
-        [Output("environment", "A BHoM Python Environment.")]
-        public static oM.Python.Environment Environment(string name)
+        [Description("Run a string containing Python code and return the output.")]
+        [Input("env", "The Python environment with which to run the Python script.")]
+        [Input("pythonString", "The string containing the Python script.")]
+        [Output("result", "The stdout data from the executed Python script.")]
+        public static string RunPythonString(this PythonEnvironment env, string pythonString)
         {
-            string envDirectory = Path.Combine(Query.EnvironmentsDirectory(), name);
-            
-            if (!Directory.Exists(envDirectory))
+            if (!pythonString.Contains("print"))
             {
-                BH.Engine.Base.Compute.RecordError($"{envDirectory} does not exist, so no known BHoM Python environment of that name can be found.");
-                return null;
+                BH.Engine.Base.Compute.RecordWarning("Nothing is being passed to StdOut in the Python script, so nothing will be returned from this method.");
             }
 
-            return new oM.Python.Environment()
+            // place pythonScript into a temporary .py file to reference and run, then call using the passed environment
+            string scriptFile = Path.Combine(Path.GetTempPath(), "_BHoM_PythonScript.py");
+            using (StreamWriter outputFile = new StreamWriter(scriptFile))
             {
-                Name = name,
-                Executable = Path.Combine(envDirectory, "python.exe"),
-            };
+                outputFile.WriteLine(pythonString);
+            }
+
+            string cmd = $"{env.Executable} {scriptFile}";
+
+            return RunCommandStdout(cmd, hideWindows: true);
         }
     }
 }
+

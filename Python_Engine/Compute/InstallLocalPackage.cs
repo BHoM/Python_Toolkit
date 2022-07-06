@@ -20,48 +20,39 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.oM.Python.Enums;
-using BH.oM.Python;
 using BH.oM.Base.Attributes;
-
+using BH.oM.Python;
+using BH.oM.Python.Enums;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using System;
 
 namespace BH.Engine.Python
 {
-    public static partial class Query
+    public static partial class Compute
     {
-        [Description("Get the list of packages available for a given Python executable.")]
-        [Input("executable", "The path to a Python executable.")]
-        [Output("packages", "The packages available for the given Python executable.")]
-        public static List<string> Packages(string executable)
+        [Description("Install a local Python packages into a Python environment associated with the given executable.")]
+        [Input("exe", "The path to a Python executable.")]
+        [Input("packageDirectory", "A directory containing a Python package.")]
+        [Input("force", "Set the Pip install --force flag to True, to force installation of the given package.")]
+        [Output("result", "The output log of the package install process.")]
+        public static string InstallLocalPackage(string exe, string packageDirectory, bool force = false)
         {
-            if (!File.Exists(executable))
-            {
-                BH.Engine.Base.Compute.RecordError($"{executable} does not exist.");
-                return null;
-            }
-
-            string tempPackageFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.txt");
-            string command = $"{executable} -m pip freeze > {tempPackageFile}";
-
-            Compute.RunCommandBool(command, hideWindows: true);
-
-            List<string> installedPackages = new List<string>(File.ReadAllLines(tempPackageFile));
-            File.Delete(tempPackageFile);
-
-            return installedPackages;
+            string cmd = $"{Modify.AddQuotesIfRequired(exe)} -m pip install --no-warn-script-location{(force ? " --force-reinstall" : "")} -e {Modify.AddQuotesIfRequired(packageDirectory)}";
+            return Compute.RunCommandStdout(cmd);
         }
 
-        [Description("Get the list of packages available for a given Python environment.")]
-        [Input("env", "A BHoM Python Environment.")]
-        [Output("packages", "The packages available for the given BHoM Python Environment.")]
-        public static List<string> Packages(this oM.Python.Environment env)
+        [Description("Install a local Python packages into a BHoM Python environment.")]
+        [Input("env", "The BHoM Python environment.")]
+        [Input("packageDirectory", "A directory containing a Python package.")]
+        [Input("force", "Set the Pip install --force flag to True, to force installation of the given packages.")]
+        [Output("result", "The output log of the package install process.")]
+        public static string InstallLocalPackage(this PythonEnvironment env, string packageDirectory, bool force = false)
         {
-            return Packages(env.Executable);
+            return InstallLocalPackage(env.Executable, packageDirectory, force);
         }
     }
 }
+

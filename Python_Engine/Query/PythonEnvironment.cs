@@ -27,32 +27,17 @@ using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
-        [Description("Download a file using CURL.")]
-        [Input("url", "URL to file.")]
-        [Input("directory", "The directory into which the file should be saved.")]
-        [Input("force", "If the file already exists, overwrite it.")]
-        [Output("path", "The path to the downloaded file.")]
-        private static string DownloadFile(string url, string directory = null, bool force = false)
+        [Description("Return an already created BHoM Python Environment.")]
+        [Input("name", "The name of the BHoM Python Environment to return.")]
+        [Output("env", "A BHoM Python Environment.")]
+        public static oM.Python.PythonEnvironment PythonEnvironment(string name)
         {
-            directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
-            string downloadedFile = Path.Combine(directory, Path.GetFileName(url));
-
-            if (File.Exists(downloadedFile) && !force)
-            {
-                return downloadedFile;
-            }
-
-            if (RunCommandBool($"curl {url} -o {downloadedFile} && exit", hideWindows: true))
-            {
-                return downloadedFile;
-            }
-
-            BH.Engine.Base.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
+            if (Query.EnvironmentExists(name))
+                return new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(EnvironmentsDirectory(), name, "python.exe") };
 
             return null;
         }
     }
 }
-

@@ -20,53 +20,41 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Python.Enums;
+using BH.oM.Python;
 using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("Obtain the Python_Toolkit BHoM Python Environment.")]
-        [Output("environment", "A BHoM Python Environment.")]
-        public static oM.Python.Environment PythonToolkitEnvironment()
+        [Description("Check whether a named BHoM Python Environment already exists.")]
+        [Input("name", "The name of the BHoM Python Environment.")]
+        [Output("exists", "True if the environment already exists, False if not.")]
+        public static bool EnvironmentExists(string name)
         {
-            // create names and paths for refenence
-            string toolkitName = ToolkitName();
-            string environmentDir = Path.Combine(EnvironmentsDirectory(), toolkitName);
-            string codeDir = Path.Combine(CodeDirectory(), toolkitName);
-            string packagesDir = Path.Combine(environmentDir, "Lib", "site-packages");
-            string requirementsTxt = Path.Combine(codeDir, "requirements.txt");
-
-            if (Query.Environment(toolkitName) == null)
+            if (Directory.Exists(Path.Combine(Query.EnvironmentsDirectory(), name)) && File.Exists(Path.Combine(Query.EnvironmentsDirectory(), name, "python.exe")))
             {
-                BH.Engine.Base.Compute.RemoveEvent(BH.Engine.Base.Query.CurrentEvents().Last());
-
-                // install env that doesn't currently exist
-                oM.Python.Environment env = Compute.InstallEnvironment(
-                    oM.Python.Enums.Version.v3_10_5,
-                    toolkitName,
-                    requirementsTxt
-                );
-                if (env == null)
-                    return null;
-
-                // copy code from PythonCode into Environment
-                Compute.CopyDirectory(codeDir, Path.Combine(packagesDir, toolkitName), true);
-
-                // install packages for this toolkit
-                string installLog = env.InstallPackages(requirementsTxt);
-                BH.Engine.Base.Compute.RecordNote(installLog);
+                return true;
             }
+            return false;
+        }
 
-            return new oM.Python.Environment()
+        [Description("Check whether a BHoM Python Environment already exists.")]
+        [Input("env", "The BHoM Python Environment.")]
+        [Output("exists", "True if the environment already exists, False if not.")]
+        public static bool EnvironmentExists(this oM.Python.PythonEnvironment env)
+        {
+            if (Directory.Exists(Path.Combine(Query.EnvironmentsDirectory(), env.Name)) && File.Exists(env.Executable))
             {
-                Name = toolkitName,
-                Executable = Path.Combine(environmentDir, "python.exe"),
-            };
+                return true;
+            }
+            return false;
         }
     }
 }

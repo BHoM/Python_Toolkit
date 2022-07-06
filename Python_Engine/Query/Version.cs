@@ -34,9 +34,17 @@ namespace BH.Engine.Python
         [Description("Get the Python version from the given Python executable.")]
         [Input("executable", "The path to a Python executable.")]
         [Output("version", "The version of Python this executable runs.")]
-        public static string Version(string executable)
+        public static string PythonVersion(string executable)
         {
             return BH.Engine.Python.Compute.RunCommandStdout($"{executable} --version").Split(' ').Last();
+        }
+
+        [Description("Get the Python version from the given BHoM Python Environment.")]
+        [Input("env", "The BHoM Python environment.")]
+        [Output("version", "The version of Python this environment runs.")]
+        public static string PythonVersion(this PythonEnvironment env)
+        {
+            return BH.Engine.Python.Compute.RunCommandStdout($"{env.Executable} --version").Split(' ').Last();
         }
     }
 }

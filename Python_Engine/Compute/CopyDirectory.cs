@@ -29,7 +29,11 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+        [Description("Copy a directory and its contents from one location to another.")]
+        [Input("sourceDir", "The directory to be copied.")]
+        [Input("destinationDir", "The destination directory where the copy will be made.")]
+        [Input("recursive", "If true, copy all subdirectories and their contents also.")]
+        private static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
         {
             // Get information about the source directory
             var dir = new DirectoryInfo(sourceDir);

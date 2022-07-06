@@ -1,8 +1,7 @@
-﻿import sys
-sys.path.insert(0, "C:/ProgramData/BHoM/Extensions/PythonEnvironments/Lib/site-packages/Python_Toolkit")
-from ToBHoM import ToBHoM
+﻿import argparse
 
-import argparse
+from to_bhom import ToBHoM
+
 
 @ToBHoM()
 def example_method_1(a: float = 23, b: int = 42) -> str:

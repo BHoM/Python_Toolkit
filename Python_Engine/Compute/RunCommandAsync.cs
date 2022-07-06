@@ -21,38 +21,43 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using System.Threading;
+using System.Threading.Tasks;
 using System.ComponentModel;
-using System.IO;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Download a file using CURL.")]
-        [Input("url", "URL to file.")]
-        [Input("directory", "The directory into which the file should be saved.")]
-        [Input("force", "If the file already exists, overwrite it.")]
-        [Output("path", "The path to the downloaded file.")]
-        private static string DownloadFile(string url, string directory = null, bool force = false)
+        [Description("Run a command via CMD and return stdout.")]
+        [Input("command", "The command to be run.")]
+        [Input("hideWindows", "Set to True to hide cmd windows.")]
+        [Input("startDirectory", "The directory in which the command should be run.")]
+        [Output("stdout", "The StandardOutput from the command that was run. If the process failed, then StandardError will be returned here instead.")]
+        public static async void RunCommandAsync(string command, bool hideWindows = true, string startDirectory = null)
         {
-            directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
-            string downloadedFile = Path.Combine(directory, Path.GetFileName(url));
-
-            if (File.Exists(downloadedFile) && !force)
+            await Task.Run(() =>
             {
-                return downloadedFile;
-            }
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+                System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
 
-            if (RunCommandBool($"curl {url} -o {downloadedFile} && exit", hideWindows: true))
-            {
-                return downloadedFile;
-            }
+                string commandMode = "/K";
+                if (hideWindows)
+                {
+                    startInfo.CreateNoWindow = true;
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    commandMode = "/C";
+                }
 
-            BH.Engine.Base.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
+                startInfo.FileName = "cmd.exe";
+                startInfo.RedirectStandardOutput = true;
+                startInfo.RedirectStandardError = true;
+                startInfo.UseShellExecute = false;
+                startInfo.Arguments = $"{commandMode} {command} && exit";
 
-            return null;
+                process.StartInfo = startInfo;
+                process.Start();
+            });
         }
     }
 }
-

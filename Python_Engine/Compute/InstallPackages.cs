@@ -33,37 +33,46 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Install packages from the given requirements.txt file into the Python environment associated with the given executable.")]
-        [Input("executable", "The path to a Python executable.")]
-        [Input("requirementsTxt", "The path to a PIP requirements.txt file.")]
-        [Output("result", "The output log of the Python PIP install process.")]
-        public static string InstallPackages(string executable, string requirementsTxt)
+        [Description("Install a list of Python packages into the Python environment associated with the given executable.")]
+        [Input("exe", "The path to a Python executable.")]
+        [Input("packages", "A list of Python packages.")]
+        [Input("force", "Set the Pip install --force flag to True, to force installation of the given packages.")]
+        [Output("result", "The output log of the package install process.")]
+        public static string InstallPackages(string exe, List<string> packages, bool force = false)
         {
-            if (!File.Exists(requirementsTxt))
-            {
-                BH.Engine.Base.Compute.RecordError($"{requirementsTxt} does not exist.");
-                return null;
-            }
-
-            if (!File.Exists(executable))
-            {
-                BH.Engine.Base.Compute.RecordError($"{executable} does not exist.");
-                return null;
-            }
-                
-            string command = $"{Modify.AddQuotesIfRequired(executable)} -m pip install --no-warn-script-location -r {Modify.AddQuotesIfRequired(requirementsTxt)}";
-            string result = Compute.RunCommandStdout(command);
-               
-            return result;
+            string command = $"{Modify.AddQuotesIfRequired(exe)} -m pip install --no-warn-script-location{(force ? " --force-reinstall" : "")} {String.Join(" ", packages)}";
+            return Compute.RunCommandStdout(command);
         }
 
-        [Description("Install packages from the given requirements.txt file into the Python environment associated with the given executable.")]
-        [Input("environment", "A Python environment object.")]
-        [Input("requirementsTxt", "The path to a PIP requirements.txt file.")]
-        [Output("result", "The output log of the Python PIP install process.")]
-        public static string InstallPackages(this oM.Python.Environment environment, string requirementsTxt)
+        [Description("Install Python packages into the Python environment associated with the given executable, using a requirements.txt file.")]
+        [Input("exe", "The path to a Python executable.")]
+        [Input("requirements", "The path to a requirements.txt file.")]
+        [Input("force", "Set the Pip install --force flag to True, to force installation of the given packages.")]
+        [Output("result", "The output log of the package install process.")]
+        public static string InstallPackages(string exe, string requirements, bool force = false)
         {
-            return InstallPackages(environment.Executable, requirementsTxt);
+            string command = $"{Modify.AddQuotesIfRequired(exe)} -m pip install --no-warn-script-location{(force ? " --force-reinstall" : "")} -r {Modify.AddQuotesIfRequired(requirements)}";
+            return Compute.RunCommandStdout(command);
+        }
+
+        [Description("Install packages into a BHoM Python environment.")]
+        [Input("env", "The BHoM Python environment.")]
+        [Input("packages", "A list of Python packages.")]
+        [Input("force", "Set the Pip install --force flag to True, to force installation of the given packages.")]
+        [Output("result", "The output log of the package install process.")]
+        public static string InstallPackages(this PythonEnvironment env, List<string> packages, bool force = false)
+        {
+            return InstallPackages(env.Executable, packages, force);
+        }
+
+        [Description("Install packages into a BHoM Python environment.")]
+        [Input("env", "The BHoM Python environment.")]
+        [Input("requirements", "The path to a requirements.txt file.")]
+        [Input("force", "Set the Pip install --force flag to True, to force installation of the given packages.")]
+        [Output("result", "The output log of the package install process.")]
+        public static string InstallPackages(this PythonEnvironment env, string requirements, bool force = false)
+        {
+            return InstallPackages(env.Executable, requirements, force);
         }
     }
 }
