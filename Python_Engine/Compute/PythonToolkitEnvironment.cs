@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -56,7 +56,7 @@ namespace BH.Engine.Python
                 return Compute.InstallPythonEnvironment(
                     version: oM.Python.Enums.PythonVersion.v3_10_5,
                     name: toolkitName,
-                    additionalPackage: Path.Combine(Query.CodeDirectory(), toolkitName)
+                    additionalPackages: new List<string>() { Path.Combine(Query.CodeDirectory(), toolkitName) }
                 );
             }
             return null;

@@ -36,10 +36,10 @@ namespace BH.Engine.Python
         [Description("Install Python of the given version into a target directory.")]
         [Input("version", "The version of Python to install.")]
         [Input("name", "The name for this Python Environment.")]
-        [Input("additionalPackage", "A directory containing an additional Python package to be installed into this environment.")]
+        [Input("additionalPackages", "A list of directories containing additional local Python packages to be installed into this environment.")]
         [Input("directory", "The directory into which Python will be installed. By default, this value is C:/ProgramData/BHoM/Extensions/PythonEnvironments.")]
         [Output("env", "The installed BHoM Python environment.")]
-        public static oM.Python.PythonEnvironment InstallPythonEnvironment(oM.Python.Enums.PythonVersion version, string name, string additionalPackage = null, string directory = "C:/ProgramData/BHoM/Extensions/PythonEnvironments")
+        public static oM.Python.PythonEnvironment InstallPythonEnvironment(oM.Python.Enums.PythonVersion version, string name, List<string> additionalPackages = null, string directory = "C:/ProgramData/BHoM/Extensions/PythonEnvironments")
         {
             if (!Query.ValidEnvironmentName(name))
             {
@@ -107,9 +107,12 @@ namespace BH.Engine.Python
             }
 
             // install additional Python code
-            if (additionalPackage != null)
+            if (additionalPackages != null)
             {
-                string result = Compute.InstallLocalPackage(executable, additionalPackage);
+                foreach (string pkg in additionalPackages)
+                {
+                    Compute.InstallLocalPackage(executable, pkg);
+                }
             }
 
             // install ipykernel and register environment with the base BHoM Python environment
