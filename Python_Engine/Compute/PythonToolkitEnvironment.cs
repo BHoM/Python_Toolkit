@@ -37,11 +37,14 @@ namespace BH.Engine.Python
         public static oM.Python.PythonEnvironment PythonToolkitEnvironment(bool run = false, bool force = false)
         {
             string toolkitName = Query.ToolkitName();
-            string toolkitEnvironmentDirectory = Path.Combine(Query.EnvironmentsDirectory(), toolkitName);
+            string envDir = Query.EnvironmentsDirectory();
+            string toolkitEnvDir = Path.Combine(Query.EnvironmentsDirectory(), toolkitName);
+
+            bool envExists = Query.EnvironmentExists(envDir, toolkitName);
 
             if (run)
             {
-                if (Query.EnvironmentExists(toolkitName) && !force)
+                if (envExists && !force)
                 {
                     return new oM.Python.PythonEnvironment()
                     {
@@ -50,11 +53,11 @@ namespace BH.Engine.Python
                     };
                 }
 
-                if (Query.EnvironmentExists(toolkitName) && force)
-                    Compute.DeleteDirectory(toolkitEnvironmentDirectory);
+                if (envExists && force)
+                    Compute.DeleteDirectory(toolkitEnvDir);
 
                 return Compute.InstallPythonEnvironment(
-                    version: oM.Python.Enums.PythonVersion.v3_10_5,
+                    version: oM.Python.Enums.PythonVersion.v3_7_9,
                     name: toolkitName,
                     additionalPackages: new List<string>() { Path.Combine(Query.CodeDirectory(), toolkitName) }
                 );

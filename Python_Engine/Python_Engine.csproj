@@ -69,17 +69,15 @@
   <ItemGroup>
     <Compile Include="Compute\DeleteDirectory.cs" />
     <Compile Include="Compute\CopyDirectory.cs" />
-    <Compile Include="Compute\InstallLocalPackage.cs" />
-    <Compile Include="Compute\InstallPackages.cs" />
-    <Compile Include="Compute\InstallPythonEnvironment.cs" />
+    <Compile Include="Compute\Install.cs" />
     <Compile Include="Compute\JupyterLab.cs" />
     <Compile Include="Compute\PythonToolkitEnvironment.cs" />
-    <Compile Include="Compute\RunCommandAsync.cs" />
+    <Compile Include="Compute\RunCommand.cs" />
     <Compile Include="Compute\RunPythonString.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
+    <Content Include="Python\tests\__init__.py" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
-    <Compile Include="Query\PythonEnvironment.cs" />
     <Compile Include="Query\ValidEnvironmentName.cs" />
     <Compile Include="Query\EnvironmentsDirectory.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />
@@ -87,8 +85,6 @@
     <Compile Include="Query\Version.cs" />
     <Compile Include="Query\ToolkitName.cs" />
     <Compile Include="Compute\DownloadFile.cs" />
-    <Compile Include="Compute\RunCommandBool.cs" />
-    <Compile Include="Compute\RunCommandStdout.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -105,15 +101,26 @@
     <Folder Include="Convert\" />
     <Folder Include="Create\" />
     <Folder Include="Python\data\" />
-    <Folder Include="Python\tests\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Python\src\python_toolkit\example2.py" />
-    <Content Include="Python\src\python_toolkit\example1.py" />
+    <Content Include="Python\src\python_toolkit\bhom\bhom_analytics.py" />
+    <Content Include="Python\src\python_toolkit\bhom\bhom_json_encoder.py" />
+    <Content Include="Python\src\python_toolkit\bhom\__init__.py" />
+    <Content Include="Python\src\python_toolkit\example\example_2.py" />
+    <Content Include="Python\src\python_toolkit\example\example_1.py" />
+    <Content Include="Python\src\python_toolkit\example\__init__.py" />
+    <Content Include="Python\src\python_toolkit\plot\chart\spatial_heatmap.py" />
+    <Content Include="Python\src\python_toolkit\plot\chart\timeseries_heatmap.py" />
+    <Content Include="Python\src\python_toolkit\plot\chart\__init__.py" />
+    <Content Include="Python\src\python_toolkit\plot\color\colormap_sequential.py" />
+    <Content Include="Python\src\python_toolkit\plot\color\lighten_color.py" />
+    <Content Include="Python\src\python_toolkit\plot\color\__init__.py" />
+    <Content Include="Python\src\python_toolkit\plot\triangulate\create_triangulation.py" />
+    <Content Include="Python\src\python_toolkit\plot\triangulate\__init__.py" />
+    <Content Include="Python\src\python_toolkit\plot\__init__.py" />
     <Content Include="Python\src\python_toolkit\__init__.py" />
     <None Include="Python\README.md" />
     <Content Include="Python\setup.py" />
-    <Content Include="Python\src\python_toolkit\to_bhom.py" />
     <Content Include="Python\requirements.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -131,10 +138,6 @@ if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\P
 
 :: move Python code over to toolkit extensions folder, redirecting output to temp log file to silence it
 robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /s /purge /xf "*.pyc" /xd "\__pycache__\" &gt; output.log
-
-:: copy local Python config JSON to BHoM/Settings/Python
-if not exist "C:\ProgramData\BHoM\Settings\Python" mkdir "C:\ProgramData\BHoM\Settings\Python"
-robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Settings\Python" "$(SolutionName).json" &gt; output.log
 
 :: remove temporary log file
 del output.log</PostBuildEvent>
