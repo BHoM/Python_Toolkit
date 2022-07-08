@@ -51,7 +51,9 @@ namespace BH.Engine.Python
 
             string cmd = $"{env.Executable} {scriptFile}";
 
-            return RunCommandStdout(cmd, hideWindows: true);
+            string results = RunCommandStdout(cmd, hideWindows: true);
+
+            return results;
         }
     }
 }

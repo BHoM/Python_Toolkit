@@ -33,27 +33,16 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("Check whether a named BHoM Python Environment already exists.")]
-        [Input("name", "The name of the BHoM Python Environment.")]
-        [Output("exists", "True if the environment already exists, False if not.")]
-        public static bool EnvironmentExists(string name)
+        [Description("Check whether a Python Environment already exists in the given location.")]
+        [Input("directory", "The directory containing a named Python environment.")]
+        [Input("directory", "The name of the Python environment (the subdirectory within \"directory\" that contains \"python.exe\").")]
+        [Output("exists", "True if the environment exists, False if not.")]
+        public static bool EnvironmentExists(string directory, string name)
         {
-            if (Directory.Exists(Path.Combine(Query.EnvironmentsDirectory(), name)) && File.Exists(Path.Combine(Query.EnvironmentsDirectory(), name, "python.exe")))
-            {
+            string fullPath = Path.Combine(directory, name);
+            if (Directory.Exists(fullPath) && File.Exists(Path.Combine(fullPath, "python.exe")))
                 return true;
-            }
-            return false;
-        }
 
-        [Description("Check whether a BHoM Python Environment already exists.")]
-        [Input("env", "The BHoM Python Environment.")]
-        [Output("exists", "True if the environment already exists, False if not.")]
-        public static bool EnvironmentExists(this oM.Python.PythonEnvironment env)
-        {
-            if (Directory.Exists(Path.Combine(Query.EnvironmentsDirectory(), env.Name)) && File.Exists(env.Executable))
-            {
-                return true;
-            }
             return false;
         }
     }

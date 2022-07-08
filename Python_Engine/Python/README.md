@@ -1,11 +1,3 @@
 ﻿# Python_Toolkit
 
-Python_Toolkit is a Python library that enables Python to be used within [BHoM](https://bhom.xyz/) workflows.
-
-## Usage
-
-TODO
-
-```
-example here of wrapping a method in BHoM Python_Toolkit in order to execute from within CSharp using a given pyEnv
-```
+The code contained here is intended to be used in conjunction with the Python_Toolkit, as part of a wider [BHoM](https://bhom.xyz/) installation. Its main purpose is to augment capabilities of the BHoM.
