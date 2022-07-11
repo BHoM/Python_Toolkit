@@ -24,6 +24,7 @@ using BH.oM.Base.Attributes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.IO;
 
 namespace BH.Engine.Python
 {
@@ -126,6 +127,31 @@ namespace BH.Engine.Python
             }
 
             return stdout.Trim();
+        }
+
+        [Description("Run a string containing Python code and return the output.")]
+        [Input("env", "The Python environment with which to run the Python script.")]
+        [Input("pythonString", "The string containing the Python script.")]
+        [Output("result", "The stdout data from the executed Python script.")]
+        public static string RunCommandPythonString(this oM.Python.PythonEnvironment env, string pythonString)
+        {
+            if (!pythonString.Contains("print"))
+            {
+                BH.Engine.Base.Compute.RecordWarning("Nothing is being passed to StdOut in the Python script, so nothing will be returned from this method.");
+            }
+
+            // place pythonScript into a temporary .py file to reference and run, then call using the passed environment
+            string scriptFile = Path.Combine(Path.GetTempPath(), "_BHoM_PythonScript.py");
+            using (StreamWriter outputFile = new StreamWriter(scriptFile))
+            {
+                outputFile.WriteLine(pythonString);
+            }
+
+            string cmd = $"{Modify.AddQuotesIfRequired(env.Executable)} {scriptFile}";
+
+            string results = RunCommandStdout(cmd, hideWindows: true);
+
+            return results;
         }
     }
 }

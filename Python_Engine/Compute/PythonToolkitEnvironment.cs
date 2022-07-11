@@ -32,34 +32,30 @@ namespace BH.Engine.Python
     {
         [Description("Install/query the Python_Toolkit BHoM Python Environment.")]
         [Input("run", "Run the installation process for the BHoM Python Environment.")]
-        [Input("force", "Force reinstallation of this BHoM Python Environment.")]
         [Output("env", "A BHoM Python Environment.")]
-        public static oM.Python.PythonEnvironment PythonToolkitEnvironment(bool run = false, bool force = false)
+        public static oM.Python.PythonEnvironment PythonToolkitEnvironment(bool run = false)
         {
+            // set-up bits and pieces describing the env, prior to running checks/processes
             string toolkitName = Query.ToolkitName();
-            string envDir = Query.EnvironmentsDirectory();
-            string toolkitEnvDir = Path.Combine(Query.EnvironmentsDirectory(), toolkitName);
-
-            bool envExists = Query.EnvironmentExists(envDir, toolkitName);
+            string envsDir = Query.EnvironmentsDirectory();
+            string codeDir = Query.CodeDirectory();
+            string toolkitEnvDir = Path.Combine(envsDir, toolkitName);
+            oM.Python.PythonEnvironment thisEnv = new oM.Python.PythonEnvironment()
+            {
+                Name = Query.ToolkitName(),
+                Executable = Path.Combine(envsDir, toolkitName, "python.exe"),
+            };
+            bool thisEnvExists = thisEnv.EnvironmentExists();
 
             if (run)
             {
-                if (envExists && !force)
-                {
-                    return new oM.Python.PythonEnvironment()
-                    {
-                        Name = Query.ToolkitName(),
-                        Executable = Path.Combine(Query.EnvironmentsDirectory(), toolkitName, "python.exe"),
-                    };
-                }
-
-                if (envExists && force)
-                    Compute.DeleteDirectory(toolkitEnvDir);
+                if (thisEnvExists)
+                    return thisEnv;
 
                 return Compute.InstallPythonEnvironment(
                     version: oM.Python.Enums.PythonVersion.v3_7_9,
                     name: toolkitName,
-                    additionalPackages: new List<string>() { Path.Combine(Query.CodeDirectory(), toolkitName) }
+                    additionalPackages: new List<string>() { Path.Combine(codeDir, toolkitName) }
                 );
             }
             return null;

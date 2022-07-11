@@ -28,6 +28,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace BH.Engine.Python
 {
@@ -38,7 +39,10 @@ namespace BH.Engine.Python
         [Output("valid", "True if valid, False if not.")]
         public static bool ValidEnvironmentName(string name)
         {
-            if (name.Any(x => Char.IsWhiteSpace(x)))
+            List<char> invalidChars = new List<char>() { ' ' };
+            invalidChars.AddRange(Path.GetInvalidPathChars().ToList());
+            invalidChars.AddRange(Path.GetInvalidFileNameChars().ToList());
+            if (name.Any(x => invalidChars.Contains(x)))
             {
                 return false;
             }
