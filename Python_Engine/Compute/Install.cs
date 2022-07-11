@@ -112,16 +112,11 @@ namespace BH.Engine.Python
 
             // install additional Python code
             if (additionalPackages != null)
-            {
-                foreach (string pkg in additionalPackages)
-                {
-                    Compute.InstallLocalPackage(executable, pkg);
-                }
-            }
+                Compute.InstallLocalPackages(executable, additionalPackages, true);
 
             // install ipykernel and register environment with the base BHoM Python environment
             Compute.InstallPackages(executable, new List<string>() { "ipykernel" });
-            string kernelCreateCmd = $"{Modify.AddQuotesIfRequired(executable)} -m ipykernel install --name={name}";
+            string kernelCreateCmd = $"{Modify.AddQuotesIfRequired(executable)} -m ipykernel install --name={name.ToLower()}";
             string kernelRegistry = Compute.RunCommandStdout(kernelCreateCmd);
 
             return new oM.Python.PythonEnvironment() { Name = name, Executable = executable };
@@ -129,23 +124,28 @@ namespace BH.Engine.Python
 
         [Description("Install a local Python packages into a Python environment associated with the given executable.")]
         [Input("exe", "The path to a Python executable.")]
-        [Input("packageDirectory", "A directory containing a Python package.")]
+        [Input("packages", "Local directories containing Python packages.")]
         [Input("force", "Set the Pip install --force flag to True, to force installation of the given package.")]
         [Output("result", "The output log of the package install process.")]
-        public static string InstallLocalPackage(string exe, string packageDirectory, bool force = false)
+        public static string InstallLocalPackages(string exe, List<string> packages, bool force = false)
         {
-            string cmd = $"{Modify.AddQuotesIfRequired(exe)} -m pip install --no-warn-script-location{(force ? " --force-reinstall" : "")} -e {Modify.AddQuotesIfRequired(packageDirectory)}";
-            return Compute.RunCommandStdout(cmd);
+            string log = "";
+            foreach (string pkg in packages)
+            {
+                string cmd = $"{Modify.AddQuotesIfRequired(exe)} -m pip install --no-warn-script-location{(force ? " --force-reinstall --no-cache-dir" : "")} -e {Modify.AddQuotesIfRequired(pkg)}";
+                log += Compute.RunCommandStdout(cmd) + "\n";
+            }
+            return log;
         }
 
         [Description("Install a local Python packages into a BHoM Python environment.")]
         [Input("env", "The BHoM Python environment.")]
-        [Input("packageDirectory", "A directory containing a Python package.")]
+        [Input("packages", "Local directories containing Python packages.")]
         [Input("force", "Set the Pip install --force flag to True, to force installation of the given packages.")]
         [Output("result", "The output log of the package install process.")]
-        public static string InstallLocalPackage(this PythonEnvironment env, string packageDirectory, bool force = false)
+        public static string InstallLocalPackages(this PythonEnvironment env, List<string> packages, bool force = false)
         {
-            return InstallLocalPackage(env.Executable, packageDirectory, force);
+            return InstallLocalPackages(env.Executable, packages, force);
         }
 
         [Description("Install a list of Python packages into the Python environment associated with the given executable.")]

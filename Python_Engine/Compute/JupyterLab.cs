@@ -34,7 +34,7 @@ namespace BH.Engine.Python
         [Description("Run a Jupyter Lab instance from the base BHoM Python Environment.")]
         [Input("run", "The Python environment with which to run the Python script.")]
         [Input("port", "The port on whcih to run the Jupyter Lab instance.")]
-        public static void JupyterLab(bool run, int port = 8888)
+        private static void JupyterLab(bool run, int port = 8888)
         {
             string command = $"cd C:/ && {Compute.PythonToolkitEnvironment(true).Executable} -m jupyter lab --port={port}";
             //RunCommandAsync(command, hideWindows: false);

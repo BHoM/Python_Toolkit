@@ -69,11 +69,11 @@
   <ItemGroup>
     <Compile Include="Compute\DeleteDirectory.cs" />
     <Compile Include="Compute\CopyDirectory.cs" />
+    <Compile Include="Compute\Uninstall.cs" />
     <Compile Include="Compute\Install.cs" />
     <Compile Include="Compute\JupyterLab.cs" />
     <Compile Include="Compute\PythonToolkitEnvironment.cs" />
     <Compile Include="Compute\RunCommand.cs" />
-    <Compile Include="Compute\RunPythonString.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Content Include="Python\tests\__init__.py" />
     <Compile Include="Query\CodeDirectory.cs" />
@@ -82,7 +82,6 @@
     <Compile Include="Query\EnvironmentsDirectory.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />
     <Compile Include="Query\ExtensionsDirectory.cs" />
-    <Compile Include="Query\Version.cs" />
     <Compile Include="Query\ToolkitName.cs" />
     <Compile Include="Compute\DownloadFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
