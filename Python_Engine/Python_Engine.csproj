@@ -75,6 +75,7 @@
     <Compile Include="Compute\PythonToolkitEnvironment.cs" />
     <Compile Include="Compute\RunCommand.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
+    <Content Include="Python\src\python_toolkit\plot\chart\timeseries_diurnal.py" />
     <Content Include="Python\tests\__init__.py" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
