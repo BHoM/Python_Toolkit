@@ -13,6 +13,7 @@ def spatial_heatmap(
     triangulations: List[Triangulation],
     values: List[List[float]],
     levels: Union[List[float], int] = None,
+    contours: List[float] = None,
     cmap: Colormap = "viridis",
     extend: str = "neither",
     norm: BoundaryNorm = None,
@@ -27,6 +28,7 @@ def spatial_heatmap(
         triangulations (List[Triangulation]): A list of triangulations to plot.
         values (List[List[float]]): A list of values, corresponding with the triangulations and their respective indices.
         levels (Union[List[float], int], optional): The number of levels to include in the colorbar. Defaults to None which will use 10-steps between the min/max for all given values.
+        contours (List[float], optional): Add contours at the given values to the spatial plot. Defaults to None.
         cmap (Colormap, optional): The . Defaults to "viridis".
         extend (str, optional): Define how to handle the end-points of the colorbar. Defaults to "neither".
         norm (BoundaryNorm, optional): A matploltib BoundaryNorm object containing colormap boundary mapping information. Defaults to None.
@@ -73,6 +75,8 @@ def spatial_heatmap(
         tcf = ax.tricontourf(
             tri, zs, extend=extend, cmap=cmap, levels=levels, norm=norm
         )
+        if contours is not None:
+            ax.tricontour(tri, zs, levels=contours)
 
     # Plot colorbar
     divider = make_axes_locatable(ax)
