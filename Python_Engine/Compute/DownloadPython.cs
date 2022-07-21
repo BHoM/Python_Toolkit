@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -29,29 +29,35 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Download a file using CURL.")]
-        [Input("url", "URL to file.")]
-        [Input("directory", "The directory into which the file should be saved.")]
-        [Input("force", "If the file already exists, overwrite it.")]
-        [Output("path", "The path to the downloaded file.")]
-        private static string DownloadFile(string url, string directory = null, bool force = false)
+        [Description("Download a the target version of Python.")]
+        [Input("version", "A Python version.")]
+        [Output("executable", "The executable of the downloaded Python.")]
+        public static string DownloadPython(this BH.oM.Python.Enums.PythonVersion version)
         {
-            directory = System.String.IsNullOrEmpty(directory) ? Path.GetTempPath() : directory;
-            string downloadedFile = Path.Combine(directory, Path.GetFileName(url));
+            string targetDirectory = Query.EnvironmentsDirectory();
+            string versionString = version.ToString().Replace("v", "");
+            string resultantDirectory = Path.Combine(targetDirectory, versionString);
+            string executable = Path.Combine(resultantDirectory, "python.exe");
 
-            if (File.Exists(downloadedFile) && !force)
+            if (File.Exists(executable))
+                return executable;
+
+            string pythonUrl = version.EmbeddableURL();
+            string pythonZipFile = Path.Combine(targetDirectory, Path.GetFileName(pythonUrl));
+
+            List<string> commands = new List<string>()
             {
-                return downloadedFile;
-            }
+                $"curl {pythonUrl} -o {pythonZipFile}",
+                $"mkdir {resultantDirectory}",
+                $"tar -v -xf {pythonZipFile} -C {resultantDirectory}",
+                $"del {pythonZipFile}",
+            };
+            foreach (string command in commands)
+	        {
+                RunCommandStdout(command, hideWindows: true);
+	        }
 
-            if (RunCommandBool($"curl {url} -o {downloadedFile} && exit", hideWindows: true))
-            {
-                return downloadedFile;
-            }
-
-            BH.Engine.Base.Compute.RecordError($"Download of {Path.GetFileName(url)} to {directory} did not work.");
-
-            return null;
+            return executable;
         }
     }
 }

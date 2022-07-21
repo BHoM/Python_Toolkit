@@ -8,3 +8,4 @@ pymongo
 pyodbc
 SQLAlchemy
 tables
+virtualenv

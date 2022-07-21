@@ -21,31 +21,16 @@
  */
 
 using BH.oM.Python.Enums;
-using BH.oM.Python;
 using BH.oM.Base.Attributes;
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("Check whether a Python Environment already exists in the given location.")]
-        [Input("directory", "The directory containing a named Python environment.")]
-        [Input("name", "The name of the Python environment (the subdirectory within \"directory\" that contains \"python.exe\").")]
-        [Output("exists", "True if the environment exists, False if not.")]
-        public static bool EnvironmentExists(string directory, string name)
-        {
-            string fullPath = Path.Combine(directory, name);
-            if (Directory.Exists(fullPath) && File.Exists(Path.Combine(fullPath, "python.exe")))
-                return true;
-
-            return false;
-        }
-
         [Description("Check whether the given BHoM Python Environment already exists.")]
         [Input("env", "A BHoM Python environment.")]
         [Output("exists", "True if the environment exists, False if not.")]
