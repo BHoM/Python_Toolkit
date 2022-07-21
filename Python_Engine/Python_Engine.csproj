@@ -67,15 +67,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compute\DeleteDirectory.cs" />
-    <Compile Include="Compute\CopyDirectory.cs" />
-    <Compile Include="Compute\Uninstall.cs" />
-    <Compile Include="Compute\Install.cs" />
-    <Compile Include="Compute\JupyterLab.cs" />
-    <Compile Include="Compute\PythonToolkitEnvironment.cs" />
+    <Compile Include="Compute\DownloadPython.cs" />
+    <Compile Include="Compute\InstallVirtualenv.cs" />
+    <Compile Include="Compute\InstallReferencedVirtualenv.cs" />
+    <Compile Include="Compute\InstallBasePythonEnvironment.cs" />
     <Compile Include="Compute\RunCommand.cs" />
+    <Compile Include="Create\Logging.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
-    <Content Include="Python\src\python_toolkit\plot\chart\timeseries_diurnal.py" />
     <Content Include="Python\tests\__init__.py" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
@@ -84,7 +82,6 @@
     <Compile Include="Query\EmbeddableURL.cs" />
     <Compile Include="Query\ExtensionsDirectory.cs" />
     <Compile Include="Query\ToolkitName.cs" />
-    <Compile Include="Compute\DownloadFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -98,8 +95,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Convert\" />
-    <Folder Include="Create\" />
     <Folder Include="Python\data\" />
   </ItemGroup>
   <ItemGroup>
@@ -109,15 +104,6 @@
     <Content Include="Python\src\python_toolkit\example\example_2.py" />
     <Content Include="Python\src\python_toolkit\example\example_1.py" />
     <Content Include="Python\src\python_toolkit\example\__init__.py" />
-    <Content Include="Python\src\python_toolkit\plot\chart\spatial_heatmap.py" />
-    <Content Include="Python\src\python_toolkit\plot\chart\timeseries_heatmap.py" />
-    <Content Include="Python\src\python_toolkit\plot\chart\__init__.py" />
-    <Content Include="Python\src\python_toolkit\plot\color\colormap_sequential.py" />
-    <Content Include="Python\src\python_toolkit\plot\color\lighten_color.py" />
-    <Content Include="Python\src\python_toolkit\plot\color\__init__.py" />
-    <Content Include="Python\src\python_toolkit\plot\triangulate\create_triangulation.py" />
-    <Content Include="Python\src\python_toolkit\plot\triangulate\__init__.py" />
-    <Content Include="Python\src\python_toolkit\plot\__init__.py" />
     <Content Include="Python\src\python_toolkit\__init__.py" />
     <None Include="Python\README.md" />
     <Content Include="Python\setup.py" />
@@ -131,7 +117,6 @@ xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
 :: create infrastructure necessary to support Python environments
 if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
 if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
-if not exist "C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py" type nul &gt; "C:\ProgramData\BHoM\Extensions\PythonCode\__init__.py"
 
 :: remove any old versions within target directory for current toolkits Python code
 if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /S /Q

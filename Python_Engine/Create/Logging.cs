@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
  * Copyright (c) 2015 - 2022, the respective contributors. All rights reserved.
  *
@@ -21,44 +21,32 @@
  */
 
 using BH.oM.Base.Attributes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Create
     {
-        [Description("Install/query the Python_Toolkit BHoM Python Environment.")]
-        [Input("run", "Run the installation process for the BHoM Python Environment.")]
-        [Output("env", "A BHoM Python Environment.")]
-        public static oM.Python.PythonEnvironment PythonToolkitEnvironment(bool run = false)
+        [Description("Create a header for a logging document.")]
+        [Input("text", "A string to place into the header.")]
+        [Output("header", "A header string.")]
+        public static string LoggingHeader(string text)
         {
-            // set-up bits and pieces describing the env, prior to running checks/processes
-            string toolkitName = Query.ToolkitName();
-            string envsDir = Query.EnvironmentsDirectory();
-            string codeDir = Query.CodeDirectory();
-            string toolkitEnvDir = Path.Combine(envsDir, toolkitName);
-            oM.Python.PythonEnvironment thisEnv = new oM.Python.PythonEnvironment()
-            {
-                Name = Query.ToolkitName(),
-                Executable = Path.Combine(envsDir, toolkitName, "python.exe"),
-            };
-            bool thisEnvExists = thisEnv.EnvironmentExists();
-
-            if (run)
-            {
-                if (thisEnvExists)
-                    return thisEnv;
-
-                return Compute.InstallPythonEnvironment(
-                    version: oM.Python.Enums.PythonVersion.v3_7_9,
-                    name: toolkitName,
-                    additionalPackages: new List<string>() { Path.Combine(codeDir, toolkitName) }
-                );
-            }
-            return null;
+            StringBuilder sb = new StringBuilder();
+            int maxLength = new List<int>() { text.Length, 54 }.Max();
+            int innerLength = maxLength - 4;
+            string topBottom = String.Concat(Enumerable.Repeat("#", maxLength + 4));
+            sb.AppendLine(topBottom);
+            sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", text)} #");
+            sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", System.DateTime.Now.ToString("s"))} #");
+            sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", $"BHoM version {BH.Engine.Base.Query.BHoMVersion()}")} #");
+            sb.AppendLine(topBottom);
+            return sb.ToString();
         }
     }
 }
