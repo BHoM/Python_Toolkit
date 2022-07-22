@@ -80,7 +80,7 @@ namespace BH.Engine.Python
                 executable = Modify.AddQuotesIfRequired(executable);
 
                 // create log of installation as process continues - useful for debugging if things go wrong!
-                string logFile = Path.Combine(targetDirectory, "BHoM_installation.log");
+                string logFile = Path.Combine(targetDirectory, "installation.log");
 
                 // create installation commands
                 List<string> installationCommands = new List<string>() {

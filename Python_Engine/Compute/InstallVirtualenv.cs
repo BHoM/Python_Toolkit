@@ -67,7 +67,7 @@ namespace BH.Engine.Python
                     Directory.CreateDirectory(targetDirectory);
 
                 // return the existing environment if it already exists
-                oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, name, "Scripts", "python.exe") };
+                oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, "Scripts", "python.exe") };
                 if (env.EnvironmentExists())
                     return env;
 
@@ -75,7 +75,7 @@ namespace BH.Engine.Python
                 string executable = pythonVersion.DownloadPython();
 
                 // create log of installation as process continues - useful for debugging if things go wrong!
-                string logFile = Path.Combine(targetDirectory, "BHoM_installation.log");
+                string logFile = Path.Combine(targetDirectory, "installation.log");
 
                 // create installation commands
                 List<string> installationCommands = new List<string>() {

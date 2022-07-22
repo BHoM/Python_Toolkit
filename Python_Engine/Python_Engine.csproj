@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compute\DownloadPython.cs" />
+    <Compile Include="Compute\RemoveVirtualenv.cs" />
     <Compile Include="Compute\InstallVirtualenv.cs" />
     <Compile Include="Compute\InstallReferencedVirtualenv.cs" />
     <Compile Include="Compute\InstallBasePythonEnvironment.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Create\Logging.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Content Include="Python\tests\__init__.py" />
+    <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
     <Compile Include="Query\ValidEnvironmentName.cs" />

@@ -41,6 +41,7 @@ namespace BH.Engine.Python
             int maxLength = new List<int>() { text.Length, 54 }.Max();
             int innerLength = maxLength - 4;
             string topBottom = String.Concat(Enumerable.Repeat("#", maxLength + 4));
+            sb.AppendLine();
             sb.AppendLine(topBottom);
             sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", text)} #");
             sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", System.DateTime.Now.ToString("s"))} #");

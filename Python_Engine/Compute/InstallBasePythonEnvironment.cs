@@ -54,7 +54,7 @@ namespace BH.Engine.Python
                     return env;
 
                 // create log of installation as process continues - useful for debugging if things go wrong!
-                string logFile = Path.Combine(targetDirectory, "BHoM_installation.log");
+                string logFile = Path.Combine(targetDirectory, "installation.log");
 
                 // prepare constants for use in installation process
                 string pythonUrl = version.EmbeddableURL();
