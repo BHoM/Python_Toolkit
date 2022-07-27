@@ -75,7 +75,6 @@
     <Compile Include="Compute\RunCommand.cs" />
     <Compile Include="Create\Logging.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
-    <Content Include="Python\tests\__init__.py" />
     <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
@@ -96,9 +95,7 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Python\data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Python\src\python_toolkit\bhom\bhom_analytics.py" />
     <Content Include="Python\src\python_toolkit\bhom\bhom_json_encoder.py" />
@@ -107,6 +104,7 @@
     <Content Include="Python\src\python_toolkit\example\example_1.py" />
     <Content Include="Python\src\python_toolkit\example\__init__.py" />
     <Content Include="Python\src\python_toolkit\__init__.py" />
+    <Content Include="Python\src\tests\__init__.py" />
     <None Include="Python\README.md" />
     <Content Include="Python\setup.py" />
     <Content Include="Python\requirements.txt" />
