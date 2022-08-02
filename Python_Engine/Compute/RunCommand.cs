@@ -25,6 +25,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -129,13 +130,13 @@ namespace BH.Engine.Python
             return stdout.Trim();
         }
 
-        [Description("Run a string containing Python code and return the output.")]
+        [Description("Run a string containing Python code and return the output. The string passed should end with a \"print\" statement, and other print statements within it should be captured within the script to ensure only a single output string is passed back to this method.")]
         [Input("env", "The Python environment with which to run the Python script.")]
         [Input("pythonString", "The string containing the Python script.")]
         [Output("result", "The stdout data from the executed Python script.")]
         public static string RunCommandPythonString(this oM.Python.PythonEnvironment env, string pythonString)
         {
-            if (!pythonString.Contains("print"))
+            if (!pythonString.Split('\n').Last().Contains("print"))
             {
                 BH.Engine.Base.Compute.RecordWarning("Nothing is being passed to StdOut in the Python script, so nothing will be returned from this method.");
             }
@@ -149,9 +150,7 @@ namespace BH.Engine.Python
 
             string cmd = $"{Modify.AddQuotesIfRequired(env.Executable)} {scriptFile}";
 
-            string results = RunCommandStdout(cmd, hideWindows: true);
-
-            return results;
+            return RunCommandStdout(cmd, hideWindows: true);
         }
     }
 }

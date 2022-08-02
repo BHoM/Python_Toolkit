@@ -72,7 +72,7 @@ namespace BH.Engine.Python
                     Directory.CreateDirectory(targetDirectory);
 
                 // return existing env if it already exists
-                oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, name, "Scripts", "python.exe") };
+                oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, "Scripts", "python.exe") };
                 if (env.EnvironmentExists())
                     return env;
 
