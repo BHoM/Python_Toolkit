@@ -14,7 +14,7 @@ A BHoM toolkit can be associated with a Python environment. The toolkit needs to
 
 ### Creating the Python code structure
 
-All Python code within BHoM should be placed within the hosting toolkit, inside its `*_Engine` folder. Within this folder, the following directory structure should be created (files have been included here within `./example_toolkit` and `./tests` also, though these are purely indicative):
+All Python code within BHoM should be placed within the hosting toolkit, inside its `*_Engine` folder. Within this folder, the following directory structure should be created (files have been included here within `./example_toolkit`, though these are purely indicative and struictures can vary based on toolkit need):
 
 ```
 .
@@ -25,22 +25,17 @@ All Python code within BHoM should be placed within the hosting toolkit, inside 
 |       ├── setup.py
 |       ├── requirements.txt
 |       └── src
-|           ├── example_toolkit
-|           |   ├── __init__.py
-|           |   ├── code_directory_a
-|           |   |   ├── __init__.py__
-|           |   |   └── method.py
-|           |   ├── code_directory_b
-|           |   |   └── __init__.py
-|           |   |   └── method.py
-|           |   └── helpers
-|           |       ├── __init__.py
-|           |       └── helper_method_a.py
-|           └── tests
+|           └── example_toolkit
 |               ├── __init__.py
-|               ├── test_code_directory_a
-|               ├── test_code_directory_b
-|               └── test_helpers
+|               ├── code_directory_a
+|               |   ├── __init__.py__
+|               |   └── method.py
+|               ├── code_directory_b
+|               |   └── __init__.py
+|               |   └── method.py
+|               └── helpers
+|                   ├── __init__.py
+|                   └── helper_method_a.py
 └── ...
 ```
 
@@ -160,7 +155,7 @@ Unless otherwise specified, code style must follow guidance from [PEP8](https://
 
 The following guidelines are given for implementation of Python code testing. It is anticipated that the majority of testing can be undertaken automatically without need for human interaction. This does increase the time required to develop code - but will result in far better code overall as a result. Everything that can be reasonably tested should be done so. Dispensation may be given from the CI/CD lead where appropriate following suitable justification made by the code developer.
 
-The testing framework used in all BHoM Python code is `pytest`. In each BHoM Python code directory there exists a `./src` folder (containing the code), and a `./tests` folder containing related tests. Tests should be created by the person that writes the code that is being tested, and subject to review by those undertaking the PR review. A passing unit test is required for PR approval. The reviewer needs to ensure that the testing procedure is sufficiently comprehensive as part of their approval.
+The testing framework used in all BHoM Python code is `pytest`. In each BHoM toolkit, in the base of that toolkit is a ./.ci directory wherein tests should be placed. For example, in the `Example_Toolkit`, tests would be located in `./Example_Toolkit/.ci/unit_tests/python`. Tests should be created by the person that writes the code that is being tested, and subject to review by those undertaking the PR review. A passing unit test is required for PR approval. The reviewer needs to ensure that the testing procedure is sufficiently comprehensive as part of their approval.
 
 An example is given below for an appropriate candidate for testing:
 
