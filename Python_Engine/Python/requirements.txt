@@ -6,6 +6,7 @@ numpy
 pandas
 pymongo
 pyodbc
+pytest
 SQLAlchemy
 tables
 virtualenv

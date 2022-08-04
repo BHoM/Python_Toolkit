@@ -81,6 +81,7 @@ namespace BH.Engine.Python
                 List<string> installationCommands = new List<string>() {
                     $"{bhomPythonExecutable} -m virtualenv --python={executable} {targetDirectory}",  // create the virtualenv of the target executable
                     $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install ipykernel",  // install ipykernel into virtualenv
+                    $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install pytest",  // install pytest into virtualenv
                     $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m ipykernel install --name={name}",  // register environment with ipykernel
                 };
                 if (localPackage != null)

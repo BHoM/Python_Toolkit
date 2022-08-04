@@ -88,6 +88,7 @@ namespace BH.Engine.Python
                     $"{executable} -m pip freeze > {Path.Combine(targetDirectory, "requirements.txt")}",  // get the installed packages from the referenced executable
                     $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install -r {Path.Combine(targetDirectory, "requirements.txt")}",  // install requirements into virtualenv
                     $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install ipykernel",  // install ipykernel into virtualenv
+                    $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install pytest",  // install pytest into virtualenv
                     $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m ipykernel install --name={name}",  // register environment with ipykernel
                 };
                 if (localPackage != null)
