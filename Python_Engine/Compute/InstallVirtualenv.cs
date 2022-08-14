@@ -51,16 +51,12 @@ namespace BH.Engine.Python
                 return null;
             }
 
-            string bhomPythonExecutable = Path.Combine(Query.EnvironmentsDirectory(), Query.ToolkitName(), "python.exe");
-
-            if (!File.Exists(bhomPythonExecutable))
-            {
-                BH.Engine.Base.Compute.RecordError("Install the BHoM Python environment before installing this virtualenv.");
-                return null;
-            }
-
             if (run)
             {
+                // install base BHoM Python environment if it's not already installed
+                oM.Python.PythonEnvironment baseEnv = Compute.InstallBasePythonEnvironment(run);
+                string bhomPythonExecutable = baseEnv.Executable;
+
                 // set location where virtual env will be created
                 string targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), name);
                 if (!Directory.Exists(targetDirectory))
