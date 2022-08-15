@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import Callable
 from uuid import uuid4
 
-from .bhom_json_encoder import BHoMJSONEncoder
+from python_toolkit.bhom.bhom_json_encoder import BHoMJSONEncoder
 
 
 def bhom_analytics(f: Callable):
     """A wrapper used to capture usage analytics of the decorated function."""
 
     @functools.wraps(f)
-    def wrapper(*args, **kwds):
+    def wrapper(*args, **kwargs):
         output_file = Path(f"C:/Temp/bhom_python_{uuid4()}.json")
         d = {
             "StartTime": datetime.now(),
@@ -41,6 +41,6 @@ def bhom_analytics(f: Callable):
         # print function here to enable downstream processes to access the location where the data is stored for loading into BHoM.
         print(output_file, file=sys.stdout)
 
-        return f(*args, **kwds)
+        return f(*args, **kwargs)
 
     return wrapper

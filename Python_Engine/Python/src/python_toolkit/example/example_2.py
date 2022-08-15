@@ -3,8 +3,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-from ..bhom.bhom_analytics import bhom_analytics
+from python_toolkit.bhom.bhom_analytics import bhom_analytics
 
 
 @bhom_analytics

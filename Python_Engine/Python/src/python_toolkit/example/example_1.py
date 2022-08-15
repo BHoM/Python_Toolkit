@@ -1,6 +1,6 @@
 ﻿import argparse
 
-from ..bhom.bhom_analytics import bhom_analytics
+from python_toolkit.bhom.bhom_analytics import bhom_analytics
 
 
 @bhom_analytics
