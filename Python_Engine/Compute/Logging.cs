@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
-    public static partial class Create
+    public static partial class Compute
     {
         [Description("Create a header for a logging document.")]
         [Input("text", "A string to place into the header.")]

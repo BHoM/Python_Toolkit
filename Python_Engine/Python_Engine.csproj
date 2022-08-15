@@ -69,7 +69,7 @@
     <Compile Include="Compute\InstallReferencedVirtualenv.cs" />
     <Compile Include="Compute\InstallBasePythonEnvironment.cs" />
     <Compile Include="Compute\Run.cs" />
-    <Compile Include="Create\Logging.cs" />
+    <Compile Include="Compute\Logging.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
@@ -92,7 +92,9 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Create\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Python\src\python_toolkit\bhom\bhom_analytics.py" />
     <Content Include="Python\src\python_toolkit\bhom\bhom_json_encoder.py" />
