@@ -44,7 +44,7 @@ namespace BH.Engine.Python
             bool run = false
         )
         {
-            if (!Query.ValidEnvironmentName(name))
+            if (!IsValidEnvironmentName(name))
             {
                 BH.Engine.Base.Compute.RecordError("A BHoM Python virtualenv cannot cannot contain invalid filepath characters.");
                 return null;

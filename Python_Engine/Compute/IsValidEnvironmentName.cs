@@ -32,12 +32,12 @@ using System.Collections.Generic;
 
 namespace BH.Engine.Python
 {
-    public static partial class Query
+    public static partial class Compute
     {
         [Description("Check whether a string is valid as BHoM Python Environment name.")]
         [Input("name", "The name given to the BHoM Python Environment.")]
         [Output("valid", "True if valid, False if not.")]
-        public static bool ValidEnvironmentName(string name)
+        public static bool IsValidEnvironmentName(string name)
         {
             List<char> invalidChars = new List<char>() { ' ' };
             invalidChars.AddRange(Path.GetInvalidPathChars().ToList());
