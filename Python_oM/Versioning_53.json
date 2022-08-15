@@ -1,0 +1,26 @@
+﻿{
+    "Namespace": {
+        "ToNew": {
+        },
+        "ToOld": {
+        }
+    },
+    "Type": {
+        "ToNew": {
+
+        },
+        "ToOld": {
+        }
+    },
+    "Property": {
+        "ToNew": {
+        },
+        "ToOld": {
+        }
+    },
+    "MessageForDeleted": {
+        "BH.oM.Python.PythonPackage": "This object was originally included as part of an older means of managing Python environments via BHoM. This workflow has been removed as part of a new Python virtual environments management strategy. If further assistance is needed, please raise an issue on https://github.com/BHoM/Python_Toolkit/issues."
+    },
+    "MessageForNoUpgrade": {
+    }
+}
