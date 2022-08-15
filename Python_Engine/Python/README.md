@@ -41,13 +41,13 @@ All Python code within BHoM should be placed within the hosting toolkit, inside 
 
 ### Populating the `requirements.txt` file content
 
-If you've used Python before you'll be familiar with requirements.txt files. These contain the packages required by a given Python environment, and can specify the version of those packages also. In BHoM, and environment may be used within a specific toolkit, or it could reference an external Python environment (replicating it for modification according to BHoM requirements), or even as a standalone environment used for a specific purpose or project.
+If you've used Python before you may be familiar with `requirements.txt` files. These contain the packages required by a Python environment, and can specify the version of those packages also. In BHoM, an environment may be defined for a specific toolkit, associated with an external Python environment (replicating it for use in BHoM workflowsrequirements), or even as a standalone environment used for a specific purpose or project.
 
 Toolkit-specific environments, and standalone environments should be explicit about which versions of packages to install.
 
 If the Python environment created is referencing an external environment (i.e. it recreates the external environment for use/development in BHoM) then packages listed in the `requirements.txt` file should not state versions. This is so that the external "source" environment has control over packages installed, rather than the BHoM copy of that environment.
 
-By default, `ipykernel` is included in all BHoM create Python environments in order to use that environments Python kernel within a [Jupyter Notebook](https://jupyter.org/) UI. `pytest` is also installed to aid in automated unit testing, and `pylint` is included to aid in finding errors in code during development.
+By default, `ipykernel` is included in all BHoM created Python environments in order to use that environments Python kernel within a [Jupyter Notebook](https://jupyter.org/) UI (you can run one of these using the instructions [here](#scriptingnotebooks). `pytest` is also installed to aid in automated unit testing, and `pylint` is included to aid in finding errors in code during development.
 
 ### Populating the `setup.py` file
 
@@ -242,7 +242,13 @@ Additionally, the following user settings can be added to enable auto-formatting
 
 ## Scripting/notebooks
 
-Jupyter notebooks provide a good testing environment for Python code development. The registered ipykernel associated with each BHoM Python environment enables creation of environment specific notebooks with access to all code contained therein. During development it can be useful to reload changes in code rather than restarting teh kernel each time you modify the source code. To do this, include the following in the first cell in a notebook and changes you make in the referenced \*.py files will be brought through into the notebook environment.
+Jupyter notebooks provide a good testing environment for Python code development. The registered ipykernel associated with each BHoM Python environment enables creation of environment specific notebooks with access to all code contained therein. Once you've got the base BHoM Python environment installed, you can run a notebook server using
+
+```bash
+C:/ProgramData/BHoM/Extensions/PythonEnvironments/Python_Toolkit/python.exe -m jupyter lab
+```
+
+During development it can be useful to reload changes in code rather than restarting the kernel each time you modify the source code. To do this, include the following in the first cell in a notebook and changes you make in the referenced \*.py files will be brought through into the notebook environment.
 
 ```python
 %load_ext autoreload
