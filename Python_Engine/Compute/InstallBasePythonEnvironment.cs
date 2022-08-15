@@ -64,7 +64,7 @@ namespace BH.Engine.Python
 
                 using (StreamWriter sw = File.AppendText(logFile))
                 {
-                    sw.WriteLine(Create.LoggingHeader("Installation started for BHoM base Python environment"));
+                    sw.WriteLine(LoggingHeader("Installation started for BHoM base Python environment"));
 
                     // download and unpack files
                     List<string> installationCommands = new List<string>() {

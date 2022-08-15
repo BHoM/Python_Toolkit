@@ -34,7 +34,7 @@ namespace BH.Engine.Python
         [Description("Install the Python Environment into BHoM for a referenced existing Python environment.")]
         [Input("name", "The name of this BHoM Python Environment.")]
         [Input("executable", "The Python executable for the referenced environment. From this, the version of Python will be determined in order to recreate it for BHoM as a virtualenv.")]
-        [Input("localPackages", "A list of local packages to be included in the resultant environment. These are where custom BHoM code can be added into this environment.")]
+        [Input("localPackage", "A local package to be included in the resultant environment. This is where custom BHoM code can be added into this environment.")]
         [Input("run", "Run the installation process for the BHoM Python Environment.")]
         [Output("env", "The virtualenv replication of  Python Environment for BHoM workflows.")]
         public static oM.Python.PythonEnvironment InstallReferencedVirtualenv(
@@ -92,7 +92,7 @@ namespace BH.Engine.Python
 
                 using (StreamWriter sw = File.AppendText(logFile))
                 {
-                    sw.WriteLine(Create.LoggingHeader($"Installation started for referenced {name} Python environment"));
+                    sw.WriteLine(LoggingHeader($"Installation started for referenced {name} Python environment"));
 
                     foreach (string command in installationCommands)
                     {

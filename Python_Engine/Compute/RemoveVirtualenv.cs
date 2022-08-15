@@ -34,7 +34,8 @@ namespace BH.Engine.Python
         [Description("Remove a virtualenv of the given name.")]
         [Input("name", "The name of this virtualenv to remove.")]
         [Input("run", "Run the installation process for this virtualenv.")]
-        public static object RemoveVirtualenv(
+        [Output("success", "True if the environment of the given name has been removed.")]
+        public static bool RemoveVirtualenv(
             string name,
             bool run = false
         )
@@ -56,7 +57,7 @@ namespace BH.Engine.Python
                     };
                     using (StreamWriter sw = File.AppendText(logFile))
                     {
-                        sw.WriteLine(Create.LoggingHeader("Installation started for BHoM base Python environment"));
+                        sw.WriteLine(LoggingHeader($"Uninstalling {name} BHoM Python environment"));
 
                         foreach (string command in uninstallationCommands)
                         {
@@ -64,13 +65,14 @@ namespace BH.Engine.Python
                             Compute.RunCommandStdout($"{command}", hideWindows: true);
                         }
                     }
+                    return true;
                 }
                 else
                 {
                     BH.Engine.Base.Compute.RecordError($"{Query.ToString(env)} wasn't found and can not be removed.");
                 }
             }
-            return null;
+            return false;
         }
     }
 }
