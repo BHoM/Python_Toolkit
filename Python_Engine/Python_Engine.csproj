@@ -74,7 +74,7 @@
     <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
-    <Compile Include="Query\ValidEnvironmentName.cs" />
+    <Compile Include="Compute\IsValidEnvironmentName.cs" />
     <Compile Include="Query\EnvironmentsDirectory.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />
     <Compile Include="Query\ExtensionsDirectory.cs" />
