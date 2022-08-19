@@ -36,82 +36,84 @@ namespace BH.Engine.Python
         [Output("env", "The base Python Environment for BHoM workflows.")]
         public static oM.Python.PythonEnvironment InstallBasePythonEnvironment(bool run = false)
         {
-            if (run)
+            if (!run)
             {
-                // Python version for base environment
-                oM.Python.Enums.PythonVersion version = oM.Python.Enums.PythonVersion.v3_10_5;
+                BH.Engine.Base.Compute.RecordWarning($"Please toggle `{nameof(run)}` to true.");
+                return null;
+            }
 
-                // set location where base Python env will be created
-                string targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), Query.ToolkitName());
-                if (!Directory.Exists(targetDirectory))
-                    Directory.CreateDirectory(targetDirectory);
+            // Python version for base environment
+            oM.Python.Enums.PythonVersion version = oM.Python.Enums.PythonVersion.v3_10_5;
 
-                // set executable path for later use in installation
-                string executable = Path.Combine(targetDirectory, "python.exe");
-                oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = Query.ToolkitName(), Executable = executable };
+            // set location where base Python env will be created
+            string targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), Query.ToolkitName());
+            if (!Directory.Exists(targetDirectory))
+                Directory.CreateDirectory(targetDirectory);
 
-                if (env.EnvironmentExists())
-                    return env;
+            // set executable path for later use in installation
+            string executable = Path.Combine(targetDirectory, "python.exe");
+            oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = Query.ToolkitName(), Executable = executable };
 
-                // create log of installation as process continues - useful for debugging if things go wrong!
-                string logFile = Path.Combine(targetDirectory, "installation.log");
+            if (env.EnvironmentExists())
+                return env;
 
-                // prepare constants for use in installation process
-                string pythonUrl = version.EmbeddableURL();
-                string pythonZipFile = Path.Combine(targetDirectory, "embeddable_python.zip");
-                string pipInstallerUrl = "https://bootstrap.pypa.io/get-pip.py";
-                string pipInstallerFile = Path.Combine(targetDirectory, "get-pip.py");
+            // create log of installation as process continues - useful for debugging if things go wrong!
+            string logFile = Path.Combine(targetDirectory, "installation.log");
 
-                using (StreamWriter sw = File.AppendText(logFile))
+            // prepare constants for use in installation process
+            string pythonUrl = version.EmbeddableURL();
+            string pythonZipFile = Path.Combine(targetDirectory, "embeddable_python.zip");
+            string pipInstallerUrl = "https://bootstrap.pypa.io/get-pip.py";
+            string pipInstallerFile = Path.Combine(targetDirectory, "get-pip.py");
+
+            using (StreamWriter sw = File.AppendText(logFile))
+            {
+                sw.WriteLine(LoggingHeader("Installation started for BHoM base Python environment"));
+
+                // download and unpack files
+                List<string> installationCommands = new List<string>() {
+                    $"curl {pythonUrl} -o {pythonZipFile}", // download Python zip file
+                    $"tar -v -xf {pythonZipFile} -C {targetDirectory}", // unzip files
+                    $"del {pythonZipFile}", // remove zip file
+                    $"curl {pipInstallerUrl} -o {pipInstallerFile}", // download PIP installer
+                    $"{executable} {pipInstallerFile} --no-warn-script-location", // install PIP
+                    $"del {pipInstallerFile}", // remove PIP installer file
+                };
+
+                foreach (string command in installationCommands)
                 {
-                    sw.WriteLine(LoggingHeader("Installation started for BHoM base Python environment"));
+                    sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
+                    sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
+                }
 
-                    // download and unpack files
-                    List<string> installationCommands = new List<string>() {
-                        $"curl {pythonUrl} -o {pythonZipFile}", // download Python zip file
-                        $"tar -v -xf {pythonZipFile} -C {targetDirectory}", // unzip files
-                        $"del {pythonZipFile}", // remove zip file
-                        $"curl {pipInstallerUrl} -o {pipInstallerFile}", // download PIP installer
-                        $"{executable} {pipInstallerFile} --no-warn-script-location", // install PIP
-                        $"del {pipInstallerFile}", // remove PIP installer file
-                    };
+                // modify directory to replicate "normal" Python installation
+                List<string> pthFiles = System.IO.Directory.GetFiles(targetDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
+                string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(targetDirectory, "DLLs")).FullName;
+                List<string> libFiles = System.IO.Directory.GetFiles(targetDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
 
-                    foreach (string command in installationCommands)
-                    {
-                        sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
-                        sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
-                    }
+                List<string> modificationCommands = new List<string>() { };
+                foreach (string pthFile in pthFiles)
+                {
+                    modificationCommands.Add($"del {pthFile}"); // delete *._pth file/s
+                }
+                foreach (string libFile in libFiles)
+                {
+                    modificationCommands.Add($"move /y {libFile} {libDirectory}"); // move specific *._pyd and *.dll file/s into DLLs directory
+                }
 
-                    // modify directory to replicate "normal" Python installation
-                    List<string> pthFiles = System.IO.Directory.GetFiles(targetDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
-                    string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(targetDirectory, "DLLs")).FullName;
-                    List<string> libFiles = System.IO.Directory.GetFiles(targetDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
+                foreach (string command in modificationCommands)
+                {
+                    sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
+                    sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
+                }
 
-                    List<string> modificationCommands = new List<string>() { };
-                    foreach (string pthFile in pthFiles)
-                    {
-                        modificationCommands.Add($"del {pthFile}"); // delete *._pth file/s
-                    }
-                    foreach (string libFile in libFiles)
-                    {
-                        modificationCommands.Add($"move /y {libFile} {libDirectory}"); // move specific *._pyd and *.dll file/s into DLLs directory
-                    }
-
-                    foreach (string command in modificationCommands)
-                    {
-                        sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
-                        sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
-                    }
-
-                    // install packages into base environment
-                    string packageInstallationCommand = $"{executable} -m pip install --no-warn-script-location -e {Path.Combine(Query.CodeDirectory(), Query.ToolkitName())}";
-                    sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {packageInstallationCommand}");
-                    sw.WriteLine(Compute.RunCommandStdout($"{packageInstallationCommand}", hideWindows: true)); // install packages into this environment
+                // install packages into base environment
+                string packageInstallationCommand = $"{executable} -m pip install --no-warn-script-location -e {Path.Combine(Query.CodeDirectory(), Query.ToolkitName())}";
+                sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {packageInstallationCommand}");
+                sw.WriteLine(Compute.RunCommandStdout($"{packageInstallationCommand}", hideWindows: true)); // install packages into this environment
                 }
 
                 return env;
-            }
-            return null;
         }
     }
 }
