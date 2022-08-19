@@ -69,8 +69,9 @@ namespace BH.Engine.Python
         [Input("command", "The command to be run.")]
         [Input("hideWindows", "Set to True to hide cmd windows.")]
         [Input("startDirectory", "The directory in which the command should be run.")]
+        [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
         [Output("success", "True if successful and False if not.")]
-        public static bool RunCommandBool(string command, bool hideWindows = false, string startDirectory = null)
+        public static bool RunCommandBool(string command, bool hideWindows = false, string startDirectory = null, double timeoutMinutes = 5)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
 
@@ -87,7 +88,8 @@ namespace BH.Engine.Python
             process.StartInfo.Arguments = $"{commandMode} {command}";
             process.Start();
 
-            process.WaitForExit();
+            int millisecondsToWait = (int)timeoutMinutes * 60 * 1000;
+            process.WaitForExit(millisecondsToWait);
 
             if (process.ExitCode != 0)
             {
@@ -101,8 +103,9 @@ namespace BH.Engine.Python
         [Input("command", "The command to be run.")]
         [Input("hideWindows", "Set to True to hide cmd windows.")]
         [Input("startDirectory", "The directory in which the command should be run.")]
+        [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
         [Output("stdout", "The StandardOutput from the command that was run. If the process failed, then StandardError will be returned here instead.")]
-        public static string RunCommandStdout(string command, bool hideWindows = true, string startDirectory = null)
+        public static string RunCommandStdout(string command, bool hideWindows = true, string startDirectory = null, double timeoutMinutes = 5)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
 
@@ -123,7 +126,9 @@ namespace BH.Engine.Python
             // To avoid deadlocks, always read the output stream first and then wait.  
             string stdout = process.StandardOutput.ReadToEnd();
             string stderr = process.StandardError.ReadToEnd();
-            process.WaitForExit();
+
+            int millisecondsToWait = (int)timeoutMinutes * 60 * 1000;
+            process.WaitForExit(millisecondsToWait);
 
             if (process.ExitCode != 0)
             {

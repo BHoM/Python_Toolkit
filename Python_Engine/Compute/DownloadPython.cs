@@ -29,9 +29,9 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Download a the target version of Python.")]
+        [Description("Download a target version of Python.")]
         [Input("version", "A Python version.")]
-        [Output("executable", "The executable of the downloaded Python.")]
+        [Output("executablePath", "The path of the executable for the downloaded Python.")]
         public static string DownloadPython(this BH.oM.Python.Enums.PythonVersion version)
         {
             string targetDirectory = Query.EnvironmentsDirectory();
