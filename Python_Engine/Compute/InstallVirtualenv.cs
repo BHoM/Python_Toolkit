@@ -69,7 +69,10 @@ namespace BH.Engine.Python
             // return the existing environment if it already exists
             oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, "Scripts", "python.exe") };
             if (env.EnvironmentExists())
+            {
+                BH.Engine.Base.Compute.RecordNote($"The {name} environment already exists and is being returned here instead of installing it again. To install a fresh version of this environment, remove this environment first.");
                 return env;
+            }
 
             // get the python version executable to reference for this virtualenv
             string executable = pythonVersion.DownloadPython();
