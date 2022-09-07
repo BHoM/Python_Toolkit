@@ -51,9 +51,9 @@ namespace BH.Engine.Python
                 return null;
             }
 
-            if (run)
+            if (!run)
             {
-                BH.Engine.Base.Compute.RecordWarning($"Please toggle `{nameof(run)}` to true.");
+                BH.Engine.Base.Compute.RecordWarning($"Please toggle \"{nameof(run)}\" to true.");
                 return null;
             }
 
