@@ -31,6 +31,7 @@ namespace BH.Engine.Python
     {
         [Description("The path where any BHoM generated Python code is placed prior to inclusion in a BHoM Python Environment.")]
         [Output("The path where any BHoM generated Python code is placed prior to inclusion in a BHoM Python Environment.")]
+        [PreviousVersion("5.3", "BH.oM.Python.Query.PythonEnvironment")]
         public static string CodeDirectory()
         {
             return Path.Combine(Query.ExtensionsDirectory(), "PythonCode");

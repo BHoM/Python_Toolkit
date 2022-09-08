@@ -32,6 +32,7 @@ namespace BH.Engine.Python
         [Description("Download a target version of Python.")]
         [Input("version", "A Python version.")]
         [Output("executablePath", "The path of the executable for the downloaded Python.")]
+        [PreviousVersion("5.3", "BH.Engine.Python.Compute.DownloadPython()")]
         public static string DownloadPython(this BH.oM.Python.Enums.PythonVersion version)
         {
             string targetDirectory = Query.EnvironmentsDirectory();
