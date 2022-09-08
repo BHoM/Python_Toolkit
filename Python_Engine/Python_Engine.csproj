@@ -70,6 +70,7 @@
     <Compile Include="Compute\InstallBasePythonEnvironment.cs" />
     <Compile Include="Compute\Run.cs" />
     <Compile Include="Compute\Logging.cs" />
+    <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
