@@ -86,13 +86,14 @@ namespace BH.Engine.Python
             string logFile = Path.Combine(targetDirectory, "installation.log");
 
             // create installation commands
+            string baseBHoMPackage = Path.Combine(Query.CodeDirectory(), baseEnv.Name);
             List<string> installationCommands = new List<string>() {
                 $"{bhomPythonExecutable} -m virtualenv --python={executable} {targetDirectory}",  // create the virtualenv of the target executable
                 $"{executable} -m pip freeze > {Path.Combine(targetDirectory, "requirements.txt")}",  // get the installed packages from the referenced executable
                 $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install -r {Path.Combine(targetDirectory, "requirements.txt")}",  // install requirements into virtualenv
-                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install ipykernel",  // install ipykernel into virtualenv
-                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install pytest",  // install pytest into virtualenv
+                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install ipykernel pytest",  // install ipykernel and pytest into virtualenv
                 $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m ipykernel install --name={name}",  // register environment with ipykernel
+                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install --no-warn-script-location -e {baseBHoMPackage}",  // install base BHoM package to virtualenv
             };
             if (localPackage != null)
                 installationCommands.Add($"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install -e {Modify.AddQuotesIfRequired(localPackage)}");  // install local package into virtualenv
