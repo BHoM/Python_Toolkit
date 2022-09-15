@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-class BHoMJSONEncoder(JSONEncoder):
+class Encoder(JSONEncoder):
     """A custom BHoM JSONEncoder class capable of serialising non-native Python datatypes into a JSONable object."""
 
     def default(self, obj):

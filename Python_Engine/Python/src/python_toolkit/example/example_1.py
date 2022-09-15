@@ -1,9 +1,9 @@
 ﻿import argparse
 
-from python_toolkit.bhom.bhom_analytics import bhom_analytics
+from python_toolkit.bhom.analytics import analytics
 
 
-@bhom_analytics
+@analytics
 def example_1(a: float = 23, b: int = 42) -> str:
     """An example method that generates and returns some text.
     This method is also decorated with a ToBHoM method, which

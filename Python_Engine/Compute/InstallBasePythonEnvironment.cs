@@ -108,7 +108,8 @@ namespace BH.Engine.Python
                 }
 
                 // install packages into base environment
-                string packageInstallationCommand = $"{executable} -m pip install --no-warn-script-location -e {Path.Combine(Query.CodeDirectory(), Query.ToolkitName())}";
+                string baseBHoMPackage = Path.Combine(Query.CodeDirectory(), Query.ToolkitName());
+                string packageInstallationCommand = $"{executable} -m pip install --no-warn-script-location -e {baseBHoMPackage}";
                 sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {packageInstallationCommand}");
                 sw.WriteLine(Compute.RunCommandStdout($"{packageInstallationCommand}", hideWindows: true)); // install packages into this environment
                 }

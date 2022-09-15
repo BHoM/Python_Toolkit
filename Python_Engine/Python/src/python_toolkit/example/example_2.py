@@ -3,10 +3,10 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from python_toolkit.bhom.bhom_analytics import bhom_analytics
+from python_toolkit.bhom.analytics import analytics
 
 
-@bhom_analytics
+@analytics
 def example_2(save_path: Path, n_steps: int = 25) -> Path:
     """An example method to generate a chart and returns a dictionary.
 

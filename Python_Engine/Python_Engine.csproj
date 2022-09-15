@@ -102,8 +102,13 @@
     <Folder Include="Create\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Python\src\python_toolkit\bhom\bhom_analytics.py" />
-    <Content Include="Python\src\python_toolkit\bhom\bhom_json_encoder.py" />
+    <Content Include="Python\src\python_toolkit\bhom\analytics.py" />
+    <Content Include="Python\src\python_toolkit\bhom\anonymise_filepath.py" />
+    <Content Include="Python\src\python_toolkit\bhom\decorate_all_in_module.py" />
+    <Content Include="Python\src\python_toolkit\bhom\encoder.py" />
+    <Content Include="Python\src\python_toolkit\bhom\package_contents.py" />
+    <Content Include="Python\src\python_toolkit\bhom\ticks.py" />
+    <Content Include="Python\src\python_toolkit\bhom\version.py" />
     <Content Include="Python\src\python_toolkit\bhom\__init__.py" />
     <Content Include="Python\src\python_toolkit\example\example_2.py" />
     <Content Include="Python\src\python_toolkit\example\example_1.py" />
@@ -116,6 +121,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
+
       xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
       xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
 
@@ -131,6 +137,7 @@
 
       :: remove temporary log file
       del output.log
+      
     </PostBuildEvent>
   </PropertyGroup>
 </Project>
