@@ -34,7 +34,7 @@ def analytics(f: Callable):
             "BHoMVersion": BHOM_VERSION,
             "BHoM_Guid": str(uuid4()),
             "CallerName": f"{module_stack}",
-            "ComponentId": "",
+            "ComponentId": str(uuid4()),
             "CustomData": {},
             "Errors": [],
             "FileId": "",
