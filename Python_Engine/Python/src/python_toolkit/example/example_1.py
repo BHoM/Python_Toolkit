@@ -32,4 +32,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    example_1(args.a, args.b)
+    print(example_1(args.a, args.b))
