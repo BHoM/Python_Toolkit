@@ -54,4 +54,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    example_2(args.save_path, args.n_steps)
+    print(example_2(args.save_path, args.n_steps))
