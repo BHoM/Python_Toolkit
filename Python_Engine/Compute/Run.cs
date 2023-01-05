@@ -71,7 +71,6 @@ namespace BH.Engine.Python
         [Input("startDirectory", "The directory in which the command should be run.")]
         [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
         [Output("success", "True if successful and False if not.")]
-        [PreviousVersion("5.3", "BH.Engine.Python.Compute.RunCommandBool(System.String, System.Boolean, System.String)")]
         public static bool RunCommandBool(string command, bool hideWindows = false, string startDirectory = null, double timeoutMinutes = 5)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
@@ -106,7 +105,6 @@ namespace BH.Engine.Python
         [Input("startDirectory", "The directory in which the command should be run.")]
         [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
         [Output("stdout", "The StandardOutput from the command that was run. If the process failed, then StandardError will be returned here instead.")]
-        [PreviousVersion("5.3", "BH.Engine.Python.Compute.RunCommandStdout(System.String, System.Boolean, System.String)")]
         public static string RunCommandStdout(string command, bool hideWindows = true, string startDirectory = null, double timeoutMinutes = 5)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
