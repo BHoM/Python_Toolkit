@@ -67,12 +67,12 @@ namespace BH.Engine.Python
             string bhomPythonExecutable = baseEnv.Executable;
 
             // set location where virtual env will be created
-            string targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), name);
+            string targetDirectory = Query.VirtualEnvDirectory(name);
             if (!Directory.Exists(targetDirectory))
                 Directory.CreateDirectory(targetDirectory);
 
             // return existing env if it already exists
-            oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, "Scripts", "python.exe") };
+            oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Query.VirtualEnvPythonExePath(name) };
             if (env.EnvironmentExists())
             {
                 BH.Engine.Base.Compute.RecordNote($"The {name} environment already exists and is being returned here instead of installing it again. To install a fresh version of this environment, remove this environment first.");
