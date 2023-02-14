@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -77,6 +77,9 @@
     <Compile Include="Compute\Logging.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
+    <Compile Include="Create\VirtualEnvironment.cs" />
+    <Compile Include="Query\VirtualEnvPythonExePath.cs" />
+    <Compile Include="Query\VirtualEnvDirectory.cs" />
     <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
@@ -89,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Versioning_53.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Python_oM\Python_oM.csproj">
@@ -97,9 +101,7 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Create\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Python\src\python_toolkit\bhom\analytics.py" />
     <Content Include="Python\src\python_toolkit\bhom\anonymise_filepath.py" />
@@ -120,15 +122,20 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
+
       xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
       xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
+
       :: create infrastructure necessary to support Python environments
       if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
       if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
+
       :: remove any old versions within target directory for current toolkits Python code
       if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /S /Q
+
       :: move Python code over to toolkit extensions folder, redirecting output to temp log file to silence it
       robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /s /purge /xf "*.pyc" /xd "\__pycache__\" &gt; output.log
+
       :: remove temporary log file
       del output.log
       
