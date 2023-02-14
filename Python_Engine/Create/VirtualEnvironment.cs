@@ -32,7 +32,7 @@ namespace BH.Engine.Python
     {
         [Description("Creates a PythonEnvironment object from a virtual environment name. This method does not install the underlying environment. An error will be returned if no environment is found.")]
         [Input("envName","The virtual environment name.")]
-        [Output("The location where a Python virtual environment would reside.")]
+        [Output("The location where a Python virtual environment would reside. Null will be returned if the underlying environment does not exist.")]
         public static PythonEnvironment VirtualEnvironment(string envName)
         {
             string exePath = Query.VirtualEnvPythonExePath(envName);
@@ -42,8 +42,7 @@ namespace BH.Engine.Python
             }
             else
             {
-                BH.Engine.Base.Compute.RecordError(
-                    $"No environment could be found for {envName}. Use the appropriate InstallPythonEnvironment to install this environment.");
+                BH.Engine.Base.Compute.RecordError($"No environment could be found for {envName}. Use the appropriate InstallPythonEnv to install this environment.");
                 return null;
             }
         }
