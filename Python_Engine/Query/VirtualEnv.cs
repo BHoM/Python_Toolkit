@@ -35,7 +35,16 @@ namespace BH.Engine.Python
         [Output("The virtual environment, if it exists.")]
         public static PythonEnvironment VirtualEnv(string envName)
         {
-            return new PythonEnvironment() { Executable = VirtualEnvPythonExePath(envName), Name = envName };
+            string exePath = Query.VirtualEnvPythonExePath(envName);
+            if (File.Exists(exePath))
+            {
+                return new PythonEnvironment() { Name = envName, Executable = exePath };
+            }
+            else
+            {
+                BH.Engine.Base.Compute.RecordError($"No environment could be found for {envName}. Use the appropriate InstallPythonEnv to install this environment.");
+                return null;
+            }
         }
     }
 }
