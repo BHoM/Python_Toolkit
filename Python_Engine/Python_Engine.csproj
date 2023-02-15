@@ -77,7 +77,6 @@
     <Compile Include="Compute\Logging.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
-    <Compile Include="Create\VirtualEnvironment.cs" />
     <Compile Include="Query\VirtualEnv.cs" />
     <Compile Include="Query\VirtualEnvPythonExePath.cs" />
     <Compile Include="Query\VirtualEnvDirectory.cs" />
@@ -102,7 +101,9 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Create\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Python\src\python_toolkit\bhom\analytics.py" />
     <Content Include="Python\src\python_toolkit\bhom\anonymise_filepath.py" />
