@@ -35,7 +35,15 @@ namespace BH.Engine.Python
         [Output("The location where a Python virtual environment would reside.")]
         public static string VirtualEnvPythonExePath(string envName)
         {
-            return Path.Combine(VirtualEnvDirectory(envName), "Scripts", "python.exe");
+            string exePath = Path.Combine(VirtualEnvDirectory(envName), "Scripts", "python.exe");
+
+            if (File.Exists(exePath))
+            {
+                return exePath;
+            }
+
+            BH.Engine.Base.Compute.RecordError($"The executable for \"{envName}\" does not exist at \"{exePath}\".");
+            return null;
         }
     }
 }

@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using BH.oM.Python;
 using System.ComponentModel;
 using System.IO;
 using System.Xml.Linq;
@@ -30,20 +30,12 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("The location where any BHoM generated Python environments reside.")]
-        [Input("envName","The virtual environment name.")]
-        [Output("The location where any BHoM generated Python environments reside.")]
-        public static string VirtualEnvDirectory(string envName)
+        [Description("Get an installed environment without the overhead of attempting to install that environment.")]
+        [Input("envName","The virtual environment name to request.")]
+        [Output("The virtual environment, if it exists.")]
+        public static PythonEnvironment VirtualEnv(string envName)
         {
-            string directory = Path.Combine(Query.EnvironmentsDirectory(), envName);
-            
-            if (Directory.Exists(directory))
-            {
-                return directory;
-            }
-            
-            BH.Engine.Base.Compute.RecordError($"The virtual environment directory for \"{envName}\" does not exist at \"{directory}\".");
-            return null;
+            return new PythonEnvironment() { Executable = VirtualEnvPythonExePath(envName), Name = envName };
         }
     }
 }
