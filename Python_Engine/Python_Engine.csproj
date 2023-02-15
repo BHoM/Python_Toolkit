@@ -77,6 +77,7 @@
     <Compile Include="Compute\Logging.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
+    <Compile Include="Query\EnvironmentCodeVersionsMatch.cs" />
     <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />

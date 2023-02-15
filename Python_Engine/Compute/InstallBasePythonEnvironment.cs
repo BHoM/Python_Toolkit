@@ -107,6 +107,11 @@ namespace BH.Engine.Python
                     sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
                 }
 
+                // install pywin32 to enable BHoM version extraction
+                string pywinInstallCommand = $"{executable} -m pip install pywin32";
+                sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {pywinInstallCommand}");
+                sw.WriteLine(Compute.RunCommandStdout($"{pywinInstallCommand}", hideWindows: true)); // install pywin32 into this environment
+
                 // install packages into base environment
                 string baseBHoMPackage = Path.Combine(Query.CodeDirectory(), Query.ToolkitName());
                 string packageInstallationCommand = $"{executable} -m pip install --no-warn-script-location -e {baseBHoMPackage}";

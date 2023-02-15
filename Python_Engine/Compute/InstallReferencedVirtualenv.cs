@@ -75,6 +75,7 @@ namespace BH.Engine.Python
             oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, "Scripts", "python.exe") };
             if (env.EnvironmentExists())
             {
+                // TODO - add check that toolkit code is of same version as BHoM Python Environment code
                 BH.Engine.Base.Compute.RecordNote($"The {name} environment already exists and is being returned here instead of installing it again. To install a fresh version of this environment, remove this environment first.");
                 return env;
             }
