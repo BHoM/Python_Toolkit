@@ -36,12 +36,16 @@ namespace BH.Engine.Python
         [Output("exists", "True if the environment exists, False if not.")]
         public static bool EnvironmentExists(this oM.Python.PythonEnvironment env)
         {
-            if (File.Exists(env.Executable))
+            if (env.Executable is null)
             {
-                return true;
+                return false;
+            }
+            if (!File.Exists(env.Executable))
+            {
+                return false;
             }
 
-            return false;
+            return true;
         }
     }
 }

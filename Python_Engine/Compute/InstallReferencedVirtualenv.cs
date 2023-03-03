@@ -68,8 +68,11 @@ namespace BH.Engine.Python
 
             // set location where virtual env will be created
             string targetDirectory = Query.VirtualEnvDirectory(name);
-            if (!Directory.Exists(targetDirectory))
+            if (targetDirectory is null)
+            {
+                targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), name);
                 Directory.CreateDirectory(targetDirectory);
+            }
 
             // return existing env if it already exists
             oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Query.VirtualEnvPythonExePath(name) };
