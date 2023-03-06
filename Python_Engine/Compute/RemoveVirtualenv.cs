@@ -42,14 +42,14 @@ namespace BH.Engine.Python
         {
             if (run)
             {
-                string bhomPythonExecutable = Path.Combine(Query.EnvironmentsDirectory(), Query.ToolkitName(), "python.exe");
+                string bhomPythonExecutable = Path.Combine(Query.EnvironmentDirectory(), Query.ToolkitName(), "python.exe");
 
-                string targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), name);
+                string targetDirectory = Path.Combine(Query.EnvironmentDirectory(), name);
                 oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, "Scripts", "python.exe") };
 
                 if (env.EnvironmentExists())
                 {
-                    string logFile = Path.Combine(Query.EnvironmentsDirectory(), "removal.log");
+                    string logFile = Path.Combine(Query.EnvironmentDirectory(), "removal.log");
 
                     List<string> uninstallationCommands = new List<string>() {
                         $"rmdir {Modify.AddQuotesIfRequired(targetDirectory)} /S /Q",  // delete folder and contents of given env name
@@ -58,11 +58,14 @@ namespace BH.Engine.Python
                     using (StreamWriter sw = File.AppendText(logFile))
                     {
                         sw.WriteLine(LoggingHeader($"Uninstalling {name} BHoM Python environment"));
+                        sw.Flush();
 
                         foreach (string command in uninstallationCommands)
                         {
                             sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
-                            Compute.RunCommandStdout($"{command}", hideWindows: true);
+                            sw.Flush();
+                            sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
+                            sw.Flush();
                         }
                     }
                     return true;

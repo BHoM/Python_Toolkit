@@ -21,6 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
+using BH.oM.Python;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,7 +35,7 @@ namespace BH.Engine.Python
         [Description("Install a virtualenv of the given configuration.")]
         [Input("name", "The name of this virtualenv.")]
         [Input("pythonVersion", "The version of Python to use for this environment.")]
-        [Input("localPackage", "A local package to be included in the resultant virtualenv. This are where custom BHoM code can be added into this environment.")]
+        [Input("localPackage", "A local package to be included in the resultant virtualenv. This is where custom BHoM code can be added into this environment.")]
         [Input("run", "Run the installation process for this virtualenv.")]
         [Output("env", "The exectuble for the resultant virtualenv.")]
         public static oM.Python.PythonEnvironment InstallVirtualenv(
@@ -47,7 +48,7 @@ namespace BH.Engine.Python
 
             if (!IsValidEnvironmentName(name))
             {
-                BH.Engine.Base.Compute.RecordError("A BHoM Python virtualenv cannot cannot contain invalid filepath characters.");
+                BH.Engine.Base.Compute.RecordError("A BHoM Python environment cannot cannot contain invalid filepath characters.");
                 return null;
             }
 
@@ -57,24 +58,29 @@ namespace BH.Engine.Python
                 return null;
             }
 
-            // install base BHoM Python environment if it's not already installed
-            oM.Python.PythonEnvironment baseEnv = Compute.InstallBasePythonEnvironment(run);
-            string bhomPythonExecutable = baseEnv.Executable;
+            // check to see if environment already exists and return it if it does!
+            PythonEnvironment existingEnv = Query.ExistingEnvironment(name);
+            if (existingEnv != null)
+            {
+                BH.Engine.Base.Compute.RecordNote($"A Python environment with the name \"{name}\" already exists and is being returned here. To reinstall this environment, delete the {Path.Combine(Query.EnvironmentDirectory(), name)} directory and re-run this method.");
+                return existingEnv;
+            }
+            BH.Engine.Base.Compute.ClearCurrentEvents();
+
+            // check to see if the base BHoM Python environment is installed and install it if it's not
+            PythonEnvironment baseEnv = Query.ExistingEnvironment(Query.ToolkitName());
+            if (baseEnv == null)
+            {
+                baseEnv = Compute.InstallBasePythonEnvironment(run);
+            }
+            BH.Engine.Base.Compute.ClearCurrentEvents();
 
             // set location where virtual env will be created
-            string targetDirectory = Query.VirtualEnvDirectory(name);
+            string targetDirectory = Query.EnvironmentDirectory(name);
             if (targetDirectory is null)
             {
-                targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), name);
+                targetDirectory = Path.Combine(Query.EnvironmentDirectory(), name);
                 Directory.CreateDirectory(targetDirectory);
-            }
-
-            // return the existing environment if it already exists
-            oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Path.Combine(targetDirectory, "Scripts", "python.exe") };
-            if (env.EnvironmentExists())
-            {
-                BH.Engine.Base.Compute.RecordNote($"The {name} environment already exists and is being returned here instead of installing it again. To install a fresh version of this environment, remove this environment first.");
-                return env;
             }
 
             // get the python version executable to reference for this virtualenv
@@ -86,27 +92,35 @@ namespace BH.Engine.Python
             // create installation commands
             string baseBHoMPackage = Path.Combine(Query.CodeDirectory(), baseEnv.Name);
             List<string> installationCommands = new List<string>() {
-                $"{bhomPythonExecutable} -m virtualenv --python={executable} {targetDirectory}",  // create the virtualenv of the target executable
+                $"{baseEnv.Executable} -m virtualenv --python={executable} {targetDirectory}",  // create the virtualenv of the target executable
                 $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install ipykernel pytest",  // install ipykernel and pytest into virtualenv
                 $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m ipykernel install --name={name}",  // register environment with ipykernel
-                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install --no-warn-script-location -e {baseBHoMPackage}",  // install base BHoM package to virtualenv
-        };
-            if (localPackage != null)
-                installationCommands.Add($"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install -e {Modify.AddQuotesIfRequired(localPackage)}");  // install local package into virtualenv
-            
+            };
 
             using (StreamWriter sw = File.AppendText(logFile))
             {
                 sw.WriteLine(LoggingHeader($"Installation started for standalone {name} Python environment"));
+                sw.Flush();
 
                 foreach (string command in installationCommands)
                 {
                     sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
+                    sw.Flush();
                     sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
+                    sw.Flush();
+                }
+             
+                if (localPackage != null)
+                {
+                    sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] Installing local package - {localPackage}");
+                    sw.Flush();
+                    sw.WriteLine(Query.ExistingEnvironment(name).InstallLocalPackage(localPackage));
+                    sw.Flush();
                 }
             }
 
-            return env;
+            // query the newly created environment and return it
+            return Query.ExistingEnvironment(name);
         }
     }
 }

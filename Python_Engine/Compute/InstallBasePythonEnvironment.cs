@@ -46,7 +46,7 @@ namespace BH.Engine.Python
             oM.Python.Enums.PythonVersion version = oM.Python.Enums.PythonVersion.v3_10_5;
 
             // set location where base Python env will be created
-            string targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), Query.ToolkitName());
+            string targetDirectory = Path.Combine(Query.EnvironmentDirectory(), Query.ToolkitName());
             if (!Directory.Exists(targetDirectory))
                 Directory.CreateDirectory(targetDirectory);
 
@@ -69,6 +69,7 @@ namespace BH.Engine.Python
             using (StreamWriter sw = File.AppendText(logFile))
             {
                 sw.WriteLine(LoggingHeader("Installation started for BHoM base Python environment"));
+                sw.Flush();
 
                 // download and unpack files
                 List<string> installationCommands = new List<string>() {
@@ -83,14 +84,15 @@ namespace BH.Engine.Python
                 foreach (string command in installationCommands)
                 {
                     sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
+                    sw.Flush();
                     sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
+                    sw.Flush();
                 }
 
                 // modify directory to replicate "normal" Python installation
                 List<string> pthFiles = System.IO.Directory.GetFiles(targetDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
                 string libDirectory = System.IO.Directory.CreateDirectory(Path.Combine(targetDirectory, "DLLs")).FullName;
                 List<string> libFiles = System.IO.Directory.GetFiles(targetDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
-
                 List<string> modificationCommands = new List<string>() { };
                 foreach (string pthFile in pthFiles)
                 {
@@ -104,15 +106,25 @@ namespace BH.Engine.Python
                 foreach (string command in modificationCommands)
                 {
                     sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
+                    sw.Flush();
                     sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
+                    sw.Flush();
                 }
 
-                // install packages into base environment
+                // install local package into base environment
                 string baseBHoMPackage = Path.Combine(Query.CodeDirectory(), Query.ToolkitName());
-                string packageInstallationCommand = $"{executable} -m pip install --no-warn-script-location -e {baseBHoMPackage}";
-                sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {packageInstallationCommand}");
-                sw.WriteLine(Compute.RunCommandStdout($"{packageInstallationCommand}", hideWindows: true)); // install packages into this environment
-                }
+                sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] Installing local package");
+                sw.WriteLine(env.InstallLocalPackage(baseBHoMPackage));
+                sw.Flush();
+
+                // copy `python.exe` into scripts in order to align venv checks for existence of this "base" environment
+                string scriptsDirectory = Path.Combine(targetDirectory, "Scripts");
+                string copyExeCommand = $"copy {executable} {scriptsDirectory}";
+                sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {copyExeCommand}");
+                sw.Flush();
+                sw.WriteLine(Compute.RunCommandStdout($"{copyExeCommand}", hideWindows: true));
+                sw.Flush();
+            }
 
                 return env;
         }

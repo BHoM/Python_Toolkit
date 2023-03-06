@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compute\DownloadPython.cs" />
+    <Compile Include="Compute\InstallLocalPackage.cs" />
     <Compile Include="Compute\Invoke.cs" />
     <Compile Include="Compute\RemoveVirtualenv.cs" />
     <Compile Include="Compute\InstallVirtualenv.cs" />
@@ -77,14 +78,14 @@
     <Compile Include="Compute\Logging.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
-    <Compile Include="Query\VirtualEnv.cs" />
-    <Compile Include="Query\VirtualEnvPythonExePath.cs" />
-    <Compile Include="Query\VirtualEnvDirectory.cs" />
+    <Compile Include="Query\PythonVersion.cs" />
+    <Compile Include="Query\ExistingEnvironment.cs" />
+    <Compile Include="Query\EnvironmentExecutable.cs" />
     <Compile Include="Query\ToString.cs" />
     <Compile Include="Query\CodeDirectory.cs" />
     <Compile Include="Query\EnvironmentExists.cs" />
     <Compile Include="Compute\IsValidEnvironmentName.cs" />
-    <Compile Include="Query\EnvironmentsDirectory.cs" />
+    <Compile Include="Query\EnvironmentDirectory.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />
     <Compile Include="Query\ExtensionsDirectory.cs" />
     <Compile Include="Query\ToolkitName.cs" />

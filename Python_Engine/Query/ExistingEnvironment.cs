@@ -21,19 +21,27 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using BH.oM.Python;
 using System.ComponentModel;
 using System.IO;
+using System.Xml.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("The location where any BHoM generated Python environments reside.")]
-        [Output("The location where any BHoM generated Python environments reside.")]
-        public static string EnvironmentsDirectory()
+        [Description("Get an already installed BHoM Python environment without the overhead of attempting to install that environment.")]
+        [Input("envName","The named environment being requested.")]
+        [Output("The installed, if it exists. If not, this method returns null.")]
+        public static PythonEnvironment ExistingEnvironment(string envName)
         {
-            return Path.Combine(Query.ExtensionsDirectory(), "PythonEnvironments");
+            if (EnvironmentExists(envName))
+            {
+                return new PythonEnvironment() { Name = envName, Executable = EnvironmentExecutable(envName) };
+            }
+
+            BH.Engine.Base.Compute.RecordError($"The environment {envName} does not exist. You probably need to install it first.");
+            return null;
         }
     }
 }

@@ -21,29 +21,42 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using BH.oM.Python;
 using System.ComponentModel;
 using System.IO;
-using System.Xml.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("The location where any BHoM generated Python environments reside.")]
-        [Input("envName","The virtual environment name.")]
-        [Output("The location where any BHoM generated Python environments reside.")]
-        public static string VirtualEnvDirectory(string envName)
+        [Description("The directory where all BHoM generated Python environments reside.")]
+        [Output("The directory where all BHoM generated Python environments reside.")]
+        public static string EnvironmentDirectory()
         {
-            string directory = Path.Combine(Query.EnvironmentsDirectory(), envName);
-            
+            return Path.Combine(Query.ExtensionsDirectory(), "PythonEnvironments");
+        }
+
+        [Description("The directory where a named BHoM generated Python environment resides.")]
+        [Input("envName", "The virtual environment name.")]
+        [Output("The directory where a named BHoM generated Python environment resides. This method does returns null if that directory does not exist.")]
+        public static string EnvironmentDirectory(string envName)
+        {
+            string directory = Path.Combine(EnvironmentDirectory(), envName);
+
             if (Directory.Exists(directory))
             {
                 return directory;
             }
-            
-            BH.Engine.Base.Compute.RecordError($"The virtual environment directory for \"{envName}\" does not exist at \"{directory}\".");
+
             return null;
+        }
+
+        [Description("The directory where this BHoM Python environment resides.")]
+        [Input("env", "The environment stored within the requested directory.")]
+        [Output("The directory where a named BHoM generated Python environment resides.")]
+        public static string EnvironmentDirectory(this PythonEnvironment env)
+        {
+            return EnvironmentDirectory(env.Name);
         }
     }
 }

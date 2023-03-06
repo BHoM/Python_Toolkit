@@ -21,45 +21,43 @@
  */
 
 using BH.oM.Base.Attributes;
+using BH.oM.Python;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Download a target version of Python.")]
-        [Input("version", "A Python version.")]
-        [Output("executablePath", "The path of the executable for the downloaded Python.")]
-        public static string DownloadPython(this BH.oM.Python.Enums.PythonVersion version)
+        [Description("Install a virtualenv of the given configuration.")]
+        [Input("env", "The environment to install the local package into.")]
+        [Input("localPackage", "A local package to be installed in the target environment.")]
+        [Output("output", "The stdout from the package installation procedure.")]
+        public static string InstallLocalPackage(this PythonEnvironment env, string localPackage)
         {
-            string targetDirectory = Query.EnvironmentDirectory();
-            string versionString = version.ToString().Replace("v", "");
-            string resultantDirectory = Path.Combine(targetDirectory, versionString);
-            string executable = Path.Combine(resultantDirectory, "python.exe");
-
-            if (File.Exists(executable))
-                return executable;
-
-            string pythonUrl = version.EmbeddableURL();
-            string pythonZipFile = Path.Combine(targetDirectory, Path.GetFileName(pythonUrl));
-
-            List<string> commands = new List<string>()
+            // check that the environment is valid
+            if (!Query.EnvironmentExists(env))
             {
-                $"curl {pythonUrl} -o {pythonZipFile}",
-                $"mkdir {resultantDirectory}",
-                $"tar -v -xf {pythonZipFile} -C {resultantDirectory}",
-                $"del {pythonZipFile}",
-            };
-            foreach (string command in commands)
-	        {
-                RunCommandStdout(command, hideWindows: true);
-	        }
+                BH.Engine.Base.Compute.RecordError($"A local package cannot be installed as the target environment ({env.Name}) does not exist!");
+            }
 
-            return executable;
+            // check that given local package contains essential files
+            if (Directory.Exists(localPackage))
+            {
+                BH.Engine.Base.Compute.RecordError($"The given local package ({localPackage}) does not exist!");
+            }
+            if (!File.Exists(Path.Combine(localPackage, "setup.py")))
+            {
+                BH.Engine.Base.Compute.RecordError($"The given local package ({localPackage}) does not contain a setup.py file!");
+            }
+
+            string output = Compute.RunCommandStdout($"{Modify.AddQuotesIfRequired(env.Executable)} -m pip install --no-warn-script-location -e {Modify.AddQuotesIfRequired(localPackage)}", hideWindows: true);
+
+            return output;
         }
     }
 }
-
 

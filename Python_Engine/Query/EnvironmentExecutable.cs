@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
-using BH.oM.Python;
+
 using System.ComponentModel;
 using System.IO;
 using System.Xml.Linq;
@@ -30,21 +30,26 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("Get an installed environment without the overhead of attempting to install that environment.")]
-        [Input("envName","The virtual environment name to request.")]
-        [Output("The virtual environment, if it exists.")]
-        public static PythonEnvironment VirtualEnv(string envName)
+        [Description("The location where `python.exe` for a named BHoM Python environment would reside. This method returns null if the named environment does not exist.")]
+        [Input("envName", "The virtual environment name.")]
+        [Output("The location where a Python virtual environment would reside.")]
+        public static string EnvironmentExecutable(string envName)
         {
-            string exePath = Query.VirtualEnvPythonExePath(envName);
-            if (File.Exists(exePath))
+            string exePath;
+            if (envName == "Python_Toolkit")
             {
-                return new PythonEnvironment() { Name = envName, Executable = exePath };
+                exePath = Path.Combine(EnvironmentDirectory(envName), "python.exe");
             }
             else
             {
-                BH.Engine.Base.Compute.RecordError($"No environment could be found for {envName}. Use the appropriate InstallPythonEnv to install this environment.");
-                return null;
+                exePath = Path.Combine(EnvironmentDirectory(envName), "Scripts", "python.exe");
             }
+
+            if (File.Exists(exePath))
+            {
+                return exePath;
+            }
+            return null;
         }
     }
 }

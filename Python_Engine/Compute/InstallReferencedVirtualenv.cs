@@ -21,6 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
+using BH.oM.Python;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -52,7 +53,7 @@ namespace BH.Engine.Python
 
             if (!File.Exists(executable))
             {
-                BH.Engine.Base.Compute.RecordError($"{executable} doesn't exist.");
+                BH.Engine.Base.Compute.RecordError($"{executable} doesn't exist so an environment cannot be created based on it.");
                 return null;
             }
 
@@ -67,52 +68,52 @@ namespace BH.Engine.Python
             string bhomPythonExecutable = baseEnv.Executable;
 
             // set location where virtual env will be created
-            string targetDirectory = Query.VirtualEnvDirectory(name);
+            string targetDirectory = Query.EnvironmentDirectory(name);
             if (targetDirectory is null)
             {
-                targetDirectory = Path.Combine(Query.EnvironmentsDirectory(), name);
+                targetDirectory = Path.Combine(Query.EnvironmentDirectory(), name);
                 Directory.CreateDirectory(targetDirectory);
             }
-
-            // return existing env if it already exists
-            oM.Python.PythonEnvironment env = new oM.Python.PythonEnvironment() { Name = name, Executable = Query.VirtualEnvPythonExePath(name) };
-            if (env.EnvironmentExists())
-            {
-                BH.Engine.Base.Compute.RecordNote($"The {name} environment already exists and is being returned here instead of installing it again. To install a fresh version of this environment, remove this environment first.");
-                return env;
-            }
-
-            // create paths for use in this process
-            executable = Modify.AddQuotesIfRequired(executable);
-
-            // create log of installation as process continues - useful for debugging if things go wrong!
             string logFile = Path.Combine(targetDirectory, "installation.log");
 
-            // create installation commands
-            string baseBHoMPackage = Path.Combine(Query.CodeDirectory(), baseEnv.Name);
-            List<string> installationCommands = new List<string>() {
-                $"{bhomPythonExecutable} -m virtualenv --python={executable} {targetDirectory}",  // create the virtualenv of the target executable
-                $"{executable} -m pip freeze > {Path.Combine(targetDirectory, "requirements.txt")}",  // get the installed packages from the referenced executable
-                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install -r {Path.Combine(targetDirectory, "requirements.txt")}",  // install requirements into virtualenv
-                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install ipykernel pytest",  // install ipykernel and pytest into virtualenv
-                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m ipykernel install --name={name}",  // register environment with ipykernel
-                $"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install --no-warn-script-location -e {baseBHoMPackage}",  // install base BHoM package to virtualenv
-            };
-            if (localPackage != null)
-                installationCommands.Add($"{Path.Combine(targetDirectory, "Scripts", "activate")} && python -m pip install -e {Modify.AddQuotesIfRequired(localPackage)}");  // install local package into virtualenv
+            // get the version of python from the passed executable
+            string versionString = Compute.RunCommandStdout($"\"{executable}\" --version").Replace("Python ", "");
+            BH.oM.Python.Enums.PythonVersion version = Query.PythonVersion(versionString);
 
+            // run the virtualenv install process
+            PythonEnvironment env = Compute.InstallVirtualenv(name=name, version=version, localPackage=null, run=run);
+
+            // install matching packages from the referenced environment
             using (StreamWriter sw = File.AppendText(logFile))
             {
-                sw.WriteLine(LoggingHeader($"Installation started for referenced {name} Python environment"));
+                // get requirements.txt file from existgin enviromnment
+                string requirementsTxtFile = Path.Combine(targetDirectory, "requirements.txt");
+                string requirementsTxtCommand = $"{Modify.AddQuotesIfRequired(executable)} -m pip freeze > {requirementsTxtFile}";
+                sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {requirementsTxtCommand}");
+                sw.Flush();
+                sw.WriteLine(Compute.RunCommandStdout(requirementsTxtCommand));
+                sw.Flush();
 
-                foreach (string command in installationCommands)
+                string requirementsInstallCommand = $"{Modify.AddQuotesIfRequired(env.Executable)} -m pip install -r {requirementsTxtFile}";
+                sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {requirementsInstallCommand}");
+                sw.Flush();
+                sw.WriteLine(Compute.RunCommandStdout(requirementsInstallCommand));
+                sw.Flush();
+            }
+
+            // install local package if it's been passed
+            if (localPackage != null)
+            {
+                using (StreamWriter sw = File.AppendText(logFile))
                 {
-                    sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] {command}");
-                    sw.WriteLine(Compute.RunCommandStdout($"{command}", hideWindows: true));
+                    sw.WriteLine($"[{System.DateTime.Now.ToString("s")}] Installing local package - {localPackage}");
+                    sw.Flush();
+                    sw.WriteLine(env.InstallLocalPackage(localPackage));
+                    sw.Flush();
                 }
             }
 
-            return env;
+           return env;
         }
     }
 }

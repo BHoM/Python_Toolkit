@@ -36,11 +36,24 @@ namespace BH.Engine.Python
         [Output("exists", "True if the environment exists, False if not.")]
         public static bool EnvironmentExists(this oM.Python.PythonEnvironment env)
         {
-            if (env.Executable is null)
+            if (EnvironmentExists(env.Name))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        [Description("Check whether the given BHoM Python Environment already exists.")]
+        [Input("envName", "A named BHoM Python environment.")]
+        [Output("exists", "True if the environment exists, False if not.")]
+        public static bool EnvironmentExists(string envName)
+        {
+            if (EnvironmentDirectory(envName) is null)
             {
                 return false;
             }
-            if (!File.Exists(env.Executable))
+            if (EnvironmentExecutable(envName) is null)
             {
                 return false;
             }
