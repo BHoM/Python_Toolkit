@@ -20,46 +20,35 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Python.Enums;
+using BH.oM.Python;
 using BH.oM.Base.Attributes;
-using System.Collections.Generic;
+
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
-        [Description("Download a target version of Python.")]
-        [Input("version", "A Python version.")]
-        [Output("executablePath", "The path of the executable for the downloaded Python.")]
-        public static string DownloadPython(this BH.oM.Python.Enums.PythonVersion version)
+        [Description("Check whether a string is valid as BHoM Python Environment name.")]
+        [Input("name", "The name given to the BHoM Python Environment.")]
+        [Output("valid", "True if valid, False if not.")]
+        public static bool IsValidEnvironmentName(string name)
         {
-            string targetDirectory = Query.EnvironmentsDirectory();
-            string versionString = version.ToString().Replace("v", "");
-            string resultantDirectory = Path.Combine(targetDirectory, versionString);
-            string executable = Path.Combine(resultantDirectory, "python.exe");
-
-            if (File.Exists(executable))
-                return executable;
-
-            string pythonUrl = version.EmbeddableURL();
-            string pythonZipFile = Path.Combine(targetDirectory, Path.GetFileName(pythonUrl));
-
-            List<string> commands = new List<string>()
+            // TODO - change namespace from compute to Query
+            List<char> invalidChars = new List<char>() { ' ' };
+            invalidChars.AddRange(Path.GetInvalidPathChars().ToList());
+            invalidChars.AddRange(Path.GetInvalidFileNameChars().ToList());
+            if (name.Any(x => invalidChars.Contains(x)))
             {
-                $"curl {pythonUrl} -o {pythonZipFile}",
-                $"mkdir {resultantDirectory}",
-                $"tar -v -xf {pythonZipFile} -C {resultantDirectory}",
-                $"del {pythonZipFile}",
-            };
-            foreach (string command in commands)
-	        {
-                RunCommandStdout(command, hideWindows: true);
-	        }
-
-            return executable;
+                return false;
+            }
+            return true;
         }
     }
 }
-
 

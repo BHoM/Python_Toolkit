@@ -67,26 +67,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compute\DownloadPython.cs" />
+    <Compile Include="Compute\BasePythonEnvironment.cs" />
+    <Compile Include="Compute\Remove.cs" />
+    <Compile Include="Compute\InstallPackage.cs" />
+    <Compile Include="Compute\VirtualEnvironment.cs" />
+    <Compile Include="Compute\UnzipFile.cs" />
+    <Compile Include="Compute\Download.cs" />
     <Compile Include="Compute\Invoke.cs" />
-    <Compile Include="Compute\RemoveVirtualenv.cs" />
-    <Compile Include="Compute\InstallVirtualenv.cs" />
-    <Compile Include="Compute\InstallReferencedVirtualenv.cs" />
-    <Compile Include="Compute\InstallBasePythonEnvironment.cs" />
-    <Compile Include="Compute\Run.cs" />
-    <Compile Include="Compute\Logging.cs" />
-    <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
-    <Compile Include="Query\VirtualEnv.cs" />
-    <Compile Include="Query\VirtualEnvPythonExePath.cs" />
-    <Compile Include="Query\VirtualEnvDirectory.cs" />
-    <Compile Include="Query\ToString.cs" />
-    <Compile Include="Query\CodeDirectory.cs" />
-    <Compile Include="Query\EnvironmentExists.cs" />
-    <Compile Include="Compute\IsValidEnvironmentName.cs" />
-    <Compile Include="Query\EnvironmentsDirectory.cs" />
+    <Compile Include="Query\PythonVersion.cs" />
+    <Compile Include="Query\Directory.cs" />
+    <Compile Include="Query\IsValidEnvironmentName.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />
-    <Compile Include="Query\ExtensionsDirectory.cs" />
     <Compile Include="Query\ToolkitName.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -102,20 +94,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Convert\" />
     <Folder Include="Create\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Python\src\python_toolkit\bhom\analytics.py" />
-    <Content Include="Python\src\python_toolkit\bhom\anonymise_filepath.py" />
-    <Content Include="Python\src\python_toolkit\bhom\decorate_all_in_module.py" />
-    <Content Include="Python\src\python_toolkit\bhom\encoder.py" />
-    <Content Include="Python\src\python_toolkit\bhom\package_contents.py" />
-    <Content Include="Python\src\python_toolkit\bhom\ticks.py" />
-    <Content Include="Python\src\python_toolkit\bhom\version.py" />
-    <Content Include="Python\src\python_toolkit\bhom\__init__.py" />
-    <Content Include="Python\src\python_toolkit\example\example_2.py" />
-    <Content Include="Python\src\python_toolkit\example\example_1.py" />
-    <Content Include="Python\src\python_toolkit\example\__init__.py" />
+    <Content Include="Python\src\python_toolkit\bhomutil\__init__.py" />
     <Content Include="Python\src\python_toolkit\__init__.py" />
     <None Include="Python\README.md" />
     <Content Include="Python\setup.py" />
