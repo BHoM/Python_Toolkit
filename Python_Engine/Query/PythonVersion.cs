@@ -21,21 +21,38 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using BH.oM.Python.Enums;
+using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("The location where any BHoM generated Python environments reside.")]
-        [Output("The location where any BHoM generated Python environments reside.")]
-        public static string EnvironmentsDirectory()
+        public static PythonVersion Version(string pythonExecutable)
         {
-            return Path.Combine(Query.ExtensionsDirectory(), "PythonEnvironments");
+            Process process = new Process()
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = pythonExecutable,
+                    Arguments = $"--version",
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                }
+            };
+            string versionString;
+            using (Process p = Process.Start(process.StartInfo))
+            {
+                p.WaitForExit();
+                if (p.ExitCode != 0)
+                    BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ToString()}");
+                versionString = p.StandardOutput.ToString();
+            }
+
+            return (PythonVersion) Enum.Parse(typeof(PythonVersion), "v" + versionString.Replace("Python ", "").Replace(".", "_"));
         }
     }
 }
-
-
