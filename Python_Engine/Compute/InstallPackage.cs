@@ -66,7 +66,7 @@ namespace BH.Engine.Python
             {
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{string.Join(" ", packages)}].\n{p.StandardError.ToString()}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{string.Join(" ", packages)}].\n{p.StandardError.ReadToEnd()}");
             }
         }
 
@@ -107,14 +107,14 @@ namespace BH.Engine.Python
                     FileName = executable,
                     Arguments = "-m pip install --no-warn-script-location -r " + requirements,
                     UseShellExecute = false,
-                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                 }
             };
             using (Process p = Process.Start(process.StartInfo))
             {
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages from {requirements}.\n{p.StandardError.ToString()}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing packages from {requirements}.\n{p.StandardError.ReadToEnd()}");
             }
         }
 
@@ -142,28 +142,22 @@ namespace BH.Engine.Python
             {
                 BH.Engine.Base.Compute.RecordError("Python executable not found at " + executable);
             }
-
-            string pip = Path.Combine(Path.GetDirectoryName(executable), "Scripts", "pip.exe");
-            if (!File.Exists(pip))
-            {
-                BH.Engine.Base.Compute.RecordError("pip not found at " + pip);
-            }
-
+            
             System.Diagnostics.Process process = new System.Diagnostics.Process()
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo()
                 {
-                    FileName = pip,
-                    Arguments = $"install --no-warn-script-location -e \"{packageDirectory}\"",
+                    FileName = executable,
+                    Arguments = $"-m pip install --no-warn-script-location -e \"{packageDirectory}\"",
                     UseShellExecute = false,
-                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                 }
             };
             using (Process p = Process.Start(process.StartInfo))
             {
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing package from \"{packageDirectory}\".\n{p.StandardError.ToString()}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing package from \"{packageDirectory}\".\n{p.StandardError.ReadToEnd()}");
             }
         }
 

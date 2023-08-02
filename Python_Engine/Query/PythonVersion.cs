@@ -40,6 +40,7 @@ namespace BH.Engine.Python
                     FileName = pythonExecutable,
                     Arguments = $"--version",
                     RedirectStandardError = true,
+                    RedirectStandardOutput = true,
                     UseShellExecute = false,
                 }
             };
@@ -48,8 +49,8 @@ namespace BH.Engine.Python
             {
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ToString()}");
-                versionString = p.StandardOutput.ToString();
+                    BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ReadToEnd()}");
+                versionString = p.StandardOutput.ReadToEnd().TrimEnd();
             }
 
             return (PythonVersion) Enum.Parse(typeof(PythonVersion), "v" + versionString.Replace("Python ", "").Replace(".", "_"));
