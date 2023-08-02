@@ -71,7 +71,7 @@ namespace BH.Engine.Python
             {
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing pip.\n{p.StandardError}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing pip.\n{p.StandardError.ReadToEnd()}");
                 File.Delete(pipInstaller);
             }
 
