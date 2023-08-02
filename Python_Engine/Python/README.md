@@ -12,7 +12,7 @@ A BHoM toolkit can be associated with a Python environment. The toolkit needs to
 
 **In the example below we'll go through creating a Python environment for the `Example_Toolkit`**.
 
-### Creating the Python code structure
+### Structure
 
 All Python code within BHoM should be placed within the hosting toolkit, inside its `*_Engine` folder. Within this folder, the following directory structure should be created (files have been included here within `./example_toolkit`, though these are purely indicative and struictures can vary based on toolkit need):
 
@@ -22,63 +22,69 @@ All Python code within BHoM should be placed within the hosting toolkit, inside 
 ├── Example_Engine
 │   └── Python
 |       ├── README.md
-|       ├── setup.py
 |       ├── requirements.txt
-|       └── src
-|           └── example_toolkit
-|               ├── __init__.py
-|               ├── code_directory_a
-|               |   ├── __init__.py__
-|               |   └── method.py
-|               ├── code_directory_b
-|               |   └── __init__.py
-|               |   └── method.py
-|               └── helpers
-|                   ├── __init__.py
-|                   └── helper_method_a.py
+|       ├── setup.py
+|       ├── src
+|       |   └── example_toolkit
+|       |       ├── __init__.py
+|       |       ├── module_a
+|       |       |   ├── __init__.py
+|       |       |   └── ...
+|       |       └── ...
+|       └── tests
+|           ├── __init__.py
+|           ├── test_module_a.py
+|           └── ...
 └── ...
 ```
 
-### Populating the `requirements.txt` file content
+### `setup.py`
 
-If you've used Python before you may be familiar with `requirements.txt` files. These contain the packages required by a Python environment, and can specify the version of those packages also. In BHoM, an environment may be defined for a specific toolkit, associated with an external Python environment (replicating it for use in BHoM workflowsrequirements), or even as a standalone environment used for a specific purpose or project.
-
-Toolkit-specific environments, and standalone environments should be explicit about which versions of packages to install.
-
-If the Python environment created is referencing an external environment (i.e. it recreates the external environment for use/development in BHoM) then packages listed in the `requirements.txt` file should not state versions. This is so that the external "source" environment has control over packages installed, rather than the BHoM copy of that environment.
-
-By default, `ipykernel` is included in all BHoM created Python environments in order to use that environments Python kernel within a [Jupyter Notebook](https://jupyter.org/) UI (you can run one of these using the instructions [here](#scriptingnotebooks). `pytest` is also installed to aid in automated unit testing, and `pylint` is included to aid in finding errors in code during development.
-
-### Populating the `setup.py` file
-
-All BHoM Python code should be stored within the `./Python/src/example_toolkit` directory, and can be further organised within this to split different packages up to better manage code. The `setup.py` file defines what folders to include when installing this code into the environment that will be created. In the code below, `src` is set as the location where the Python code is stored, and `requirements.txt` is also being used to state what packages to install alongside the local code.
+The `setup.py` file must be created alongside the code within a toolkit. This should contain teh following:
 
 ```python
 ## setup.py ##
-from setuptools import setup, find_packages
-import pathlib
+from pathlib import Path
 
-here = pathlib.Path(__file__).parent.resolve()
+import setuptools
+from win32api import HIWORD, LOWORD, GetFileVersionInfo
+
+TOOLKIT_NAME = "Example_Toolkit"
+
+def _bhom_version() -> str:
+    """Return the version of BHoM installed (using the BHoM.dll in the root BHoM directory."""
+    info = GetFileVersionInfo("C:/ProgramData/BHoM/Assemblies/BHoM.dll", "\\")  # pylint: disable=[no-name-in-module]
+    ms = info["FileVersionMS"]
+    ls = info["FileVersionLS"]
+    return f"{HIWORD(ms)}.{LOWORD(ms)}.{HIWORD(ls)}.{LOWORD(ls)}"  # pylint: disable=[no-name-in-module]
+
+BHOM_VERSION = _bhom_version()
+
+here = Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
-requirements = [i.strip() for i in (here / "requirements.txt").read_text(encoding="utf-8-sig").splitlines()]
+requirements = [
+    i.strip()
+    for i in (here / "requirements.txt").read_text(encoding="utf-8-sig").splitlines()
+]
 
-setup(
-    name="example_toolkit",
+setuptools.setup(
+    name=TOOLKIT_NAME.lower(),
     author="BHoM",
     author_email="bhombot@burohappold.com",
-    description="A Python library that enables Example Toolkit python code to be used within BHoM workflows.",
+    description=f"A Python library that contains code intended to be used by the {TOOLKIT_NAME} Python environment for BHoM workflows.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/BHoM/Example_Toolkit",
+    url=f"https://github.com/BHoM/{TOOLKIT_NAME}",
     package_dir={"": "src"},
-    packages=find_packages(where="src", exclude=['tests']),
+    packages=setuptools.find_packages(where="src", exclude=['tests']),
     install_requires=requirements,
+    version=BHOM_VERSION,
 )
 ```
 
-### Installing the Python environment
+### Enabling installation
 
-Once the Example_Toolkit has been given a Python folder containing the requisite files and directory structure, two methods are required in the toolkit to which Python code is being added. The first is a `Query` method for the name of that toolkit:
+Two methods are required in the toolkit to which Python code is being added. The first is a `Query` method for the name of that toolkit:
 
 ```C#
 using BH.oM.Base.Attributes;

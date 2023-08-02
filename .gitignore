@@ -95,3 +95,7 @@ Alligator/Alligator_REMOTE_9848.csproj
 # VSCode User File #
 ####################
 .vscode/
+
+# User defined files #
+######################
+build.ps1
