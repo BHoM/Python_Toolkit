@@ -90,8 +90,8 @@ namespace BH.Engine.Python
                 File.Move(libFile, Path.Combine(libDirectory, Path.GetFileName(libFile)));
             }
 
-            // install virtualenv and jupyterlab into base environment
-            InstallPackages(executable, new List<string>() { "virtualenv", "jupyterlab" });
+            // install essential packages into base environment
+            InstallPackages(executable, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });
 
             return new PythonEnvironment() { Name = Query.ToolkitName(), Executable = executable };
         }

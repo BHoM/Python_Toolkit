@@ -23,6 +23,7 @@
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
 using BH.oM.Python.Enums;
+using Microsoft.SqlServer.Server;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -59,11 +60,9 @@ namespace BH.Engine.Python
                 return null;
             }
 
-            // determine whether the virtual environment already exists
-            string targetDirectory = Path.Combine(Query.DirectoryEnvironments(), name);
-            string targetExecutable = Path.Combine(targetDirectory, "Scripts", "python.exe");
-            string targetKernel = Path.Combine(Query.DirectoryKernels(), name);
-            bool exists = Directory.Exists(targetDirectory) && File.Exists(targetExecutable) && Directory.Exists(targetKernel);
+            string targetExecutable = Query.VirtualEnvironmentExecutable(name);
+            string targetDirectory = Query.VirtualEnvironmentDirectory(name);
+            bool exists = Query.VirtualEnvironmentExists(name);
 
             if (exists && reload)
                 return new PythonEnvironment() { Name = name, Executable = targetExecutable };
