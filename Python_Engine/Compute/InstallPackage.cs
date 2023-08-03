@@ -52,12 +52,13 @@ namespace BH.Engine.Python
                 BH.Engine.Base.Compute.RecordError("No packages to install.");
             }
 
+            string packagesString = string.Join(" ", packages);
             System.Diagnostics.Process process = new System.Diagnostics.Process()
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo()
                 {
                     FileName = executable,
-                    Arguments = "-m pip install --no-warn-script-location " + string.Join(" ", packages),
+                    Arguments = $"-m pip install --no-warn-script-location {packagesString}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                 }
@@ -66,7 +67,7 @@ namespace BH.Engine.Python
             {
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{string.Join(" ", packages)}].\n{p.StandardError.ReadToEnd()}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{packagesString}].\n{p.StandardError.ReadToEnd()}");
             }
         }
 
@@ -91,12 +92,12 @@ namespace BH.Engine.Python
         {
             if (!File.Exists(executable))
             {
-                BH.Engine.Base.Compute.RecordError("Python executable not found at " + executable);
+                BH.Engine.Base.Compute.RecordError($"Python executable not found at {executable}");
             }
 
             if (!File.Exists(requirements))
             {
-                BH.Engine.Base.Compute.RecordError("requirements.txt not found at " + requirements);
+                BH.Engine.Base.Compute.RecordError($"requirements.txt not found at {requirements}");
             }
 
             
@@ -105,7 +106,7 @@ namespace BH.Engine.Python
                 StartInfo = new System.Diagnostics.ProcessStartInfo()
                 {
                     FileName = executable,
-                    Arguments = "-m pip install --no-warn-script-location -r " + requirements,
+                    Arguments = $"-m pip install --no-warn-script-location -r {Modify.AddQuotesIfRequired(requirements)}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                 }
@@ -148,7 +149,7 @@ namespace BH.Engine.Python
                 StartInfo = new System.Diagnostics.ProcessStartInfo()
                 {
                     FileName = executable,
-                    Arguments = $"-m pip install --no-warn-script-location -e \"{packageDirectory}\"",
+                    Arguments = $"-m pip install --no-warn-script-location -e {Modify.AddQuotesIfRequired(packageDirectory)}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                 }
