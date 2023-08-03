@@ -59,6 +59,22 @@ namespace BH.Engine.Python
             string envPath = Path.Combine(Query.DirectoryEnvironments(), envName);
             if (Directory.Exists(envPath))
                 Directory.Delete(envPath, true);
+
+            RemoveKernel(envName);
+        }
+
+        [Description("Remove all BHoM Python virtual environments.")]
+        public static void RemoveAllVirtualEnvironments()
+        {
+            DirectoryInfo di = new DirectoryInfo(Query.DirectoryEnvironments());
+            foreach (DirectoryInfo dir in di.EnumerateDirectories())
+            {
+                if (dir.Name != Query.ToolkitName())
+                {
+                    RemoveVirtualEnvironment(dir.Name);
+                }
+                    
+            }
         }
 
         [Description("Completely remove the base BHoM Python environment.")]
@@ -69,25 +85,11 @@ namespace BH.Engine.Python
                 Directory.Delete(basePath, true);
         }
 
-        [Description("Remove all BHoM Python environments.")]
-        public static void RemoveAllEnvironments()
-        {
-            DirectoryInfo di = new DirectoryInfo(Query.DirectoryEnvironments());
-            foreach (FileInfo file in di.EnumerateFiles())
-            {
-                file.Delete();
-            }
-            foreach (DirectoryInfo dir in di.EnumerateDirectories())
-            {
-                dir.Delete(true);
-            }
-        }
-
         [Description("Completely remove all BHoM-related Python environments and kernels.")]
         public static void RemoveEverything()
         {
-            RemoveAllKernels();
-            RemoveAllEnvironments();
+            RemoveAllVirtualEnvironments();
+            RemoveBaseEnvironment();
         }
     }
 }

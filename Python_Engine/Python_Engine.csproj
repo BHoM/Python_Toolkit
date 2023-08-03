@@ -77,6 +77,7 @@
     <Compile Include="Compute\Download.cs" />
     <Compile Include="Compute\Invoke.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
+    <Compile Include="Query\VirtualEnvironment.cs" />
     <Compile Include="Query\PythonVersion.cs" />
     <Compile Include="Query\Directory.cs" />
     <Compile Include="Query\IsValidEnvironmentName.cs" />
@@ -108,17 +109,21 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>:: Copy BHoM DLLs to where they need to go
-xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
-xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y</PostBuildEvent>
+    <PostBuildEvent>
+      xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
+      xcopy "$(TargetDir)Python.Runtime.dll" "C:\\ProgramData\\BHoM\\Assemblies" /Y
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>:: create infrastructure necessary to support Python environments
-if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
-if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
-
-:: Mirror code from .\Python into C:\ProgramData\BHoM\Extensions\PythonCode
-robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /mir /ns /nc /nfl /ndl /np /njh /njs
-</PreBuildEvent>
+    <PreBuildEvent>
+      if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
+      if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
+      
+      if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /S /Q
+      mkdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)"
+      
+      robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /mir /xf "*.pyc" "*.ipynb" /xd "__*__" ".*" &gt; output.log
+      del output.log
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>
