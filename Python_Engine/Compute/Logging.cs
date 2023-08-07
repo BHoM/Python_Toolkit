@@ -21,26 +21,35 @@
  */
 
 using BH.oM.Base.Attributes;
-using Python.Runtime;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
         // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
-        [ToBeRemoved("5.3", "This method included in order to fool versioning into playing nicely.")]
-        public static PyObject Invoke(PyObject module, string method, Dictionary<string, object> args)
+        [Description("Create a header for a logging document.")]
+        [Input("text", "A string to place into the header.")]
+        [Output("header", "A header string.")]
+        public static string LoggingHeader(string text)
         {
-            return module;
-        }
-
-        // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
-        [ToBeRemoved("5.3", "This method included in order to fool versioning into playing nicely.")]
-        public static PyObject Invoke(PyObject module, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
-        {
-            return module;
+            StringBuilder sb = new StringBuilder();
+            int maxLength = new List<int>() { text.Length, 54 }.Max();
+            int innerLength = maxLength - 4;
+            string topBottom = String.Concat(Enumerable.Repeat("#", maxLength + 4));
+            sb.AppendLine();
+            sb.AppendLine(topBottom);
+            sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", text)} #");
+            sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", System.DateTime.Now.ToString("s"))} #");
+            sb.AppendLine($"# {String.Format($"{{0,-{maxLength}}}", $"BHoM version {BH.Engine.Base.Query.BHoMVersion()}")} #");
+            sb.AppendLine(topBottom);
+            return sb.ToString();
         }
     }
 }
+

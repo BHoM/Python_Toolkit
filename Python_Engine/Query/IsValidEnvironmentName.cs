@@ -34,12 +34,12 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
+        // TODO - THIS METHOD USED TO BE IN QUERY BUT IS NOW IN COMPUTE
         [Description("Check whether a string is valid as BHoM Python Environment name.")]
         [Input("name", "The name given to the BHoM Python Environment.")]
         [Output("valid", "True if valid, False if not.")]
         public static bool IsValidEnvironmentName(string name)
         {
-            // TODO - change namespace from compute to Query
             List<char> invalidChars = new List<char>() { ' ' };
             invalidChars.AddRange(Path.GetInvalidPathChars().ToList());
             invalidChars.AddRange(Path.GetInvalidFileNameChars().ToList());

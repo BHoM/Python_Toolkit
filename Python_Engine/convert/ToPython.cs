@@ -20,27 +20,22 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.oM.Base.Attributes;
-using Python.Runtime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BH.oM.Base.Attributes;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Convert
     {
-        // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
+        // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED, PLUS IT HAS AN OLD ToBeRemoved TAG
         [ToBeRemoved("5.3", "This method included in order to fool versioning into playing nicely.")]
-        public static PyObject Invoke(PyObject module, string method, Dictionary<string, object> args)
+        public static bool ToPython<T>(this T[,] input)
         {
-            return module;
-        }
-
-        // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
-        [ToBeRemoved("5.3", "This method included in order to fool versioning into playing nicely.")]
-        public static PyObject Invoke(PyObject module, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
-        {
-            return module;
+            return false;
         }
     }
 }
