@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
  * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
  *
@@ -20,27 +20,29 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Python.Enums;
 using BH.oM.Base.Attributes;
-using Python.Runtime;
+
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel;
+using System.IO;
 
 namespace BH.Engine.Python
 {
-    public static partial class Compute
+    public static partial class Query
     {
         // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
-        [ToBeRemoved("5.3", "This method included in order to fool versioning into playing nicely.")]
-        public static PyObject Invoke(PyObject module, string method, Dictionary<string, object> args)
+        [Description("Check whether the given BHoM Python Environment already exists.")]
+        [Input("env", "A BHoM Python environment.")]
+        [Output("exists", "True if the environment exists, False if not.")]
+        public static bool EnvironmentExists(this oM.Python.PythonEnvironment env)
         {
-            return module;
-        }
+            if (File.Exists(env.Executable))
+            {
+                return true;
+            }
 
-        // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
-        [ToBeRemoved("5.3", "This method included in order to fool versioning into playing nicely.")]
-        public static PyObject Invoke(PyObject module, string method, IEnumerable<object> args, Dictionary<string, object> kwargs)
-        {
-            return module;
+            return false;
         }
     }
 }

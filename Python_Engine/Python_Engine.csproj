@@ -67,6 +67,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compute\InstallBasePythonEnvironment.cs" />
+    <Compile Include="Compute\InstallReferencedVirtualenv.cs" />
+    <Compile Include="Compute\InstallVirtualenv.cs" />
+    <Compile Include="Compute\Logging.cs" />
+    <Compile Include="Compute\RemoveVirtualenv.cs" />
     <Compile Include="Compute\Run.cs" />
     <Compile Include="Compute\BasePythonEnvironment.cs" />
     <Compile Include="Compute\Remove.cs" />
@@ -76,7 +81,16 @@
     <Compile Include="Compute\UnzipFile.cs" />
     <Compile Include="Compute\Download.cs" />
     <Compile Include="Compute\Invoke.cs" />
+    <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
+    <Compile Include="Query\CodeDirectory.cs" />
+    <Compile Include="Query\EnvironmentExists.cs" />
+    <Compile Include="Query\EnvironmentsDirectory.cs" />
+    <Compile Include="Query\ExtensionsDirectory.cs" />
+    <Compile Include="Query\ToString.cs" />
+    <Compile Include="Query\VirtualEnv.cs" />
+    <Compile Include="Query\VirtualEnvPythonExePath.cs" />
+    <Compile Include="Query\VirtualEnvDirectory.cs" />
     <Compile Include="Query\VirtualEnvironment.cs" />
     <Compile Include="Query\PythonVersion.cs" />
     <Compile Include="Query\Directory.cs" />
@@ -97,7 +111,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Convert\" />
     <Folder Include="Create\" />
   </ItemGroup>
   <ItemGroup>
