@@ -32,17 +32,31 @@ namespace BH.Engine.Python
     {
         [Description("Create a requirements.txt file from an existing Python executable.")]
         [Input("executable", "The path to the Python executable to create the requirements.txt file from.")]
+        [Input("targetPath", "The path to the requirements.txt file to create. If not specified, the file will be created in the same directory as the executable.")]
         [Output("requirementsTxt", "The path to the requirements.txt file.")]
         public static string RequirementsTxt(
-            string executable
+            string executable,
+            string targetPath = null
         )
         {
             if (!File.Exists(executable))
             {
                 BH.Engine.Base.Compute.RecordError($"The executable '{executable}' does not exist.");
+                return null;
             }
 
-            string targetPath = Path.Combine(Path.GetDirectoryName(executable), "requirements.txt");
+            if (string.IsNullOrEmpty(targetPath))
+            {
+                targetPath = Path.Combine(Path.GetDirectoryName(executable), "requirements.txt");
+            }
+            else
+            {
+                if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
+                {
+                    BH.Engine.Base.Compute.RecordError($"The executable '{executable}' does not exist.");
+                    return null;
+                }
+            }
 
             System.Diagnostics.Process process = new System.Diagnostics.Process()
             {
