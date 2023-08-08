@@ -74,8 +74,9 @@ namespace BH.Engine.Python
                 RemoveKernel(name);
             }
 
-            // download the right version of Python
+            // download the target version of Python
             string referencedExecutable = version.DownloadPython();
+            
             // move the directory containing referencedExecutable into Query.DirectoryBaseEnvironment() using the same name
             string sourceDirectory = Path.GetDirectoryName(referencedExecutable);
             string destinationDirectory = Path.Combine(Query.DirectoryBaseEnvironment(), new DirectoryInfo(Path.GetDirectoryName(referencedExecutable)).Name);
@@ -83,10 +84,8 @@ namespace BH.Engine.Python
             {
                 Directory.Move(sourceDirectory, destinationDirectory);
             }
-            else
-            {
+            if (Directory.Exists(sourceDirectory))
                 Directory.Delete(sourceDirectory, true);
-            }
             referencedExecutable = Path.Combine(destinationDirectory, "python.exe");
 
             // create the venv from the base environment
