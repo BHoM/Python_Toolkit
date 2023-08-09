@@ -89,7 +89,7 @@ namespace BH.Engine.Python
         [Description("Download the target version of Python.")]
         [Input("version", "A Python version.")]
         [Output("executablePath", "The path of the executable for the downloaded Python.")]
-        [PreviousVersion("6.3", "BH.Engine.Python.Compute.DownloadPython(this BH.oM.Python.Enums.PythonVersion)")]
+        [PreviousVersion("6.3", "BH.Engine.Python.Compute.DownloadPython(BH.oM.Python.Enums.PythonVersion)")]
         public static string DownloadPython(this PythonVersion version, string name = null)
         {
             string url = version.EmbeddableURL();
