@@ -38,6 +38,7 @@ namespace BH.Engine.Python
         [Description("Check whether a string is valid as BHoM Python Environment name.")]
         [Input("name", "The name given to the BHoM Python Environment.")]
         [Output("valid", "True if valid, False if not.")]
+        [PreviousVersion("6.3","BH.Engine.Python.Compute.IsValidEnvironmentName(System.String)")]
         public static bool IsValidEnvironmentName(string name)
         {
             List<char> invalidChars = new List<char>() { ' ' };
