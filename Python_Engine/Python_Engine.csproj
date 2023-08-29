@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -92,7 +92,7 @@
     <Compile Include="Query\VirtualEnvPythonExePath.cs" />
     <Compile Include="Query\VirtualEnvDirectory.cs" />
     <Compile Include="Query\VirtualEnvironment.cs" />
-    <Compile Include="Query\PythonVersion.cs" />
+    <Compile Include="Query\Version.cs" />
     <Compile Include="Query\Directory.cs" />
     <Compile Include="Query\IsValidEnvironmentName.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />
