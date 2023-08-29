@@ -32,7 +32,7 @@ namespace BH.Engine.Python
         // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
         [Description("The string representation of a BHoM PythonEnvironment object.")]
         [Input("env", "A BHoM PythonEnvironment object.")]
-        [Output("The string representation of the input BHoM PythonEnvironment object")]
+        [Output("The string representation of the input BHoM PythonEnvironment object.")]
         public static string ToString(this oM.Python.PythonEnvironment env)
         {
             return $"{env.GetType().Name}[{env.Name}]";
