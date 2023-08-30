@@ -89,6 +89,7 @@ namespace BH.Engine.Python
         // changed from what to what ? 
         [Description("Download the target version of Python.")]
         [Input("version", "A Python version.")]
+        [Input("name", "Name of target exe file.")]
         [Output("executablePath", "The path of the executable for the downloaded Python.")]
         [PreviousVersion("6.3", "BH.Engine.Python.Compute.DownloadPython(BH.oM.Python.Enums.PythonVersion)")]
         public static string DownloadPython(this PythonVersion version, string name = null)
