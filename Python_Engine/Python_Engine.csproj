@@ -77,7 +77,7 @@
     <Compile Include="Compute\Download.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\VirtualEnvironment.cs" />
-    <Compile Include="Query\PythonVersion.cs" />
+    <Compile Include="Query\Version.cs" />
     <Compile Include="Query\Directory.cs" />
     <Compile Include="Query\IsValidEnvironmentName.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />

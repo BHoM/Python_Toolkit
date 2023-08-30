@@ -31,6 +31,9 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
+        [Description("Gets the Python version for the requested Python executable.")]
+        [Input("pythonExecutable", "Path to python.exe.")]
+        [Output("version", "Python version of the requested Python executable.")]
         public static PythonVersion Version(string pythonExecutable)
         {
             Process process = new Process()
