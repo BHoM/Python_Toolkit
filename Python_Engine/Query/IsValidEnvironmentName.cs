@@ -34,7 +34,6 @@ namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        // TODO - THIS METHOD USED TO BE IN QUERY BUT IS NOW IN COMPUTE
         [Description("Check whether a string is valid as BHoM Python Environment name.")]
         [Input("name", "The name given to the BHoM Python Environment.")]
         [Output("valid", "True if valid, False if not.")]

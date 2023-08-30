@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
  * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
  *
@@ -21,32 +21,39 @@
  */
 
 using BH.oM.Base.Attributes;
-using BH.oM.Python;
+using BH.oM.Python.Enums;
+using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.Xml.Linq;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED
-        [Description("Get an installed environment without the overhead of attempting to install that environment.")]
-        [Input("envName", "The virtual environment name to request.")]
-        [Output("The virtual environment, if it exists.")]
-        public static PythonEnvironment VirtualEnv(string envName)
+        public static PythonVersion Version(string pythonExecutable)
         {
-            string exePath = Query.VirtualEnvPythonExePath(envName);
-            if (File.Exists(exePath))
+            Process process = new Process()
             {
-                return new PythonEnvironment() { Name = envName, Executable = exePath };
-            }
-            else
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = pythonExecutable,
+                    Arguments = $"--version",
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                }
+            };
+            string versionString;
+            using (Process p = Process.Start(process.StartInfo))
             {
-                BH.Engine.Base.Compute.RecordError($"No environment could be found for {envName}. Use the appropriate InstallPythonEnv to install this environment.");
-                return null;
+                p.WaitForExit();
+                if (p.ExitCode != 0)
+                    BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ReadToEnd()}");
+                versionString = p.StandardOutput.ReadToEnd().TrimEnd();
             }
+
+            return (PythonVersion) Enum.Parse(typeof(PythonVersion), "v" + versionString.Replace("Python ", "").Replace(".", "_"));
         }
     }
 }
-
