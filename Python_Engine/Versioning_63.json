@@ -13,7 +13,7 @@
 		"BH.Engine.Python.Query.VirtualEnv(System.String)": "This method has been removed.",
 		"BH.Engine.Python.Query.VirtualEnvPythonExePath(System.String)": "This method has been removed.",
 		"BH.Engine.Python.Query.VirtualEnvDirectory(System.String)": "This method has been removed.",
-		"BH.Engine.Python.Convert.ToPython(System.Object[,])": "This method has been removed.",
+		"BH.Engine.Python.Convert.ToPython[T](T[,])": "This method has been removed.",
 		"BH.Engine.Python.Compute.RunCommandAsync(System.String, System.Boolean, System.String)": "This method has been removed.",
 		"BH.Engine.Python.Compute.RunCommandBool(System.String, System.Boolean, System.String, System.Double)": "This method has been removed.",
 		"BH.Engine.Python.Compute.RunPythonScript(BH.oM.Python.PythonEnvironment, System.String, System.Collections.Generic.List<System.String>)": "This method has been removed.",
