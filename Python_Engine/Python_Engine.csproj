@@ -75,6 +75,7 @@
     <Compile Include="Compute\VirtualEnvironment.cs" />
     <Compile Include="Compute\UnzipFile.cs" />
     <Compile Include="Compute\Download.cs" />
+    <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
     <Compile Include="Query\VirtualEnvironment.cs" />
     <Compile Include="Query\Version.cs" />
@@ -96,7 +97,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Convert\" />
     <Folder Include="Create\" />
   </ItemGroup>
   <ItemGroup>
