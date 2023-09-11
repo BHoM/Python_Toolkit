@@ -42,8 +42,10 @@ namespace BH.Engine.Python
         )
         {
             if (!Directory.Exists(Query.DirectoryEnvironments()))
+            {
                 // create PythonEnvironments directory if it doesnt already exist
                 Directory.CreateDirectory(Query.DirectoryEnvironments());
+            }
             
             // determine whether the base environment already exists
             string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), "python.exe");
