@@ -41,8 +41,7 @@ namespace BH.Engine.Python
         public static string DirectoryKernels()
         {
             string dir = @"C:\ProgramData\jupyter\kernels";
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            Directory.CreateDirectory(dir);
             return dir;
         }
 
@@ -51,8 +50,7 @@ namespace BH.Engine.Python
         public static string DirectoryCode()
         {
             string dir = Path.Combine(Query.DirectoryExtensions(), "PythonCode");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            Directory.CreateDirectory(dir);
             return dir;
         }
 
@@ -61,8 +59,7 @@ namespace BH.Engine.Python
         public static string DirectoryEnvironments()
         {
             string dir = Path.Combine(Query.DirectoryExtensions(), "PythonEnvironments");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            Directory.CreateDirectory(dir);
             return dir;
         }
 
