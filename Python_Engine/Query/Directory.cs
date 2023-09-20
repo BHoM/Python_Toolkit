@@ -40,21 +40,30 @@ namespace BH.Engine.Python
         [Output("The location where any BHoM-related Python kernels reside.")]
         public static string DirectoryKernels()
         {
-            return @"C:\ProgramData\jupyter\kernels";
+            string dir = @"C:\ProgramData\jupyter\kernels";
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
         }
 
         [Description("The location where any BHoM-related Python code resides.")]
         [Output("The location where any BHoM-related Python code resides.")]
         public static string DirectoryCode()
         {
-            return Path.Combine(Query.DirectoryExtensions(), "PythonCode");
+            string dir = Path.Combine(Query.DirectoryExtensions(), "PythonCode");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
         }
 
         [Description("The location where any BHoM-related Python environment (or virtualenv) resides.")]
         [Output("The location where any BHoM-related Python environment (or virtualenv) resides.")]
         public static string DirectoryEnvironments()
         {
-            return Path.Combine(Query.DirectoryExtensions(), "PythonEnvironments");
+            string dir = Path.Combine(Query.DirectoryExtensions(), "PythonEnvironments");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
         }
 
         [Description("The location where the base Python environment exists.")]
