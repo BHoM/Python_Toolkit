@@ -1,12 +1,1 @@
-﻿black
-Jinja2
-jupyterlab
-matplotlib
-numpy
-pandas
-pymongo
-pyodbc
-pytest
-SQLAlchemy
-tables
-virtualenv
+﻿

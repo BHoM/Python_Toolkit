@@ -33,11 +33,11 @@
   <ItemGroup>
     <Reference Include="BHoM">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\ProgramData\BHoM\Assemblies\BHoM.dll</HintPath>
+      <HintPath>$(ProgramData)\BHoM\Assemblies\BHoM.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BHoM_Engine">
-      <HintPath>C:\ProgramData\BHoM\Assemblies\BHoM_Engine.dll</HintPath>
+      <HintPath>$(ProgramData)\BHoM\Assemblies\BHoM_Engine.dll</HintPath>
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -47,12 +47,12 @@
     </Reference>
     <Reference Include="Reflection_Engine">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\ProgramData\BHoM\Assemblies\Reflection_Engine.dll</HintPath>
+      <HintPath>$(ProgramData)\BHoM\Assemblies\Reflection_Engine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Serialiser_Engine">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\ProgramData\BHoM\Assemblies\Serialiser_Engine.dll</HintPath>
+      <HintPath>$(ProgramData)\BHoM\Assemblies\Serialiser_Engine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -67,26 +67,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compute\DownloadPython.cs" />
-    <Compile Include="Compute\Invoke.cs" />
-    <Compile Include="Compute\RemoveVirtualenv.cs" />
-    <Compile Include="Compute\InstallVirtualenv.cs" />
-    <Compile Include="Compute\InstallReferencedVirtualenv.cs" />
-    <Compile Include="Compute\InstallBasePythonEnvironment.cs" />
     <Compile Include="Compute\Run.cs" />
-    <Compile Include="Compute\Logging.cs" />
+    <Compile Include="Compute\BasePythonEnvironment.cs" />
+    <Compile Include="Compute\Remove.cs" />
+    <Compile Include="Compute\InstallPackage.cs" />
+    <Compile Include="Compute\RequirementsTxt.cs" />
+    <Compile Include="Compute\VirtualEnvironment.cs" />
+    <Compile Include="Compute\UnzipFile.cs" />
+    <Compile Include="Compute\Download.cs" />
     <Compile Include="Convert\ToPython.cs" />
     <Compile Include="Modify\AddQuotesIfRequired.cs" />
-    <Compile Include="Query\VirtualEnv.cs" />
-    <Compile Include="Query\VirtualEnvPythonExePath.cs" />
-    <Compile Include="Query\VirtualEnvDirectory.cs" />
-    <Compile Include="Query\ToString.cs" />
-    <Compile Include="Query\CodeDirectory.cs" />
-    <Compile Include="Query\EnvironmentExists.cs" />
-    <Compile Include="Compute\IsValidEnvironmentName.cs" />
-    <Compile Include="Query\EnvironmentsDirectory.cs" />
+    <Compile Include="Query\VirtualEnvironment.cs" />
+    <Compile Include="Query\Version.cs" />
+    <Compile Include="Query\Directory.cs" />
+    <Compile Include="Query\IsValidEnvironmentName.cs" />
     <Compile Include="Query\EmbeddableURL.cs" />
-    <Compile Include="Query\ExtensionsDirectory.cs" />
     <Compile Include="Query\ToolkitName.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -105,17 +100,7 @@
     <Folder Include="Create\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Python\src\python_toolkit\bhom\analytics.py" />
-    <Content Include="Python\src\python_toolkit\bhom\anonymise_filepath.py" />
-    <Content Include="Python\src\python_toolkit\bhom\decorate_all_in_module.py" />
-    <Content Include="Python\src\python_toolkit\bhom\encoder.py" />
-    <Content Include="Python\src\python_toolkit\bhom\package_contents.py" />
-    <Content Include="Python\src\python_toolkit\bhom\ticks.py" />
-    <Content Include="Python\src\python_toolkit\bhom\version.py" />
-    <Content Include="Python\src\python_toolkit\bhom\__init__.py" />
-    <Content Include="Python\src\python_toolkit\example\example_2.py" />
-    <Content Include="Python\src\python_toolkit\example\example_1.py" />
-    <Content Include="Python\src\python_toolkit\example\__init__.py" />
+    <Content Include="Python\src\python_toolkit\bhomutil\__init__.py" />
     <Content Include="Python\src\python_toolkit\__init__.py" />
     <None Include="Python\README.md" />
     <Content Include="Python\setup.py" />
@@ -124,23 +109,20 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
-
       xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
-      xcopy "$(TargetDir)Python.Runtime.dll"  "C:\\ProgramData\\BHoM\\Assemblies" /Y
-
-      :: create infrastructure necessary to support Python environments
+      xcopy "$(TargetDir)Python.Runtime.dll" "C:\\ProgramData\\BHoM\\Assemblies" /Y
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
       if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
       if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
-
-      :: remove any old versions within target directory for current toolkits Python code
-      if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /S /Q
-
-      :: move Python code over to toolkit extensions folder, redirecting output to temp log file to silence it
-      robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /s /purge /xf "*.pyc" /xd "\__pycache__\" &gt; output.log
-
-      :: remove temporary log file
-      del output.log
       
-    </PostBuildEvent>
+      if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /S /Q
+      mkdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)"
+      
+      robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /mir /xf "*.pyc" "*.ipynb" /xd "__*__" ".*" &gt; output.log
+      del output.log
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>

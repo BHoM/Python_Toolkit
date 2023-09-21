@@ -31,6 +31,7 @@ namespace BH.Engine.Python
 {
     public static partial class Convert
     {
+        // TODO - REMOVE THIS METHOD, NO LONGER REQUIRED, PLUS IT HAS AN OLD ToBeRemoved TAG
         [ToBeRemoved("5.3", "This method included in order to fool versioning into playing nicely.")]
         public static bool ToPython<T>(this T[,] input)
         {
@@ -38,4 +39,3 @@ namespace BH.Engine.Python
         }
     }
 }
-

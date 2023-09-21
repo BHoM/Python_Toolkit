@@ -20,85 +20,21 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Base;
 using BH.oM.Base.Attributes;
-using System.Threading;
-using System.Threading.Tasks;
+using BH.oM.Python;
+using BH.oM.Python.Enums;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using BH.oM.Python;
-using BH.oM.Base;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Run a command via CMD and return stdout.")]
-        [Input("command", "The command to be run.")]
-        [Input("hideWindows", "Set to True to hide cmd windows.")]
-        [Input("startDirectory", "The directory in which the command should be run.")]
-        [Output("stdout", "The StandardOutput from the command that was run. If the process failed, then StandardError will be returned here instead.")]
-        public static async void RunCommandAsync(string command, bool hideWindows = true, string startDirectory = null)
-        {
-            await Task.Run(() =>
-            {
-                System.Diagnostics.Process process = new System.Diagnostics.Process();
-                System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
-
-                string commandMode = "/K";
-                if (hideWindows)
-                {
-                    startInfo.CreateNoWindow = true;
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                    commandMode = "/C";
-                }
-
-                startInfo.FileName = "cmd.exe";
-                startInfo.RedirectStandardOutput = true;
-                startInfo.RedirectStandardError = true;
-                startInfo.UseShellExecute = false;
-                startInfo.Arguments = $"{commandMode} {command} && exit";
-
-                process.StartInfo = startInfo;
-                process.Start();
-            });
-        }
-
-        [Description("Run a command via CMD and return True if successful and False if not.")]
-        [Input("command", "The command to be run.")]
-        [Input("hideWindows", "Set to True to hide cmd windows.")]
-        [Input("startDirectory", "The directory in which the command should be run.")]
-        [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
-        [Output("success", "True if successful and False if not.")]
-        public static bool RunCommandBool(string command, bool hideWindows = false, string startDirectory = null, double timeoutMinutes = 5)
-        {
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-
-            string commandMode = "/K";
-            if (hideWindows)
-            {
-                process.StartInfo.CreateNoWindow = true;
-                process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                commandMode = "/C";
-            }
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.Arguments = $"{commandMode} {command}";
-            process.Start();
-
-            int millisecondsToWait = (int)timeoutMinutes * 60 * 1000;
-            process.WaitForExit(millisecondsToWait);
-
-            if (process.ExitCode != 0)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         [Description("Run a command via CMD and return stdout.")]
         [Input("command", "The command to be run.")]
         [Input("hideWindows", "Set to True to hide cmd windows.")]
@@ -160,72 +96,5 @@ namespace BH.Engine.Python
 
             return RunCommandStdout(cmd, hideWindows: true);
         }
-
-        [Description("Run a Python script using the given BHoM PythonEnvironment, and return a BHoM object containing results.")]
-        [Input("pythonEnvironment", "The Python environment with which to run the Python script.")]
-        [Input("pythonScript", "A path to a Python script (a *.py file containing a __main__ executable function).")]
-        [Input("arguments", "A list of optional arguments to pass to the script.")]
-        [Output("obj", "A BHoM CustomObject containing results from this script.")]
-        public static oM.Base.CustomObject RunPythonScript(this PythonEnvironment pythonEnvironment, string pythonScript, List<string> arguments = null)
-        {
-            if (!File.Exists(pythonScript))
-            {
-                BH.Engine.Base.Compute.RecordError($"{pythonScript} does not exist.");
-                return null;
-            }
-
-            string contents = File.ReadAllText(pythonScript);
-            List<string> executableStrings = new List<string>()
-            {
-                "if __name__ == \"__main__\":",
-                "if __name__ is \"__main__\":",
-                "if __name__ == '__main__':",
-                "if __name__ is '__main__':",
-                "if __name__ == \'__main__\':",
-                "if __name__ is \'__main__\':",
-            };
-            if (!executableStrings.Any(contents.Contains))
-            {
-                BH.Engine.Base.Compute.RecordError($"The script passed does not seem to be directly executable using Python. It should contain an 'if __name__ == \"__main__\"' to enable the file to be called directly.");
-                return null;
-            }
-
-            string cmd = $"{pythonEnvironment.Executable} {pythonScript}";
-            if (arguments.Count > 0)
-            {
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    cmd += $" {arguments[i]}";
-                }
-            }
-
-            string tempFile = RunCommandStdout(cmd, hideWindows: true);
-
-            if (!File.Exists(tempFile))
-            {
-                if (arguments.Contains("-h"))
-                {
-                    BH.Engine.Base.Compute.RecordNote($"It looks like you've asked for some documentation. Here it is!");
-                }
-                else
-                {
-                    BH.Engine.Base.Compute.RecordError($"Something went wrong! The object returned contains the error message given by the Python code.");
-                }
-
-                return new CustomObject()
-                {
-                    CustomData = new Dictionary<string, object>()
-                    {
-                        { "output", (object)tempFile }
-                    }
-                };
-            }
-            else
-            {
-                string tempFileContent = File.ReadAllText(tempFile);
-                return Serialiser.Convert.FromJson(tempFileContent) as CustomObject;
-            }
-        }
     }
 }
-
