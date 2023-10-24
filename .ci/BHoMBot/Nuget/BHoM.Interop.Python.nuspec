@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>BHoM.Interop.Python</id>
+    <version></version>
+    <authors>BHoM</authors>
+    <projectUrl>https://github.com/BHoM/Python_Toolkit</projectUrl>
+    <license type="file">licence.txt</license>
+    <icon>icon.png</icon>
+    <readme>readme.md</readme>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Interact with Python via BHoM</description>
+    <releaseNotes></releaseNotes>
+    <copyright></copyright>
+    <tags>BHoM engine aec Python</tags>
+    <title></title>
+    <dependencies>
+      <group targetFramework="netstandard2.0">
+        <dependency id="NETStandard.Library" version="2.0.3" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="licence/licence.txt" target="" />
+    <file src="images/icon.png" target="" />
+    <file src="docs/readme.md" target="" />
+  </files>
+</package>
