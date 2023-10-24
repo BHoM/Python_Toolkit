@@ -1,35 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4A6B3805-35EE-4278-9701-CC1E0CD641F9}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyVersion>7.0.0.0</AssemblyVersion>
+    <Description>https://github.com/BHoM/Python_Toolkit</Description>
+    <Version>6.0.0</Version>
+    <Authors>BHoM</Authors>
+    <Copyright>Copyright © https://github.com/BHoM</Copyright>
     <RootNamespace>BH.Engine.Python</RootNamespace>
-    <AssemblyName>Python_Engine</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <FileVersion>7.0.0.0</FileVersion>
     <OutputPath>..\Build\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\Build\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Python_oM\Python_oM.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="BHoM">
       <SpecificVersion>False</SpecificVersion>
@@ -55,73 +41,14 @@
       <HintPath>$(ProgramData)\BHoM\Assemblies\Serialiser_Engine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Compute\Run.cs" />
-    <Compile Include="Compute\BasePythonEnvironment.cs" />
-    <Compile Include="Compute\Remove.cs" />
-    <Compile Include="Compute\InstallPackage.cs" />
-    <Compile Include="Compute\RequirementsTxt.cs" />
-    <Compile Include="Compute\VirtualEnvironment.cs" />
-    <Compile Include="Compute\UnzipFile.cs" />
-    <Compile Include="Compute\Download.cs" />
-    <Compile Include="Convert\ToPython.cs" />
-    <Compile Include="Modify\AddQuotesIfRequired.cs" />
-    <Compile Include="Query\VirtualEnvironment.cs" />
-    <Compile Include="Query\Version.cs" />
-    <Compile Include="Query\Directory.cs" />
-    <Compile Include="Query\IsValidEnvironmentName.cs" />
-    <Compile Include="Query\EmbeddableURL.cs" />
-    <Compile Include="Query\ToolkitName.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Python_oM\Python_oM.csproj">
-      <Project>{3BF9F725-F1CA-432F-A549-557324CAFB91}</Project>
-      <Name>Python_oM</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Create\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Python\src\python_toolkit\bhomutil\__init__.py" />
-    <Content Include="Python\src\python_toolkit\__init__.py" />
-    <None Include="Python\README.md" />
-    <Content Include="Python\setup.py" />
-    <Content Include="Python\requirements.txt" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-      xcopy "$(TargetDir)$(TargetFileName)" "C:\\ProgramData\\BHoM\\Assemblies" /Y
-      xcopy "$(TargetDir)Python.Runtime.dll" "C:\\ProgramData\\BHoM\\Assemblies" /Y
-    </PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-      if not exist "C:\ProgramData\BHoM\Extensions\PythonEnvironments" mkdir "C:\ProgramData\BHoM\Extensions\PythonEnvironments"
-      if not exist "C:\ProgramData\BHoM\Extensions\PythonCode" mkdir "C:\ProgramData\BHoM\Extensions\PythonCode"
-      
-      if exist "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" rmdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /S /Q
-      mkdir "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)"
-      
-      robocopy "$(ProjectDir)Python" "C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)" /mir /xf "*.pyc" "*.ipynb" /xd "__*__" ".*" &gt; output.log
-      del output.log
-    </PreBuildEvent>
-  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\\ProgramData\\BHoM\\Assemblies&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetDir)Python.Runtime.dll&quot; &quot;C:\\ProgramData\\BHoM\\Assemblies&quot; /Y" />
+  </Target>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if not exist &quot;C:\ProgramData\BHoM\Extensions\PythonEnvironments&quot; mkdir &quot;C:\ProgramData\BHoM\Extensions\PythonEnvironments&quot;&#xD;&#xA;if not exist &quot;C:\ProgramData\BHoM\Extensions\PythonCode&quot; mkdir &quot;C:\ProgramData\BHoM\Extensions\PythonCode&quot;&#xD;&#xA;      &#xD;&#xA;if exist &quot;C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)&quot; rmdir &quot;C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)&quot; /S /Q&#xD;&#xA;mkdir &quot;C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)&quot;&#xD;&#xA;      &#xD;&#xA;robocopy &quot;$(ProjectDir)Python&quot; &quot;C:\ProgramData\BHoM\Extensions\PythonCode\$(SolutionName)&quot; /mir /xf &quot;*.pyc&quot; &quot;*.ipynb&quot; /xd &quot;__*__&quot; &quot;.*&quot; &amp;gt; output.log&#xD;&#xA;del output.log" />
+  </Target>
+
 </Project>

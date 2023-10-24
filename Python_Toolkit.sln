@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30523.141
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_Engine", "Python_Engine\Python_Engine.csproj", "{4A6B3805-35EE-4278-9701-CC1E0CD641F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_oM", "Python_oM\Python_oM.csproj", "{6CACB513-53CC-427D-92EC-4C0C1B1172B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_oM", "Python_oM\Python_oM.csproj", "{3BF9F725-F1CA-432F-A549-557324CAFB91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_Engine", "Python_Engine\Python_Engine.csproj", "{D24A2970-618D-4149-B123-99F406D867D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A6B3805-35EE-4278-9701-CC1E0CD641F9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3BF9F725-F1CA-432F-A549-557324CAFB91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CACB513-53CC-427D-92EC-4C0C1B1172B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CACB513-53CC-427D-92EC-4C0C1B1172B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CACB513-53CC-427D-92EC-4C0C1B1172B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CACB513-53CC-427D-92EC-4C0C1B1172B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D24A2970-618D-4149-B123-99F406D867D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D24A2970-618D-4149-B123-99F406D867D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D24A2970-618D-4149-B123-99F406D867D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D24A2970-618D-4149-B123-99F406D867D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
