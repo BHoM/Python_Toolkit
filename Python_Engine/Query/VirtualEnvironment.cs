@@ -72,7 +72,6 @@ namespace BH.Engine.Python
         [Output("directory", "The directory where the virtual environment is located.")]
         public static string VirtualEnvironmentDirectory(string envName)
         {
-            
             return Path.Combine(Query.DirectoryEnvironments(), envName);
         }
 
