@@ -46,13 +46,9 @@ namespace BH.Engine.Python
             bool versionMatches = Version(VirtualEnvironmentExecutable(envName)) == pythonVersion;
 
             if (pythonVersion == PythonVersion.Undefined)
-            {
                 return directoryExists && executableExists && kernelExists;
-            }
-            else
-            {
-                return directoryExists && executableExists && kernelExists && versionMatches;
-            }
+            
+            return directoryExists && executableExists && kernelExists && versionMatches;
         }
 
         [Description("Get the path to the named BHoM Python virtual environment kernel.")]
