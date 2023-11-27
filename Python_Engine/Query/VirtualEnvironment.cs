@@ -36,10 +36,20 @@ namespace BH.Engine.Python
     {
         [Description("Check whether a named BHoM Python virtual environment exists.")]
         [Input("envName", "The name given to the BHoM Python Environment.")]
+        [Input("pythonVersion", "The version to check against.")]
         [Output("exists", "True if exists, False if not.")]
-        public static bool VirtualEnvironmentExists(string envName)
+        [PreviousVersion("7.0", "BH.Engine.Python.Query.VirtualEnvironmentExists(System.String)")]
+        public static bool VirtualEnvironmentExists(string envName, PythonVersion pythonVersion = PythonVersion.Undefined)
         {
-            return Directory.Exists(VirtualEnvironmentDirectory(envName)) && File.Exists(VirtualEnvironmentExecutable(envName)) && Directory.Exists(VirtualEnvironmentKernel(envName));
+            bool directoryExists = Directory.Exists(VirtualEnvironmentDirectory(envName));
+            bool executableExists = File.Exists(VirtualEnvironmentExecutable(envName));
+            bool kernelExists = Directory.Exists(VirtualEnvironmentKernel(envName));
+            bool versionMatches = Version(VirtualEnvironmentExecutable(envName)) == pythonVersion;
+
+            if (pythonVersion == PythonVersion.Undefined)
+                return directoryExists && executableExists && kernelExists;
+            
+            return directoryExists && executableExists && kernelExists && versionMatches;
         }
 
         [Description("Get the path to the named BHoM Python virtual environment kernel.")]
