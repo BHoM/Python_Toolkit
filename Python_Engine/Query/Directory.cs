@@ -33,28 +33,38 @@ namespace BH.Engine.Python
         [Output("The location where BHoM extensions reside.")]
         public static string DirectoryExtensions()
         {
-            return @"C:\ProgramData\BHoM\Extensions";
+            return Path.Combine(System.IO.Directory.GetParent(BH.Engine.Base.Query.BHoMFolder()).FullName, "Extensions");
         }
 
         [Description("The location where any BHoM-related Python kernels reside.")]
         [Output("The location where any BHoM-related Python kernels reside.")]
         public static string DirectoryKernels()
         {
-            return @"C:\ProgramData\jupyter\kernels";
+            
+            string dir = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData), "jupyter", "kernels");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
         }
 
         [Description("The location where any BHoM-related Python code resides.")]
         [Output("The location where any BHoM-related Python code resides.")]
         public static string DirectoryCode()
         {
-            return Path.Combine(Query.DirectoryExtensions(), "PythonCode");
+            string dir = Path.Combine(Query.DirectoryExtensions(), "PythonCode");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
         }
 
         [Description("The location where any BHoM-related Python environment (or virtualenv) resides.")]
         [Output("The location where any BHoM-related Python environment (or virtualenv) resides.")]
         public static string DirectoryEnvironments()
         {
-            return Path.Combine(Query.DirectoryExtensions(), "PythonEnvironments");
+            string dir = Path.Combine(Query.DirectoryExtensions(), "PythonEnvironments");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
         }
 
         [Description("The location where the base Python environment exists.")]
