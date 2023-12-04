@@ -44,7 +44,9 @@ namespace BH.Engine.Python
             bool directoryExists = Directory.Exists(VirtualEnvironmentDirectory(envName));
             bool executableExists = File.Exists(VirtualEnvironmentExecutable(envName));
             bool kernelExists = Directory.Exists(VirtualEnvironmentKernel(envName));
-            bool versionMatches = Version(VirtualEnvironmentExecutable(envName)) == pythonVersion;
+            bool versionMatches = false;
+            if (executableExists)
+                versionMatches = Version(VirtualEnvironmentExecutable(envName)) == pythonVersion;
 
             if (pythonVersion == PythonVersion.Undefined)
                 return directoryExists && executableExists && kernelExists;
