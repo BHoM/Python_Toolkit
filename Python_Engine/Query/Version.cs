@@ -48,12 +48,19 @@ namespace BH.Engine.Python
                 }
             };
             string versionString;
-            using (Process p = Process.Start(process.StartInfo))
+            try
             {
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ReadToEnd()}");
-                versionString = p.StandardOutput.ReadToEnd().TrimEnd();
+                using (Process p = Process.Start(process.StartInfo))
+                {
+                    p.WaitForExit();
+                    if (p.ExitCode != 0)
+                        BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ReadToEnd()}");
+                    versionString = p.StandardOutput.ReadToEnd().TrimEnd();
+                }
+            }
+            catch
+            {
+                return PythonVersion.Undefined;
             }
 
             return (PythonVersion) Enum.Parse(typeof(PythonVersion), "v" + versionString.Replace("Python ", "").Replace(".", "_"));
