@@ -41,10 +41,14 @@ namespace BH.Engine.Python
         [PreviousVersion("7.0", "BH.Engine.Python.Query.VirtualEnvironmentExists(System.String)")]
         public static bool VirtualEnvironmentExists(string envName, PythonVersion pythonVersion = PythonVersion.Undefined)
         {
+            string executable = VirtualEnvironmentExecutable(envName);
             bool directoryExists = Directory.Exists(VirtualEnvironmentDirectory(envName));
-            bool executableExists = File.Exists(VirtualEnvironmentExecutable(envName));
+            bool executableExists = File.Exists(executable);
             bool kernelExists = Directory.Exists(VirtualEnvironmentKernel(envName));
-            bool versionMatches = Version(VirtualEnvironmentExecutable(envName)) == pythonVersion;
+            bool versionMatches = false;
+
+            if (executableExists)
+                versionMatches = Version(executable) == pythonVersion;
 
             if (pythonVersion == PythonVersion.Undefined)
                 return directoryExists && executableExists && kernelExists;
