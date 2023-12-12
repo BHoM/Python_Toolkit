@@ -37,9 +37,15 @@ namespace BH.Engine.Python
         [Input("reload", "Reload the base Python environment rather than recreating it, if it already exists.")]
         [Output("env", "The base Python Environment for all BHoM workflows.")]
         public static PythonEnvironment BasePythonEnvironment(
+            bool run = false,
             bool reload = true
         )
         {
+            if (!run)
+            {
+                return null;
+            }
+
             if (!Directory.Exists(Query.DirectoryEnvironments()))
             {
                 // create PythonEnvironments directory if it doesnt already exist
