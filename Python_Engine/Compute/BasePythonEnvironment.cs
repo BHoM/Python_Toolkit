@@ -37,10 +37,10 @@ namespace BH.Engine.Python
         [Input("reload", "Reload the base Python environment rather than recreating it, if it already exists.")]
         [Input("run", "Start the installation/retrieval of the BHoM Base Python Environment.")]
         [Output("env", "The base Python Environment for all BHoM workflows.")]
-        [PreviousVersion("BH.Engine.Python.Compute.BasePythonEnvironment(System.Boolean)")]
+        [PreviousVersion("7.0", "BH.Engine.Python.Compute.BasePythonEnvironment(System.Boolean)")]
         public static PythonEnvironment BasePythonEnvironment(
-            bool run = false,
-            bool reload = true
+            bool reload = true,
+            bool run = false
         )
         {
             if (!run)
