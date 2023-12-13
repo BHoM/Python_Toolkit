@@ -35,11 +35,19 @@ namespace BH.Engine.Python
     {
         [Description("Retrieve or reinstall the base Python Environment for BHoM workflows.")]
         [Input("reload", "Reload the base Python environment rather than recreating it, if it already exists.")]
+        [Input("run", "Start the installation/retrieval of the BHoM Base Python Environment.")]
         [Output("env", "The base Python Environment for all BHoM workflows.")]
+        [PreviousVersion("7.0", "BH.Engine.Python.Compute.BasePythonEnvironment(System.Boolean)")]
         public static PythonEnvironment BasePythonEnvironment(
-            bool reload = true
+            bool reload = true,
+            bool run = false
         )
         {
+            if (!run)
+            {
+                return null;
+            }
+
             if (!Directory.Exists(Query.DirectoryEnvironments()))
             {
                 // create PythonEnvironments directory if it doesnt already exist
