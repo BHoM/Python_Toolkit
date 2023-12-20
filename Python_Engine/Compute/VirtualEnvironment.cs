@@ -23,7 +23,6 @@
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
 using BH.oM.Python.Enums;
-using Microsoft.SqlServer.Server;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;

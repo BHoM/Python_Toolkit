@@ -36,6 +36,11 @@ namespace BH.Engine.Python
         [Output("version", "Python version of the requested Python executable.")]
         public static PythonVersion Version(string pythonExecutable)
         {
+            if (!File.Exists(pythonExecutable)) 
+            {
+                return PythonVersion.Undefined;
+            }
+
             Process process = new Process()
             {
                 StartInfo = new ProcessStartInfo()
@@ -47,16 +52,25 @@ namespace BH.Engine.Python
                     UseShellExecute = false,
                 }
             };
-            string versionString;
-            using (Process p = Process.Start(process.StartInfo))
+
+            try
             {
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ReadToEnd()}");
-                versionString = p.StandardOutput.ReadToEnd().TrimEnd();
+                string versionString;
+                using (Process p = Process.Start(process.StartInfo))
+                {
+                    p.WaitForExit();
+                    if (p.ExitCode != 0)
+                        BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{p.StandardError.ReadToEnd()}");
+                    versionString = p.StandardOutput.ReadToEnd().TrimEnd();
+                }
+
+                return (PythonVersion)Enum.Parse(typeof(PythonVersion), "v" + versionString.Replace("Python ", "").Replace(".", "_"));
+            }
+            catch
+            {
+                return PythonVersion.Undefined;
             }
 
-            return (PythonVersion) Enum.Parse(typeof(PythonVersion), "v" + versionString.Replace("Python ", "").Replace(".", "_"));
         }
     }
 }
