@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -37,7 +37,6 @@ namespace BH.Engine.Python
         [Input("reload", "Reload the base Python environment rather than recreating it, if it already exists.")]
         [Input("run", "Start the installation/retrieval of the BHoM Base Python Environment.")]
         [Output("env", "The base Python Environment for all BHoM workflows.")]
-        [PreviousVersion("7.0", "BH.Engine.Python.Compute.BasePythonEnvironment(System.Boolean)")]
         public static PythonEnvironment BasePythonEnvironment(
             bool reload = true,
             bool run = false
@@ -111,3 +110,4 @@ namespace BH.Engine.Python
         }
     }
 }
+

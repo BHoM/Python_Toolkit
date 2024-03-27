@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -38,7 +38,6 @@ namespace BH.Engine.Python
         [Input("envName", "The name given to the BHoM Python Environment.")]
         [Input("pythonVersion", "The version to check against.")]
         [Output("exists", "True if exists, False if not.")]
-        [PreviousVersion("7.0", "BH.Engine.Python.Query.VirtualEnvironmentExists(System.String)")]
         public static bool VirtualEnvironmentExists(string envName, PythonVersion pythonVersion = PythonVersion.Undefined)
         {
             string executable = VirtualEnvironmentExecutable(envName);
@@ -96,4 +95,5 @@ namespace BH.Engine.Python
         }
     }
 }
+
 
