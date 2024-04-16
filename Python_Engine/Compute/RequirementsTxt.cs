@@ -72,10 +72,11 @@ namespace BH.Engine.Python
             using (Process p = Process.Start(process.StartInfo))
             {
                 StreamWriter sr = new StreamWriter(targetPath);
+                sr.Write(p.StandardOutput.ReadToEnd());
+                string standardError = p.StandardError.ReadToEnd();
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error creating requirements.txt from \"{executable}\".\n{p.StandardError.ReadToEnd()}");
-                sr.Write(p.StandardOutput.ReadToEnd());
+                    BH.Engine.Base.Compute.RecordError($"Error creating requirements.txt from \"{executable}\".\n{standardError}");
                 sr.Close();
             }
 
