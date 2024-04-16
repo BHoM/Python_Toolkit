@@ -64,9 +64,10 @@ namespace BH.Engine.Python
             };
             using (Process p = Process.Start(process.StartInfo))
             {
+                string standardError = p.StandardError.ReadToEnd();
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{packagesString}].\n{p.StandardError.ReadToEnd()}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{packagesString}].\n{standardError}");
             }
         }
 
@@ -112,9 +113,10 @@ namespace BH.Engine.Python
             };
             using (Process p = Process.Start(process.StartInfo))
             {
+                string standardError = p.StandardError.ReadToEnd();
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages from {requirements}.\n{p.StandardError.ReadToEnd()}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing packages from {requirements}.\n{standardError}");
             }
         }
 
@@ -155,9 +157,10 @@ namespace BH.Engine.Python
             };
             using (Process p = Process.Start(process.StartInfo))
             {
+                string standardError = p.StandardError.ReadToEnd();
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing package from \"{packageDirectory}\".\n{p.StandardError.ReadToEnd()}");
+                    BH.Engine.Base.Compute.RecordError($"Error installing package from \"{packageDirectory}\".\n{standardError}");
             }
         }
 
