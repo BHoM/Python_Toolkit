@@ -100,9 +100,10 @@ namespace BH.Engine.Python
             };
             using (Process p = Process.Start(process.StartInfo))
             {
+                string standardError = p.StandardError.ReadToEnd();
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error creating virtual environment.\n{p.StandardError.ReadToEnd()}");
+                    BH.Engine.Base.Compute.RecordError($"Error creating virtual environment.\n{standardError}");
             }
 
             // install ipykernel, pytest and black into new virtualenv
@@ -121,9 +122,10 @@ namespace BH.Engine.Python
             };
             using (Process p = Process.Start(process2.StartInfo))
             {
+                string standardError = p.StandardError.ReadToEnd();
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error registering the \"{name}\" virtual environment.\n{p.StandardError.ReadToEnd()}");
+                    BH.Engine.Base.Compute.RecordError($"Error registering the \"{name}\" virtual environment.\n{standardError}");
             }
             // replace text in a file
 
