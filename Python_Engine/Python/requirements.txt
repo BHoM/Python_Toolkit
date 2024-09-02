@@ -1,1 +1,7 @@
-﻿
+﻿virtualenv
+jupyterlab
+black
+pylint
+numpy==1.26.4
+pandas==2.2.1
+matplotlib==3.8.3
