@@ -68,7 +68,8 @@ namespace BH.Engine.Python
             string exe = PythonVersion.v3_10.DownloadPythonVersion();
 
             // install essential packages into base environment
-            InstallPackages(exe, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });
+            //InstallPackages(executable, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });
+            InstallRequirements(exe, Path.Combine(Query.DirectoryCode(), "Python_Toolkit", "requirements.txt"));
 
             return new PythonEnvironment() { Name = Query.ToolkitName(), Executable = exe };
         }
