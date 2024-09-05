@@ -24,7 +24,9 @@ using BH.oM.Base.Attributes;
 using BH.oM.Python.Enums;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace BH.Engine.Python
@@ -84,35 +86,77 @@ namespace BH.Engine.Python
 
             return filePath;
         }
-
+        /*
         // TODO - THIS METHOD HAS CHANGED BUT IS STILL USED, SO NEEDS DEPRECATING
-        // changed from what to what ? 
-        [Description("Download the target version of Python.")]
+        // changed from what to what ?
+        [Description("Download the installer for the target version of python.")]
         [Input("version", "A Python version.")]
-        [Input("name", "Name of target exe file.")]
-        [Output("executablePath", "The path of the executable for the downloaded Python.")]
+        [Input("name", "Name of the toolkit for this installation of python.")]
+        [Output("executablePath", "The path of the executable for the downloaded Python installer.")]
         public static string DownloadPython(this PythonVersion version, string name = null)
         {
             string url = version.EmbeddableURL();
             if (string.IsNullOrEmpty(name))
                 name = Path.GetFileNameWithoutExtension(url);
-            string targetExecutable = Path.Combine(Query.DirectoryEnvironments(), name, "python.exe");
-            
+
+            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), version.ToString(), "installer.exe");
+
             if (File.Exists(targetExecutable))
                 return targetExecutable;
-            
-            string zipfile = DownloadFile(url, Query.DirectoryEnvironments());
-            UnzipFile(zipfile, Query.DirectoryEnvironments(), name, true);
 
-            return targetExecutable;
-        }
+            if (!Directory.Exists(Path.Combine(Query.DirectoryEnvironments(), name)))
+                Directory.CreateDirectory(Path.Combine(Query.DirectoryEnvironments(), name));
 
-        [Description("Download the pip installer")]
-        [Input("targetDirectory", "The directory into which get-pip.py will be downloaded.")]
-        [Output("getpipPath", "The path of the file used to install pip into an embedded Python environment.")]
-        public static string DownloadGetPip(string targetDirectory)
+            string exefile = DownloadFile(url, Path.Combine(Query.DirectoryEnvironments(), name));
+
+            return exefile;
+        }*/
+
+        [PreviousVersion("7.3", "BH.Engine.Python.Compute.DownloadPython(BH.oM.Python.PythonVersion, System.String)")]
+        [Description("Download and install a specified version of python, and return the executable for it.")]
+        [Input("version", "The version of python to download.")]
+        [Output("pythonExecutable", "The executable (python.exe) for the python version that was installed")]
+        public static string DownloadPythonVersion(this PythonVersion version)
         {
-            return DownloadFile("https://bootstrap.pypa.io/get-pip.py", targetDirectory);
+            string url = version.EmbeddableURL();
+
+            string basePath = Path.Combine(Query.DirectoryBaseEnvironment(), version.ToString());
+
+            if (File.Exists(Path.Combine(basePath, "python.exe")))
+                return Path.Combine(basePath, "python.exe");
+
+            if (!Directory.Exists(basePath))
+                Directory.CreateDirectory(basePath);
+            else
+            {
+                Directory.Delete(basePath, true); //if there are any files here already for some reason, remove them.
+                Directory.CreateDirectory(basePath);
+            }
+
+            string installerFile = DownloadFile(url, basePath, "installer.exe");
+
+            using (Process install = new Process()
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = installerFile,
+                    Arguments = $"/passive InstallAllUsers=0 InstallLauncherAllUsers=0 Include_launcher=0 Shortcuts=0 AssociateFiles=0 Include_tools=0 Include_test=0 TargetDir={Modify.AddQuotesIfRequired(basePath)}",
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                }
+            })
+            {
+                install.Start();
+                string stderr = install.StandardError.ReadToEnd();
+                install.WaitForExit();
+                if (install.ExitCode != 0)
+                {
+                    BH.Engine.Base.Compute.RecordError($"Error installing python: {stderr}");
+                    return null;
+                }
+            }
+
+            return Path.Combine(basePath, "python.exe");
         }
     }
 }
