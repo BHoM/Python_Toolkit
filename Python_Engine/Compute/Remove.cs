@@ -83,7 +83,7 @@ namespace BH.Engine.Python
 
         [PreviousVersion("7.3", "BH.Engine.Python.Compute.RemoveBaseEnvironment()")]
         [Input("version", "The base python version to remove.")]
-        public static void RemoveBaseVersion(PythonVersion version = PythonVersion.v3_10_11)
+        public static void RemoveBaseVersion(PythonVersion version = PythonVersion.v3_10)
         {
             string basePath = Path.Combine(Query.DirectoryBaseEnvironment(), version.ToString());
             string baseInstaller = Path.Combine(basePath, "installer.exe");

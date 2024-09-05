@@ -44,7 +44,7 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_7_6,   "https://www.python.org/ftp/python/3.7.6/python-3.7.6rc1-amd64.exe" },
                 { PythonVersion.v3_7_7,   "https://www.python.org/ftp/python/3.7.7/python-3.7.7rc1-amd64.exe" },
                 { PythonVersion.v3_7_8,   "https://www.python.org/ftp/python/3.7.8/python-3.7.8rc1-amd64.exe" },*/
-                { PythonVersion.v3_7_9,   "https://www.python.org/ftp/python/3.7.9/python-3.7.9-amd64.exe" },
+                { PythonVersion.v3_7,   "https://www.python.org/ftp/python/3.7.9/python-3.7.9-amd64.exe" },
                 /*{ PythonVersion.v3_8_0,   "https://www.python.org/ftp/python/3.8.0/python-3.8.0rc1-amd64.exe" },
                 { PythonVersion.v3_8_1,   "https://www.python.org/ftp/python/3.8.1/python-3.8.1rc1-amd64.exe" },
                 { PythonVersion.v3_8_2,   "https://www.python.org/ftp/python/3.8.2/python-3.8.2rc2-amd64.exe" },
@@ -54,7 +54,7 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_8_6,   "https://www.python.org/ftp/python/3.8.6/python-3.8.6rc1-amd64.exe" },
                 { PythonVersion.v3_8_7,   "https://www.python.org/ftp/python/3.8.7/python-3.8.7rc1-amd64.exe" },
                 { PythonVersion.v3_8_8,   "https://www.python.org/ftp/python/3.8.8/python-3.8.8rc1-amd64.exe" },*/
-                { PythonVersion.v3_8_9,   "https://www.python.org/ftp/python/3.8.9/python-3.8.9-amd64.exe" },
+                { PythonVersion.v3_8,   "https://www.python.org/ftp/python/3.8.9/python-3.8.9-amd64.exe" },
                 /*{ PythonVersion.v3_9_0,   "https://www.python.org/ftp/python/3.9.0/python-3.9.0rc2-amd64.exe" },
                 { PythonVersion.v3_9_1,   "https://www.python.org/ftp/python/3.9.1/python-3.9.1rc1-amd64.exe" },
                 { PythonVersion.v3_9_2,   "https://www.python.org/ftp/python/3.9.2/python-3.9.2rc1-amd64.exe" },
@@ -65,7 +65,7 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_9_7,   "https://www.python.org/ftp/python/3.9.7/python-3.9.7-amd64.exe" },
                 { PythonVersion.v3_9_8,   "https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe" },
                 { PythonVersion.v3_9_9,   "https://www.python.org/ftp/python/3.9.9/python-3.9.9-amd64.exe" },*/
-                { PythonVersion.v3_9_10,  "https://www.python.org/ftp/python/3.9.10/python-3.9.10-amd64.exe" },
+                { PythonVersion.v3_9,  "https://www.python.org/ftp/python/3.9.10/python-3.9.10-amd64.exe" },
                 /*{ PythonVersion.v3_10_0,  "https://www.python.org/ftp/python/3.10.0/python-3.10.0rc2-amd64.exe" },
                 { PythonVersion.v3_10_1,  "https://www.python.org/ftp/python/3.10.1/python-3.10.1-amd64.exe" },
                 { PythonVersion.v3_10_2,  "https://www.python.org/ftp/python/3.10.2/python-3.10.2-amd64.exe" },
@@ -77,12 +77,12 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_10_8,  "https://www.python.org/ftp/python/3.10.8/python-3.10.8-amd64.exe" },
                 { PythonVersion.v3_10_9,  "https://www.python.org/ftp/python/3.10.9/python-3.10.9-amd64.exe" },
                 { PythonVersion.v3_10_10, "https://www.python.org/ftp/python/3.10.10/python-3.10.10-amd64.exe" },*/
-                { PythonVersion.v3_10_11, "https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe" },
+                { PythonVersion.v3_10, "https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe" },
                 /*{ PythonVersion.v3_11_0,  "https://www.python.org/ftp/python/3.11.0/python-3.11.0rc2-amd64.exe" },
                 { PythonVersion.v3_11_1,  "https://www.python.org/ftp/python/3.11.1/python-3.11.1-amd64.exe" },
                 { PythonVersion.v3_11_2,  "https://www.python.org/ftp/python/3.11.2/python-3.11.2-amd64.exe" },
                 { PythonVersion.v3_11_3,  "https://www.python.org/ftp/python/3.11.3/python-3.11.3-amd64.exe" },*/
-                { PythonVersion.v3_11_4,  "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" },
+                { PythonVersion.v3_11,  "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" },
             };
 
             return versions[version];

@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using BH.oM.Python.Enums;
 using System.ComponentModel;
 using System.IO;
 
@@ -69,9 +69,9 @@ namespace BH.Engine.Python
 
         [Description("The location where the base Python environment exists.")]
         [Output("The location where the base Python environment exists.")]
-        public static string DirectoryBaseEnvironment()
+        public static string DirectoryBaseEnvironment(PythonVersion version = PythonVersion.v3_10)
         {
-            return Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName());
+            return Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName(), version.ToString());
         }
     }
 }
