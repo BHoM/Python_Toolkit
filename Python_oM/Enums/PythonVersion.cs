@@ -24,16 +24,17 @@ using System.ComponentModel;
 
 namespace BH.oM.Python.Enums
 {
+    // There are multiple specific versions here that are commented out - When installing, only one specific version (e.g 3.10.x) per minor python version (e.g 3.x) can be installed, and changes between specific versions are usually bug fixes and not breaking. however the specific versions are kept commented for posterity.
     public enum PythonVersion
     {
         [Description("Undefined")]
         Undefined,
-        [Description("3.7.0")]
+        /*[Description("3.7.0")]
         v3_7_0,
         [Description("3.7.1")]
         v3_7_1,
-        //[Description("3.7.2")]
-        //v3_7_2,
+        [Description("3.7.2")]
+        v3_7_2,
         [Description("3.7.3")]
         v3_7_3,
         [Description("3.7.4")]
@@ -45,10 +46,10 @@ namespace BH.oM.Python.Enums
         [Description("3.7.7")]
         v3_7_7,
         [Description("3.7.8")]
-        v3_7_8,
+        v3_7_8,*/
         [Description("3.7.9")]
         v3_7_9,
-        [Description("3.8.0")]
+        /*[Description("3.8.0")]
         v3_8_0,
         [Description("3.8.1")]
         v3_8_1,
@@ -65,12 +66,12 @@ namespace BH.oM.Python.Enums
         [Description("3.8.7")]
         v3_8_7,
         [Description("3.8.8")]
-        v3_8_8,
+        v3_8_8,*/
         [Description("3.8.9")]
         v3_8_9,
-        [Description("3.8.10")]
-        v3_8_10,
-        [Description("3.9.0")]
+        //[Description("3.8.10")]
+        //v3_8_10,
+        /*[Description("3.9.0")]
         v3_9_0,
         [Description("3.9.1")]
         v3_9_1,
@@ -89,10 +90,10 @@ namespace BH.oM.Python.Enums
         [Description("3.9.8")]
         v3_9_8,
         [Description("3.9.9")]
-        v3_9_9,
+        v3_9_9,*/
         [Description("3.9.10")]
         v3_9_10,
-        [Description("3.10.0")]
+        /*[Description("3.10.0")]
         v3_10_0,
         [Description("3.10.1")]
         v3_10_1,
@@ -113,17 +114,17 @@ namespace BH.oM.Python.Enums
         [Description("3.10.9")]
         v3_10_9,
         [Description("3.10.10")]
-        v3_10_10,
+        v3_10_10,*/
         [Description("3.10.11")]
         v3_10_11,
-        [Description("3.11.0")]
+        /*[Description("3.11.0")]
         v3_11_0,
         [Description("3.11.1")]
         v3_11_1,
         [Description("3.11.2")]
         v3_11_2,
         [Description("3.11.3")]
-        v3_11_3,
+        v3_11_3,*/
         [Description("3.11.4")]
         v3_11_4,
     }
