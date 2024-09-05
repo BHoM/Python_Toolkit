@@ -53,7 +53,7 @@ namespace BH.Engine.Python
             }
 
             // check that base environment is installed and return null and raise error if it isn't
-            string baseEnvironmentExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), PythonVersion.v3_10_11.ToString(), "python.exe");
+            string baseEnvironmentExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), PythonVersion.v3_10.ToString(), "python.exe");
             if (!File.Exists(baseEnvironmentExecutable))
             {
                 BH.Engine.Base.Compute.RecordWarning("The base Python environment doesnt seem to be installed. Install it first in order to run this method.");

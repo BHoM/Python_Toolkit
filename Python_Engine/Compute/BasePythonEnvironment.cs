@@ -54,7 +54,7 @@ namespace BH.Engine.Python
             }
             
             // determine whether the base environment already exists
-            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), PythonVersion.v3_10_11.ToString(), "python.exe");
+            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), PythonVersion.v3_10.ToString(), "python.exe");
             bool exists = File.Exists(targetExecutable);
 
             if (exists && reload)
@@ -65,7 +65,7 @@ namespace BH.Engine.Python
                 RemoveEverything();
 
             // download the installer for the target Python version
-            string exe = PythonVersion.v3_10_11.DownloadPythonVersion();
+            string exe = PythonVersion.v3_10.DownloadPythonVersion();
 
             // install essential packages into base environment
             InstallPackages(exe, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });
