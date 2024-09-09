@@ -85,7 +85,7 @@ namespace BH.Engine.Python
         [Input("version", "The base python version to remove.")]
         public static void RemoveBaseVersion(PythonVersion version = PythonVersion.v3_10)
         {
-            string basePath = Path.Combine(Query.DirectoryBaseEnvironment(), version.ToString());
+            string basePath = Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName(), version.ToString());
             string baseInstaller = Path.Combine(basePath, "installer.exe");
 
             // If the installer does not exist and the folder does - assume a bad/invalid install and just delete the entire folder.
