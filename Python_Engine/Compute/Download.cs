@@ -120,7 +120,7 @@ namespace BH.Engine.Python
         {
             string url = version.EmbeddableURL();
 
-            string basePath = Path.Combine(Query.DirectoryBaseEnvironment(), version.ToString());
+            string basePath = Path.Combine(Query.DirectoryBaseEnvironment(version));
 
             if (File.Exists(Path.Combine(basePath, "python.exe")))
                 return Path.Combine(basePath, "python.exe");
