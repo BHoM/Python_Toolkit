@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from ..bhom.analytics import bhom_analytics
-from ..helpers import validate_timeseries
+from ..helpers.timeseries import validate_timeseries
 
 
 @bhom_analytics()
