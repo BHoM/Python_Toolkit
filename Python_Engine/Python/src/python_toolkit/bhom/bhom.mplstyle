@@ -1,0 +1,81 @@
+# Default matplotlib settings for this toolkit.
+
+# Set custom colors. All colors are in web style hex format.
+axes.prop_cycle: cycler('color', ['702F8A', 'E63187', '00A9E0', 'FFCF04', '6CC24E', 'EB671C', '00A499', 'D50032', '24135F', '6D104E', '006DA8', 'D06A13', '5D822D', 'F0AC1B', '1C3660', 'BC204B', '8F72B0', 'FCD16D', '8DB9CA', 'EE7837', 'AFC1A2', 'B72B77', 'A0D2C9', 'E6484D'])
+
+# Face settings
+axes.facecolor: white
+axes.edgecolor: black
+
+# Style spines
+axes.linewidth: 0.8
+axes.spines.top: False
+axes.spines.left: True
+axes.spines.right: False
+axes.spines.bottom: True
+
+# Set line styling for line plots
+lines.linewidth: 1
+lines.solid_capstyle: round
+lines.dash_capstyle: round
+
+# Grid style
+axes.axisbelow: True
+axes.grid: true
+axes.grid.axis: both
+grid.color: 958B82
+grid.linestyle: --
+grid.linewidth: 0.5
+
+# Setting font sizes and spacing
+axes.labelsize: medium
+axes.labelweight: semibold
+axes.ymargin: 0.1
+font.family: sans-serif
+font.sans-serif: Segoe UI
+font.size: 10
+xtick.labelsize: medium
+xtick.major.pad: 3.5
+ytick.labelsize: medium
+ytick.major.pad: 3.5
+
+# date formatter
+date.autoformatter.day: %b-%d
+date.autoformatter.hour: %b-%d %H
+date.autoformatter.microsecond: %M:%S.%f
+date.autoformatter.minute: %d %H:%M
+date.autoformatter.month: %b
+date.autoformatter.second: %H:%M:%S
+date.autoformatter.year: %Y
+
+# Title
+axes.titlecolor: black
+axes.titlelocation: left
+axes.titlepad: 6
+axes.titlesize: large
+axes.titleweight: bold
+
+# Remove major and minor ticks except for on the x-axis.
+xtick.major.size: 3
+xtick.minor.size: 2
+ytick.major.size: 3
+ytick.minor.size: 2
+
+# Set spacing for figure and also DPI.
+figure.subplot.left: 0.08
+figure.subplot.right: 0.95
+figure.subplot.bottom: 0.07
+figure.figsize: 12, 5
+figure.dpi: 150
+figure.facecolor: white
+
+# Properties for saving the figure. Ensure a high DPI when saving so we have a good resolution.
+savefig.dpi: 300
+savefig.facecolor: white
+savefig.bbox: tight
+savefig.pad_inches: 0.2
+
+# Legend Styling
+legend.framealpha: 0
+legend.frameon: False
+legend.facecolor: inherit
