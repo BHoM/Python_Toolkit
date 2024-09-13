@@ -66,16 +66,14 @@ def bhom_analytics() -> Callable:
                 "SelectedItem": {
                     "MethodName": function.__name__,
                     "Parameters": _args,
-                    "TypeName": f"{function.__module__}.{function.__qualname__}",
-                    "_bhomVersion": BHOM_VERSION,
-                    "_t": "Python",
+                    "TypeName": f"{function.__module__}.{function.__qualname__}"
                 },
                 "Time": {
                     "$date": csharp_ticks(short=True),
                 },
                 "UI": "Python",
                 "UiVersion": TOOLKIT_NAME,
-                "_t": "BH.oM.UI.UsageLogEntry",
+                "_t": "BH.oM.Base.UsageLogEntry",
             }
 
             try:
