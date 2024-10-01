@@ -39,6 +39,10 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Convert\" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy $(TargetDir)$(TargetFileName) $(ProgramData)\BHoM\Assemblies /Y" />
   </Target>
