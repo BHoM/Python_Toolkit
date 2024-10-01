@@ -72,7 +72,7 @@ namespace BH.Engine.Python
             // install essential packages into base environment
             InstallPackages(exe, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });
 
-            InstallPackageLocal(Query.DirectoryCode(), Query.ToolkitName());
+            InstallPackageLocal(exe, Path.Combine(Query.DirectoryCode(), Query.ToolkitName()));
 
             return new PythonEnvironment() { Name = Query.ToolkitName(), Executable = exe };
         }
