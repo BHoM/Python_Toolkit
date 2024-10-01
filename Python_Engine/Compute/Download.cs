@@ -86,31 +86,8 @@ namespace BH.Engine.Python
 
             return filePath;
         }
-        /*
-        // TODO - THIS METHOD HAS CHANGED BUT IS STILL USED, SO NEEDS DEPRECATING
-        // changed from what to what ?
-        [Description("Download the installer for the target version of python.")]
-        [Input("version", "A Python version.")]
-        [Input("name", "Name of the toolkit for this installation of python.")]
-        [Output("executablePath", "The path of the executable for the downloaded Python installer.")]
-        public static string DownloadPython(this PythonVersion version, string name = null)
-        {
-            string url = version.EmbeddableURL();
-            if (string.IsNullOrEmpty(name))
-                name = Path.GetFileNameWithoutExtension(url);
 
-            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), version.ToString(), "installer.exe");
-
-            if (File.Exists(targetExecutable))
-                return targetExecutable;
-
-            if (!Directory.Exists(Path.Combine(Query.DirectoryEnvironments(), name)))
-                Directory.CreateDirectory(Path.Combine(Query.DirectoryEnvironments(), name));
-
-            string exefile = DownloadFile(url, Path.Combine(Query.DirectoryEnvironments(), name));
-
-            return exefile;
-        }*/
+        /******************************************************/
 
         [PreviousVersion("7.3", "BH.Engine.Python.Compute.DownloadPython(BH.oM.Python.PythonVersion, System.String)")]
         [Description("Download and install a specified version of python, and return the executable for it.")]
