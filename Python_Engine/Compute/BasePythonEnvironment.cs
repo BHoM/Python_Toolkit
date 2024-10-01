@@ -34,10 +34,12 @@ namespace BH.Engine.Python
     public static partial class Compute
     {
         [Description("Retrieve or reinstall the base Python Environment for BHoM workflows.")]
+        [Input("version", "The target version of python to be installed or retrieved.")]
         [Input("reload", "Reload the base Python environment rather than recreating it, if it already exists.")]
         [Input("run", "Start the installation/retrieval of the BHoM Base Python Environment.")]
         [Output("env", "The base Python Environment for all BHoM workflows.")]
         public static PythonEnvironment BasePythonEnvironment(
+            PythonVersion version = PythonVersion.v3_10,
             bool reload = true,
             bool run = false
         )
@@ -54,7 +56,7 @@ namespace BH.Engine.Python
             }
 
             // determine whether the base environment already exists
-            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), "python.exe");
+            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(version), "python.exe");
             bool exists = File.Exists(targetExecutable);
 
             if (exists && reload)
@@ -64,8 +66,8 @@ namespace BH.Engine.Python
                 // remove all existing environments and kernels
                 RemoveEverything();
 
-            // download the installer for the target Python version
-            string exe = PythonVersion.v3_10.DownloadPythonVersion();
+            // download and run the installer for the target Python version
+            string exe = version.DownloadPythonVersion();
 
             // install essential packages into base environment
             InstallPackages(exe, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });

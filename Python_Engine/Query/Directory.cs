@@ -70,7 +70,7 @@ namespace BH.Engine.Python
         [PreviousVersion("8.0", "BH.Engine.Python.Query.DirectoryBaseEnvironment()")]
         [Description("The location where the base Python environment exists.")]
         [Output("The location where the base Python environment exists.")]
-        public static string DirectoryBaseEnvironment(PythonVersion version = PythonVersion.v3_10)
+        public static string DirectoryBaseEnvironment(this PythonVersion version)
         {
             return Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName(), version.ToString());
         }
