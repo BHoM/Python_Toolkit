@@ -33,7 +33,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [PreviousVersion("8.0", "BH.Engine.Python.Compute.BasePythonEnvironment(System.String, System.String)")]
+        [PreviousVersion("8.0", "BH.Engine.Python.Compute.BasePythonEnvironment(System.Boolean, System.Boolean)")]
         [Description("Retrieve or reinstall the base Python Environment for BHoM workflows.")]
         [Input("version", "The target version of python to be installed or retrieved.")]
         [Input("reload", "Reload the base Python environment rather than recreating it, if it already exists.")]
