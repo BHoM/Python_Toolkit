@@ -21,7 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
-
+using BH.oM.Python.Enums;
 using System.ComponentModel;
 using System.IO;
 
@@ -30,14 +30,14 @@ namespace BH.Engine.Python
     public static partial class Query
     {
         [Description("The location where BHoM extensions reside.")]
-        [Output("The location where BHoM extensions reside.")]
+        [Output("path", "The location where BHoM extensions reside.")]
         public static string DirectoryExtensions()
         {
             return Path.Combine(System.IO.Directory.GetParent(BH.Engine.Base.Query.BHoMFolder()).FullName, "Extensions");
         }
 
         [Description("The location where any BHoM-related Python kernels reside.")]
-        [Output("The location where any BHoM-related Python kernels reside.")]
+        [Output("path", "The location where any BHoM-related Python kernels reside.")]
         public static string DirectoryKernels()
         {
             
@@ -48,7 +48,7 @@ namespace BH.Engine.Python
         }
 
         [Description("The location where any BHoM-related Python code resides.")]
-        [Output("The location where any BHoM-related Python code resides.")]
+        [Output("path", "The location where any BHoM-related Python code resides.")]
         public static string DirectoryCode()
         {
             string dir = Path.Combine(Query.DirectoryExtensions(), "PythonCode");
@@ -58,7 +58,7 @@ namespace BH.Engine.Python
         }
 
         [Description("The location where any BHoM-related Python environment (or virtualenv) resides.")]
-        [Output("The location where any BHoM-related Python environment (or virtualenv) resides.")]
+        [Output("path", "The location where any BHoM-related Python environment (or virtualenv) resides.")]
         public static string DirectoryEnvironments()
         {
             string dir = Path.Combine(Query.DirectoryExtensions(), "PythonEnvironments");
@@ -67,11 +67,13 @@ namespace BH.Engine.Python
             return dir;
         }
 
+        [PreviousVersion("8.0", "BH.Engine.Python.Query.DirectoryBaseEnvironment()")]
         [Description("The location where the base Python environment exists.")]
-        [Output("The location where the base Python environment exists.")]
-        public static string DirectoryBaseEnvironment()
+        [Input("version", "The python version to get the base environment for.")]
+        [Output("path", "The location where the base Python environment exists.")]
+        public static string DirectoryBaseEnvironment(this PythonVersion version)
         {
-            return Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName());
+            return Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName(), version.ToString());
         }
     }
 }

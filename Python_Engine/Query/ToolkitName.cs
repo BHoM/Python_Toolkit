@@ -29,7 +29,7 @@ namespace BH.Engine.Python
     public static partial class Query
     {
         [Description("The name of this toolkit.")]
-        [Output("The name of this toolkit.")]
+        [Output("name", "The name of this toolkit.")]
         public static string ToolkitName()
         {
             return "Python_Toolkit";
