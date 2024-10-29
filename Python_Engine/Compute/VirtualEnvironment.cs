@@ -73,7 +73,7 @@ namespace BH.Engine.Python
             {
                 // The output here should be the same, but to be sure replace the value.
                 BH.Engine.Base.Compute.RecordNote($"The base environment for the requested version {version} has been installed as it was not present.");
-                versionExecutable = version.DownloadPythonVersion();
+                versionExecutable = BasePythonEnvironment(version, run: true)?.Executable;
 
                 if (versionExecutable == null) // If the executable is null, then python wasn't installed correctly, so return null - the error message for downloading the version should suffice.
                     return null;
