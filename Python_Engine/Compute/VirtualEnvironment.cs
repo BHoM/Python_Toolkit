@@ -46,17 +46,10 @@ namespace BH.Engine.Python
                 BH.Engine.Base.Compute.RecordError("A BHoM Python virtual environment cannot cannot contain invalid filepath characters.");
                 return null;
             }
+
             if (version == PythonVersion.Undefined)
             {
-                BH.Engine.Base.Compute.RecordError("Please provide a version of Python.");
-                return null;
-            }
-
-            // check that base environment is installed and return null and raise error if it isn't
-            string baseEnvironmentExecutable = Path.Combine(Query.DirectoryBaseEnvironment(version), "python.exe");
-            if (!File.Exists(baseEnvironmentExecutable))
-            {
-                BH.Engine.Base.Compute.RecordWarning($"The base Python environment for the desired version ({version}) doesn't seem to be installed. Install it first using BasePythonEnvironment in order to run this method.");
+                BH.Engine.Base.Compute.RecordError("Please provide a valid Python version.");
                 return null;
             }
 
@@ -77,15 +70,20 @@ namespace BH.Engine.Python
             }
 
             if (!File.Exists(versionExecutable))
+            {
                 // The output here should be the same, but to be sure replace the value.
+                BH.Engine.Base.Compute.RecordNote($"The base environment for the requested version {version} has been installed as it was not present.");
                 versionExecutable = version.DownloadPythonVersion();
+                if (versionExecutable == null)
+                    return null;
+            }
 
             // create the venv from the base environment
             Process process = new Process()
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = Modify.AddQuotesIfRequired(baseEnvironmentExecutable),
+                    FileName = Modify.AddQuotesIfRequired(versionExecutable),
                     Arguments = $"-m virtualenv --python={Modify.AddQuotesIfRequired(versionExecutable)} {Modify.AddQuotesIfRequired(targetDirectory)}",
                     RedirectStandardError = true,
                     UseShellExecute = false,
