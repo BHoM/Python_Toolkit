@@ -113,6 +113,7 @@ namespace BH.Engine.Python
                     UseShellExecute = false,
                 }
             };
+
             using (Process p = Process.Start(process2.StartInfo))
             {
                 string standardError = p.StandardError.ReadToEnd();
@@ -120,7 +121,6 @@ namespace BH.Engine.Python
                 if (p.ExitCode != 0)
                     BH.Engine.Base.Compute.RecordError($"Error registering the \"{name}\" virtual environment.\n{standardError}");
             }
-            // replace text in a file
 
             return new PythonEnvironment() { Executable = targetExecutable, Name = name };
         }
