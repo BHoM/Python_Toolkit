@@ -20,6 +20,7 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.Engine.Base;
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
 using BH.oM.Python.Enums;
@@ -45,22 +46,17 @@ namespace BH.Engine.Python
                 BH.Engine.Base.Compute.RecordError("A BHoM Python virtual environment cannot cannot contain invalid filepath characters.");
                 return null;
             }
+
             if (version == PythonVersion.Undefined)
             {
-                BH.Engine.Base.Compute.RecordError("Please provide a version of Python.");
-                return null;
-            }
-
-            // check that base environment is installed and return null and raise error if it isn't
-            string baseEnvironmentExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), "python.exe");
-            if (!File.Exists(baseEnvironmentExecutable))
-            {
-                BH.Engine.Base.Compute.RecordWarning("The base Python environment doesnt seem to be installed. Install it first in order to run this method.");
+                BH.Engine.Base.Compute.RecordError("Please provide a valid Python version.");
                 return null;
             }
 
             string targetExecutable = Query.VirtualEnvironmentExecutable(name);
             string targetDirectory = Query.VirtualEnvironmentDirectory(name);
+            string versionExecutable = Path.Combine(Query.DirectoryBaseEnvironment(version), "python.exe");
+
             bool exists = Query.VirtualEnvironmentExists(name);
 
             if (exists && reload)
@@ -73,31 +69,28 @@ namespace BH.Engine.Python
                 RemoveKernel(name);
             }
 
-            // download the target version of Python
-            string referencedExecutable = version.DownloadPython();
-            
-            // move the directory containing referencedExecutable into Query.DirectoryBaseEnvironment() using the same name
-            string sourceDirectory = Path.GetDirectoryName(referencedExecutable);
-            string destinationDirectory = Path.Combine(Query.DirectoryBaseEnvironment(), new DirectoryInfo(Path.GetDirectoryName(referencedExecutable)).Name);
-            if (!Directory.Exists(destinationDirectory))
+            if (!File.Exists(versionExecutable))
             {
-                Directory.Move(sourceDirectory, destinationDirectory);
+                // The output here should be the same, but to be sure replace the value.
+                BH.Engine.Base.Compute.RecordNote($"The base environment for the requested version {version} has been installed as it was not present.");
+                versionExecutable = BasePythonEnvironment(version, run: true)?.Executable;
+
+                if (versionExecutable == null) // If the executable is null, then python wasn't installed correctly, so return null - the error message for downloading the version should suffice.
+                    return null;
             }
-            if (Directory.Exists(sourceDirectory))
-                Directory.Delete(sourceDirectory, true);
-            referencedExecutable = Path.Combine(destinationDirectory, "python.exe");
 
             // create the venv from the base environment
             Process process = new Process()
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = Modify.AddQuotesIfRequired(baseEnvironmentExecutable),
-                    Arguments = $"-m virtualenv --python={Modify.AddQuotesIfRequired(referencedExecutable)} {Modify.AddQuotesIfRequired(targetDirectory)}",
+                    FileName = Modify.AddQuotesIfRequired(versionExecutable),
+                    Arguments = $"-m virtualenv --python={Modify.AddQuotesIfRequired(versionExecutable)} {Modify.AddQuotesIfRequired(targetDirectory)}",
                     RedirectStandardError = true,
                     UseShellExecute = false,
                 }
             };
+
             using (Process p = Process.Start(process.StartInfo))
             {
                 string standardError = p.StandardError.ReadToEnd();
@@ -120,6 +113,7 @@ namespace BH.Engine.Python
                     UseShellExecute = false,
                 }
             };
+
             using (Process p = Process.Start(process2.StartInfo))
             {
                 string standardError = p.StandardError.ReadToEnd();
@@ -127,8 +121,6 @@ namespace BH.Engine.Python
                 if (p.ExitCode != 0)
                     BH.Engine.Base.Compute.RecordError($"Error registering the \"{name}\" virtual environment.\n{standardError}");
             }
-            // replace text in a file
-
 
             return new PythonEnvironment() { Executable = targetExecutable, Name = name };
         }
