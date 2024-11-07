@@ -21,6 +21,7 @@ def histogram(
     elif len(bins) <= 1:
         bins = np.linspace(series.values.min(), series.values.max(), 31)
 
+    #TODO - update to accept ax as an arg and use plt.gca() if ax is None
     fig, ax = plt.subplots(1, 1, figsize=(12, 5))
     ax.hist(series.values, bins=bins, label = series.name, density=False)
 

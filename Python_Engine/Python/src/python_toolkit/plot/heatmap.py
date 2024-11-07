@@ -77,7 +77,7 @@ def heatmap(
         date_formatter = mdates.DateFormatter("%b %Y")
     else:
         date_formatter = mdates.DateFormatter("%b")
-    ax.yaxis.set_major_formatter(date_formatter)
+    ax.xaxis.set_major_formatter(date_formatter)
 
     ax.yaxis_date()
     ax.yaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
