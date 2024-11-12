@@ -13,16 +13,18 @@ from .utilities import contrasting_colour
 @bhom_analytics()
 def histogram(
     series: pd.Series,
+    ax: plt.Axes = None,
     bins: list[float] | list[int] = None,
     **kwargs,
-    ):
+    ) -> plt.Axes:
     if bins is None:
         bins = np.linspace(series.values.min(), series.values.max(), 31)
     elif len(bins) <= 1:
         bins = np.linspace(series.values.min(), series.values.max(), 31)
 
-    #TODO - update to accept ax as an arg and use plt.gca() if ax is None
-    fig, ax = plt.subplots(1, 1, figsize=(12, 5))
+    if ax is None:
+        ax = plt.gca()
+
     ax.hist(series.values, bins=bins, label = series.name, density=False)
 
     show_legend = kwargs.pop("show_legend", True)
@@ -31,7 +33,6 @@ def histogram(
         ax.legend()
 
     return ax
-
 
 @bhom_analytics()
 def monthly_proportional_histogram(
