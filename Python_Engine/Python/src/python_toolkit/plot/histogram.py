@@ -17,6 +17,24 @@ def histogram(
     bins: list[float] | list[int] = None,
     **kwargs,
     ) -> plt.Axes:
+    """Create a histogram of a pandas series
+
+    Args:
+        series (pd.Series):
+            The pandas Series to plot. Must have a datetime index.
+        ax (plt.Axes, optional):
+            An optional plt.Axes object to populate. Defaults to None, which creates a new plt.Axes object.
+        bins (list[float]):
+            The bins to use for the histogram.
+        show_legend (bool, optional):
+            Whether to show the legend. Defaults to False.
+        **kwargs:
+            Additional keyword arguments to pass to plt.hist.
+
+    Returns:
+        plt.Axes:
+            The populated plt.Axes object.
+    """
     if bins is None:
         bins = np.linspace(series.values.min(), series.values.max(), 31)
     elif len(bins) <= 1:
@@ -25,9 +43,9 @@ def histogram(
     if ax is None:
         ax = plt.gca()
 
-    ax.hist(series.values, bins=bins, label = series.name, density=False)
-
     show_legend = kwargs.pop("show_legend", True)
+
+    ax.hist(series.values, bins=bins, label = series.name, density=False, **kwargs)
 
     if show_legend:
         ax.legend()
