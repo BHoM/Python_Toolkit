@@ -2,10 +2,14 @@
 
 import base64
 import colorsys
+import copy
+import itertools
 from pathlib import Path
 from typing import Any
-import copy
 
+import matplotlib.image as mimage
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import numpy as np
 from matplotlib.colors import (
     LinearSegmentedColormap,
@@ -17,22 +21,30 @@ from matplotlib.colors import (
     to_rgb,
     to_rgba_array,
 )
-import matplotlib.image as mimage
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 from matplotlib.tri import Triangulation
 from PIL import Image
+
 from ..bhom.analytics import bhom_analytics
 
+
 @bhom_analytics()
-def average_color(colors: Any, keep_alpha: bool = False) -> str:
+def average_color(
+    colors: Any, keep_alpha: bool = False, return_type: str = "hex"
+) -> str | tuple[int] | tuple[float]:
     """Return the average color from a list of colors.
 
     Args:
         colors (Any):
             A list of colors.
         keep_alpha (bool, optional):
-            If True, the alpha value of the color is kept. Defaults to False.
+            If True, the alpha value of the color is kept and averaged across all input colors. Defaults to False.
+        return_type (str, optional):
+            The type of color to return. Can be either "hex" or "rgb_int" or rgb_float. Defaults
+            to "hex".
+            Example:
+            - hex: "#FFFFFF"
+            - rgb_int: (255, 255, 255)
+            - rgb_float: (1.0, 1.0, 1.0)
 
     Returns:
         color: str
@@ -42,16 +54,133 @@ def average_color(colors: Any, keep_alpha: bool = False) -> str:
     if not isinstance(colors, (list, tuple)):
         raise ValueError("colors must be a list")
 
+    rtypes = ["hex", "rgb_int", "rgb_float"]
+    if return_type not in rtypes:
+        raise ValueError("return_type must be one of {rtypes}.")
+
     for i in colors:
         if not is_color_like(i):
             raise ValueError(
-                f"colors must be a list of valid colors - '{i}' is not valid."
+                f"colors must be a list of valid color-like objects - '{i}' is not valid."
             )
 
     if len(colors) == 1:
         return colors[0]
 
-    return rgb2hex(to_rgba_array(colors).mean(axis=0), keep_alpha=keep_alpha)
+    avg_rgba = to_rgba_array(colors).mean(axis=0)
+
+    match return_type:
+        case "hex":
+            result = rgb2hex(avg_rgba, keep_alpha=keep_alpha)
+        case "rgb_float":
+            result = avg_rgba.tolist() if keep_alpha else avg_rgba[:-1].tolist()
+        case "rgb_int":
+            result = (
+                (avg_rgba * 255).round(0).clip(0, 255).astype(int).tolist()
+                if keep_alpha
+                else (avg_rgba * 255).round(0).clip(0, 255)[:-1].astype(int).tolist()
+            )
+        case _:
+            raise ValueError("return_type must be one of {rtypes}. Also, how did you get here?")
+
+    return result
+
+
+@bhom_analytics()
+def similar_colors(
+    color: Any, color_threshold: int | tuple[int], return_type: str = "hex"
+) -> list[str] | list[tuple[int]] | list[tuple[float]]:
+    """Return a list of similar colors based on proximity in RGB space.
+    This method ignores the alpha channel of the input color.
+
+    Args:
+        color (Any):
+            A value representing a color.
+        color_threshold (int | tuple[int]):
+            The threshold for color matching, added to and subtracted from the
+            input colors RGB channels. This is in the range 0-255, and can be
+            either a single value or a tuple of values for each RGB channel.
+        return_type (str, optional):
+            The type of color to return. Can be either "hex" or "rgb_int" or "rgb_float".
+            Defaults to "hex".
+            Example:
+            - hex: "#FFFFFF"
+            - rgb_int: (255, 255, 255)
+            - rgb_float: (1.0, 1.0, 1.0)
+
+    Returns:
+        list[str] | list[tuple[int]] | list[tuple[float]]:
+            A list of similar colors, in hex format.
+    """
+
+    # validation #
+    rtypes = ["hex", "rgb_int", "rgb_float"]
+    if return_type not in rtypes:
+        raise ValueError("return_type must be one of {rtypes}.")
+    if not is_color_like(color):
+        raise ValueError(f"{color} is not a valid color-like object.")
+    if not isinstance(color_threshold, (int, tuple)):
+        raise ValueError("color_threshold must be either an integer or a tuple of 3-integers")
+    if isinstance(color_threshold, int):
+        color_threshold = (color_threshold, color_threshold, color_threshold)
+    if len(color_threshold) != 3:
+        raise ValueError("color_threshold must be a tuple of 3 integers")
+    if not all(0 <= i <= 255 for i in color_threshold):
+        raise ValueError("color_threshold values must be between 0 and 255")
+
+    # convert color_threshold to 0-1 scale
+    _color_threshold = color_threshold
+    color_threshold = tuple([i / 255 for i in color_threshold])
+
+    # convert the input color to rgb_float format
+    original_rgb_float = to_rgba_array(color)[0]
+
+    # create list of similar red, green and blue channels
+    r_low = max(original_rgb_float[0] - color_threshold[0], 0)
+    r_high = min(original_rgb_float[0] + color_threshold[0], 1)
+    rs = np.linspace(r_low, r_high, _color_threshold[0])
+    if len(rs) == 0:
+        rs = [r_low, r_high]
+    rs = np.unique(rs)
+
+    g_low = max(original_rgb_float[1] - color_threshold[1], 0)
+    g_high = min(original_rgb_float[1] + color_threshold[1], 1)
+    gs = np.linspace(g_low, g_high, _color_threshold[1])
+    if len(gs) == 0:
+        gs = [g_low, g_high]
+    gs = np.unique(gs)
+
+    b_low = max(original_rgb_float[2] - color_threshold[2], 0)
+    b_high = min(original_rgb_float[2] + color_threshold[2], 1)
+    bs = np.linspace(b_low, b_high, _color_threshold[2])
+    if len(bs) == 0:
+        bs = [b_low, b_high]
+    bs = np.unique(bs)
+
+    # create new list of rgb_floats
+    rgb_floats = []
+    for r, g, b in itertools.product(rs, gs, bs):
+        rgb_floats.append([r, g, b])
+    rgb_floats = [tuple(i) for i in np.unique(rgb_floats, axis=0).tolist()]
+
+    match return_type:
+        case "hex":
+            result = [rgb2hex(i) for i in rgb_floats]
+        case "rgb_float":
+            result = rgb_floats
+        case "rgb_int":
+            result = [
+                tuple(i)
+                for i in (np.array(rgb_floats) * 255)
+                .round(0)
+                .astype(int)
+                .clip(min=0, max=255)
+                .tolist()
+            ]
+        case _:
+            raise ValueError("return_type must be one of {rtypes}. Also, how did you get here?")
+    return result
+
 
 @bhom_analytics()
 def animation(
@@ -106,6 +235,7 @@ def animation(
 
     return output_gif
 
+
 def create_title(text: str, plot_type: str) -> str:
     """Create a title for a plot.
 
@@ -130,6 +260,7 @@ def create_title(text: str, plot_type: str) -> str:
         ]
     )
 
+
 def contrasting_colour(color: Any):
     """Calculate the contrasting color for a given color.
 
@@ -143,6 +274,7 @@ def contrasting_colour(color: Any):
             String code of the contrasting color.
     """
     return ".15" if relative_luminance(color) > 0.408 else "w"
+
 
 def relative_luminance(color: Any):
     """Calculate the relative luminance of a color according to W3C standards
@@ -163,6 +295,7 @@ def relative_luminance(color: Any):
         return lum.item()
     except ValueError:
         return lum
+
 
 def colormap_sequential(
     *colors: str | float | int | tuple, N: int = 256
@@ -204,6 +337,7 @@ def colormap_sequential(
         colors=fixed_colors,
         N=N,
     )
+
 
 def annotate_imshow(
     im: mimage.AxesImage,
@@ -272,6 +406,7 @@ def annotate_imshow(
 
     return texts
 
+
 def lighten_color(color: str | tuple, amount: float = 0.5) -> tuple[float]:
     """
     Lightens the given color by multiplying (1-luminosity) by the given amount.
@@ -323,6 +458,7 @@ def base64_to_image(base64_string: str, image_path: Path) -> Path:
 
     return image_path
 
+
 @bhom_analytics()
 def image_to_base64(image_path: Path, html: bool = False) -> str:
     """Load an image file from disk and convert to base64 string.
@@ -359,6 +495,7 @@ def image_to_base64(image_path: Path, html: bool = False) -> str:
 
     return base64_string
 
+
 @bhom_analytics()
 def figure_to_base64(figure: plt.Figure, html: bool = False, transparent: bool = True) -> str:
     """Convert a matplotlib figure object into a base64 string.
@@ -386,6 +523,7 @@ def figure_to_base64(figure: plt.Figure, html: bool = False, transparent: bool =
 
     return base64_string
 
+
 @bhom_analytics()
 def figure_to_image(fig: plt.Figure) -> Image:
     """Convert a matplotlib Figure object into a PIL Image.
@@ -410,10 +548,9 @@ def figure_to_image(fig: plt.Figure) -> Image:
 
     return Image.fromarray(buf)
 
+
 @bhom_analytics()
-def tile_images(
-    imgs: list[Path] | list[Image.Image], rows: int, cols: int
-) -> Image.Image:
+def tile_images(imgs: list[Path] | list[Image.Image], rows: int, cols: int) -> Image.Image:
     """Tile a set of images into a grid.
 
     Args:
@@ -435,9 +572,7 @@ def tile_images(
     imgs = [Image.open(img) if isinstance(img, Path) else img for img in imgs]
 
     if len(imgs) != rows * cols:
-        raise ValueError(
-            f"The number of images given ({len(imgs)}) does not equal ({rows}*{cols})"
-        )
+        raise ValueError(f"The number of images given ({len(imgs)}) does not equal ({rows}*{cols})")
 
     # ensure each image has the same dimensions
     w, h = imgs[0].size
@@ -453,6 +588,7 @@ def tile_images(
         img.close()
 
     return grid
+
 
 @bhom_analytics()
 def triangulation_area(triang: Triangulation) -> float:
@@ -484,6 +620,7 @@ def triangulation_area(triang: Triangulation) -> float:
     )
 
     return area
+
 
 @bhom_analytics()
 def create_triangulation(
@@ -548,12 +685,11 @@ def create_triangulation(
             break
         if count > max_iterations:
             plt.close(fig)
-            raise ValueError(
-                f"Could not create a valid triangulation mask within {max_iterations}"
-            )
+            raise ValueError(f"Could not create a valid triangulation mask within {max_iterations}")
     plt.close(fig)
     triang.set_mask(maxi > alpha)
     return triang
+
 
 @bhom_analytics()
 def format_polar_plot(ax: plt.Axes, yticklabels: bool = True) -> plt.Axes:
@@ -569,9 +705,7 @@ def format_polar_plot(ax: plt.Axes, yticklabels: bool = True) -> plt.Axes:
     ax.set_xticks(np.radians((0, 90, 180, 270)), minor=False)
     ax.set_xticklabels(("N", "E", "S", "W"), minor=False, **{"fontsize": "medium"})
     ax.set_xticks(
-        np.radians(
-            (22.5, 45, 67.5, 112.5, 135, 157.5, 202.5, 225, 247.5, 292.5, 315, 337.5)
-        ),
+        np.radians((22.5, 45, 67.5, 112.5, 135, 157.5, 202.5, 225, 247.5, 292.5, 315, 337.5)),
         minor=True,
     )
     ax.set_xticklabels(
