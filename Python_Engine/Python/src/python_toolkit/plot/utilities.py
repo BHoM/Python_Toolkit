@@ -3,6 +3,7 @@
 import base64
 import colorsys
 import copy
+import io
 import itertools
 from pathlib import Path
 from typing import Any
