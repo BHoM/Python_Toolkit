@@ -2,7 +2,6 @@
 
 # pylint: disable=C0302
 # pylint: disable=E0401
-import itertools
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -10,7 +9,6 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 from python_toolkit.bhom.analytics import bhom_analytics
-from python_toolkit.bhom.logging import CONSOLE_LOGGER
 from scipy.spatial import KDTree
 from tqdm import tqdm
 
@@ -19,6 +17,7 @@ from ..plot.utilities import average_color, similar_colors
 # pylint: enable=E0401
 
 
+@bhom_analytics()
 def point_group(points: list[list[float]], threshold: float) -> list[list[float]]:
     """Cluster 2D points based on proximity.
 
@@ -80,6 +79,7 @@ def point_group(points: list[list[float]], threshold: float) -> list[list[float]
     return clusters
 
 
+@bhom_analytics()
 def pixels_to_points(
     image_file: Path | str,
     color_keys: dict[str, list[str]],
