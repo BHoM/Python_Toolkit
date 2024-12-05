@@ -6,12 +6,13 @@ import sys
 import uuid
 from functools import wraps
 from typing import Any, Callable
+from datetime import datetime
 
 # pylint: enable=E0401
 
 from .logging import ANALYTICS_LOGGER
 from .util import csharp_ticks
-from . import BHOM_VERSION, TOOLKIT_NAME
+from . import BHOM_VERSION, TOOLKIT_NAME, BHOM_LOG_FOLDER
 
 
 def bhom_analytics() -> Callable:
@@ -82,6 +83,12 @@ def bhom_analytics() -> Callable:
                 exec_metadata["Errors"].extend(sys.exc_info())
                 raise exc
             finally:
+                log_file = BHOM_LOG_FOLDER / f"{function.__module__.split('.')[0]}_{datetime.now().strftime('%Y%m%d')}.log"
+
+                if ANALYTICS_LOGGER.handlers[0].baseFilename != log_file:
+                    ANALYTICS_LOGGER.handlers[0].close()
+                    ANALYTICS_LOGGER.handlers[0].baseFilename = log_file
+
                 ANALYTICS_LOGGER.info(
                     json.dumps(exec_metadata, default=str, indent=None)
                 )
