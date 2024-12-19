@@ -23,9 +23,11 @@
 using BH.oM.Base.Attributes;
 using BH.oM.Python.Enums;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -68,7 +70,11 @@ namespace BH.Engine.Python
                     }
                 }
 
-                return (PythonVersion)Enum.Parse(typeof(PythonVersion), "v" + versionString.Replace("Python ", "").Replace(".", "_"));
+                List<string> strings = versionString.Replace("Python ", "").Replace(".", "_").Split('_').ToList();
+                strings.RemoveAt(strings.Count - 1);
+                string enumParseable = "v" + strings.Aggregate((a, b) => $"{a}_{b}");
+
+                return (PythonVersion)Enum.Parse(typeof(PythonVersion), enumParseable);
             }
             catch
             {

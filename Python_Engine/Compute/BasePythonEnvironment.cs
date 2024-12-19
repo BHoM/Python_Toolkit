@@ -33,11 +33,14 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [PreviousVersion("8.0", "BH.Engine.Python.Compute.BasePythonEnvironment(System.Boolean, System.Boolean)")]
         [Description("Retrieve or reinstall the base Python Environment for BHoM workflows.")]
+        [Input("version", "The target version of python to be installed or retrieved.")]
         [Input("reload", "Reload the base Python environment rather than recreating it, if it already exists.")]
         [Input("run", "Start the installation/retrieval of the BHoM Base Python Environment.")]
         [Output("env", "The base Python Environment for all BHoM workflows.")]
         public static PythonEnvironment BasePythonEnvironment(
+            PythonVersion version = PythonVersion.v3_10,
             bool reload = true,
             bool run = false
         )
@@ -52,10 +55,10 @@ namespace BH.Engine.Python
                 // create PythonEnvironments directory if it doesnt already exist
                 Directory.CreateDirectory(Query.DirectoryEnvironments());
             }
-            
+
             // determine whether the base environment already exists
-            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(), "python.exe");
-            bool exists = Directory.Exists(Query.DirectoryBaseEnvironment()) && File.Exists(targetExecutable);
+            string targetExecutable = Path.Combine(Query.DirectoryBaseEnvironment(version), "python.exe");
+            bool exists = File.Exists(targetExecutable);
 
             if (exists && reload)
                 return new PythonEnvironment() { Name = Query.ToolkitName(), Executable = targetExecutable };
@@ -64,50 +67,14 @@ namespace BH.Engine.Python
                 // remove all existing environments and kernels
                 RemoveEverything();
 
-            // download the target Python version and convert into a "full" python installation bypassing admin rights
-            string executable = PythonVersion.v3_10_5.DownloadPython(Query.ToolkitName());
-            string pipInstaller = DownloadGetPip(Path.GetDirectoryName(executable));
-            string baseEnvironmentDirectory = Path.GetDirectoryName(executable);
-
-            // install pip into the python installation
-            Process process = new Process()
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = Modify.AddQuotesIfRequired(executable),
-                    Arguments = Modify.AddQuotesIfRequired(pipInstaller) + " --no-warn-script-location",
-                    RedirectStandardError=true,
-                    UseShellExecute=false,
-                }
-            };
-            using (Process p = Process.Start(process.StartInfo))
-            {
-                string standardError = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing pip.\n{standardError}");
-                File.Delete(pipInstaller);
-            }
-
-            // delete files with the suffix ._pth from installedDirectory
-            List<string> pthFiles = Directory.GetFiles(baseEnvironmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith("._pth")).ToList();
-            foreach (string pthFile in pthFiles)
-            {
-                File.Delete(pthFile);
-            }
-
-            // move files with the suffix .dll and .pyd from installedDirectory into a DLLs directory
-            string libDirectory = Directory.CreateDirectory(Path.Combine(baseEnvironmentDirectory, "DLLs")).FullName;
-            List<string> libFiles = Directory.GetFiles(baseEnvironmentDirectory, "*.*", SearchOption.TopDirectoryOnly).Where(s => (s.EndsWith(".dll") || s.EndsWith(".pyd")) && !Path.GetFileName(s).Contains("python") && !Path.GetFileName(s).Contains("vcruntime")).ToList();
-            foreach (string libFile in libFiles)
-            {
-                File.Move(libFile, Path.Combine(libDirectory, Path.GetFileName(libFile)));
-            }
+            // download and run the installer for the target Python version
+            string exe = version.DownloadPythonVersion();
 
             // install essential packages into base environment
-            InstallPackages(executable, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });
+            InstallPackages(exe, new List<string>() { "virtualenv", "jupyterlab", "black", "pylint" });
+            InstallPackageLocal(exe, Path.Combine(Query.DirectoryCode(), Query.ToolkitName()));
 
-            return new PythonEnvironment() { Name = Query.ToolkitName(), Executable = executable };
+            return new PythonEnvironment() { Name = Query.ToolkitName(), Executable = exe };
         }
     }
 }
