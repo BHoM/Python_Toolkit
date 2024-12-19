@@ -1,5 +1,0 @@
-﻿{
-  "MessageForDeleted": {
-    "BH.Engine.Python.Compute.DownloadGetPip(System.String)": "The DownloadGetPip method was removed due to an update to how base python environments are installed, and the functionality within this method is now covered by BasePythonEnvironment."
-  }
-}

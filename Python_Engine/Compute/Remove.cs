@@ -81,7 +81,6 @@ namespace BH.Engine.Python
             }
         }
 
-        [PreviousVersion("8.0", "BH.Engine.Python.Compute.RemoveBaseEnvironment()")]
         [Description("Remove the base install for the python version specified.")]
         [Input("version", "The base python version to remove.")]
         public static void RemoveBaseVersion(PythonVersion version = PythonVersion.v3_10)
