@@ -134,9 +134,11 @@ namespace BH.Engine.Python
 
             string pythonExePath = Path.Combine(basePath, "python.exe");
 
+            // It is possible for the installer to exit with ExitCode==0 without installing Python in the requested location. This can happen if the same version of Python appears to be installed elsewhere on the system. It can also happen if there was a 'dodgy' uninstall of a previous version. We've been unable to figure out where the installer is actually looking for existing installs. In lieu of a better solution, to fix dodgy uninstalls, run the installer again for the target version of Python (download links within EmbeddableURL.cs) and run a combination of 'repair' and 'uninstall' until it's gone. Installing the py launcher (via 'modify' in the installer) before attempting to uninstall could also help. 
+
             if (!File.Exists(pythonExePath))
             {
-                BH.Engine.Base.Compute.RecordError($"The Python installer appears to have completed successfully, but {pythonExePath} does not exist. This usually means that Python version {version} already exists on your machine, but in a different location. Try uninstalling Python from your system before running this BHoM method again.");
+                BH.Engine.Base.Compute.RecordError($"The Python installer appears to have completed successfully, but \n{pythonExePath} does not exist. \nThis usually means that Python {version} already exists on your machine, but in a different location. \nThis toolkit is therefore unable to run any Python commands right now. \nTry uninstalling Python from your system before running this BHoM method again.");
                 return null;
             }
 
