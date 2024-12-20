@@ -132,7 +132,15 @@ namespace BH.Engine.Python
                 }
             }
 
-            return Path.Combine(basePath, "python.exe");
+            string pythonExePath = Path.Combine(basePath, "python.exe");
+
+            if (!File.Exists(pythonExePath))
+            {
+                BH.Engine.Base.Compute.RecordError($"The Python installer appears to have completed successfully, but {pythonExePath} does not exist. This usually means that Python version {version} already exists on your machine, but in a different location. Try uninstalling Python from your system before running this BHoM method again.");
+                return null;
+            }
+
+            return pythonExePath;
         }
     }
 }
