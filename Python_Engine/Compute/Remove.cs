@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2025, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -81,7 +81,6 @@ namespace BH.Engine.Python
             }
         }
 
-        [PreviousVersion("8.0", "BH.Engine.Python.Compute.RemoveBaseEnvironment()")]
         [Description("Remove the base install for the python version specified.")]
         [Input("version", "The base python version to remove.")]
         public static void RemoveBaseVersion(PythonVersion version = PythonVersion.v3_10)
@@ -138,4 +137,5 @@ namespace BH.Engine.Python
         }
     }
 }
+
 

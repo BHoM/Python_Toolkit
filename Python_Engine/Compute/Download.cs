@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2025, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -89,7 +89,6 @@ namespace BH.Engine.Python
 
         /******************************************************/
 
-        [PreviousVersion("8.0", "BH.Engine.Python.Compute.DownloadPython(BH.oM.Python.Enums.PythonVersion, System.String)")]
         [Description("Download and install a specified version of python, and return the executable for it.")]
         [Input("version", "The version of python to download.")]
         [Output("pythonExecutable", "The executable (python.exe) for the python version that was installed")]
@@ -137,4 +136,5 @@ namespace BH.Engine.Python
         }
     }
 }
+
 

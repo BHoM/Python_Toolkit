@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2025, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -67,7 +67,6 @@ namespace BH.Engine.Python
             return dir;
         }
 
-        [PreviousVersion("8.0", "BH.Engine.Python.Query.DirectoryBaseEnvironment()")]
         [Description("The location where the base Python environment exists.")]
         [Input("version", "The python version to get the base environment for.")]
         [Output("path", "The location where the base Python environment exists.")]
@@ -77,6 +76,7 @@ namespace BH.Engine.Python
         }
     }
 }
+
 
 
 
