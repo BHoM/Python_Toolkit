@@ -19,6 +19,10 @@
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
     </dependencies>
+	<contentFiles>
+	  <files include="any\any\PythonCode\**\*.*" buildAction="Content" copyToOutput="true" flatten="false"/>
+	  <files include="any\any\PythonEnvironment\**\*" buildAction="Content" copyToOutput="true" flatten="false"/>
+	</contentFiles>
   </metadata>
   <files>
     <file src="C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\wrapped\**\*.*" exclude="**\__pycache__\*;**\docs\**\*" target="contentFiles\any\any\PythonCode\Python_Toolkit\src\python_toolkit\bhom\wrapped"/>
