@@ -5,6 +5,11 @@ import decimal as d
 
 #from ..bhom.analytics import bhom_analytics
 
+
+#to do:
+#improve ability to supply dimensions manually
+# allow sub parts of dimensions to be passed. ie . just the tick values of one column
+
 def set_dimensions(df, tick_mark_count, dp):
     
     df_copy = df.copy()
@@ -25,7 +30,6 @@ def set_dimensions(df, tick_mark_count, dp):
             dim['ticktext'] = df[column].unique()
 
             dimensions.append(dim)
-
             continue
 
         
@@ -44,11 +48,9 @@ def set_dimensions(df, tick_mark_count, dp):
             dim['tickvals'] = [df_copy[column].min() + i * (df_copy[column].max() - df_copy[column].min()) / (tick_mark_count - 1) for i in range(tick_mark_count)]
             dim['ticktext'] = [round(i ,dp) for i in dim['tickvals']]
 
-            # not quantiles, equally spaced marks
 
             dimensions.append(dim)
 
-    #need to add the text back to catagorical data types
     return dimensions
         
 #@bhom_analytics()
