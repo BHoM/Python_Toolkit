@@ -9,8 +9,24 @@ import decimal as d
 #to do:
 #improve ability to supply dimensions manually
 # allow sub parts of dimensions to be passed. ie . just the tick values of one column
+# allow decimal places for sub categories
 
 def set_dimensions(df, tick_mark_count, dp):
+
+    """Set the dimensions for a parallel coordinate plot, based on column datatypes and unique values.
+    
+    Args:
+        df (pd.DataFrame):
+            The pandas DataFrame to plot.
+        tick_mark_count (int):
+            The number of tick marks to show on the parallel coordinate plot.
+        dp (int):
+            The number of decimal places to show on the tick marks.
+                
+    Returns:
+        list[dict]:
+            A list of dimensions to plot.
+    """
     
     df_copy = df.copy()
     dimensions = []
