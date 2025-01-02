@@ -57,7 +57,8 @@ def heatmap(
             raise ValueError(
                 f"Length of mask ({len(kwargs['mask'])}) must match length of data ({len(series)})."
             )
-        z = np.ma.masked_array(z, mask=kwargs.pop("mask"))
+        mask_flip = kwargs.pop("mask").to_frame().pivot_table(columns=series.index.date, index=series.index.time)
+        z = np.ma.masked_array(z, mask=mask_flip)
 
     # handle non-standard kwargs
     extend = kwargs.pop("extend", "neither")
