@@ -142,11 +142,11 @@ def test_heatmap():
     assert isinstance(heatmap(TIMESERIES_COLLECTION), plt.Axes)
     plt.close("all")
 
-    mask = pd.Series(np.random.random(8760) > 0.5)
+    mask = np.random.random(8760) > 0.5
     assert isinstance(heatmap(TIMESERIES_COLLECTION, mask=mask), plt.Axes)
     plt.close("all")
 
-    mask_bad = pd.Series(np.random.random(10) > 0.5)
+    mask_bad = np.random.random(10) > 0.5
     with pytest.raises(ValueError):
         heatmap(TIMESERIES_COLLECTION, mask=mask_bad)
     plt.close("all")

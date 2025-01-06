@@ -53,11 +53,13 @@ def heatmap(
     z = day_time_matrix.values
 
     if "mask" in kwargs:
+        if not (isinstance(kwargs["mask"], list) or isinstance(kwargs["mask"], np.ndarray)):
+            raise TypeError("The type of 'mask' must be a list or numpy array")
         if len(kwargs["mask"]) != len(series):
             raise ValueError(
                 f"Length of mask ({len(kwargs['mask'])}) must match length of data ({len(series)})."
             )
-        mask_flip = kwargs.pop("mask").to_frame().pivot_table(columns=series.index.date, index=series.index.time)
+        mask_flip = pd.Series(kwargs.pop("mask")).to_frame().pivot_table(columns=series.index.date, index=series.index.time)
         z = np.ma.masked_array(z, mask=mask_flip)
 
     # handle non-standard kwargs
