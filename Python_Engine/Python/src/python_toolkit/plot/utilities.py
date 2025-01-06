@@ -2,6 +2,7 @@
 
 import base64
 import colorsys
+import io
 from pathlib import Path
 from typing import Any
 import copy
