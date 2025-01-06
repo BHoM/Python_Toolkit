@@ -54,7 +54,7 @@ def heatmap(
 
     if "mask" in kwargs:
         if not isinstance(kwargs["mask"], (list, np.ndarray, pd.Series)):
-            raise TypeError("The type of 'mask' must be a list or numpy array")
+            raise TypeError("The type of 'mask' must be a list, numpy ndarray or pandas Series")
         if len(kwargs["mask"]) != len(series):
             raise ValueError(
                 f"Length of mask ({len(kwargs['mask'])}) must match length of data ({len(series)})."
