@@ -53,7 +53,7 @@ def heatmap(
     z = day_time_matrix.values
 
     if "mask" in kwargs:
-        if not (isinstance(kwargs["mask"], list) or isinstance(kwargs["mask"], np.ndarray) or isinstance(kwargs["mask"], pd.Series)):
+        if not isinstance(kwargs["mask"], (list, np.ndarray, pd.Series)):
             raise TypeError("The type of 'mask' must be a list or numpy array")
         if len(kwargs["mask"]) != len(series):
             raise ValueError(
