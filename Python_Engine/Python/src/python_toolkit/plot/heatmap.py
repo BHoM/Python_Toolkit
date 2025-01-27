@@ -44,7 +44,7 @@ def heatmap(
     day_time_matrix = (
         series.dropna()
         .to_frame()
-        .pivot_table(columns=series.index.date, index=series.index.time)
+        .pivot_table(columns=series.dropna().index.date, index=series.dropna().index.time)
     )
     x = mdates.date2num(day_time_matrix.columns.get_level_values(1))
     y = mdates.date2num(
