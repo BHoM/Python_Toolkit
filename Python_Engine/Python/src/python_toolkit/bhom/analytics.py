@@ -83,11 +83,11 @@ def bhom_analytics() -> Callable:
                 exec_metadata["Errors"].extend(sys.exc_info())
                 raise exc
             finally:
-                log_file = str(BHOM_LOG_FOLDER / f"{function.__module__.split('.')[0]}_{datetime.now().strftime('%Y%m%d')}.log")
+                log_file = BHOM_LOG_FOLDER / f"{function.__module__.split('.')[0]}_{datetime.now().strftime('%Y%m%d')}.log"
 
                 if ANALYTICS_LOGGER.handlers[0].baseFilename != log_file:
                     ANALYTICS_LOGGER.handlers[0].close()
-                    ANALYTICS_LOGGER.handlers[0].baseFilename = log_file
+                    ANALYTICS_LOGGER.handlers[0].baseFilename = str(log_file)
 
                 ANALYTICS_LOGGER.info(
                     json.dumps(exec_metadata, default=str, indent=None)
