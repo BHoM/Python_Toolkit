@@ -12,7 +12,7 @@ from .. import TOOLKIT_NAME, BHOM_LOG_FOLDER
 
 formatter = logging.Formatter("%(message)s")
 handler = RotatingFileHandler(
-    BHOM_LOG_FOLDER / f"{TOOLKIT_NAME}_{datetime.now().strftime('%Y%m%d')}.log",
+    str(BHOM_LOG_FOLDER / f"{TOOLKIT_NAME}_{datetime.now().strftime('%Y%m%d')}.log"),
     mode="a",
     maxBytes=25 * 1024 * 1024,  # 25mb max before file overwritten
     backupCount=1,
