@@ -85,7 +85,7 @@ def bhom_analytics() -> Callable:
             finally:
                 log_file = BHOM_LOG_FOLDER / f"{function.__module__.split('.')[0]}_{datetime.now().strftime('%Y%m%d')}.log"
 
-                if ANALYTICS_LOGGER.handlers[0].baseFilename != log_file:
+                if ANALYTICS_LOGGER.handlers[0].baseFilename != str(log_file):
                     ANALYTICS_LOGGER.handlers[0].close()
                     ANALYTICS_LOGGER.handlers[0].baseFilename = str(log_file)
 
