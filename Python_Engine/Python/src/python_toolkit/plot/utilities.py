@@ -2,6 +2,7 @@
 
 import base64
 import colorsys
+import io
 from pathlib import Path
 from typing import Any
 import copy
@@ -319,7 +320,7 @@ def base64_to_image(base64_string: str, image_path: Path) -> Path:
         base64_string = base64_string.split(";")[-1]
 
     with open(Path(image_path), "wb") as fp:
-        fp.write(base64.decodebytes(base64_string))
+        fp.write(base64.decodebytes(base64_string.encode('utf-8')))
 
     return image_path
 

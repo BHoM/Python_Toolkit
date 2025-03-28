@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2025, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -89,7 +89,6 @@ namespace BH.Engine.Python
 
         /******************************************************/
 
-        [PreviousVersion("8.0", "BH.Engine.Python.Compute.DownloadPython(BH.oM.Python.Enums.PythonVersion, System.String)")]
         [Description("Download and install a specified version of python, and return the executable for it.")]
         [Input("version", "The version of python to download.")]
         [Output("pythonExecutable", "The executable (python.exe) for the python version that was installed")]
@@ -133,8 +132,19 @@ namespace BH.Engine.Python
                 }
             }
 
-            return Path.Combine(basePath, "python.exe");
+            string pythonExePath = Path.Combine(basePath, "python.exe");
+
+            // It is possible for the installer to exit with ExitCode==0 without installing Python in the requested location. This can happen if the same version of Python appears to be installed elsewhere on the system. It can also happen if there was a 'dodgy' uninstall of a previous version. We've been unable to figure out where the installer is actually looking for existing installs. To fix dodgy uninstalls, run the installer again for the target version of Python (download links within EmbeddableURL.cs) and run a combination of 'repair' and 'uninstall' until it's gone. Installing the py launcher (via 'modify' in the installer) before attempting to uninstall could also help. 
+
+            if (!File.Exists(pythonExePath))
+            {
+                BH.Engine.Base.Compute.RecordError($"The Python installer appears to have completed successfully, but \n{pythonExePath} does not exist. \nThis usually means that Python {version} already exists on your machine, but in a different location. \nThis toolkit is therefore unable to run any Python commands right now. \nTry uninstalling Python {version} from your system before running this BHoM method again.");
+                return null;
+            }
+
+            return pythonExePath;
         }
     }
 }
+
 
