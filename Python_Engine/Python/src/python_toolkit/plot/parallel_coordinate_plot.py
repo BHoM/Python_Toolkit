@@ -3,13 +3,7 @@ import pandas as pd
 from matplotlib.colors import Colormap
 import decimal as d
 
-#from ..bhom.analytics import bhom_analytics
-
-
-#to do:
-#improve ability to supply dimensions manually
-# allow sub parts of dimensions to be passed. ie . just the tick values of one column
-# allow decimal places for sub categories
+from ..bhom.analytics import bhom_analytics
 
 def set_dimensions(df, tick_mark_count, dp):
 
@@ -37,7 +31,6 @@ def set_dimensions(df, tick_mark_count, dp):
         dim['label'] = str(column)
 
         if df_copy[column].dtype == "object":
-            print('column is object', column)
             #for catagorical data types, convert to numerical, with text as tick marks
             df_copy[column] = df_copy[column].astype("category").cat.codes
 
@@ -47,7 +40,6 @@ def set_dimensions(df, tick_mark_count, dp):
 
             dimensions.append(dim)
             continue
-
         
         dim['values'] = df_copy[column]
 
@@ -64,15 +56,14 @@ def set_dimensions(df, tick_mark_count, dp):
             dim['tickvals'] = [df_copy[column].min() + i * (df_copy[column].max() - df_copy[column].min()) / (tick_mark_count - 1) for i in range(tick_mark_count)]
             dim['ticktext'] = [round(i ,dp) for i in dim['tickvals']]
 
-
             dimensions.append(dim)
 
     return dimensions
         
-#@bhom_analytics()
+@bhom_analytics()
 def parallel_coordinate_plot(
 
-    df: pd.DataFrame,
+    df: pd.DataFrame = pd.DataFrame(),
     variables_to_show: list = None,
     decimal_places: int = 0,
     tick_mark_count: int = 11,
@@ -91,17 +82,25 @@ def parallel_coordinate_plot(
         df (pd.DataFrame):
             The pandas DataFrame to plot.
         variables_to_show (list, optional):
-            The variables to show on the parallel coordinate plot. must be a subset of df.columns.
+            The variables to show on the parallel coordinate plot. Must be a subset of df.columns.
         decimal_places (int, optional):
             The number of decimal places to show on the tick marks. Defaults to 0.
         tick_mark_count (int, optional):
-            The number of tick marks to show on the parallel coordinate plot. Defaults to 10.
+            The number of tick marks to show on the parallel coordinate plot. Defaults to 11.
         colour_key (str, optional):
             The column to use as the colour key. Defaults to None.
-        cmap (Colormap, optional):
-            The colormap to use for the colour key. Defaults to "viridis".
+        cmap (Colormap or str, optional):
+            The colormap to use for the colour key. Can be a matplotlib Colormap or a string representing a Plotly colorscale. Defaults to "viridis".
         dimensions (list[dict], optional):
-            A list of dimensions to plot. Defaults to None.
+            A list of dimensions to plot. If None, dimensions will be automatically generated based on the DataFrame. Defaults to None.
+        plot_title (str, optional):
+            The title of the plot. Defaults to an empty string.
+        plot_bgcolor (str, optional):
+            The background color of the plot. Defaults to 'black'.
+        paper_bgcolor (str, optional):
+            The background color of the paper. Defaults to 'black'.
+        font_color (str, optional):
+            The color of the font used in the plot. Defaults to 'white'.
         **kwargs:
             Additional keyword arguments to pass to go.Parcoords().
             
@@ -116,11 +115,10 @@ def parallel_coordinate_plot(
     if dimensions is None:
         dimensions = set_dimensions(df, tick_mark_count, decimal_places)
 
-    if colour_key is not None:
-        line = dict(color=df[colour_key],
-                     colorscale=cmap)
-    else:
-        line = dict()
+    if colour_key is None and not df.empty:
+        colour_key = df.columns[-1]
+    
+    line = dict(color=df[colour_key], colorscale=cmap)
 
     fig = go.Figure(
         data=go.Parcoords(
