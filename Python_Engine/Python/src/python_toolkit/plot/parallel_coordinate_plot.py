@@ -71,9 +71,9 @@ def parallel_coordinate_plot(
     cmap: Colormap = "viridis",
     dimensions: list[dict] = None,
     plot_title: str = "",
-    plot_bgcolor: str = 'black',
-    paper_bgcolor: str = 'black',
-    font_color: str = 'white',
+    plot_bgcolour: str = 'black',
+    paper_bgcolour: str = 'black',
+    font_colour: str = 'white',
     **kwargs,
 ) -> go.Figure:
     """Create a parallel coordinate plot of a pandas DataFrame.
@@ -95,11 +95,11 @@ def parallel_coordinate_plot(
             A list of dimensions to plot. If None, dimensions will be automatically generated based on the DataFrame. Defaults to None.
         plot_title (str, optional):
             The title of the plot. Defaults to an empty string.
-        plot_bgcolor (str, optional):
+        plot_bgcolour (str, optional):
             The background color of the plot. Defaults to 'black'.
-        paper_bgcolor (str, optional):
+        paper_bgcolour (str, optional):
             The background color of the paper. Defaults to 'black'.
-        font_color (str, optional):
+        font_colour (str, optional):
             The color of the font used in the plot. Defaults to 'white'.
         **kwargs:
             Additional keyword arguments to pass to go.Parcoords().
@@ -130,9 +130,9 @@ def parallel_coordinate_plot(
 
     fig.update_layout(
         title = plot_title,
-        plot_bgcolor = plot_bgcolor,
-        paper_bgcolor = paper_bgcolor,
-        font_color = font_color
+        plot_bgcolor = plot_bgcolour,
+        paper_bgcolor = paper_bgcolour,
+        font_color = font_colour
     )
 
     return fig
