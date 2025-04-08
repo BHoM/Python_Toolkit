@@ -5,7 +5,7 @@ import decimal as d
 
 from ..bhom.analytics import bhom_analytics
 
-def set_dimensions(df, tick_mark_count, dp):
+def set_dimensions(df: pd.DataFrame, tick_mark_count: int, dp:int): -> list[dict[str, any]]
 
     """Set the dimensions for a parallel coordinate plot, based on column datatypes and unique values.
     
@@ -18,7 +18,7 @@ def set_dimensions(df, tick_mark_count, dp):
             The number of decimal places to show on the tick marks.
                 
     Returns:
-        list[dict]:
+        list[dict[str, any]]:
             A list of dimensions to plot.
     """
     
