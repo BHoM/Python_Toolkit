@@ -2,10 +2,11 @@ import plotly.graph_objects as go
 import pandas as pd
 from matplotlib.colors import Colormap
 import decimal as d
+from typing import List, Dict
 
 from ..bhom.analytics import bhom_analytics
 
-def set_dimensions(df: pd.DataFrame, tick_mark_count: int, dp:int): -> list[dict[str, any]]
+def set_dimensions(df: pd.DataFrame, tick_mark_count: int, dp:int): -> List[Dict[str, any]]
 
     """Set the dimensions for a parallel coordinate plot, based on column datatypes and unique values.
     
