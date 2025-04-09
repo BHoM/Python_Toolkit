@@ -70,7 +70,7 @@ def parallel_coordinate_plot(
     tick_mark_count: int = 11,
     colour_key: str = None,
     cmap: Colormap = "viridis",
-    dimensions: list[dict] = None,
+    dimensions: List[dict] = None,
     plot_title: str = "",
     plot_bgcolour: str = 'black',
     paper_bgcolour: str = 'black',
