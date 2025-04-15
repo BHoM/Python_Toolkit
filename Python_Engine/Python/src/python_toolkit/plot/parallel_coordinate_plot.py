@@ -3,10 +3,11 @@ import pandas as pd
 from matplotlib.colors import Colormap
 import decimal as d
 from typing import List, Dict
+import math
 
 from ..bhom.analytics import bhom_analytics
 
-def set_dimensions(df: pd.DataFrame, tick_mark_count: int, dp:int): -> List[Dict[str, any]]
+def set_dimensions(df: pd.DataFrame, tick_mark_count: int, dp:int) -> List[Dict[str, any]]:
 
     """Set the dimensions for a parallel coordinate plot, based on column datatypes and unique values.
     
@@ -54,6 +55,10 @@ def set_dimensions(df: pd.DataFrame, tick_mark_count: int, dp:int): -> List[Dict
         else:
             # reduce the number of tick marks if the column has a large number of unique values
             dim['range'] = [df_copy[column].min(), df_copy[column].max()]
+
+            if (dim['range'][1] - dim['range'][0] +1) < tick_mark_count:
+                tick_mark_count = math.ceil(dim['range'][1] - dim['range'][0]) + 1
+
             dim['tickvals'] = [df_copy[column].min() + i * (df_copy[column].max() - df_copy[column].min()) / (tick_mark_count - 1) for i in range(tick_mark_count)]
             dim['ticktext'] = [round(i ,dp) for i in dim['tickvals']]
 
@@ -137,3 +142,9 @@ def parallel_coordinate_plot(
     )
 
     return fig
+
+
+
+file = r"C:\Users\fmallinder\Downloads\parallel plot data.csv"
+df = pd.read_csv(file)
+parallel_coordinate_plot(df, tick_mark_count =5 , decimal_place=0)
