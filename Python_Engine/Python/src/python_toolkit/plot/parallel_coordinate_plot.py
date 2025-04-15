@@ -145,6 +145,8 @@ def parallel_coordinate_plot(
 
 
 
-file = r"C:\Users\fmallinder\Downloads\parallel plot data.csv"
-df = pd.read_csv(file)
-parallel_coordinate_plot(df, tick_mark_count =5 , decimal_place=0)
+if __name__ == "__main__":
+    #example workflow
+    file = r"C:\Users\fmallinder\Downloads\parallel plot data.csv"
+    df = pd.read_csv(file)
+    parallel_coordinate_plot(df, tick_mark_count =5 , decimal_place=0)
