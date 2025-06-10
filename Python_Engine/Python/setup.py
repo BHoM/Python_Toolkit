@@ -21,8 +21,5 @@ setuptools.setup(
     description=f"A Python library that contains minimal code intended to be used by the {TOOLKIT_NAME} Python environment for BHoM workflows.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url=f"https://github.com/BHoM/{TOOLKIT_NAME}",
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src", exclude=['tests']),
     version=BHOM_VERSION,
 )

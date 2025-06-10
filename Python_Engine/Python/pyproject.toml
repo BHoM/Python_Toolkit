@@ -2,11 +2,9 @@
 name = "python_toolkit"
 readme = "README.md"
 dynamic = ["version", "description"]
-
 authors = [
     { name = "BHoM", email = "bhombot@burohappold.com" }
 ]
-
 dependencies = [
     "case-converter",
     "jupyterlab",
@@ -16,6 +14,9 @@ dependencies = [
     "plotly",
     "virtualenv",
 ]
+
+[urls]
+source = "https://github.com/BHoM/Python_Toolkit"
 
 [build-system]
 requires = ["setuptools", "pywin32"]
@@ -34,6 +35,13 @@ dev = [
     "sphinxcontrib-fulltoc>=1.2.0",
     "sphinxcontrib-napoleon>=0.7",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests"]
 
 [tool.pytest.ini_options]
 pythonpath = "src"
