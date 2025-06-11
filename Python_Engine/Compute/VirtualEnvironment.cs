@@ -108,7 +108,7 @@ namespace BH.Engine.Python
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = targetExecutable,
-                    Arguments = $"-m ipykernel install --name={name} --user", //--user adds the kernel to %appdata%/jupyter/kernels, rather than the virtualenv/share/jupyter/kernels
+                    Arguments = $"-m ipykernel install --name={name} --user", //--user adds the kernel to %appdata%/jupyter/kernels, rather than to the virtualenv/share/jupyter/kernels
                     RedirectStandardError = true,
                     UseShellExecute = false,
                 }
