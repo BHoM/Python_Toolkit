@@ -16,21 +16,10 @@ BHOM_VERSION = _bhom_version()
 
 here = Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
-requirements = [
-    i.strip()
-    for i in (here / "requirements.txt").read_text(encoding="utf-8-sig").splitlines()
-]
 
 setuptools.setup(
-    name=TOOLKIT_NAME.lower(),
-    author="BHoM",
-    author_email="bhombot@burohappold.com",
     description=f"A Python library that contains minimal code intended to be used by the {TOOLKIT_NAME} Python environment for BHoM workflows.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url=f"https://github.com/BHoM/{TOOLKIT_NAME}",
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src", exclude=['tests']),
-    install_requires=requirements,
     version=BHOM_VERSION,
 )
