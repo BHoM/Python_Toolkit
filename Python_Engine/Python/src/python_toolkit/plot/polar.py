@@ -12,6 +12,9 @@ from matplotlib.patches import Rectangle
 from pandas.tseries.frequencies import to_offset
 import textwrap
 
+from .utilities import process_polar_data, format_polar_plot
+
+
 def plot_polar(
         data: pd.DataFrame,
         value_column: str = "Value",
@@ -63,19 +66,19 @@ def plot_polar(
         # create grouped data for plotting
 
         #TOM NOTE: need to find out exactly what this does. Likely it's just a dataframe pivot where each column is a values bin and the index is the direction bins (from the number of directions). Density seems to make values between 0-100%. remove_calm removes values below 0.1, though this should be implemented in an argument for this method instead.
-        binned = self.histogram(
-            directions=directions,
-            other_data=other_data,
-            other_bins=other_bins,
-            density=True,
-            remove_calm=True,
+        binned = process_polar_data(
+            data,
+            value_column,
+            direction_column,
+            directions,
+            value_bins
         )
 
         # set colors
         if colors is None:
             colors = [
                 to_hex(plt.get_cmap("viridis")(i))
-                for i in np.linspace(0, 1, len(binned.columns)) #TOM NOTE: number of bins
+                for i in np.linspace(0, 1, len(binned.columns))
             ]
         if isinstance(colors, str):
             colors = plt.get_cmap(colors)
@@ -87,8 +90,6 @@ def plot_polar(
                     f"colors must be a list of length {len(binned.columns)}, or a colormap."
                 )
 
-        #TOM NOTE: Don't change anything after this point
-
         # HACK to ensure that bar ends are curved when using a polar plot.
         fig = plt.figure()
         rect = [0.1, 0.1, 0.8, 0.8]
@@ -96,7 +97,7 @@ def plot_polar(
         hist_ax.bar(np.array([1]), np.array([1]))
 
         if title is None or title == "":
-            ax.set_title(textwrap.fill(f"{self.source}", 75))
+            ax.set_title(textwrap.fill(f"{value_column}", 75))
         else:
             ax.set_title(title)
 

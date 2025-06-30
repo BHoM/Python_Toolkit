@@ -4,8 +4,10 @@ import base64
 import colorsys
 import io
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 import copy
+
+import pandas as pd
 
 import numpy as np
 from matplotlib.colors import (
@@ -595,3 +597,80 @@ def format_polar_plot(ax: plt.Axes, yticklabels: bool = True) -> plt.Axes:
     )
     if not yticklabels:
         ax.set_yticklabels([])
+
+def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:str, directions:int=36, value_bins:List[float]=None):
+    if value_bins is None:
+        value_bins = np.linspace(min(data[values_column]), max(data[values_column]), 11)
+
+    direction_bins = np.unique(
+            ((np.linspace(0, 360, directions + 1) - ((360 / directions) / 2)) % 360).tolist()
+            + [0, 360]
+        )
+
+    values_ser = data[values_column].copy()
+    directions_ser = data[directions_column].copy()
+
+    categories = pd.cut(values_ser, bins=value_bins, include_lowest=False)
+    dir_categories = pd.cut(directions_ser, bins=direction_bins, include_lowest=True)
+    bin_tuples = [tuple([i.left, i.right]) for i in categories.cat.categories.tolist()]
+    dir_tuples = [tuple([i.left, i.right]) for i in dir_categories.cat.categories.tolist()][1:-1]
+    dir_tuples.append((dir_tuples[-1][1], dir_tuples[0][0]))
+
+    mapper = dict(
+        zip(
+            *[
+                categories.cat.categories.tolist(),
+                bin_tuples,
+            ]
+        )
+    )
+    mapper[np.nan] = bin_tuples[0]
+
+    dir_mapper = dict(
+        zip(
+            *[
+                dir_categories.cat.categories.tolist(),
+                [dir_tuples[-1]] + dir_tuples,
+            ]
+        )
+    )
+
+    categories = pd.Series(
+        [mapper[i] for i in categories],
+        index=categories.index,
+        name=categories.name,
+    )
+
+    dir_categories = pd.Series(
+        [dir_mapper[i] for i in dir_categories],
+        index=dir_categories.index,
+        name=dir_categories.name,
+    )
+
+    df = pd.concat([dir_categories, categories], axis=1)
+
+    #remove calm?
+
+    # pivot dataframe
+    df = (
+        df.groupby([df.columns[0], df.columns[1]], observed=True)
+        .value_counts()
+        .unstack()
+        .fillna(0)
+        .astype(int)
+    )
+
+    for b in bin_tuples:
+        if b not in df.columns:
+            df[b] = 0
+    df.sort_index(axis=1, inplace=True)
+    df = df.T
+    for b in dir_tuples:
+        if b not in df.columns:
+            df[b] = 0
+    df.sort_index(axis=1, inplace=True)
+    df = df.T
+
+    df = df / df.values.sum() #as density plot
+
+    return df
