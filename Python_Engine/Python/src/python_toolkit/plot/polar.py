@@ -22,7 +22,7 @@ def polar(
         ax: plt.Axes = None,
         directions: int = 36,
         value_bins: List[float] = None,
-        colors: list[str | tuple[float] | Colormap] = None, #set of colours to use for the value bins
+        colours: list[str | tuple[float] | Colormap] = None, #set of colours to use for the value bins
         title: str = None,
         legend: bool = True,
         ylim: tuple[float] = None,
@@ -57,7 +57,7 @@ def polar(
             label (bool, optional):
                 Set to False to remove the bin labels. Defaults to False.
             density (bool, optional):
-                Set to False to see the sum of the values instead of their frequency
+                Set to False to see the sum of the values instead of their frequency density
         Returns:
             plt.Axes: The axes object.
         """
@@ -76,17 +76,17 @@ def polar(
         )
 
         # set colors
-        if colors is None:
-            colors = [
+        if colours is None:
+            colours = [
                 to_hex(plt.get_cmap("viridis")(i))
                 for i in np.linspace(0, 1, len(binned.columns))
             ]
-        if isinstance(colors, str):
-            colors = plt.get_cmap(colors)
-        if isinstance(colors, Colormap):
-            colors = [to_hex(colors(i)) for i in np.linspace(0, 1, len(binned.columns))]
-        if isinstance(colors, list | tuple):
-            if len(colors) != len(binned.columns):
+        if isinstance(colours, str):
+            colours = plt.get_cmap(colours)
+        if isinstance(colours, Colormap):
+            colours = [to_hex(colours(i)) for i in np.linspace(0, 1, len(binned.columns))]
+        if isinstance(colours, list | tuple):
+            if len(colours) != len(binned.columns):
                 raise ValueError(
                     f"colors must be a list of length {len(binned.columns)}, or a colormap."
                 )
@@ -118,7 +118,7 @@ def polar(
                         alpha=1,
                     )
                 )
-                color_list.append(colors[n])
+                color_list.append(colours[n])
                 y += val
             if label:
                 ax.text(x, y, f"{y:0.1%}", ha="center", va="center", fontsize="x-small")
@@ -131,7 +131,7 @@ def polar(
         # construct legend
         if legend:
             handles = [
-                mpatches.Patch(color=colors[n], label=(f"{i} to {j}" if str(j) != str(np.inf) else f"{i} and above"))
+                mpatches.Patch(color=colours[n], label=(f"{i} to {j}" if str(j) != str(np.inf) else f"{i} and above"))
                 for n, (i, j) in enumerate(binned.columns.values)
             ]
             _ = ax.legend(
