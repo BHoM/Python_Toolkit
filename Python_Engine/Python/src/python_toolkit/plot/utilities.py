@@ -601,7 +601,7 @@ def format_polar_plot(ax: plt.Axes, yticklabels: bool = True) -> plt.Axes:
 
 def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:str, directions:int=36, value_bins:List[float]=None, density:bool=True):
     """Process data for a polar plot by grouping by value and direction bins, either as value counts, or sums (determined by density)
-    
+
     """
     if values_column not in data.columns:
         raise ValueError(f"Values column `{values_column}` could not be found in the input dataframe.")
@@ -656,21 +656,21 @@ def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:s
         index=dir_categories.index,
         name=dir_categories.name,
     )
-    
-    df = pd.concat([dir_categories, categories, values_ser], axis=1)
-    df.columns = [df.columns[0], df.columns[1], "Value"]
 
     # pivot dataframe
     if density:
+        df = pd.concat([dir_categories, categories], axis=1)
         df = (
             df.groupby([df.columns[0], df.columns[1]], observed=True)
-            .value_counts()
+            .value_counts() # TODO: allow non-density plot so that actual sums can be viewed (e.g. for directional radiation plots)
             .unstack()
             .fillna(0)
             .astype(int)
         )
     else:
         #This allows plots like radiation roses, where the sum of the radiation from that direction is more useful than the counts
+        df = pd.concat([dir_categories, categories, values_ser], axis=1)
+        df.columns = [df.columns[0], df.columns[1], "Value"]
         df = (
             df.groupby([df.columns[0], df.columns[1]], observed=True)
             .sum()
@@ -678,8 +678,7 @@ def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:s
             .fillna(0)
             .astype(float)
         )
-    
-    df = df.droplevel(level=0, axis=1)
+        df.droplevel(level=0, axis=1)
 
     for b in bin_tuples:
         if b not in df.columns:
