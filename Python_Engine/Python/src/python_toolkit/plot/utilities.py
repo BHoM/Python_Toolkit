@@ -662,7 +662,7 @@ def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:s
         df = pd.concat([dir_categories, categories], axis=1)
         df = (
             df.groupby([df.columns[0], df.columns[1]], observed=True)
-            .value_counts() # TODO: allow non-density plot so that actual sums can be viewed (e.g. for directional radiation plots)
+            .value_counts()
             .unstack()
             .fillna(0)
             .astype(int)
