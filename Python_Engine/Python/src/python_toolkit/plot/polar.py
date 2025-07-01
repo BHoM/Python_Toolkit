@@ -15,7 +15,7 @@ import textwrap
 from .utilities import process_polar_data, format_polar_plot
 
 
-def plot_polar(
+def polar(
         data: pd.DataFrame,
         value_column: str = "Value",
         direction_column: str = "Direction",
@@ -27,6 +27,7 @@ def plot_polar(
         legend: bool = True,
         ylim: tuple[float] = None,
         label: bool = False,
+        density: bool = True,
     ) -> plt.Axes:
         """Create a polar plot showing frequencies by direction.
 
@@ -55,7 +56,8 @@ def plot_polar(
                 The y-axis limits. Defaults to None.
             label (bool, optional):
                 Set to False to remove the bin labels. Defaults to False.
-
+            density (bool, optional):
+                Set to False to see the sum of the values instead of their frequency
         Returns:
             plt.Axes: The axes object.
         """
@@ -64,14 +66,13 @@ def plot_polar(
             _, ax = plt.subplots(subplot_kw={"projection": "polar"})
 
         # create grouped data for plotting
-
-        #TOM NOTE: need to find out exactly what this does. Likely it's just a dataframe pivot where each column is a values bin and the index is the direction bins (from the number of directions). Density seems to make values between 0-100%. remove_calm removes values below 0.1, though this should be implemented in an argument for this method instead.
         binned = process_polar_data(
             data,
             value_column,
             direction_column,
             directions,
-            value_bins
+            value_bins,
+            density
         )
 
         # set colors
@@ -95,6 +96,7 @@ def plot_polar(
         rect = [0.1, 0.1, 0.8, 0.8]
         hist_ax = plt.Axes(fig, rect)
         hist_ax.bar(np.array([1]), np.array([1]))
+        # END HACK
 
         if title is None or title == "":
             ax.set_title(textwrap.fill(f"{value_column}", 75))
@@ -129,7 +131,7 @@ def plot_polar(
         # construct legend
         if legend:
             handles = [
-                mpatches.Patch(color=colors[n], label=f"{i} to {j}")
+                mpatches.Patch(color=colors[n], label=(f"{i} to {j}" if str(j) != str(np.inf) else f"{i} and above"))
                 for n, (i, j) in enumerate(binned.columns.values)
             ]
             _ = ax.legend(
@@ -147,10 +149,14 @@ def plot_polar(
         # set y-axis limits
         if ylim is None:
             ylim = (0, max(binned.sum(axis=1)))
-        if len(ylim) != 2:
+            ax.set_ylim(ylim)
+        elif len(ylim) != 2:
             raise ValueError("ylim must be a tuple of length 2.")
-        ax.set_ylim(ylim)
-        ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1))
+        else:
+            ax.set_ylim(ylim)
+
+        if density:
+            ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1))
 
         format_polar_plot(ax, yticklabels=True)
 
