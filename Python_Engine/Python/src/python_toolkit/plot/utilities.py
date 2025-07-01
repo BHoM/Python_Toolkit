@@ -26,6 +26,7 @@ import matplotlib.ticker as mticker
 from matplotlib.tri import Triangulation
 from PIL import Image
 from ..bhom.analytics import bhom_analytics
+from ..bhom.logging import CONSOLE_LOGGER
 
 @bhom_analytics()
 def average_color(colors: Any, keep_alpha: bool = False) -> str:
@@ -598,7 +599,16 @@ def format_polar_plot(ax: plt.Axes, yticklabels: bool = True) -> plt.Axes:
     if not yticklabels:
         ax.set_yticklabels([])
 
-def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:str, directions:int=36, value_bins:List[float]=None):
+def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:str, directions:int=36, value_bins:List[float]=None, density:bool=True):
+    """Process data for a polar plot by grouping by value and direction bins, either as value counts, or sums (determined by density)
+    
+    """
+    if values_column not in data.columns:
+        raise ValueError(f"Values column `{values_column}` could not be found in the input dataframe.")
+
+    if directions_column not in data.columns:
+        raise ValueError(f"Directions column `{directions_column}` could not be found in the input dataframe")
+
     if value_bins is None:
         value_bins = np.linspace(min(data[values_column]), max(data[values_column]), 11)
 
@@ -646,19 +656,30 @@ def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:s
         index=dir_categories.index,
         name=dir_categories.name,
     )
-
-    df = pd.concat([dir_categories, categories], axis=1)
-
-    #remove calm?
+    
+    df = pd.concat([dir_categories, categories, values_ser], axis=1)
+    df.columns = [df.columns[0], df.columns[1], "Value"]
 
     # pivot dataframe
-    df = (
-        df.groupby([df.columns[0], df.columns[1]], observed=True)
-        .value_counts()
-        .unstack()
-        .fillna(0)
-        .astype(int)
-    )
+    if density:
+        df = (
+            df.groupby([df.columns[0], df.columns[1]], observed=True)
+            .value_counts()
+            .unstack()
+            .fillna(0)
+            .astype(int)
+        )
+    else:
+        #This allows plots like radiation roses, where the sum of the radiation from that direction is more useful than the counts
+        df = (
+            df.groupby([df.columns[0], df.columns[1]], observed=True)
+            .sum()
+            .unstack()
+            .fillna(0)
+            .astype(float)
+        )
+    
+    df = df.droplevel(level=0, axis=1)
 
     for b in bin_tuples:
         if b not in df.columns:
@@ -671,6 +692,7 @@ def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:s
     df.sort_index(axis=1, inplace=True)
     df = df.T
 
-    df = df / df.values.sum() #as density plot
+    if density:
+        df = df / df.values.sum() #show density values as a percentage of the total number of values.
 
     return df
