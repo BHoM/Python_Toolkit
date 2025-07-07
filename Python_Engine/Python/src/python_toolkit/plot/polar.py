@@ -46,8 +46,8 @@ def polar(
                 The number of directions to use. Defaults to 36.
             value_bins (list[float]):
                 The bins to use for the magnitudes of the values.
-            colors: (str | tuple[float] | Colormap, optional):
-                A list of colors to use for the value_bins. May also be a colormap.
+            colours: (str | tuple[float] | Colormap, optional):
+                A list of colours to use for the value_bins. May also be a matplotlib colormap.
             title (str, optional):
                 title to display above the plot. Defaults to the source of this wind object.
             legend (bool, optional):
@@ -57,7 +57,7 @@ def polar(
             label (bool, optional):
                 Set to False to remove the bin labels. Defaults to False.
             density (bool, optional):
-                Set to False to see the sum of the values instead of their frequency density
+                Set to False to see the sum of the values instead of their frequency density. Defaults to True.
         Returns:
             plt.Axes: The axes object.
         """

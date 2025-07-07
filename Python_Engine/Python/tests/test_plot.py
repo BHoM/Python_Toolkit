@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from python_toolkit.plot.diurnal import diurnal, stacked_diurnals
 from python_toolkit.plot.heatmap import heatmap
+from python_toolkit.plot.polar import polar
 from python_toolkit.plot.spatial_heatmap import spatial_heatmap
 from python_toolkit.plot.utilities import (
     colormap_sequential,
@@ -15,7 +16,7 @@ from python_toolkit.plot.utilities import (
 from matplotlib.figure import Figure
 
 from pathlib import Path
-from . import TIMESERIES_COLLECTION
+from . import TEST_DATA, TIMESERIES_COLLECTION
 
 def test_create_triangulation():
     """_"""
@@ -161,3 +162,10 @@ def test_heatmap():
         plt.Axes,
     )
     plt.close("all")
+
+def test_polar():
+    """_"""
+    assert isinstance(polar(TEST_DATA), plt.Axes)
+    plt.close("all")
+
+    
