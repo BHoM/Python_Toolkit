@@ -41,7 +41,7 @@ namespace BH.Engine.Python
         public static string DirectoryKernels()
         {
             
-            string dir = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData), "jupyter", "kernels");
+            string dir = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "jupyter", "kernels");
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             return dir;
