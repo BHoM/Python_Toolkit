@@ -1,20 +1,17 @@
 ﻿from pathlib import Path
-
 import setuptools
-from win32api import HIWORD, LOWORD, GetFileVersionInfo
 
 TOOLKIT_NAME = "Python_Toolkit"
 
+here = Path(__file__).parent.resolve()
+
 def _bhom_version() -> str:
     """Return the version of BHoM installed (using the BHoM.dll in the root BHoM directory."""
-    info = GetFileVersionInfo("C:/ProgramData/BHoM/Assemblies/BHoM.dll", "\\")  # pylint: disable=[no-name-in-module]
-    ms = info["FileVersionMS"]
-    ls = info["FileVersionLS"]
-    return f"{HIWORD(ms)}.{LOWORD(ms)}.{HIWORD(ls)}.{LOWORD(ls)}"  # pylint: disable=[no-name-in-module]
+    versionFile = here / "VERSION.txt" #version file is created in a pre-build event in Python_Engine.csproj
+    return versionFile.read_text();
 
 BHOM_VERSION = _bhom_version()
 
-here = Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setuptools.setup(

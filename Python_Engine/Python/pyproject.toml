@@ -22,7 +22,7 @@ dependencies = [
 source = "https://github.com/BHoM/Python_Toolkit"
 
 [build-system]
-requires = ["setuptools", "pywin32"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
@@ -45,6 +45,9 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = ["tests"]
+
+[tool.setuptools.package-data]
+"*" = ["*.mplstyle"]
 
 [tool.pytest.ini_options]
 pythonpath = "src"
