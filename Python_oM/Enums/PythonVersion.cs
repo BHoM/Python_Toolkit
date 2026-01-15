@@ -127,6 +127,8 @@ namespace BH.oM.Python.Enums
         v3_11_3,*/
         [Description("3.11")] //3.11.4
         v3_11,
+        [Description("3.12")]
+        v3_12,
     }
 }
 
