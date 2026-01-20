@@ -38,7 +38,7 @@ class UsageLogEntry():
     SelectedItem:Dict = field(default_factory = {"MethodName": "", "Parameters": [], "TypeName": ""})
     Time:Dict = field(default_factory = {"$date": 0})
     UI:str = "Python"
-    UiVersion:str = TOOLKIT_NAME
+    UiVersion:str = sys.version
     _t:str = "BH.oM.Base.UsageLogEntry"
 
     @classmethod
@@ -86,12 +86,12 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
 
             db_entries.append({
                 "StartTime": ticks_to_datetime(min(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
-                "EndTime": ticks_to_datetime(min(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
+                "EndTime": ticks_to_datetime(max(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
                 "UI": first_entry.UI,
                 "UiVersion":first_entry.UiVersion,
                 "CallerName": first_entry.CallerName,
                 "SelectedItem": first_entry.SelectedItem,
-                "Computer": socket.gethostname(), #no clue why machine name is a socker function rather than os...
+                "Computer": socket.gethostname(),
                 "UserName": os.environ.get("USERNAME"),
                 "BHoMVersion": BHOM_VERSION,
                 "FileId": "",
@@ -175,8 +175,6 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                 "FileName": "",
                 "Fragments": [],
                 "Name": "",
-                # TODO - get project properties from another function/logging
-                # method (or from BHoM DLL analytics capture ...)
                 "ProjectID": project_id(),
                 "SelectedItem": {
                     "MethodName": function.__name__,
