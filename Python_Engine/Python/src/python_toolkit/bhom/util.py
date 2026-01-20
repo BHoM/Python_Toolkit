@@ -1,7 +1,6 @@
 """General utility functions."""
 # pylint: disable=E0401
-from datetime import datetime
-
+from datetime import datetime, timedelta
 # pylint: enable=E0401
 
 
@@ -22,3 +21,10 @@ def csharp_ticks(date_time: datetime = datetime.utcnow(), short: bool = False) -
         return int(_ticks)
 
     return int(_ticks * (10**7))
+
+def ticks_to_datetime(ticks: int, short:bool = False) -> datetime:
+
+    if not short:
+        _ticks *= (10**-7)
+
+    return datetime(1, 1, 1) + timedelta(seconds=ticks)

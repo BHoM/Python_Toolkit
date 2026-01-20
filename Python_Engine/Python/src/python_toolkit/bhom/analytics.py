@@ -1,6 +1,5 @@
 """BHoM analytics decorator."""
 # pylint: disable=E0401
-from _typeshed import OptExcInfo
 import codecs
 from dataclasses import dataclass, field
 import inspect
@@ -20,7 +19,7 @@ from datetime import datetime
 # pylint: enable=E0401
 
 from .logging import ANALYTICS_LOGGER
-from .util import csharp_ticks
+from .util import csharp_ticks, ticks_to_datetime
 from . import BHOM_VERSION, TOOLKIT_NAME, BHOM_LOG_FOLDER, DISABLE_ANALYTICS
 
 @dataclass
@@ -83,9 +82,11 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
             methodgroup = list(methodgroup)
             first_entry = methodgroup[0]
 
+            errors = list(itertools.chain.from_iterable([x.Errors for x in methodgroup]))
+
             db_entries.append({
-                "StartTime": min(methodgroup, key=lambda x: x.Time["$date"]).Time,
-                "EndTime": min(methodgroup, key=lambda x: x.Time["$date"]).Time,
+                "StartTime": ticks_to_datetime(min(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
+                "EndTime": ticks_to_datetime(min(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
                 "UI": first_entry.UI,
                 "UiVersion":first_entry.UiVersion,
                 "CallerName": first_entry.CallerName,
@@ -104,15 +105,15 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
 
     return db_entries
 
-def convert_exc_info_to_bhom_error(exc_info:OptExcInfo):
-    time = csharp_ticks(datetime.now())
-    utcTime = csharp_ticks()
+def convert_exc_info_to_bhom_error(exc_info):
+    time = csharp_ticks(datetime.now(), short=True)
+    utcTime = csharp_ticks(short=True)
     stack_trace = traceback.extract_tb(exc_info[3])
     message = str(exc_info[1])
     Type = "Error" #using string but ideally this would be an enum value.
     return {"Time": {"$date": time}, "UtcTime": {"$date": utcTime}, "StackTrace": stack_trace, "Message": message, "Type": Type, "_t": "BH.oM.Base.Debugging.Event"}
 
-def bhom_analytics(project_id:str = "", disable:bool = DISABLE_ANALYTICS) -> Callable:
+def bhom_analytics(project_id:Callable = lambda: "", disable:bool = DISABLE_ANALYTICS) -> Callable:
     """Decorator for capturing usage data.
 
     Returns
@@ -163,7 +164,7 @@ def bhom_analytics(project_id:str = "", disable:bool = DISABLE_ANALYTICS) -> Cal
                 "Name": "",
                 # TODO - get project properties from another function/logging
                 # method (or from BHoM DLL analytics capture ...)
-                "ProjectID": project_id,
+                "ProjectID": project_id(),
                 "SelectedItem": {
                     "MethodName": function.__name__,
                     "Parameters": _args,
