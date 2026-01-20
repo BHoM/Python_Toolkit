@@ -13,12 +13,12 @@ import sys
 import traceback
 import uuid
 from functools import wraps
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Union
 from datetime import datetime
 
 # pylint: enable=E0401
 
-from .logging import ANALYTICS_LOGGER
+from .logging import ANALYTICS_LOGGER, CONSOLE_LOGGER
 from .util import csharp_ticks, ticks_to_datetime
 from . import BHOM_VERSION, TOOLKIT_NAME, BHOM_LOG_FOLDER, DISABLE_ANALYTICS
 
@@ -113,7 +113,19 @@ def convert_exc_info_to_bhom_error(exc_info):
     Type = "Error" #using string but ideally this would be an enum value.
     return {"Time": {"$date": time}, "UtcTime": {"$date": utcTime}, "StackTrace": stack_trace, "Message": message, "Type": Type, "_t": "BH.oM.Base.Debugging.Event"}
 
-def bhom_analytics(project_id:Callable = lambda: "", disable:bool = DISABLE_ANALYTICS) -> Callable:
+global PROJECT_NUMBER
+PROJECT_NUMBER = None
+
+def set_project_number(project_number: Union[str, None]):
+    global PROJECT_NUMBER
+    CONSOLE_LOGGER.debug(f"Setting project number: {PROJECT_NUMBER} to {project_number}")
+    PROJECT_NUMBER = project_number
+    
+def get_project_number() -> Union[str, None]:
+    CONSOLE_LOGGER.debug(f"Retrieving project number: {PROJECT_NUMBER}")
+    return PROJECT_NUMBER
+
+def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISABLE_ANALYTICS) -> Callable:
     """Decorator for capturing usage data.
 
     Returns
@@ -139,8 +151,9 @@ def bhom_analytics(project_id:Callable = lambda: "", disable:bool = DISABLE_ANAL
         @wraps(function)
         def wrapper(*args, **kwargs) -> Any:
             """A wrapper around the function that captures usage analytics."""
-            
+
             if disable:
+                CONSOLE_LOGGER.debug("bhom_analytics is curently disabled.")
                 return function(*args, **kwargs)
             
             _id = uuid.uuid4()
@@ -156,7 +169,7 @@ def bhom_analytics(project_id:Callable = lambda: "", disable:bool = DISABLE_ANAL
                 "BHoM_Guid": _id,
                 "CallerName": function.__name__,
                 "ComponentId": _id,
-                "CustomData": {"interpreter", sys.executable},
+                "CustomData": {"interpreter": sys.executable},
                 "Errors": [],
                 "FileId": "",
                 "FileName": "",
