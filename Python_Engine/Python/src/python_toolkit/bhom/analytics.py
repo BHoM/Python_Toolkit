@@ -50,7 +50,7 @@ class UsageLogEntry():
             d["Fragments"] = None
         return UsageLogEntry(d["BHoMVersion"], d["BHoM_Guid"], d["CallerName"], d["ComponentId"], d["CustomData"], d["Errors"], d["FileId"], d["FileName"], d["Fragments"], d["Name"], d["ProjectID"], d["SelectedItem"], d["Time"], d["UI"], d["UiVersion"])
 
-def load_logs_from_file(filename:str, delete_processed_files: bool = False) -> List[UsageLogEntry]:
+def load_logs_from_file(filename:str) -> List[UsageLogEntry]:
     logs:List[UsageLogEntry] = []
 
     #adapted from https://stackoverflow.com/questions/30629297/remove-byte-order-mark-from-objects-in-a-list
@@ -63,9 +63,6 @@ def load_logs_from_file(filename:str, delete_processed_files: bool = False) -> L
         for line in lines:
             if len(line) != 0:
                 logs.append(UsageLogEntry.from_json(line))
-
-    if delete_processed_files:
-        Path(filename).unlink()
 
     return logs
 
@@ -81,8 +78,6 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
         for method_name, methodgroup in groupby(projectgroup, lambda x: x.CallerName + str(x.SelectedItem)):
             methodgroup = list(methodgroup)
             first_entry = methodgroup[0]
-
-            errors = list(itertools.chain.from_iterable([x.Errors for x in methodgroup]))
 
             db_entries.append({
                 "StartTime": ticks_to_datetime(min(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
@@ -134,6 +129,8 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
         The decorated function.
     """
 
+    _componentId = uuid.uuid4()
+
     def decorator(function: Callable):
         """A decorator to capture usage data for called methods/functions.
 
@@ -168,7 +165,7 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                 "BHoMVersion": BHOM_VERSION,
                 "BHoM_Guid": _id,
                 "CallerName": function.__name__,
-                "ComponentId": _id,
+                "ComponentId": _componentId,
                 "CustomData": {"interpreter": sys.executable},
                 "Errors": [],
                 "FileId": "",
@@ -185,7 +182,7 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                     "$date": csharp_ticks(short=True),
                 },
                 "UI": "Python",
-                "UiVersion": TOOLKIT_NAME,
+                "UiVersion": sys.version,
                 "_t": "BH.oM.Base.UsageLogEntry",
             }
 
