@@ -83,6 +83,7 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_11_2,  "https://www.python.org/ftp/python/3.11.2/python-3.11.2-amd64.exe" },
                 { PythonVersion.v3_11_3,  "https://www.python.org/ftp/python/3.11.3/python-3.11.3-amd64.exe" },*/
                 { PythonVersion.v3_11,  "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" },
+                { PythonVersion.v3_12, "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe" }
             };
 
             return versions[version];
