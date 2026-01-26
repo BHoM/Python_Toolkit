@@ -71,11 +71,13 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
 
     usage_log_entries.sort(key=lambda x: x.ProjectID)
 
-    for project_id, projectgroup in groupby(usage_log_entries, lambda x: x.ProjectID):
-        projectgroup = list(projectgroup)
-        projectgroup.sort(key = lambda x: x.CallerName + str(x.SelectedItem))
+    for file_id, filegroup in groupby(usage_log_entries, lambda x: x.FileId):
+        filegroup = list(filegroup)
+        project_id = filegroup[0].ProjectID
+        filename = filegroup[0].FileName
+        filegroup.sort(key = lambda x: x.CallerName + str(x.SelectedItem))
 
-        for method_name, methodgroup in groupby(projectgroup, lambda x: x.CallerName + str(x.SelectedItem)):
+        for method_name, methodgroup in groupby(filegroup, lambda x: x.CallerName + str(x.SelectedItem)):
             methodgroup = list(methodgroup)
             first_entry = methodgroup[0]
 
@@ -89,8 +91,8 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
                 "Computer": socket.gethostname(),
                 "UserName": os.environ.get("USERNAME"),
                 "BHoMVersion": BHOM_VERSION,
-                "FileId": "",
-                "FileName": "",
+                "FileId": file_id,
+                "FileName": filename,
                 "ProjectID": project_id,
                 "NbCallingComponents": len(set([a.ComponentId for a in methodgroup])),
                 "TotalNbCals": len(methodgroup),
@@ -155,6 +157,9 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
             
             _id = uuid.uuid4()
 
+            #for now for file IDs, generate one using the project ID
+            file_id = uuid.uuid3(uuid.NAMESPACE_OID, project_id())
+
             # get the data being passed to the function, expected dtype and return type
             argspec = inspect.getfullargspec(function)[-1]
             argspec.pop("return", None)
@@ -168,8 +173,8 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                 "ComponentId": _componentId,
                 "CustomData": {"interpreter": sys.executable},
                 "Errors": [],
-                "FileId": "",
-                "FileName": "",
+                "FileId": str(file_id),
+                "FileName": str(file_id),
                 "Fragments": [],
                 "Name": "",
                 "ProjectID": project_id(),
