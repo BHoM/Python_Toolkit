@@ -19,7 +19,7 @@ from datetime import datetime
 # pylint: enable=E0401
 
 from .logging import ANALYTICS_LOGGER, CONSOLE_LOGGER
-from .util import csharp_ticks, ticks_to_datetime
+from .util import bson_unix_ticks, bson_unix_ticks_to_datetime
 from . import BHOM_VERSION, TOOLKIT_NAME, BHOM_LOG_FOLDER, DISABLE_ANALYTICS
 
 @dataclass
@@ -82,8 +82,8 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
             first_entry = methodgroup[0]
 
             db_entries.append({
-                "StartTime": ticks_to_datetime(min(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
-                "EndTime": ticks_to_datetime(max(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
+                "StartTime": bson_unix_ticks_to_datetime(min(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
+                "EndTime": bson_unix_ticks_to_datetime(max(methodgroup, key=lambda x: x.Time["$date"]).Time["$date"], short=True),
                 "UI": first_entry.UI,
                 "UiVersion":first_entry.UiVersion,
                 "CallerName": first_entry.CallerName,
@@ -103,8 +103,8 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
     return db_entries
 
 def convert_exc_info_to_bhom_error(exc_info):
-    time = csharp_ticks(datetime.now(), short=True)
-    utcTime = csharp_ticks(short=True)
+    time = bson_unix_ticks(datetime.now(), short=True)
+    utcTime = bson_unix_ticks(short=True)
     stack_trace = traceback.extract_tb(exc_info[3])
     message = str(exc_info[1])
     Type = "Error" #using string but ideally this would be an enum value.
@@ -184,7 +184,7 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                     "TypeName": f"{function.__module__}.{function.__qualname__}"
                 },
                 "Time": {
-                    "$date": csharp_ticks(short=True),
+                    "$date": bson_unix_ticks(short=True),
                 },
                 "UI": "Python",
                 "UiVersion": sys.version,
