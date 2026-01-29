@@ -158,7 +158,11 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
             _id = uuid.uuid4()
 
             #for now for file IDs, generate one using the project ID
-            file_id = uuid.uuid3(uuid.NAMESPACE_OID, project_id())
+            pid = project_id()
+            if pid == None:
+                pid = ""
+
+            file_id = uuid.uuid3(uuid.NAMESPACE_OID, pid)
 
             # get the data being passed to the function, expected dtype and return type
             argspec = inspect.getfullargspec(function)[-1]
