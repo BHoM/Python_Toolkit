@@ -304,30 +304,47 @@ class DefaultRoot:
         """Recalculate and apply window sizing (useful after adding widgets)."""
         self._apply_sizing()
 
+    def _destroy_root(self) -> None:
+        """Safely terminate and destroy the Tk root window."""
+        if not hasattr(self, "root") or self.root is None:
+            return
+
+        try:
+            if self.root.winfo_exists():
+                self.root.quit()
+                self.root.destroy()
+        except tk.TclError:
+            pass
+
+    def _exit(self, result: str, callback: Optional[Callable] = None) -> None:
+        """Handle any exit path and always destroy the root window."""
+        self.result = result
+        try:
+            if callback:
+                callback()
+        except Exception as ex:
+            print(f"Warning: Exit callback raised an exception: {ex}")
+        finally:
+            self._destroy_root()
+
     def _on_submit(self) -> None:
         """Handle submit button click."""
-        self.result = "submit"
-        if self.submit_command:
-            self.submit_command()
-        self.root.destroy()
+        self._exit("submit", self.submit_command)
 
     def _on_close(self) -> None:
         """Handle close button click."""
-        self.result = "close"
-        if self.close_command:
-            self.close_command()
-        self.root.destroy()
+        self._exit("close", self.close_command)
 
     def _on_close_window(self, callback: Optional[Callable]) -> None:
         """Handle window X button click."""
-        self.result = "window_closed"
-        if callback:
-            callback()
-        self.root.destroy()
+        self._exit("window_closed", callback)
 
     def run(self) -> Optional[str]:
         """Show the window and return the result."""
-        self.root.mainloop()
+        try:
+            self.root.mainloop()
+        finally:
+            self._destroy_root()
         return self.result
 
 
@@ -336,6 +353,7 @@ if __name__ == "__main__":
     from widgets.RadioSelection import RadioSelection
     from widgets.ValidatedEntryBox import ValidatedEntryBox
     from widgets.ListBox import ScrollableListBox
+    from widgets.CmapSelector import CmapSelector
 
     # Store form state
     form_data = {}
@@ -347,6 +365,7 @@ if __name__ == "__main__":
         form_data["file_path"] = file_selector.get()
         form_data["priority"] = priority_radio.get()
         form_data["selected_items"] = listbox.get_selection()
+        form_data["cmap"] = cmap_selector.colormap_var.get()
         print("\nForm submitted with data:")
         for key, value in form_data.items():
             print(f"  {key}: {value}")
@@ -414,6 +433,9 @@ if __name__ == "__main__":
     )
     listbox.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
     listbox.set_selections(["Item 2", "Item 5"])
+
+    cmap_selector = CmapSelector(window.content_frame, cmap_set="categorical")
+    cmap_selector.pack(anchor="w", pady=(0, 10))
 
     # Refresh window sizing after adding all widgets
     window.refresh_sizing()

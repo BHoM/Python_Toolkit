@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import Colormap, Normalize
+from matplotlib.figure import Figure
 import numpy as np
 from typing import Union, Optional
 
@@ -8,7 +9,7 @@ def cmap_sample_plot(
     cmap: Union[str, Colormap],
     bounds: Optional[tuple] = None,
     figsize: tuple = (9, 1)
-) -> plt.Figure:
+) -> Figure:
 
     """
     Generate a sample plot for a given colormap.
@@ -33,6 +34,8 @@ def cmap_sample_plot(
 
     # Create the figure and axis
     fig, ax = plt.subplots(figsize=figsize)
+    fig.patch.set_alpha(0)
+    ax.set_facecolor("none")
     
     # Create normalization if custom colormap or custom bounds
     norm = Normalize(vmin=vmin, vmax=vmax)
