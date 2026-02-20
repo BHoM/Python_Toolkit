@@ -83,7 +83,7 @@ namespace eval ttk::theme::bhom_dark {
             -padding {0 0}
 
         ttk::style configure Title.TLabel \
-            -font {{Segoe UI} 20 bold} \
+            -font {{Segoe UI} 24 bold} \
             -foreground $colors(-fg) \
             -padding {0 0}
 
@@ -98,63 +98,63 @@ namespace eval ttk::theme::bhom_dark {
             -padding {0 0}
 
         ttk::style configure Heading.TLabel \
-              -font {{Segoe UI} 24 bold} \
+                        -font {{Segoe UI} 12 bold} \
             -foreground $colors(-primary) \
             -padding {0 0}
 
-              -font {{Segoe UI} 10 bold} \
-            -font {{Segoe UI} 10} \
+                ttk::style configure Body.TLabel \
+                        -font {{Segoe UI} 10} \
             -foreground $colors(-fg) \
             -padding {6 4}
-              -font {{Segoe UI} 12 bold} \
+
         ttk::style configure Caption.TLabel \
             -font {{Segoe UI} 9} \
             -foreground $colors(-text-secondary) \
-              -font {{Segoe UI} 8 bold} \
+                        -padding {6 4}
 
         ttk::style configure Small.TLabel \
             -font {{Segoe UI} 8} \
-              -font {{Segoe UI} 10 bold} \
+                        -foreground $colors(-text-secondary) \
             -padding {4 2}
 
         ttk::style configure Success.TLabel \
-              -font {{Segoe UI} 10 bold} \
+                        -font {{Segoe UI} 10 bold} \
             -foreground $colors(-success)
 
         ttk::style configure Warning.TLabel \
-              -font {{Segoe UI} 10 bold} \
+                        -font {{Segoe UI} 10 bold} \
             -foreground $colors(-warning)
 
         ttk::style configure Error.TLabel \
-              -font {{Segoe UI} 10 bold} \
+                        -font {{Segoe UI} 10 bold} \
             -foreground $colors(-error)
 
         ttk::style configure Info.TLabel \
-              -font {{Segoe UI} 10 bold} \
+                        -font {{Segoe UI} 10 bold} \
             -foreground $colors(-info)
 
         # Button - soft rounded design
-              -font {{Segoe UI} 10 bold} \
-            -font {{Segoe UI} 11 bold} \
+                ttk::style configure TButton \
+                        -font {{Segoe UI} 10 bold} \
             -background $colors(-active-bg) \
             -foreground $colors(-fg) \
-              -font {{Segoe UI} 10 bold} \
+                        -bordercolor $colors(-border-light) \
             -lightcolor $colors(-hover-bg) \
             -darkcolor $colors(-border) \
             -borderwidth 2 \
-              -font {{Segoe UI} 10 bold} \
+                        -focuscolor "" \
             -padding {16 8} \
             -relief raised
 
         # Large Button variant
         ttk::style configure Large.TButton \
-            -font {{Segoe UI} 13 bold} \
+            -font {{Segoe UI} 12 bold} \
             -padding {20 12} \
             -borderwidth 2
 
         # Small Button variant
         ttk::style configure Small.TButton \
-            -font {{Segoe UI} 9 bold} \
+            -font {{Segoe UI} 8 bold} \
             -padding {12 6} \
             -borderwidth 2
 
@@ -180,7 +180,7 @@ namespace eval ttk::theme::bhom_dark {
 
         # Primary Button - accent color with soft rounded edges
         ttk::style configure Primary.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-primary) \
             -foreground $colors(-fg) \
             -bordercolor $colors(-primary-light) \
@@ -206,7 +206,7 @@ namespace eval ttk::theme::bhom_dark {
 
         # Secondary Button - soft rounded edges
         ttk::style configure Secondary.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-secondary) \
             -foreground $colors(-fg) \
             -bordercolor $colors(-secondary) \
@@ -226,7 +226,7 @@ namespace eval ttk::theme::bhom_dark {
 
         # Accent Button - lime green from app.css
         ttk::style configure Accent.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-tertiary) \
             -foreground "#000000" \
             -bordercolor $colors(-tertiary) \
@@ -248,7 +248,7 @@ namespace eval ttk::theme::bhom_dark {
 
         # Success Button - green from app.css
         ttk::style configure Success.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-success) \
             -foreground $colors(-fg) \
             -bordercolor $colors(-success) \
@@ -268,7 +268,7 @@ namespace eval ttk::theme::bhom_dark {
 
         # Link Button - blue link from app.css
         ttk::style configure Link.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-bg) \
             -foreground $colors(-info) \
             -borderwidth 0 \
@@ -283,7 +283,7 @@ namespace eval ttk::theme::bhom_dark {
 
         # Outline Button - soft rounded with bold font
         ttk::style configure Outline.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-bg) \
             -foreground $colors(-primary) \
             -bordercolor $colors(-primary) \
@@ -305,7 +305,7 @@ namespace eval ttk::theme::bhom_dark {
 
         # Text Button - bold font with padding
         ttk::style configure Text.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-bg) \
             -foreground $colors(-primary) \
             -borderwidth 0 \
@@ -573,8 +573,8 @@ namespace eval ttk::theme::bhom_dark {
         ttk::style configure TSizegrip \
             -background $colors(-bg)
 
-        # Spinbox
-        # Spinbox - soft rounded design\n        ttk::style configure TSpinbox \
+        # Spinbox - soft rounded design
+        ttk::style configure TSpinbox \
             -fieldbackground $colors(-inputbg) \
             -foreground $colors(-inputfg) \
             -bordercolor $colors(-border-light) \
@@ -695,7 +695,7 @@ namespace eval ttk::theme::bhom_light {
             -padding {0 0}
 
         ttk::style configure Title.TLabel \
-            -font {{Segoe UI} 20 bold} \
+            -font {{Segoe UI} 24 bold} \
             -foreground $colors(-fg) \
             -padding {0 0}
 
@@ -710,63 +710,63 @@ namespace eval ttk::theme::bhom_light {
             -padding {0 0}
 
         ttk::style configure Heading.TLabel \
-              -font {{Segoe UI} 24 bold} \
+            -font {{Segoe UI} 12 bold} \
             -foreground $colors(-primary) \
             -padding {0 0}
 
-              -font {{Segoe UI} 10 bold} \
+        ttk::style configure Body.TLabel \
             -font {{Segoe UI} 10} \
             -foreground $colors(-fg) \
             -padding {6 4}
-              -font {{Segoe UI} 12 bold} \
+
         ttk::style configure Caption.TLabel \
             -font {{Segoe UI} 9} \
             -foreground $colors(-text-secondary) \
-              -font {{Segoe UI} 8 bold} \
+            -padding {6 4}
 
         ttk::style configure Small.TLabel \
             -font {{Segoe UI} 8} \
-              -font {{Segoe UI} 10 bold} \
+            -foreground $colors(-text-secondary) \
             -padding {4 2}
 
         ttk::style configure Success.TLabel \
-              -font {{Segoe UI} 10 bold} \
+            -font {{Segoe UI} 10 bold} \
             -foreground $colors(-success)
 
         ttk::style configure Warning.TLabel \
-              -font {{Segoe UI} 10 bold} \
+            -font {{Segoe UI} 10 bold} \
             -foreground $colors(-warning)
 
         ttk::style configure Error.TLabel \
-              -font {{Segoe UI} 10 bold} \
+            -font {{Segoe UI} 10 bold} \
             -foreground $colors(-error)
 
         ttk::style configure Info.TLabel \
-              -font {{Segoe UI} 10 bold} \
+            -font {{Segoe UI} 10 bold} \
             -foreground $colors(-info)
 
         # Button - soft rounded design
-              -font {{Segoe UI} 10 bold} \
-            -font {{Segoe UI} 11 bold} \
+        ttk::style configure TButton \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-active-bg) \
             -foreground $colors(-fg) \
-              -font {{Segoe UI} 10 bold} \
+            -bordercolor $colors(-border-light) \
             -lightcolor $colors(-hover-bg) \
             -darkcolor $colors(-border) \
             -borderwidth 2 \
-              -font {{Segoe UI} 10 bold} \
+            -focuscolor "" \
             -padding {16 8} \
             -relief raised
 
         # Large Button variant
         ttk::style configure Large.TButton \
-            -font {{Segoe UI} 13 bold} \
+            -font {{Segoe UI} 12 bold} \
             -padding {20 12} \
             -borderwidth 2
 
         # Small Button variant
         ttk::style configure Small.TButton \
-            -font {{Segoe UI} 9 bold} \
+            -font {{Segoe UI} 8 bold} \
             -padding {12 6} \
             -borderwidth 2
 
@@ -792,7 +792,7 @@ namespace eval ttk::theme::bhom_light {
 
         # Primary Button - accent color with soft rounded edges
         ttk::style configure Primary.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-primary) \
             -foreground "#ffffff" \
             -bordercolor $colors(-primary-light) \
@@ -818,7 +818,7 @@ namespace eval ttk::theme::bhom_light {
 
         # Secondary Button - soft rounded edges
         ttk::style configure Secondary.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-secondary) \
             -foreground "#ffffff" \
             -bordercolor $colors(-secondary) \
@@ -838,7 +838,7 @@ namespace eval ttk::theme::bhom_light {
 
         # Accent Button - muted yellow for light mode
         ttk::style configure Accent.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-tertiary) \
             -foreground "#ffffff" \
             -bordercolor $colors(-tertiary) \
@@ -860,7 +860,7 @@ namespace eval ttk::theme::bhom_light {
 
         # Success Button - green from app.css
         ttk::style configure Success.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-success) \
             -foreground "#ffffff" \
             -bordercolor $colors(-success) \
@@ -880,7 +880,7 @@ namespace eval ttk::theme::bhom_light {
 
         # Link Button - blue link from app.css
         ttk::style configure Link.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-bg) \
             -foreground $colors(-info) \
             -borderwidth 0 \
@@ -895,7 +895,7 @@ namespace eval ttk::theme::bhom_light {
 
         # Outline Button - soft rounded with bold font
         ttk::style configure Outline.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-bg) \
             -foreground $colors(-primary) \
             -bordercolor $colors(-primary) \
@@ -917,7 +917,7 @@ namespace eval ttk::theme::bhom_light {
 
         # Text Button - bold font with padding
         ttk::style configure Text.TButton \
-            -font {{Segoe UI} 11 bold} \
+            -font {{Segoe UI} 10 bold} \
             -background $colors(-bg) \
             -foreground $colors(-primary) \
             -borderwidth 0 \
