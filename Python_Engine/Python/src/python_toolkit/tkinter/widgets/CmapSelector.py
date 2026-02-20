@@ -117,7 +117,19 @@ class CmapSelector(ttk.Frame):
 
     def _get_all_colormaps(self) -> List[str]:
         """Return all registered colormap names, including reversed variants."""
-        return sorted(cm.datad.keys())
+        # Base names available in this matplotlib build
+        try:
+            base_names = set(cm.cmap_d.keys())
+        except Exception:
+            base_names = set(cm.datad.keys())
+
+        # Include reversed variants (name_r) next to each base map
+        all_names = set(base_names)
+        for name in list(base_names):
+            if not name.endswith("_r"):
+                all_names.add(f"{name}_r")
+
+        return sorted(all_names)
 
     def _filter_available(self, names: List[str]) -> List[str]:
         """Filter a candidate list to names available in the current matplotlib build."""
@@ -176,7 +188,8 @@ if __name__ == "__main__":
     root.title("Colormap Selector Test")
     root.geometry("800x600")
 
-    cmap_selector = CmapSelector(root, cmap_set="categorical")
+    cmap_selector = CmapSelector(root, cmap_set="all")
     cmap_selector.pack(fill=tk.BOTH, expand=True)
 
     root.mainloop()
+    root.destroy()

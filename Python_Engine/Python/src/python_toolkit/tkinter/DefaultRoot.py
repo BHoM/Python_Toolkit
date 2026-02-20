@@ -20,6 +20,7 @@ class DefaultRoot:
         self,
         title: str = "Application",
         logo_path: Optional[Path] = None,
+        icon_path: Optional[Path] = None,
         min_width: int = 500,
         min_height: int = 400,
         width: Optional[int] = None,
@@ -42,6 +43,7 @@ class DefaultRoot:
         Args:
             title (str): Window and banner title text.
             logo_path (Path, optional): Path to logo image file.
+            icon_path (Path, optional): Path to window icon file (.ico recommended on Windows).
             min_width (int): Minimum window width.
             min_height (int): Minimum window height.
             width (int, optional): Fixed width (overrides dynamic sizing).
@@ -60,6 +62,8 @@ class DefaultRoot:
         """
         self.root = tk.Tk()
         self.root.title(title)
+        self._icon_image = None
+        self._set_window_icon(icon_path)
         self.root.minsize(min_width, min_height)
         self.root.resizable(resizable, resizable)
         
@@ -68,10 +72,9 @@ class DefaultRoot:
 
         # Determine theme based on mode and system preference
         theme_name = self._determine_theme_name(theme_mode)
-        self.theme_name = theme_name
 
         # Load custom dark theme
-        self._load_theme(theme_path, theme_name)
+        self.theme_name = self._load_theme(theme_path, theme_name)
 
         self.min_width = min_width
         self.min_height = min_height
@@ -102,6 +105,42 @@ class DefaultRoot:
 
         # Apply sizing
         self._apply_sizing()
+
+    def _set_window_icon(self, icon_path: Optional[Path]) -> None:
+        """Set a custom window icon, replacing the default Tk icon when possible."""
+        if icon_path is None:
+            return
+
+        path = Path(icon_path)
+        if not path.exists():
+            print(f"Warning: Icon file not found at {path}")
+            return
+
+        # Windows prefers .ico for titlebar/taskbar icons.
+        if path.suffix.lower() == ".ico":
+            try:
+                self.root.iconbitmap(default=str(path))
+                return
+            except tk.TclError:
+                pass
+
+        # Fallback for image formats supported by Tk PhotoImage (png/gif/etc.).
+        try:
+            self._icon_image = tk.PhotoImage(file=str(path))
+            self.root.iconphoto(True, self._icon_image)
+            return
+        except tk.TclError:
+            pass
+
+        # Final fallback using PIL if available.
+        try:
+            from PIL import Image, ImageTk
+
+            img = Image.open(path)
+            self._icon_image = ImageTk.PhotoImage(img)
+            self.root.iconphoto(True, self._icon_image)
+        except Exception as ex:
+            print(f"Warning: Could not set window icon from {path}: {ex}")
 
     def _determine_theme_name(self, theme_mode: str) -> str:
         """
@@ -163,7 +202,7 @@ class DefaultRoot:
         """
         self._set_titlebar_theme(theme_name)
 
-    def _load_theme(self, custom_theme_path: Optional[Path] = None, theme_name: str = "bhom_dark") -> None:
+    def _load_theme(self, custom_theme_path: Optional[Path] = None, theme_name: str = "bhom_dark") -> str:
         """
         Load a custom theme from a TCL file.
         
@@ -171,27 +210,50 @@ class DefaultRoot:
             custom_theme_path (Path, optional): Path to custom TCL theme file. 
                                                 If None, uses default style.tcl in same directory.
             theme_name (str): Name of the theme to apply from the TCL file.
+
+        Returns:
+            str: Name of the theme that ended up being applied.
         """
+        style = ttk.Style()
+
+        def _pick_theme_name(available_theme_names: tuple) -> str:
+            if theme_name in available_theme_names:
+                return theme_name
+
+            for candidate in ("bhom_dark", "bhom_light"):
+                if candidate in available_theme_names:
+                    return candidate
+
+            return style.theme_use()
+
         try:
             # Determine which theme file to use
             if custom_theme_path and custom_theme_path.exists():
                 theme_path = custom_theme_path
             else:
-                # Use default theme in same directory as this file
-                current_dir = Path(__file__).parent
-                theme_path = current_dir / "style.tcl"
+                # Use default theme
+                theme_path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_style.tcl")
             
             if theme_path.exists():
                 # Load the TCL theme file
                 self.root.tk.call('source', str(theme_path))
-                
-                # Apply the specified theme
-                style = ttk.Style()
-                style.theme_use(theme_name)
+
+                available_theme_names = style.theme_names()
+                selected_theme = _pick_theme_name(available_theme_names)
+                style.theme_use(selected_theme)
+                return selected_theme
             else:
                 print(f"Warning: Theme file not found at {theme_path}")
+                available_theme_names = style.theme_names()
+                selected_theme = _pick_theme_name(available_theme_names)
+                style.theme_use(selected_theme)
+                return selected_theme
         except Exception as e:
             print(f"Warning: Could not load custom theme: {e}")
+            try:
+                return style.theme_use()
+            except Exception:
+                return theme_name
 
     def _build_banner(self, parent: ttk.Frame, title: str, logo_path: Optional[Path]) -> None:
         """Build the branded banner section."""
@@ -209,7 +271,7 @@ class DefaultRoot:
                 img.thumbnail((40, 40), Image.Resampling.LANCZOS)
                 self.logo_image = ImageTk.PhotoImage(img)
                 logo_label = ttk.Label(banner_content, image=self.logo_image)
-                logo_label.pack(side=tk.LEFT, padx=(0, 10))
+                logo_label.pack(side=tk.RIGHT)
             except ImportError:
                 pass  # PIL not available, skip logo
 
@@ -379,6 +441,10 @@ if __name__ == "__main__":
         min_height=500,
         submit_command=on_submit,
         close_command=on_close,
+        logo_path= Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\bhom_logo.png"),
+        icon_path= Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\bhom_icon.png"),
+        theme_mode="dark",
+
     )
 
     # Add form widgets to the content area

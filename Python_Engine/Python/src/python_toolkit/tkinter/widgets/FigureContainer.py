@@ -3,6 +3,7 @@ from tkinter import ttk
 from typing import Optional
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 
 class FigureContainer(ttk.Frame):
@@ -34,6 +35,20 @@ class FigureContainer(ttk.Frame):
         for widget in self.winfo_children():
             widget.destroy()
 
+    def _resolved_background(self) -> str:
+        """Resolve a background colour suitable for embedded Tk canvas widgets."""
+        try:
+            bg = ttk.Style().lookup("TFrame", "background")
+            if bg:
+                return bg
+        except Exception:
+            pass
+
+        try:
+            return self.winfo_toplevel().cget("bg")
+        except Exception:
+            return "white"
+
     def embed_figure(self, figure: Figure) -> None:
         """
         Embed a matplotlib figure in the figure container.
@@ -45,8 +60,16 @@ class FigureContainer(ttk.Frame):
 
         self.figure = figure
         self.figure_canvas = FigureCanvasTkAgg(figure, master=self)
-        self.figure_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        canvas_widget = self.figure_canvas.get_tk_widget()
+        bg = self._resolved_background()
+        canvas_widget.configure(bg=bg, highlightthickness=0, bd=0)
+        canvas_widget.pack(fill=tk.BOTH, expand=True)
         self.figure_canvas.draw()
+        # Close the figure in pyplot to avoid accumulating open-figure state
+        try:
+            plt.close(figure)
+        except Exception:
+            pass
         self.image = None
         self.image_label = None
 
@@ -79,6 +102,12 @@ class FigureContainer(ttk.Frame):
     def clear(self) -> None:
         """Clear the figure container."""
         self._clear_children()
+        # Close any held figure to free matplotlib resources
+        if self.figure is not None:
+            try:
+                plt.close(self.figure)
+            except Exception:
+                pass
         self.figure = None
         self.figure_canvas = None
         self.image = None

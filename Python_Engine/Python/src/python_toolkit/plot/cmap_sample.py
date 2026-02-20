@@ -1,9 +1,10 @@
 from matplotlib import pyplot as plt
-from matplotlib import cm
 from matplotlib.colors import Colormap, Normalize
 from matplotlib.figure import Figure
 import numpy as np
 from typing import Union, Optional
+
+plt.rcParams["figure.max_open_warning"] = 0
 
 def cmap_sample_plot(
     cmap: Union[str, Colormap],
@@ -35,13 +36,14 @@ def cmap_sample_plot(
     # Create the figure and axis
     fig, ax = plt.subplots(figsize=figsize)
     fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
     ax.set_facecolor("none")
     
     # Create normalization if custom colormap or custom bounds
     norm = Normalize(vmin=vmin, vmax=vmax)
     
     # Display the gradient with the specified colormap
-    im = ax.imshow(gradient, aspect='auto', cmap=cmap, norm=norm)
+    ax.imshow(gradient, aspect='auto', cmap=cmap, norm=norm)
     
     # Remove axes for a cleaner look
     ax.set_axis_off()

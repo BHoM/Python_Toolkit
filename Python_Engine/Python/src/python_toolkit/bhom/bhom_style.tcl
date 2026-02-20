@@ -98,51 +98,51 @@ namespace eval ttk::theme::bhom_dark {
             -padding {0 0}
 
         ttk::style configure Heading.TLabel \
-            -font {{Segoe UI} 12 bold} \
+              -font {{Segoe UI} 24 bold} \
             -foreground $colors(-primary) \
             -padding {0 0}
 
-        ttk::style configure Body.TLabel \
+              -font {{Segoe UI} 10 bold} \
             -font {{Segoe UI} 10} \
             -foreground $colors(-fg) \
             -padding {6 4}
-
+              -font {{Segoe UI} 12 bold} \
         ttk::style configure Caption.TLabel \
             -font {{Segoe UI} 9} \
             -foreground $colors(-text-secondary) \
-            -padding {6 4}
+              -font {{Segoe UI} 8 bold} \
 
         ttk::style configure Small.TLabel \
             -font {{Segoe UI} 8} \
-            -foreground $colors(-text-secondary) \
+              -font {{Segoe UI} 10 bold} \
             -padding {4 2}
 
         ttk::style configure Success.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-success)
 
         ttk::style configure Warning.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-warning)
 
         ttk::style configure Error.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-error)
 
         ttk::style configure Info.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-info)
 
         # Button - soft rounded design
-        ttk::style configure TButton \
+              -font {{Segoe UI} 10 bold} \
             -font {{Segoe UI} 11 bold} \
             -background $colors(-active-bg) \
             -foreground $colors(-fg) \
-            -bordercolor $colors(-border-light) \
+              -font {{Segoe UI} 10 bold} \
             -lightcolor $colors(-hover-bg) \
             -darkcolor $colors(-border) \
             -borderwidth 2 \
-            -focuscolor "" \
+              -font {{Segoe UI} 10 bold} \
             -padding {16 8} \
             -relief raised
 
@@ -710,51 +710,51 @@ namespace eval ttk::theme::bhom_light {
             -padding {0 0}
 
         ttk::style configure Heading.TLabel \
-            -font {{Segoe UI} 12 bold} \
+              -font {{Segoe UI} 24 bold} \
             -foreground $colors(-primary) \
             -padding {0 0}
 
-        ttk::style configure Body.TLabel \
+              -font {{Segoe UI} 10 bold} \
             -font {{Segoe UI} 10} \
             -foreground $colors(-fg) \
             -padding {6 4}
-
+              -font {{Segoe UI} 12 bold} \
         ttk::style configure Caption.TLabel \
             -font {{Segoe UI} 9} \
             -foreground $colors(-text-secondary) \
-            -padding {6 4}
+              -font {{Segoe UI} 8 bold} \
 
         ttk::style configure Small.TLabel \
             -font {{Segoe UI} 8} \
-            -foreground $colors(-text-secondary) \
+              -font {{Segoe UI} 10 bold} \
             -padding {4 2}
 
         ttk::style configure Success.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-success)
 
         ttk::style configure Warning.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-warning)
 
         ttk::style configure Error.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-error)
 
         ttk::style configure Info.TLabel \
-            -font {{Segoe UI} 10 bold} \
+              -font {{Segoe UI} 10 bold} \
             -foreground $colors(-info)
 
         # Button - soft rounded design
-        ttk::style configure TButton \
+              -font {{Segoe UI} 10 bold} \
             -font {{Segoe UI} 11 bold} \
             -background $colors(-active-bg) \
             -foreground $colors(-fg) \
-            -bordercolor $colors(-border-light) \
+              -font {{Segoe UI} 10 bold} \
             -lightcolor $colors(-hover-bg) \
             -darkcolor $colors(-border) \
             -borderwidth 2 \
-            -focuscolor "" \
+              -font {{Segoe UI} 10 bold} \
             -padding {16 8} \
             -relief raised
 
