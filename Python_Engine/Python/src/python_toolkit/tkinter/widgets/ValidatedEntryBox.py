@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable, Any, Union
 
-class ValidatedEntryBox:
+class ValidatedEntryBox(ttk.Frame):
     """
     A reusable entry box component with built-in validation for different data types.
     
@@ -26,6 +26,7 @@ class ValidatedEntryBox:
         required: bool = True,
         custom_validator: Optional[Callable[[Any], tuple[bool, str]]] = None,
         on_validate: Optional[Callable[[bool], None]] = None,
+        **kwargs
     ) -> None:
         """
         Initialize the ValidatedEntryBox.
@@ -43,7 +44,7 @@ class ValidatedEntryBox:
             custom_validator: Custom validation function that returns (is_valid, error_message)
             on_validate: Callback function called after validation with validation result
         """
-        self.parent = parent
+        super().__init__(parent, **kwargs)
         self.value_type = value_type
         self.min_value = min_value
         self.max_value = max_value
@@ -54,13 +55,12 @@ class ValidatedEntryBox:
         self.on_validate = on_validate
         
         # Create frame to hold entry and error label
-        self.frame = ttk.Frame(parent)
         
         # Create or use provided StringVar
         self.variable = variable if variable is not None else tk.StringVar(value="")
         
         # Create entry widget
-        self.entry = ttk.Entry(self.frame, textvariable=self.variable, width=width)
+        self.entry = ttk.Entry(self, textvariable=self.variable, width=width)
         self.entry.pack(side="left", fill="x", expand=True)
         
         # Bind validation events
@@ -68,20 +68,20 @@ class ValidatedEntryBox:
         self.entry.bind("<Return>", lambda _: self.validate())
         
         # Create error label
-        self.error_label = ttk.Label(self.frame, text="", style="Error.TLabel")
+        self.error_label = ttk.Label(self, text="", style="Error.TLabel")
         self.error_label.pack(side="left", padx=(10, 0))
         
     def pack(self, **kwargs) -> None:
         """Pack the entry box frame."""
-        self.frame.pack(**kwargs)
+        self.pack(**kwargs)
         
     def grid(self, **kwargs) -> None:
         """Grid the entry box frame."""
-        self.frame.grid(**kwargs)
+        self.grid(**kwargs)
         
     def place(self, **kwargs) -> None:
         """Place the entry box frame."""
-        self.frame.place(**kwargs)
+        self.place(**kwargs)
         
     def get(self) -> str:
         """Get the current value as a string."""

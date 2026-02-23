@@ -10,7 +10,7 @@ except ImportError:
 import ctypes
 
 
-class DefaultRoot:
+class DefaultRoot(tk.Tk):
     """
     A reusable default root window template for tkinter applications.
     Includes a branded banner, content area, and optional action buttons.
@@ -60,15 +60,15 @@ class DefaultRoot:
             theme_path (Path, optional): Path to custom TCL theme file. If None, uses default style.tcl.
             theme_mode (str): Theme mode - "light", "dark", or "auto" to detect from system (default: "auto").
         """
-        self.root = tk.Tk()
-        self.root.title(title)
+        super().__init__()
+        self.title(title)
         self._icon_image = None
         self._set_window_icon(icon_path)
-        self.root.minsize(min_width, min_height)
-        self.root.resizable(resizable, resizable)
+        self.minsize(min_width, min_height)
+        self.resizable(resizable, resizable)
         
         # Hide window during setup to prevent flash
-        self.root.withdraw()
+        self.withdraw()
 
         # Determine theme based on mode and system preference
         theme_name = self._determine_theme_name(theme_mode)
@@ -86,10 +86,10 @@ class DefaultRoot:
         self.result = None
 
         # Handle window close (X button)
-        self.root.protocol("WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window))
+        self.protocol("WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window))
 
         # Main container
-        main_container = ttk.Frame(self.root)
+        main_container = ttk.Frame(self)
         main_container.pack(fill=tk.BOTH, expand=True)
 
         # Banner section
@@ -119,7 +119,7 @@ class DefaultRoot:
         # Windows prefers .ico for titlebar/taskbar icons.
         if path.suffix.lower() == ".ico":
             try:
-                self.root.iconbitmap(default=str(path))
+                self.iconbitmap(default=str(path))
                 return
             except tk.TclError:
                 pass
@@ -127,7 +127,7 @@ class DefaultRoot:
         # Fallback for image formats supported by Tk PhotoImage (png/gif/etc.).
         try:
             self._icon_image = tk.PhotoImage(file=str(path))
-            self.root.iconphoto(True, self._icon_image)
+            self.iconphoto(True, self._icon_image)
             return
         except tk.TclError:
             pass
@@ -138,7 +138,7 @@ class DefaultRoot:
 
             img = Image.open(path)
             self._icon_image = ImageTk.PhotoImage(img)
-            self.root.iconphoto(True, self._icon_image)
+            self.iconphoto(True, self._icon_image)
         except Exception as ex:
             print(f"Warning: Could not set window icon from {path}: {ex}")
 
@@ -178,9 +178,9 @@ class DefaultRoot:
         """
         try:
             import platform
-            if platform.system() == "Windows" and ctypes is not None and self.root.winfo_exists():
-                hwnd = self.root.winfo_id()
-                hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            if platform.system() == "Windows" and ctypes is not None and self.winfo_exists():
+                hwnd = self.winfo_id()
+                hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
                 if hwnd:
                     DWMWA_USE_IMMERSIVE_DARK_MODE = 20
                     use_dark = 1 if theme_name == "bhom_dark" else 0
@@ -236,7 +236,7 @@ class DefaultRoot:
             
             if theme_path.exists():
                 # Load the TCL theme file
-                self.root.tk.call('source', str(theme_path))
+                self.tk.call('source', str(theme_path))
 
                 available_theme_names = style.theme_names()
                 selected_theme = _pick_theme_name(available_theme_names)
@@ -324,7 +324,7 @@ class DefaultRoot:
 
     def _apply_sizing(self) -> None:
         """Apply window sizing and positioning."""
-        self.root.update_idletasks()
+        self.update_idletasks()
 
         # Determine final dimensions
         if self.fixed_width and self.fixed_height:
@@ -332,27 +332,27 @@ class DefaultRoot:
             final_height = self.fixed_height
         elif self.fixed_width:
             final_width = self.fixed_width
-            final_height = max(self.min_height, self.root.winfo_reqheight())
+            final_height = max(self.min_height, self.winfo_reqheight())
         elif self.fixed_height:
-            final_width = max(self.min_width, self.root.winfo_reqwidth())
+            final_width = max(self.min_width, self.winfo_reqwidth())
             final_height = self.fixed_height
         else:
             # Dynamic sizing
-            final_width = max(self.min_width, self.root.winfo_reqwidth())
-            final_height = max(self.min_height, self.root.winfo_reqheight())
+            final_width = max(self.min_width, self.winfo_reqwidth())
+            final_height = max(self.min_height, self.winfo_reqheight())
 
         # Position
         if self.center_on_screen:
-            screen_width = self.root.winfo_screenwidth()
-            screen_height = self.root.winfo_screenheight()
+            screen_width = self.winfo_screenwidth()
+            screen_height = self.winfo_screenheight()
             x = (screen_width - final_width) // 2
             y = (screen_height - final_height) // 2
-            self.root.geometry(f"{final_width}x{final_height}+{x}+{y}")
+            self.geometry(f"{final_width}x{final_height}+{x}+{y}")
         else:
-            self.root.geometry(f"{final_width}x{final_height}")
+            self.geometry(f"{final_width}x{final_height}")
         
         # Defer window display until after styling is applied
-        self.root.after(0, self._show_window_with_styling)
+        self.after(0, self._show_window_with_styling)
 
     def _show_window_with_styling(self) -> None:
         """Apply titlebar styling and show the window."""
@@ -360,21 +360,21 @@ class DefaultRoot:
         self._apply_titlebar_theme(self.theme_name)
         
         # Show window after styling
-        self.root.deiconify()
+        self.deiconify()
 
     def refresh_sizing(self) -> None:
         """Recalculate and apply window sizing (useful after adding widgets)."""
         self._apply_sizing()
 
-    def _destroy_root(self) -> None:
+    def destroy_root(self) -> None:
         """Safely terminate and destroy the Tk root window."""
-        if not hasattr(self, "root") or self.root is None:
+        if not hasattr(self, "root") or self is None:
             return
 
         try:
-            if self.root.winfo_exists():
-                self.root.quit()
-                self.root.destroy()
+            if self.winfo_exists():
+                self.quit()
+                self.destroy()
         except tk.TclError:
             pass
 
@@ -404,7 +404,7 @@ class DefaultRoot:
     def run(self) -> Optional[str]:
         """Show the window and return the result."""
         try:
-            self.root.mainloop()
+            self.mainloop()
         finally:
             self._destroy_root()
         return self.result

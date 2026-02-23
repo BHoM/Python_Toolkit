@@ -4,7 +4,7 @@ from typing import Optional, Callable
 from DefaultRoot import DefaultRoot
 
 
-class LandingPage:
+class LandingPage(DefaultRoot):
     """
     A reusable landing page GUI with configurable title, message, and buttons.
     Uses DefaultRoot as the base template.
@@ -41,9 +41,7 @@ class LandingPage:
         # Store callbacks
         self.continue_command = continue_command
         self.close_command = close_command
-
-        # Initialize DefaultRoot with continue mapped to submit
-        self.window = DefaultRoot(
+        super().__init__(
             title=title,
             min_width=min_width,
             min_height=min_height,
@@ -53,12 +51,13 @@ class LandingPage:
             show_close=show_close,
             close_text=close_text,
             close_command=self._on_close,
-        )
+            )
+        # Initialize DefaultRoot with continue mapped to submit
 
         # Optional message/commentary
         if message:
             message_label = ttk.Label(
-                self.window.content_frame,
+                self.content_frame,
                 text=message,
                 justify=tk.LEFT,
                 wraplength=min_width - 80,
@@ -66,7 +65,7 @@ class LandingPage:
             message_label.pack(anchor="w", pady=(0, 20))
 
         # Custom buttons container
-        self.custom_buttons_frame = ttk.Frame(self.window.content_frame)
+        self.custom_buttons_frame = ttk.Frame(self.content_frame)
         self.custom_buttons_frame.pack(fill=tk.X, pady=(0, 20))
 
     def add_custom_button(self, text: str, command: Callable, **kwargs) -> ttk.Button:
@@ -84,7 +83,7 @@ class LandingPage:
         button = ttk.Button(self.custom_buttons_frame, text=text, command=command, **kwargs)
         button.pack(pady=5, fill=tk.X)
         # Recalculate window size after adding button
-        self.window.refresh_sizing()
+        self.refresh_sizing()
         return button
 
     def _on_continue(self):
@@ -99,7 +98,7 @@ class LandingPage:
 
     def run(self) -> Optional[str]:
         """Show the landing page and return the result."""
-        result = self.window.run()
+        result = self.run()
         # Map DefaultRoot results to LandingPage convention
         if result == "submit":
             return "continue"
@@ -128,5 +127,10 @@ if __name__ == "__main__":
         "Option B", lambda: print("Option B selected")
     )
 
-    result = landing.run()
+    landing.mainloop()
+    landing.destroy_root()
+
+    result = landing.result
+
+
     print(f"Result: {result}")
