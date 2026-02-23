@@ -36,6 +36,7 @@ def cmap_sample_plot(
     # Create the figure and axis
     fig, ax = plt.subplots(figsize=figsize)
     fig.patch.set_alpha(0)
+    fig.patch.set_facecolor("none")
     ax.patch.set_alpha(0)
     ax.set_facecolor("none")
     

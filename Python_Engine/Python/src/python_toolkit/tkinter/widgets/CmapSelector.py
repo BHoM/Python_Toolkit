@@ -58,6 +58,8 @@ class CmapSelector(ttk.Frame):
         parent: tk.Widget,
         colormaps: Optional[List[str]] = None,
         cmap_set: str = "all",
+        item_title: Optional[str] = None,
+        helper_text: Optional[str] = None,
         **kwargs
     ) -> None:
         """
@@ -73,7 +75,21 @@ class CmapSelector(ttk.Frame):
         """
         super().__init__(parent, **kwargs)
 
+        # Optional header/title label at the top of the widget
+        if item_title:
+            self.title_label = ttk.Label(self, text=item_title, style="Header.TLabel")
+            self.title_label.pack(side="top", anchor="w", pady=(0, 4))
+
+        # Optional helper/requirements label above the input
+        if helper_text:
+            self.helper_label = ttk.Label(self, text=helper_text, style="Caption.TLabel")
+            self.helper_label.pack(side="top", anchor="w", pady=(0, 8))
+
         mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
+
+        # Create frame for cmap selection content
+        self.cmap_frame = ttk.Frame(self)
+        self.cmap_frame.pack(side="top", fill="both", expand=True)
 
         self.colormap_var = tk.StringVar(value="viridis")
         self._all_colormaps = self._get_all_colormaps()
@@ -84,10 +100,10 @@ class CmapSelector(ttk.Frame):
         }
         self._uses_explicit_colormaps = colormaps is not None
 
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.cmap_frame.columnconfigure(0, weight=1)
+        self.cmap_frame.rowconfigure(0, weight=1)
 
-        content = ttk.Frame(self, width=440, height=130)
+        content = ttk.Frame(self.cmap_frame, width=440, height=130)
         content.grid(row=0, column=0, padx=4, pady=4)
         content.grid_propagate(False)
 
@@ -96,7 +112,6 @@ class CmapSelector(ttk.Frame):
 
         self.cmap_set_var = tk.StringVar(value=cmap_set.lower())
 
-        ttk.Label(header, text="Select cmap").pack(side=tk.LEFT, padx=(0, 8))
         self.cmap_combobox = ttk.Combobox(
             header,
             textvariable=self.colormap_var,
@@ -185,12 +200,17 @@ class CmapSelector(ttk.Frame):
         fig = cmap_sample_plot(cmap_name, figsize=(4, 1))
         self.figure_widget.embed_figure(fig)
 
+    def get_selected_cmap(self) -> Optional[str]:
+        """Return the currently selected colormap name, or None if no selection."""
+        cmap_name = self.colormap_var.get()
+        return cmap_name if cmap_name else None
+
 if __name__ == "__main__":
     from python_toolkit.tkinter.DefaultRoot import DefaultRoot
     root = DefaultRoot()
     parent_container = root.content_frame
 
-    cmap_selector = CmapSelector(parent_container, cmap_set="all")
+    cmap_selector = CmapSelector(parent_container, cmap_set="all", item_title="Colormap Selector", helper_text="Select a colormap from the list.")
     cmap_selector.pack(fill=tk.BOTH, expand=True)
 
     root.mainloop()
