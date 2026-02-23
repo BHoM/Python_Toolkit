@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
+from typing import Optional
 
 class ScrollableListBox(ttk.Frame):
     """A reusable listbox widget with auto-hiding scrollbar."""
 
-    def __init__(self, parent, items=None, selectmode=tk.MULTIPLE, height=None, show_selection_controls=False, **kwargs):
+    def __init__(self, parent, items=None, selectmode=tk.MULTIPLE, height=None, show_selection_controls=False,  item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
         """
         Args:
             parent (tk.Widget): The parent widget.
@@ -19,6 +20,19 @@ class ScrollableListBox(ttk.Frame):
         self.items = items or []
         if height is None:
             height = len(self.items) if self.items else 5
+
+        self.item_title = item_title
+        self.helper_text = helper_text
+
+        # Optional header/title label at the top of the widget
+        if self.item_title:
+            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
+            self.title_label.pack(side="top", anchor="w")
+
+        # Optional helper/requirements label above the input
+        if self.helper_text:
+            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
+            self.helper_label.pack(side="top", anchor="w")
         
         self.content_frame = ttk.Frame(self)
         self.content_frame.pack(fill=tk.BOTH, expand=True)
@@ -104,11 +118,13 @@ class ScrollableListBox(ttk.Frame):
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("Scrollable ListBox Example")
+
+    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+    root = DefaultRoot()
+    parent_container = root.content_frame
     
     items = [f"Item {i}" for i in range(1, 21)]
-    listbox = ScrollableListBox(root, items=items, height=10, show_selection_controls=True)
+    listbox = ScrollableListBox(parent_container, items=items, height=10, show_selection_controls=True, item_title="List Box", helper_text="Select items from the list.")
     listbox.pack(padx=20, pady=20)
 
     print("Selected items:", listbox.get_selection())

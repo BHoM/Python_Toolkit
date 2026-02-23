@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable, Any, Union
 
-class ValidatedEntryBox(ttk.Frame):
+class ValidatedEntryBox(tk.Frame):
     """
     A reusable entry box component with built-in validation for different data types.
     
@@ -15,7 +15,9 @@ class ValidatedEntryBox(ttk.Frame):
     
     def __init__(
         self,
-        parent: tk.Widget,
+        parent,
+        item_title: Optional[str] = None,
+        helper_text: Optional[str] = None,
         variable: Optional[tk.StringVar] = None,
         width: int = 15,
         value_type: type = str,
@@ -32,7 +34,9 @@ class ValidatedEntryBox(ttk.Frame):
         Initialize the ValidatedEntryBox.
         
         Args:
-            parent: Parent widget
+            parent: Parent
+            item_title: Optional header text shown at the top of the widget frame
+            requirements_text: Optional helper text shown above the entry box
             variable: StringVar to bind to the entry (creates one if not provided)
             width: Width of the entry widget
             value_type: Type to validate against (str, int, float)
@@ -53,14 +57,28 @@ class ValidatedEntryBox(ttk.Frame):
         self.required = required
         self.custom_validator = custom_validator
         self.on_validate = on_validate
-        
-        # Create frame to hold entry and error label
+        self.item_title = item_title
+        self.helper_text = helper_text
+
+        # Optional header/title label at the top of the widget
+        if self.item_title:
+            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
+            self.title_label.pack(side="top", anchor="w")
+
+        # Optional helper/requirements label above the input
+        if self.helper_text:
+            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
+            self.helper_label.pack(side="top", anchor="w")
+
+        # Create frame to hold entry and error label on one row
+        self.input_row = ttk.Frame(self)
+        self.input_row.pack(side="top", fill="x", expand=True)
         
         # Create or use provided StringVar
         self.variable = variable if variable is not None else tk.StringVar(value="")
         
         # Create entry widget
-        self.entry = ttk.Entry(self, textvariable=self.variable, width=width)
+        self.entry = ttk.Entry(self.input_row, textvariable=self.variable, width=width)
         self.entry.pack(side="left", fill="x", expand=True)
         
         # Bind validation events
@@ -68,20 +86,8 @@ class ValidatedEntryBox(ttk.Frame):
         self.entry.bind("<Return>", lambda _: self.validate())
         
         # Create error label
-        self.error_label = ttk.Label(self, text="", style="Error.TLabel")
+        self.error_label = ttk.Label(self.input_row, text="", style="Error.TLabel")
         self.error_label.pack(side="left", padx=(10, 0))
-        
-    def pack(self, **kwargs) -> None:
-        """Pack the entry box frame."""
-        self.pack(**kwargs)
-        
-    def grid(self, **kwargs) -> None:
-        """Grid the entry box frame."""
-        self.grid(**kwargs)
-        
-    def place(self, **kwargs) -> None:
-        """Place the entry box frame."""
-        self.place(**kwargs)
         
     def get(self) -> str:
         """Get the current value as a string."""
@@ -256,13 +262,23 @@ class ValidatedEntryBox(ttk.Frame):
 
 if __name__ == "__main__":
     # Test the ValidatedEntryBox
-    root = tk.Tk()
-    root.title("Validated Entry Box Test")
+
+    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+    root = DefaultRoot(title="Validated Entry Box Test")
+    parent_container = getattr(root, "content_frame", root)
     
     def on_validate(is_valid):
         print(f"Validation result: {is_valid}")
     
-    entry_box = ValidatedEntryBox(root, value_type=int, min_value=0, max_value=100, on_validate=on_validate)
+    entry_box = ValidatedEntryBox(
+        parent_container,
+        item_title="Integer Field",
+        helper_text="Enter an integer from 0 to 100",
+        value_type=int,
+        min_value=0,
+        max_value=100,
+        on_validate=on_validate
+    )
     entry_box.pack(padx=20, pady=20)
     
     root.mainloop()

@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
+from typing import Optional
 
-class RadioSelection(ttk.Frame):
+class RadioSelection(tk.Frame):
 	"""A reusable radio selection widget built from a list of fields."""
 
-	def __init__(self, parent, fields=None, command=None, default=None, orient="vertical", max_per_line=None, **kwargs):
+	def __init__(self, parent, fields=None, command=None, default=None, orient="vertical", max_per_line=None, item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
 		"""
 		Args:
 			parent (tk.Widget): The parent widget.
@@ -13,6 +14,8 @@ class RadioSelection(ttk.Frame):
 			default (str, optional): Default selected value.
 			orient (str): Either "vertical" or "horizontal".
 			max_per_line (int, optional): Maximum items per row/column before wrapping.
+			item_title (str, optional): Optional header text shown at the top of the widget frame.
+			helper_text (str, optional): Optional helper text shown above the entry box.
 			**kwargs: Additional Frame options.
 		"""
 		super().__init__(parent, **kwargs)
@@ -21,8 +24,24 @@ class RadioSelection(ttk.Frame):
 		self.command = command
 		self.orient = orient.lower()
 		self.max_per_line = max_per_line
+		self.item_title = item_title
+		self.helper_text = helper_text
 		self.value_var = tk.StringVar()
 		self._buttons = []
+
+		# Optional header/title label at the top of the widget
+		if self.item_title:
+			self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
+			self.title_label.pack(side="top", anchor="w")
+
+		# Optional helper/requirements label above the input
+		if self.helper_text:
+			self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
+			self.helper_label.pack(side="top", anchor="w")
+
+		# Sub-frame for radio button controls
+		self.buttons_frame = ttk.Frame(self)
+		self.buttons_frame.pack(side="top", fill="x", expand=True)
 
 		self._build_buttons()
 
@@ -39,7 +58,7 @@ class RadioSelection(ttk.Frame):
 
 		for index, field in enumerate(self.fields):
 			button = ttk.Radiobutton(
-				self,
+				self.buttons_frame,
 				text=field,
 				value=field,
 				variable=self.value_var,
@@ -88,19 +107,24 @@ class RadioSelection(ttk.Frame):
 
 
 if __name__ == "__main__":
-	root = tk.Tk()
-	root.title("Radio Selection Test")
+
+	from python_toolkit.tkinter.DefaultRoot import DefaultRoot
 
 	def on_selection(value):
 		print(f"Selected: {value}")
 
+	root = DefaultRoot()
+	parent_frame = root.content_frame
+
 	widget = RadioSelection(
-		root,
+		parent_frame,
 		fields=["Option A", "Option B", "Option C", "Option D", "Option E", "Option F", "Option G"],
 		command=on_selection,
 		default="Option B",
 		orient="vertical",
 		max_per_line=6,
+		item_title="Choose an Option",
+		helper_text="Select one of the options below:"
 	)
 	widget.pack(padx=20, pady=20)
 

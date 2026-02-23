@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 from matplotlib import cm
 from tkinter import ttk
 import tkinter as tk
-
+import matplotlib as mpl
 from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.tkinter.widgets.FigureContainer import FigureContainer
 
@@ -72,6 +72,8 @@ class CmapSelector(ttk.Frame):
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
+
+        mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
         self.colormap_var = tk.StringVar(value="viridis")
         self._all_colormaps = self._get_all_colormaps()
@@ -184,11 +186,11 @@ class CmapSelector(ttk.Frame):
         self.figure_widget.embed_figure(fig)
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("Colormap Selector Test")
-    root.geometry("800x600")
+    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+    root = DefaultRoot()
+    parent_container = root.content_frame
 
-    cmap_selector = CmapSelector(root, cmap_set="all")
+    cmap_selector = CmapSelector(parent_container, cmap_set="all")
     cmap_selector.pack(fill=tk.BOTH, expand=True)
 
     root.mainloop()

@@ -6,14 +6,16 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
-class FigureContainer(ttk.Frame):
+class FigureContainer(tk.Frame):
     """
     A reusable widget for embedding matplotlib figures and images.
     """
 
     def __init__(
         self,
-        parent: tk.Widget,
+        parent,
+        item_title: Optional[str] = None,
+        helper_text: Optional[str] = None,
         **kwargs
     ) -> None:
         """
@@ -21,19 +23,51 @@ class FigureContainer(ttk.Frame):
 
         Args:
             parent: Parent widget
+            item_title: Optional header text shown at the top of the widget frame.
+            helper_text: Optional helper text shown above the entry box.
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
 
         self.figure: Optional[Figure] = None
-        self.figure_canvas: Optional[FigureCanvasTkAgg] = None
         self.image: Optional[tk.PhotoImage] = None
-        self.image_label: Optional[ttk.Label] = None
+        self.image_file: Optional[str] = None
+
+        self.item_title = item_title
+        self.helper_text = helper_text
+
+        # Optional header/title label at the top of the widget
+        if self.item_title:
+            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
+            self.title_label.pack(side="top", anchor="w")
+
+        # Optional helper/requirements label above the input
+        if self.helper_text:
+            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
+            self.helper_label.pack(side="top", anchor="w")
+
+        # Container frame for embedded content (not title/helper)
+        self.content_frame = ttk.Frame(self)
+        self.content_frame.pack(side="top", fill=tk.BOTH, expand=True)
+
+        self.canvas = None
+        self.image_label = None
+
+        if self.image:
+            self.embed_image(self.image)
+
+        elif self.figure:
+            self.embed_figure(self.figure)
+
+        elif self.image_file:
+            self.embed_image_file(self.image_file)
 
     def _clear_children(self) -> None:
-        """Destroy any child widgets hosted by this frame."""
-        for widget in self.winfo_children():
+        """Destroy any child widgets hosted by the content frame only."""
+        for widget in self.content_frame.winfo_children():
             widget.destroy()
+        self.canvas = None
+        self.image_label = None
 
     def _resolved_background(self) -> str:
         """Resolve a background colour suitable for embedded Tk canvas widgets."""
@@ -50,28 +84,19 @@ class FigureContainer(ttk.Frame):
             return "white"
 
     def embed_figure(self, figure: Figure) -> None:
-        """
-        Embed a matplotlib figure in the figure container.
 
+        """ add matplotlib figure to the container, replacing any existing content. 
+        
         Args:
             figure: Matplotlib Figure object to embed
         """
+
         self._clear_children()
 
         self.figure = figure
-        self.figure_canvas = FigureCanvasTkAgg(figure, master=self)
-        canvas_widget = self.figure_canvas.get_tk_widget()
-        bg = self._resolved_background()
-        canvas_widget.configure(bg=bg, highlightthickness=0, bd=0)
-        canvas_widget.pack(fill=tk.BOTH, expand=True)
-        self.figure_canvas.draw()
-        # Close the figure in pyplot to avoid accumulating open-figure state
-        try:
-            plt.close(figure)
-        except Exception:
-            pass
-        self.image = None
-        self.image_label = None
+        self.canvas = FigureCanvasTkAgg(figure, master=self.content_frame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
     def embed_image(self, image: tk.PhotoImage) -> None:
         """
@@ -83,11 +108,10 @@ class FigureContainer(ttk.Frame):
         self._clear_children()
 
         self.image = image
-        self.image_label = ttk.Label(self, image=image)
+        
+        # Create label to display the image
+        self.image_label = ttk.Label(self.content_frame, image=image)
         self.image_label.pack(fill=tk.BOTH, expand=True)
-
-        self.figure = None
-        self.figure_canvas = None
 
     def embed_image_file(self, file_path: str) -> None:
         """
@@ -97,6 +121,7 @@ class FigureContainer(ttk.Frame):
             file_path: Path to image file
         """
         image = tk.PhotoImage(file=file_path)
+        self.image_file = file_path
         self.embed_image(image)
 
     def clear(self) -> None:
@@ -109,20 +134,18 @@ class FigureContainer(ttk.Frame):
             except Exception:
                 pass
         self.figure = None
-        self.figure_canvas = None
         self.image = None
         self.image_label = None
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
 
-    root = tk.Tk()
-    root.title("Figure Container Test")
-    root.geometry("500x400")
+    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+    root = DefaultRoot()
+    parent_container = root.content_frame
 
     # Create figure container
-    figure_container = FigureContainer(root)
+    figure_container = FigureContainer(parent=parent_container, item_title="Figure Container", helper_text="This widget can embed matplotlib figures or images.")
     figure_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
     # Create and embed a matplotlib figure

@@ -6,16 +6,16 @@ from typing import Iterable, List
 from widgets.ListBox import ScrollableListBox
 from DefaultRoot import DefaultRoot
 
-class DirectoryFileSelector:
+class DirectoryFileSelector(DefaultRoot):
     def __init__(self, directory: Path, file_types: Iterable[str], selection_label: str = "file(s)") -> None:
         self.directory = Path(directory)
         self.file_types = self._normalise_file_types(file_types)
         self.selection_label = selection_label
         self._cancelled = False
-        self._selected_files = []
+        self.selected_files = []
 
         # Create DefaultRoot window
-        self.window = DefaultRoot(
+        super().__init__(
             title=f"Select {selection_label}",
             min_width=600,
             min_height=400,
@@ -34,13 +34,13 @@ class DirectoryFileSelector:
 
         # Add content to the window's content frame
         ttk.Label(
-            self.window.content_frame,
+            self.content_frame,
             text=f"Select the {self.selection_label} to analyse.",
             justify=tk.LEFT,
         ).pack(anchor="w", pady=(0, 10))
 
         self.listbox = ScrollableListBox(
-            self.window.content_frame,
+            self.content_frame,
             items=self.display_items,
             selectmode=tk.MULTIPLE,
             height=12,
@@ -50,7 +50,7 @@ class DirectoryFileSelector:
         self.listbox.select_all()
 
         # Refresh sizing after adding widgets
-        self.window.refresh_sizing()
+        self.refresh_sizing()
 
     def _normalise_file_types(self, file_types: Iterable[str]) -> List[str]:
         normalised = []
@@ -79,20 +79,16 @@ class DirectoryFileSelector:
         except ValueError:
             return str(path)
 
-    def run(self) -> List[Path]:
-        result = self.window.run()
-        if self._cancelled or result != "submit":
-            return []
-        return self._selected_files
-
     def _on_submit(self):
         """Handle OK button - capture selection before window closes."""
         selected = self.listbox.get_selection()
-        self._selected_files = [self.file_lookup[item] for item in selected if item in self.file_lookup]
+        self.selected_files = [self.file_lookup[item] for item in selected if item in self.file_lookup]
+        self.destroy_root()
 
     def _on_cancel(self):
         """Handle Cancel button or window close."""
         self._cancelled = True
+        self.destroy_root()
 
 
 if __name__ == "__main__":
@@ -102,7 +98,7 @@ if __name__ == "__main__":
         file_types=[".py", ".txt"],
         selection_label="scripts and text files",
     )
-    selected_files = selector.run()
-    print("Selected files:")
-    for file in selected_files:
+
+    selector.mainloop()
+    for file in selector.selected_files:
         print(file)

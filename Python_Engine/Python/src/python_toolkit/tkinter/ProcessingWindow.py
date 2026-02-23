@@ -2,8 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import time
+from typing import Optional
+from python_toolkit.tkinter.DefaultRoot import DefaultRoot
 
-class ProcessingWindow:
+class ProcessingWindow(DefaultRoot):
     """A simple processing window with animated indicator."""
 
     def __init__(self, title="Processing", message="Processing..."):
@@ -12,14 +14,14 @@ class ProcessingWindow:
             title (str): Window title.
             message (str): Message to display.
         """
-        self.root = tk.Tk()
+        super().__init__(title=title, min_width=300, min_height=150, show_submit=False, show_close=False)
         
-        self.root.title(title)
-        self.root.attributes("-topmost", True)
-        self.root.resizable(False, False)
+        self.title(title)
+        self.attributes("-topmost", True)
+        self.resizable(False, False)
 
         # Container
-        container = ttk.Frame(self.root, padding=20)
+        container = ttk.Frame(self, padding=20)
         container.pack(fill="both", expand=True)
 
         # Constant title label
@@ -59,11 +61,11 @@ class ProcessingWindow:
         self.is_running = False
 
         # Update to calculate the required size
-        self.root.update_idletasks()
+        self.update_idletasks()
         
         # Get the required width and height
-        required_width = self.root.winfo_reqwidth()
-        required_height = self.root.winfo_reqheight()
+        required_width = self.winfo_reqwidth()
+        required_height = self.winfo_reqheight()
         
         # Set minimum size
         min_width = 300
@@ -72,11 +74,11 @@ class ProcessingWindow:
         window_height = max(required_height, min_height)
 
         # Center on screen
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
-        self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
     def start(self):
         """Start the processing window and animation."""
@@ -85,15 +87,15 @@ class ProcessingWindow:
 
     def keep_alive(self):
         """Call this repeatedly to process animation updates. Returns False when done."""
-        if self.is_running and self.root.winfo_exists():
-            self.root.update()
+        if self.is_running and self.winfo_exists():
+            self.update()
             return True
         return False
 
     def stop(self):
         """Stop the animation and close the window."""
         self.is_running = False
-        self.root.destroy()
+        self.destroy()
 
     def _animate(self):
         """Update animation frames."""
@@ -102,12 +104,12 @@ class ProcessingWindow:
             dots = ["◐", "◓", "◑", "◒"]
             self.animation_label.config(text=dots[self.current_frame % len(dots)])
             self.current_frame += 1
-            self.root.after(200, self._animate)
+            self.after(200, self._animate)
 
     def update_message(self, message: str):
         """Update the message text."""
         self.message_label.config(text=message)
-        self.root.update()
+        self.update()
 
 
 if __name__ == "__main__":

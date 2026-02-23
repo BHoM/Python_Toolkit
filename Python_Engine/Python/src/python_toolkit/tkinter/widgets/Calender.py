@@ -1,15 +1,31 @@
 import tkinter as tk
+from typing import Optional
+from tkinter import ttk
 import calendar
 import datetime
 
 class CalendarWidget(tk.Frame):
-    def __init__(self, parent, def_year: int, def_month: int, def_day: int, show_year_selector: bool = False, year_min: int = 1900, year_max: int = 2100, **kwargs):
+    def __init__(self, parent, def_year: int, def_month: int, def_day: int, show_year_selector: bool = False, year_min: int = 1900, year_max: int = 2100, item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
         super().__init__(parent, **kwargs)
+
         self.year = def_year
         self.month = def_month
         self.show_year_selector = show_year_selector
         self.year_min = year_min
         self.year_max = year_max
+
+        self.item_title = item_title
+        self.helper_text = helper_text
+
+        # Optional header/title label at the top of the widget
+        if self.item_title:
+            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
+            self.title_label.pack(side="top", anchor="w")
+
+        # Optional helper/requirements label above the input
+        if self.helper_text:
+            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
+            self.helper_label.pack(side="top", anchor="w")
 
         self.cal_frame = tk.Frame(self)
         self.cal_frame.pack(side="top", fill="x")
@@ -86,18 +102,14 @@ class CalendarWidget(tk.Frame):
         return datetime.date(self.year, self.month, self.day)
     
 if __name__ == "__main__":
-    root = tk.Tk()
 
-    root = DefaultRoot()
+    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+
+    root = DefaultRoot(min_height=500)
     root.title("Calendar Widget Test")
 
     # Example without year selector
-    cal_widget1 = CalendarWidget(root, def_year=2024, def_month=6, def_day=15)
+    cal_widget1 = CalendarWidget(root.content_frame, def_year=2024, def_month=6, def_day=15, item_title="Select Start Date")
     cal_widget1.pack(padx=20, pady=20)
-
-    # Example with year selector
-    tk.Label(root, text="With Year Selector:").pack(pady=(20, 0))
-    cal_widget2 = CalendarWidget(root, def_year=2026, def_month=2, def_day=20, show_year_selector=True, year_min=2000, year_max=2030)
-    cal_widget2.pack(padx=20, pady=20)
 
     root.mainloop()

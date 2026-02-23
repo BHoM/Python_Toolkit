@@ -13,7 +13,9 @@ class LandingPage(DefaultRoot):
     def __init__(
         self,
         title: str = "Landing Page",
+        header: Optional[str] = None,   
         message: Optional[str] = None,
+        sub_title: Optional[str] = None,
         min_width: int = 400,
         min_height: int = 200,
         show_continue: bool = True,
@@ -54,15 +56,19 @@ class LandingPage(DefaultRoot):
             )
         # Initialize DefaultRoot with continue mapped to submit
 
+        if header:
+            header_label = ttk.Label(self.content_frame, text=header, style="Header.TLabel")
+            header_label.pack(side="top", anchor="w", pady=(0, 10))
+
         # Optional message/commentary
         if message:
-            message_label = ttk.Label(
-                self.content_frame,
-                text=message,
-                justify=tk.LEFT,
-                wraplength=min_width - 80,
-            )
-            message_label.pack(anchor="w", pady=(0, 20))
+            message_label = ttk.Label(self.content_frame, text=message, style="Body.TLabel", justify=tk.LEFT)
+            message_label.pack(side="top", anchor="w", pady=(0, 10))
+        
+        # Optional sub-title
+        if sub_title:
+            sub_title_label = ttk.Label(self.content_frame, text=sub_title, style="Caption.TLabel")
+            sub_title_label.pack(side="top", anchor="w", pady=(0, 10))
 
         # Custom buttons container
         self.custom_buttons_frame = ttk.Frame(self.content_frame)
@@ -116,6 +122,8 @@ if __name__ == "__main__":
     landing = LandingPage(
         title="Example Application",
         message="Welcome to the landing page example.\n\nThis demonstrates a configurable landing page with custom buttons.\n\nPlease select an option below to proceed.",
+        header="Welcome!",
+        sub_title="Please choose an option to continue:",
         continue_text="Proceed",
         continue_command=on_continue,
         close_command=on_close,
@@ -128,7 +136,6 @@ if __name__ == "__main__":
     )
 
     landing.mainloop()
-    landing.destroy_root()
 
     result = landing.result
 

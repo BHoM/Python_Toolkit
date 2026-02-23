@@ -15,8 +15,8 @@ class DefaultRoot(tk.Tk):
     def __init__(
         self,
         title: str = "Application",
-        logo_path: Optional[Path] = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\BHoM_Logo.png"),
-        icon_path: Optional[Path] = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\bhom_icon.png"),
+        logo_path: Path = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\BHoM_Logo.png"),
+        icon_path: Path = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\bhom_icon.png"),
         dark_logo_path: Optional[Path] = None,
         dark_icon_path: Optional[Path] = None,
         min_width: int = 500,
@@ -32,8 +32,8 @@ class DefaultRoot(tk.Tk):
         close_text: str = "Close",
         close_command: Optional[Callable] = None,
         on_close_window: Optional[Callable] = None,
-        theme_path: Optional[Path] = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_light_theme.tcl"),
-        theme_path_dark: Optional[Path] = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_dark_theme.tcl"),
+        theme_path: Path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_light_theme.tcl"),
+        theme_path_dark: Path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_dark_theme.tcl"),
         theme_mode: Literal["light", "dark", "auto"] = "auto",
         **kwargs
     ):
@@ -71,7 +71,7 @@ class DefaultRoot(tk.Tk):
         self.withdraw()
 
         # Load custom themes
-        _theme_path, _icon_path, _logo_path, _theme_style = self._determine_theme(logo_path, dark_logo_path, icon_path, dark_icon_path, theme_mode, theme_path, theme_path_dark)
+        _theme_path, _logo_path, _icon_path, _theme_style = self._determine_theme(logo_path, dark_logo_path, icon_path, dark_icon_path, theme_mode, theme_path, theme_path_dark)
         
         self._set_window_icon(_icon_path)
         self.theme = self._load_theme(_theme_path)
@@ -135,13 +135,13 @@ class DefaultRoot(tk.Tk):
 
     def _determine_theme(
             self, 
-            logo_path: Optional[Path], 
+            logo_path: Path, 
             dark_logo_path: Optional[Path], 
-            icon_path: Optional[Path], 
+            icon_path: Path, 
             dark_icon_path: Optional[Path], 
             theme_mode: str, 
-            theme_path_light: Optional[Path], 
-            theme_path_dark: Optional[Path]) -> tuple[Path|None, Path|None, Path|None, str]:
+            theme_path_light: Path, 
+            theme_path_dark: Path) -> tuple[Path, Path, Path, str]:
         
         """determin the light or dark mode usage"""
 
@@ -162,25 +162,32 @@ class DefaultRoot(tk.Tk):
         else:
             return theme_path_light, logo_path, icon_path, "light"
 
-    def _set_titlebar_theme(self, theme_style: str) -> None:
+    def _set_titlebar_theme(self, theme_style: str) -> str:
         """
         Apply titlebar theme using Windows API.
         """
-
         try:
+           
+            use_dark = 1 if theme_style == "dark" else 0
+
             if platform.system() == "Windows" and ctypes is not None and self.winfo_exists():
                 hwnd = self.winfo_id()
                 hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
                 if hwnd:
                     DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-                    use_dark = 1 if theme_style == "dark" else 0
                     ctypes.windll.dwmapi.DwmSetWindowAttribute(
                         hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
                         ctypes.byref(ctypes.c_int(use_dark)),
                         ctypes.sizeof(ctypes.c_int)
                     )
+
+            if use_dark:
+                return "dark"
+            else:
+                return "light"
+
         except Exception:
-            pass
+            return "light"
 
     def _load_theme(self, _theme_path: Path) -> str:
         """
@@ -197,6 +204,8 @@ class DefaultRoot(tk.Tk):
         style = ttk.Style()
 
         try:
+            current_themes = set(style.theme_names())
+
             # Determine which theme file to use
             if _theme_path and _theme_path.exists():
                 theme_path = _theme_path
@@ -209,7 +218,9 @@ class DefaultRoot(tk.Tk):
                 self.tk.call('source', str(theme_path))
 
                 available_theme_names = style.theme_names()
-                selected_theme = available_theme_names[0] if available_theme_names else "default"
+                newly_added = [name for name in available_theme_names if name not in current_themes]
+                selected_theme = newly_added[-1] if newly_added else (available_theme_names[0] if available_theme_names else "default")
+
                 style.theme_use(selected_theme)
                 return selected_theme
             else:
@@ -229,26 +240,29 @@ class DefaultRoot(tk.Tk):
     def _build_banner(self, parent: ttk.Frame, title: str, logo_path: Optional[Path]) -> None:
         """Build the branded banner section."""
         banner = ttk.Frame(parent, relief=tk.RIDGE, borderwidth=1)
-        banner.pack(fill=tk.X, padx=0, pady=0)
+        banner.pack(fill=tk.BOTH, padx=0, pady=0)
 
         banner_content = ttk.Frame(banner, padding=10)
-        banner_content.pack(fill=tk.X)
+        banner_content.pack(fill=tk.BOTH, expand=True)
+
+        # Text container
+        text_container = ttk.Frame(banner_content)
+        text_container.pack(side=tk.LEFT, fill=tk.Y)
+
+        logo_container = ttk.Frame(banner_content, width=80)
+        logo_container.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Logo (if provided)
         if logo_path and logo_path.exists():
             try:
                 from PIL import Image, ImageTk
                 img = Image.open(logo_path)
-                img.thumbnail((40, 40), Image.Resampling.LANCZOS)
+                img.thumbnail((80, 80), Image.Resampling.LANCZOS)
                 self.logo_image = ImageTk.PhotoImage(img)
-                logo_label = ttk.Label(banner_content, image=self.logo_image)
-                logo_label.pack(side=tk.RIGHT)
+                logo_label = ttk.Label(logo_container, image=self.logo_image)
+                logo_label.pack(fill=tk.BOTH, expand=True)
             except ImportError:
                 pass  # PIL not available, skip logo
-
-        # Text container
-        text_container = ttk.Frame(banner_content)
-        text_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Title
         title_label = ttk.Label(
@@ -328,7 +342,7 @@ class DefaultRoot(tk.Tk):
     def _show_window_with_styling(self) -> None:
         """Apply titlebar styling and show the window."""
         # Apply titlebar theme
-        self._apply_titlebar_theme(self.theme_name)
+        self._set_titlebar_theme(self.titlebar_theme)
         
         # Show window after styling
         self.deiconify()
@@ -339,8 +353,6 @@ class DefaultRoot(tk.Tk):
 
     def destroy_root(self) -> None:
         """Safely terminate and destroy the Tk root window."""
-        if not hasattr(self, "root") or self is None:
-            return
 
         try:
             if self.winfo_exists():
@@ -372,14 +384,6 @@ class DefaultRoot(tk.Tk):
         """Handle window X button click."""
         self._exit("window_closed", callback)
 
-    def run(self) -> Optional[str]:
-        """Show the window and return the result."""
-        try:
-            self.mainloop()
-        finally:
-            self.destroy_root()
-        return self.result
-
 
 if __name__ == "__main__":
 
@@ -391,8 +395,9 @@ if __name__ == "__main__":
         theme_mode="auto",
     )
 
-
-    """    
+    test.mainloop()
+    
+    r""" 
     from widgets.PathSelector import PathSelector
     from widgets.RadioSelection import RadioSelection
     from widgets.ValidatedEntryBox import ValidatedEntryBox
