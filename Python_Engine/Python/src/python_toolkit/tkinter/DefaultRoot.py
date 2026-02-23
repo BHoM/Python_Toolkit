@@ -2,13 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
 from typing import Optional, Callable, Literal
-
-try:
-    import darkdetect
-except ImportError:
-    darkdetect = None
+import darkdetect 
+import platform
 import ctypes
-
 
 class DefaultRoot(tk.Tk):
     """
@@ -19,8 +15,10 @@ class DefaultRoot(tk.Tk):
     def __init__(
         self,
         title: str = "Application",
-        logo_path: Optional[Path] = None,
-        icon_path: Optional[Path] = None,
+        logo_path: Optional[Path] = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\BHoM_Logo.png"),
+        icon_path: Optional[Path] = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\bhom_icon.png"),
+        dark_logo_path: Optional[Path] = None,
+        dark_icon_path: Optional[Path] = None,
         min_width: int = 500,
         min_height: int = 400,
         width: Optional[int] = None,
@@ -34,8 +32,10 @@ class DefaultRoot(tk.Tk):
         close_text: str = "Close",
         close_command: Optional[Callable] = None,
         on_close_window: Optional[Callable] = None,
-        theme_path: Optional[Path] = None,
+        theme_path: Optional[Path] = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_light_theme.tcl"),
+        theme_path_dark: Optional[Path] = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_dark_theme.tcl"),
         theme_mode: Literal["light", "dark", "auto"] = "auto",
+        **kwargs
     ):
         """
         Initialize the default root window.
@@ -59,22 +59,23 @@ class DefaultRoot(tk.Tk):
             on_close_window (callable, optional): Command when X is pressed.
             theme_path (Path, optional): Path to custom TCL theme file. If None, uses default style.tcl.
             theme_mode (str): Theme mode - "light", "dark", or "auto" to detect from system (default: "auto").
+            **kwargs
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self.title(title)
         self._icon_image = None
-        self._set_window_icon(icon_path)
         self.minsize(min_width, min_height)
         self.resizable(resizable, resizable)
         
         # Hide window during setup to prevent flash
         self.withdraw()
 
-        # Determine theme based on mode and system preference
-        theme_name = self._determine_theme_name(theme_mode)
-
-        # Load custom dark theme
-        self.theme_name = self._load_theme(theme_path, theme_name)
+        # Load custom themes
+        _theme_path, _icon_path, _logo_path, _theme_style = self._determine_theme(logo_path, dark_logo_path, icon_path, dark_icon_path, theme_mode, theme_path, theme_path_dark)
+        
+        self._set_window_icon(_icon_path)
+        self.theme = self._load_theme(_theme_path)
+        self.titlebar_theme = self._set_titlebar_theme(_theme_style)
 
         self.min_width = min_width
         self.min_height = min_height
@@ -93,7 +94,7 @@ class DefaultRoot(tk.Tk):
         main_container.pack(fill=tk.BOTH, expand=True)
 
         # Banner section
-        self._build_banner(main_container, title, logo_path)
+        self._build_banner(main_container, title, _logo_path)
 
         # Content area (public access for adding widgets)
         self.content_frame = ttk.Frame(main_container, padding=20)
@@ -106,85 +107,73 @@ class DefaultRoot(tk.Tk):
         # Apply sizing
         self._apply_sizing()
 
-    def _set_window_icon(self, icon_path: Optional[Path]) -> None:
-        """Set a custom window icon, replacing the default Tk icon when possible."""
-        if icon_path is None:
-            return
+    def _set_window_icon(self, icon_path: Path) -> None:
+        """Set a custom window icon, replacing the default uk icon."""
 
-        path = Path(icon_path)
-        if not path.exists():
-            print(f"Warning: Icon file not found at {path}")
+        if not icon_path.exists():
+            print(f"Warning: Icon file not found at {icon_path}")
             return
 
         # Windows prefers .ico for titlebar/taskbar icons.
-        if path.suffix.lower() == ".ico":
+        if icon_path.suffix.lower() == ".ico":
             try:
-                self.iconbitmap(default=str(path))
+                self.iconbitmap(default=str(icon_path))
                 return
             except tk.TclError:
                 pass
 
         # Fallback for image formats supported by Tk PhotoImage (png/gif/etc.).
         try:
-            self._icon_image = tk.PhotoImage(file=str(path))
+            self._icon_image = tk.PhotoImage(file=str(icon_path))
             self.iconphoto(True, self._icon_image)
             return
         except tk.TclError:
             pass
 
-        # Final fallback using PIL if available.
-        try:
-            from PIL import Image, ImageTk
-
-            img = Image.open(path)
-            self._icon_image = ImageTk.PhotoImage(img)
-            self.iconphoto(True, self._icon_image)
         except Exception as ex:
-            print(f"Warning: Could not set window icon from {path}: {ex}")
+            print(f"Warning: Could not set window icon from {icon_path}: {ex}")
 
-    def _determine_theme_name(self, theme_mode: str) -> str:
-        """
-        Determine the theme name based on the specified mode and system preference.
+    def _determine_theme(
+            self, 
+            logo_path: Optional[Path], 
+            dark_logo_path: Optional[Path], 
+            icon_path: Optional[Path], 
+            dark_icon_path: Optional[Path], 
+            theme_mode: str, 
+            theme_path_light: Optional[Path], 
+            theme_path_dark: Optional[Path]) -> tuple[Path|None, Path|None, Path|None, str]:
         
-        Args:
-            theme_mode (str): "light", "dark", or "auto"
-            
-        Returns:
-            str: Theme name ("bhom_light" or "bhom_dark")
-        """
-        if theme_mode == "auto":
-            # Try to detect system theme
-            if darkdetect is not None:
-                try:
-                    is_dark = darkdetect.is_dark()
-                    return "bhom_dark" if is_dark else "bhom_light"
-                except Exception:
-                    # Fall back to dark if detection fails
-                    return "bhom_dark"
-            else:
-                # Default to dark if darkdetect not available
-                return "bhom_dark"
-        elif theme_mode == "light":
-            return "bhom_light"
-        else:  # "dark"
-            return "bhom_dark"
+        """determin the light or dark mode usage"""
 
-    def _set_titlebar_theme(self, theme_name: str) -> None:
+        if theme_mode == "light":
+            return theme_path_light, logo_path, icon_path, "light"
+        
+        if dark_logo_path is None:
+            dark_logo_path = logo_path
+        if dark_icon_path is None:
+            dark_icon_path = icon_path
+
+        if theme_mode == "dark":
+            return theme_path_dark, dark_logo_path, dark_icon_path, "dark"
+        
+        #case == auto - detect system theme preference
+        if darkdetect.isDark():
+            return theme_path_dark, dark_logo_path, dark_icon_path, "dark"
+        else:
+            return theme_path_light, logo_path, icon_path, "light"
+
+    def _set_titlebar_theme(self, theme_style: str) -> None:
         """
         Apply titlebar theme using Windows API.
-        
-        Args:
-            theme_name (str): Theme name ("bhom_light" or "bhom_dark")
         """
+
         try:
-            import platform
             if platform.system() == "Windows" and ctypes is not None and self.winfo_exists():
                 hwnd = self.winfo_id()
                 hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
                 if hwnd:
                     DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-                    use_dark = 1 if theme_name == "bhom_dark" else 0
-                    print(f"Applying titlebar theme: {theme_name} (dark={use_dark})")
+                    use_dark = 1 if theme_style == "dark" else 0
                     ctypes.windll.dwmapi.DwmSetWindowAttribute(
                         hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
                         ctypes.byref(ctypes.c_int(use_dark)),
@@ -193,16 +182,7 @@ class DefaultRoot(tk.Tk):
         except Exception:
             pass
 
-    def _apply_titlebar_theme(self, theme_name: str) -> None:
-        """
-        Apply Windows titlebar theme using DWM API (deferred version).
-        
-        Args:
-            theme_name (str): Theme name ("bhom_light" or "bhom_dark")
-        """
-        self._set_titlebar_theme(theme_name)
-
-    def _load_theme(self, custom_theme_path: Optional[Path] = None, theme_name: str = "bhom_dark") -> str:
+    def _load_theme(self, _theme_path: Path) -> str:
         """
         Load a custom theme from a TCL file.
         
@@ -216,20 +196,10 @@ class DefaultRoot(tk.Tk):
         """
         style = ttk.Style()
 
-        def _pick_theme_name(available_theme_names: tuple) -> str:
-            if theme_name in available_theme_names:
-                return theme_name
-
-            for candidate in ("bhom_dark", "bhom_light"):
-                if candidate in available_theme_names:
-                    return candidate
-
-            return style.theme_use()
-
         try:
             # Determine which theme file to use
-            if custom_theme_path and custom_theme_path.exists():
-                theme_path = custom_theme_path
+            if _theme_path and _theme_path.exists():
+                theme_path = _theme_path
             else:
                 # Use default theme
                 theme_path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_style.tcl")
@@ -239,21 +209,22 @@ class DefaultRoot(tk.Tk):
                 self.tk.call('source', str(theme_path))
 
                 available_theme_names = style.theme_names()
-                selected_theme = _pick_theme_name(available_theme_names)
+                selected_theme = available_theme_names[0] if available_theme_names else "default"
                 style.theme_use(selected_theme)
                 return selected_theme
             else:
                 print(f"Warning: Theme file not found at {theme_path}")
                 available_theme_names = style.theme_names()
-                selected_theme = _pick_theme_name(available_theme_names)
+                selected_theme = available_theme_names[0] if available_theme_names else "default"
                 style.theme_use(selected_theme)
                 return selected_theme
+            
         except Exception as e:
             print(f"Warning: Could not load custom theme: {e}")
             try:
                 return style.theme_use()
             except Exception:
-                return theme_name
+                return "default"
 
     def _build_banner(self, parent: ttk.Frame, title: str, logo_path: Optional[Path]) -> None:
         """Build the branded banner section."""
@@ -387,7 +358,7 @@ class DefaultRoot(tk.Tk):
         except Exception as ex:
             print(f"Warning: Exit callback raised an exception: {ex}")
         finally:
-            self._destroy_root()
+            self.destroy_root()
 
     def _on_submit(self) -> None:
         """Handle submit button click."""
@@ -406,11 +377,22 @@ class DefaultRoot(tk.Tk):
         try:
             self.mainloop()
         finally:
-            self._destroy_root()
+            self.destroy_root()
         return self.result
 
 
 if __name__ == "__main__":
+
+
+    ### TEST SIMPLE
+
+    test = DefaultRoot(
+        title="Test Window",
+        theme_mode="auto",
+    )
+
+
+    """    
     from widgets.PathSelector import PathSelector
     from widgets.RadioSelection import RadioSelection
     from widgets.ValidatedEntryBox import ValidatedEntryBox
@@ -511,3 +493,6 @@ if __name__ == "__main__":
     print(f"\nWindow result: {result}")
     if result == "submit":
         print("Final form data:", form_data)
+
+
+    """
