@@ -119,6 +119,16 @@ class BHoMBaseWindow(tk.Tk):
 
         # Apply sizing
         self._apply_sizing()
+        self.build()
+        
+    def build(self):
+        """Call build on all child widgets that have it (for deferred widget construction)."""
+        for widget in self.widgets:
+            if hasattr(widget, "build") and callable(getattr(widget, "build")):
+                widget.build()
+
+        
+        self.refresh_sizing()
 
     def _set_window_icon(self, icon_path: Path) -> None:
         """Set a custom window icon, replacing the default uk icon."""

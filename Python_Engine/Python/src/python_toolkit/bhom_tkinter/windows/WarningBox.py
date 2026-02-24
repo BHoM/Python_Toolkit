@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-import os
-import time
-from typing import Optional, Literal
+from typing import Optional
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 """This will be used in place of warning / pop up boxes, to ensure consistent style"""
@@ -13,11 +11,16 @@ class WarningBox(BHoMBaseWindow):
     def __init__(
             self, 
             title: str= 'Warning', 
-            warnings: list[str]|str = [], 
-            errors: list[str]|str = [], 
-            infos: list[str]|str = [], 
+            warnings: list[str] | str | None = None,
+            errors: list[str] | str | None = None,
+            infos: list[str] | str | None = None,
             **kwargs
             ):
+
+        self.warnings = self._normalise_messages(warnings)
+        self.errors = self._normalise_messages(errors)
+        self.infos = self._normalise_messages(infos)
+
         super().__init__(
             title=title,
             show_submit=False,
@@ -27,16 +30,20 @@ class WarningBox(BHoMBaseWindow):
             **kwargs
         )
 
-        if isinstance(warnings, str):
-            warnings = [warnings]
-        if isinstance(errors, str):
-            errors = [errors]
-        if isinstance(infos, str):
-            infos = [infos]
+    def build(self):
+        self._render_messages()
+        super().build()
 
-        self.warnings = warnings
-        self.errors = errors
-        self.infos = infos
+    def _normalise_messages(self, messages: list[str] | str | None) -> list[str]:
+        if messages is None:
+            return []
+        if isinstance(messages, str):
+            return [messages]
+        return list(messages)
+
+    def _render_messages(self):
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
 
         for message in self.errors:
             ttk.Label(self.content_frame, text=message, style="Error.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
@@ -47,15 +54,8 @@ class WarningBox(BHoMBaseWindow):
 
     def update_messages(self):
         """Clear and re-render all messages in the warning box."""
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
-
-        for message in self.errors:
-            ttk.Label(self.content_frame, text=message, style="Error.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
-        for message in self.warnings:
-            ttk.Label(self.content_frame, text=message, style="Warning.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
-        for message in self.infos:
-            ttk.Label(self.content_frame, text=message, style="Caption.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
+        self._render_messages()
+        self.refresh_sizing()
 
 
     def add_error_message(self, message: str):

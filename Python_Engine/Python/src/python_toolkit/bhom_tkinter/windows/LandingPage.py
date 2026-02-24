@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable
-from Python_Engine.Python.src.python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 
 class LandingPage(BHoMBaseWindow):
@@ -13,17 +13,10 @@ class LandingPage(BHoMBaseWindow):
     def __init__(
         self,
         title: str = "Landing Page",
-        header: Optional[str] = None,   
+        header: Optional[str] = None,
         message: Optional[str] = None,
         sub_title: Optional[str] = None,
-        min_width: int = 400,
-        min_height: int = 200,
-        show_continue: bool = True,
-        continue_text: str = "Continue",
-        continue_command: Optional[Callable] = None,
-        show_close: bool = True,
-        close_text: str = "Close",
-        close_command: Optional[Callable] = None,
+        **kwargs,
     ):
         """
         Initializes the landing page GUI.
@@ -31,48 +24,41 @@ class LandingPage(BHoMBaseWindow):
         Args:
             title (str): Window and header title text.
             message (str, optional): Commentary/message text to display.
-            min_width (int): Minimum window width in pixels.
-            min_height (int): Minimum window height in pixels.
-            show_continue (bool): Whether to show the continue button.
-            continue_text (str): Text for the continue button.
-            continue_command (callable, optional): Command to run on continue.
-            show_close (bool): Whether to show the close button.
-            close_text (str): Text for the close button.
-            close_command (callable, optional): Command to run on close.
         """
-        # Store callbacks
-        self.continue_command = continue_command
-        self.close_command = close_command
+        self.header = header
+        self.message = message
+        self.sub_title = sub_title
+        self.custom_buttons_frame: Optional[ttk.Frame] = None
+
         super().__init__(
             title=title,
-            min_width=min_width,
-            min_height=min_height,
-            show_submit=show_continue,
-            submit_text=continue_text,
-            submit_command=self._on_continue,
-            show_close=show_close,
-            close_text=close_text,
-            close_command=self._on_close,
+            **kwargs,
+        )
+
+    def build(self):
+        """Build landing-page content using the base window's content area."""
+        if self.header:
+            ttk.Label(self.content_frame, text=self.header, style="Header.TLabel").pack(
+                side="top", anchor="w", pady=(0, 10)
             )
-        # Initialize DefaultRoot with continue mapped to submit
 
-        if header:
-            header_label = ttk.Label(self.content_frame, text=header, style="Header.TLabel")
-            header_label.pack(side="top", anchor="w", pady=(0, 10))
-
-        # Optional message/commentary
-        if message:
-            message_label = ttk.Label(self.content_frame, text=message, style="Body.TLabel", justify=tk.LEFT)
-            message_label.pack(side="top", anchor="w", pady=(0, 10))
+        if self.message:
+            ttk.Label(
+                self.content_frame,
+                text=self.message,
+                style="Body.TLabel",
+                justify=tk.LEFT,
+            ).pack(side="top", anchor="w", pady=(0, 10))
         
-        # Optional sub-title
-        if sub_title:
-            sub_title_label = ttk.Label(self.content_frame, text=sub_title, style="Caption.TLabel")
-            sub_title_label.pack(side="top", anchor="w", pady=(0, 10))
+        if self.sub_title:
+            ttk.Label(self.content_frame, text=self.sub_title, style="Caption.TLabel").pack(
+                side="top", anchor="w", pady=(0, 10)
+            )
 
-        # Custom buttons container
         self.custom_buttons_frame = ttk.Frame(self.content_frame)
         self.custom_buttons_frame.pack(fill=tk.X, pady=(0, 20))
+
+        super().build()
 
     def add_custom_button(self, text: str, command: Callable, **kwargs) -> ttk.Button:
         """
@@ -86,58 +72,28 @@ class LandingPage(BHoMBaseWindow):
         Returns:
             ttk.Button: The created button widget.
         """
+        if self.custom_buttons_frame is None:
+            self.custom_buttons_frame = ttk.Frame(self.content_frame)
+            self.custom_buttons_frame.pack(fill=tk.X, pady=(0, 20))
+
         button = ttk.Button(self.custom_buttons_frame, text=text, command=command, **kwargs)
         button.pack(pady=5, fill=tk.X)
         # Recalculate window size after adding button
         self.refresh_sizing()
         return button
 
-    def _on_continue(self):
-        """Handle continue button click."""
-        if self.continue_command:
-            self.continue_command()
-
-    def _on_close(self):
-        """Handle close button click."""
-        if self.close_command:
-            self.close_command()
-
-    def run(self) -> Optional[str]:
-        """Show the landing page and return the result."""
-        result = self.run()
-        # Map DefaultRoot results to LandingPage convention
-        if result == "submit":
-            return "continue"
-        return result
-
 
 if __name__ == "__main__":
-    # Basic example
-    def on_continue():
-        print("Continue clicked!")
 
-    def on_close():
-        print("Close clicked!")
+    #simple example of using the landing page
+    def on_button_click():
+        print("Button clicked!")
 
-    landing = LandingPage(
-        title="Example Application",
-        message="Welcome to the landing page example.\n\nThis demonstrates a configurable landing page with custom buttons.\n\nPlease select an option below to proceed.",
-        header="Welcome!",
-        sub_title="Please choose an option to continue:",
-        continue_text="Proceed",
-        continue_command=on_continue,
-        close_command=on_close,
+    landing_page = LandingPage(
+        title="Welcome to the BHoM Toolkit",
+        header="Welcome to the BHoM Toolkit",
+        message="This is a landing page example. You can add custom buttons below.",
+        sub_title="Please click the button to proceed.",
     )
-
-    # Add custom buttons
-    landing.add_custom_button("Option A", lambda: print("Option A selected"))
-    landing.add_custom_button(
-        "Option B", lambda: print("Option B selected")
-    )
-
-    landing.mainloop()
-
-    result = landing.result
-
-
-    print(f"Result: {result}")
+    landing_page.add_custom_button(text="Click Me", command=on_button_click)
+    landing_page.mainloop()

@@ -1,57 +1,63 @@
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
-from widgets.ListBox import ScrollableListBox
-from widgets._packing_options import PackingOptions
-from Python_Engine.Python.src.python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+from python_toolkit.bhom_tkinter.widgets.ListBox import ScrollableListBox
+from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 class DirectoryFileSelector(BHoMBaseWindow):
 
-    def __init__(self, directory: Path, file_types: Iterable[str], selection_label: str = "file(s)") -> None:
+    def __init__(
+        self,
+        directory: Path,
+        file_types: Iterable[str],
+        selection_label: str = "file(s)",
+        **kwargs,
+    ) -> None:
         self.directory = Path(directory)
         self.file_types = self._normalise_file_types(file_types)
         self.selection_label = selection_label
         self._cancelled = False
-        self.selected_files = []
-        # Create BHoMBaseWindow
-        super().__init__(
-            title=f"Select {selection_label}",
-            min_width=600,
-            min_height=400,
-            show_submit=True,
-            submit_text="OK",
-            submit_command=self._on_submit,
-            show_close=True,
-            close_text="Cancel",
-            close_command=self._on_cancel,
-            on_close_window=self._on_cancel,
-        )
+        self.selected_files: List[Path] = []
 
         self.files = self._discover_files()
         self.display_items = [self._display_value(file) for file in self.files]
         self.file_lookup = dict(zip(self.display_items, self.files))
+        self.file_selector_listbox: Optional[ScrollableListBox] = None
 
-        # Add content to the window's content frame
+        kwargs.setdefault("title", f"Select {selection_label}")
+        kwargs.setdefault("min_width", 600)
+        kwargs.setdefault("min_height", 400)
+        kwargs.setdefault("submit_text", "OK")
+        kwargs.setdefault("submit_command", self._on_submit)
+        kwargs.setdefault("close_text", "Cancel")
+        kwargs.setdefault("close_command", self._on_cancel)
+        kwargs.setdefault("on_close_window", self._on_cancel)
+
+        super().__init__(**kwargs)
+
+    def build(self):
         ttk.Label(
             self.content_frame,
             text=f"Select the {self.selection_label} to analyse.",
             justify=tk.LEFT,
         ).pack(anchor="w", pady=(0, 10))
 
-        self.widgets.append(ScrollableListBox(
-            id = "file_selector_listbox",
-            parent=self.content_frame,
-            items=self.display_items,
-            selectmode=tk.MULTIPLE,
-            height=12,
-            show_selection_controls=True,
-            packing_options=PackingOptions(fill='both', expand=True),
-        ))
+        if self.file_selector_listbox is None:
+            self.file_selector_listbox = ScrollableListBox(
+                id="file_selector_listbox",
+                parent=self.content_frame,
+                items=self.display_items,
+                selectmode=tk.MULTIPLE,
+                height=12,
+                show_selection_controls=True,
+                packing_options=PackingOptions(fill='both', expand=True),
+            )
+            self.widgets.append(self.file_selector_listbox)
 
-        # Refresh sizing after adding widgets
-        self.refresh_sizing()
+        super().build()
 
     def _normalise_file_types(self, file_types: Iterable[str]) -> List[str]:
         normalised = []
@@ -82,10 +88,7 @@ class DirectoryFileSelector(BHoMBaseWindow):
 
     def _on_submit(self):
         """Handle OK button - capture selection before window closes."""
-        for widget in self.widgets:
-            if isinstance(widget, ScrollableListBox):
-                selected = widget.get_selection()
-                break
+        selected = self.file_selector_listbox.get_selection() if self.file_selector_listbox else []
         self.selected_files = [self.file_lookup[item] for item in selected if item in self.file_lookup]
         self.destroy_root()
 
@@ -94,11 +97,10 @@ class DirectoryFileSelector(BHoMBaseWindow):
         self._cancelled = True
         self.destroy_root()
 
-
 if __name__ == "__main__":
     # Example usage
     selector = DirectoryFileSelector(
-        directory=Path.cwd(),
+        directory=Path.home(),
         file_types=[".py", ".txt"],
         selection_label="scripts and text files",
     )

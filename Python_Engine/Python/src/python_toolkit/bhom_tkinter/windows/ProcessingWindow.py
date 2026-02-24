@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-import os
 import time
-from typing import Optional
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 class ProcessingWindow(BHoMBaseWindow):
@@ -14,71 +12,54 @@ class ProcessingWindow(BHoMBaseWindow):
             title (str): Window title.
             message (str): Message to display.
         """
-        super().__init__(title=title, min_width=300, min_height=150, show_submit=False, show_close=False)
-        
-        self.title(title)
+        self.window_title = title
+        self.message_text = message
+
+        super().__init__(
+            title=title,
+            min_width=300,
+            min_height=150,
+            show_submit=False,
+            show_close=False,
+            resizable=False,
+        )
+
         self.attributes("-topmost", True)
-        self.resizable(False, False)
 
-        # Container
-        container = ttk.Frame(self, padding=20)
-        container.pack(fill="both", expand=True)
-
-        # Constant title label
-        self.title_label = ttk.Label(
-            container,
-            text=title,
-            style="Title.TLabel",
-            justify="center",
-            wraplength=400
-        )
-        self.title_label.pack(pady=(0, 8))
-
-        # Updatable message label
-        self.message_label = ttk.Label(
-            container,
-            text=message,
-            justify="center",
-            wraplength=400
-        )
-        self.message_label.pack(pady=(0, 20))
-
-        # Animation frame
-        animation_frame = ttk.Frame(container)
-        animation_frame.pack(expand=True)
-
-        self.animation_label = ttk.Label(
-            animation_frame,
-            text="●",
-            style="Title.TLabel",
-            foreground="#0078d4"
-        )
-        self.animation_label.pack()
+        self.title_label = None
+        self.message_label = None
+        self.animation_label = None
 
         # Animation state
-        self.animation_frames = ["●", "●", "●"]
         self.current_frame = 0
         self.is_running = False
 
-        # Update to calculate the required size
-        self.update_idletasks()
-        
-        # Get the required width and height
-        required_width = self.winfo_reqwidth()
-        required_height = self.winfo_reqheight()
-        
-        # Set minimum size
-        min_width = 300
-        min_height = 150
-        window_width = max(required_width, min_width)
-        window_height = max(required_height, min_height)
+    def build(self):
+        self.title_label = ttk.Label(
+            self.content_frame,
+            text=self.window_title,
+            style="Title.TLabel",
+            justify="center",
+            wraplength=400,
+        )
+        self.title_label.pack(pady=(0, 8))
 
-        # Center on screen
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-        x = (screen_width - window_width) // 2
-        y = (screen_height - window_height) // 2
-        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        self.message_label = ttk.Label(
+            self.content_frame,
+            text=self.message_text,
+            justify="center",
+            wraplength=400,
+        )
+        self.message_label.pack(pady=(0, 20))
+
+        self.animation_label = ttk.Label(
+            self.content_frame,
+            text="●",
+            style="Title.TLabel",
+        )
+        self.animation_label.pack()
+
+        super().build()
 
     def start(self):
         """Start the processing window and animation."""
@@ -102,13 +83,16 @@ class ProcessingWindow(BHoMBaseWindow):
         if self.is_running:
             # Create rotating dot animation
             dots = ["◐", "◓", "◑", "◒"]
-            self.animation_label.config(text=dots[self.current_frame % len(dots)])
+            if self.animation_label is not None:
+                self.animation_label.config(text=dots[self.current_frame % len(dots)])
             self.current_frame += 1
             self.after(200, self._animate)
 
     def update_message(self, message: str):
         """Update the message text."""
-        self.message_label.config(text=message)
+        self.message_text = message
+        if self.message_label is not None:
+            self.message_label.config(text=message)
         self.update()
 
 
