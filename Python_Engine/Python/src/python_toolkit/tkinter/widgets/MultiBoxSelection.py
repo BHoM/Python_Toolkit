@@ -31,12 +31,12 @@ class CheckboxSelection(tk.Frame):
 
 		# Optional header/title label at the top of the widget
 		if self.item_title:
-			self.title_label = ttk.Label(self, text=self.item_title)
+			self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
 			self.title_label.pack(side="top", anchor="w")
 
 		# Optional helper/requirements label above the input
 		if self.helper_text:
-			self.helper_label = ttk.Label(self, text=self.helper_text)
+			self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
 			self.helper_label.pack(side="top", anchor="w")
 
 		# Sub-frame for checkbox controls
@@ -64,6 +64,7 @@ class CheckboxSelection(tk.Frame):
 				text=f"□ {field}",
 				variable=var,
 				command=lambda f=field: self._on_select_field(f),
+				style="Checkbox.TCheckbutton"
 			)
 			if self.max_per_line and self.max_per_line > 0:
 				if self.orient == "horizontal":

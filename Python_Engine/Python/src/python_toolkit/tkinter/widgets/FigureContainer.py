@@ -5,7 +5,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-
+import matplotlib as mpl
+mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
 class FigureContainer(tk.Frame):
     """

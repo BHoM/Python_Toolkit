@@ -6,6 +6,8 @@ import matplotlib as mpl
 from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.tkinter.widgets.FigureContainer import FigureContainer
 
+mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
+
 class CmapSelector(ttk.Frame):
     """
     A widget for selecting and previewing a matplotlib colormap.

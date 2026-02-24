@@ -454,14 +454,15 @@ namespace eval ttk::theme::bhom_dark {
                 active $colors(-primary) \
                 pressed $colors(-primary-hover)]
 
-        # Scale - minimal sleek design
+        # Scale - clearer track and larger thumb
         ttk::style configure TScale \
             -background $colors(-primary) \
-            -troughcolor $colors(-bg) \
-            -bordercolor $colors(-bg) \
+            -troughcolor $colors(-border) \
+            -bordercolor $colors(-border-light) \
             -slidercolor $colors(-primary) \
-            -borderwidth 0 \
-            -sliderrelief flat
+            -borderwidth 1 \
+            -sliderrelief raised \
+            -sliderlength 20
 
         ttk::style map TScale \
             -background [list \
@@ -469,6 +470,24 @@ namespace eval ttk::theme::bhom_dark {
                 pressed $colors(-primary-hover)] \
             -slidercolor [list \
                 active $colors(-primary-light) \
+                pressed $colors(-primary-hover)]
+
+        # Colour picker scale variant - stronger contrast and larger grab handle
+        ttk::style configure ColourPicker.Horizontal.TScale \
+            -background $colors(-primary) \
+            -troughcolor $colors(-darker) \
+            -bordercolor $colors(-border-light) \
+            -slidercolor $colors(-primary-light) \
+            -borderwidth 1 \
+            -sliderrelief raised \
+            -sliderlength 24
+
+        ttk::style map ColourPicker.Horizontal.TScale \
+            -background [list \
+                active $colors(-primary-light) \
+                pressed $colors(-primary-hover)] \
+            -slidercolor [list \
+                active $colors(-primary) \
                 pressed $colors(-primary-hover)]
 
         # Progressbar - soft rounded design
