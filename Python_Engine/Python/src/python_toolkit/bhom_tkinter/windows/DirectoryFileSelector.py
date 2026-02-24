@@ -41,7 +41,8 @@ class DirectoryFileSelector(BHoMBaseWindow):
         ).pack(anchor="w", pady=(0, 10))
 
         self.widgets.append(ScrollableListBox(
-            self.content_frame,
+            id = "file_selector_listbox",
+            parent=self.content_frame,
             items=self.display_items,
             selectmode=tk.MULTIPLE,
             height=12,
@@ -81,7 +82,10 @@ class DirectoryFileSelector(BHoMBaseWindow):
 
     def _on_submit(self):
         """Handle OK button - capture selection before window closes."""
-        selected = self.listbox.get_selection()
+        for widget in self.widgets:
+            if isinstance(widget, ScrollableListBox):
+                selected = widget.get_selection()
+                break
         self.selected_files = [self.file_lookup[item] for item in selected if item in self.file_lookup]
         self.destroy_root()
 

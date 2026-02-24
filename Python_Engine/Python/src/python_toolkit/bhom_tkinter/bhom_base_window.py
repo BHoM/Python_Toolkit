@@ -90,24 +90,32 @@ class BHoMBaseWindow(tk.Tk):
         self.submit_command = submit_command
         self.close_command = close_command
         self.result = None
+        self.button_bar: Optional[ttk.Frame] = None
+        self._has_been_shown = False
+        self._pending_resize_job: Optional[str] = None
+        self._is_resizing = False
+        self._auto_fit_width = width is None
+        self._auto_fit_height = height is None
 
         # Handle window close (X button)
         self.protocol("WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window))
 
         # Main container
-        main_container = ttk.Frame(self)
-        main_container.pack(fill=tk.BOTH, expand=True)
+        self.main_container = ttk.Frame(self)
+        self.main_container.pack(fill=tk.BOTH, expand=True)
 
         # Banner section
-        self._build_banner(main_container, title, _logo_path)
+        self._build_banner(self.main_container, title, _logo_path)
 
         # Content area (public access for adding widgets)
-        self.content_frame = ttk.Frame(main_container, padding=20)
+        self.content_frame = ttk.Frame(self.main_container, padding=20)
         self.content_frame.pack(fill=tk.BOTH, expand=True)
 
         # Bottom button frame (if needed)
         if show_submit or show_close:
-            self._build_buttons(main_container, show_submit, submit_text, show_close, close_text)
+            self._build_buttons(self.main_container, show_submit, submit_text, show_close, close_text)
+
+        self._bind_dynamic_sizing()
 
         # Apply sizing
         self._apply_sizing()
@@ -294,10 +302,10 @@ class BHoMBaseWindow(tk.Tk):
         close_text: str,
     ) -> None:
         """Build the bottom button bar."""
-        button_bar = ttk.Frame(parent, padding=(20, 10))
-        button_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.button_bar = ttk.Frame(parent, padding=(20, 10))
+        self.button_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
-        button_container = ttk.Frame(button_bar)
+        button_container = ttk.Frame(self.button_bar)
         button_container.pack(anchor=tk.E)
 
         if show_close:
@@ -312,37 +320,74 @@ class BHoMBaseWindow(tk.Tk):
             )
             self.submit_button.pack(side=tk.LEFT, padx=5)
 
+    def _bind_dynamic_sizing(self) -> None:
+        """Bind layout changes to schedule auto sizing updates."""
+        self.main_container.bind("<Configure>", self._schedule_dynamic_sizing)
+        self.content_frame.bind("<Configure>", self._schedule_dynamic_sizing)
+        if self.button_bar is not None:
+            self.button_bar.bind("<Configure>", self._schedule_dynamic_sizing)
+
+    def _schedule_dynamic_sizing(self, _event=None) -> None:
+        """Debounce dynamic sizing updates triggered by layout changes."""
+        if self._is_resizing:
+            return
+        if not (self._auto_fit_width or self._auto_fit_height):
+            return
+        if self._pending_resize_job is not None:
+            try:
+                self.after_cancel(self._pending_resize_job)
+            except Exception:
+                pass
+        self._pending_resize_job = self.after(30, self._apply_sizing)
+
     def _apply_sizing(self) -> None:
         """Apply window sizing and positioning."""
+        self._pending_resize_job = None
+        self._is_resizing = True
         self.update_idletasks()
+
+        required_width = self.winfo_reqwidth()
+        required_height = self.winfo_reqheight()
+
+        if hasattr(self, "main_container"):
+            required_width = max(required_width, self.main_container.winfo_reqwidth())
+            required_height = max(required_height, self.main_container.winfo_reqheight())
+
+        if self.button_bar is not None and self.button_bar.winfo_manager():
+            required_height = max(required_height, self.button_bar.winfo_reqheight() + self.content_frame.winfo_reqheight())
 
         # Determine final dimensions
         if self.fixed_width and self.fixed_height:
-            final_width = self.fixed_width
-            final_height = self.fixed_height
+            final_width = max(self.min_width, self.fixed_width, required_width)
+            final_height = max(self.min_height, self.fixed_height, required_height)
         elif self.fixed_width:
-            final_width = self.fixed_width
-            final_height = max(self.min_height, self.winfo_reqheight())
+            final_width = max(self.min_width, self.fixed_width, required_width)
+            final_height = max(self.min_height, required_height)
         elif self.fixed_height:
-            final_width = max(self.min_width, self.winfo_reqwidth())
-            final_height = self.fixed_height
+            final_width = max(self.min_width, required_width)
+            final_height = max(self.min_height, self.fixed_height, required_height)
         else:
             # Dynamic sizing
-            final_width = max(self.min_width, self.winfo_reqwidth())
-            final_height = max(self.min_height, self.winfo_reqheight())
+            final_width = max(self.min_width, required_width)
+            final_height = max(self.min_height, required_height)
 
         # Position
-        if self.center_on_screen:
+        if self.center_on_screen and not self._has_been_shown:
             screen_width = self.winfo_screenwidth()
             screen_height = self.winfo_screenheight()
             x = (screen_width - final_width) // 2
             y = (screen_height - final_height) // 2
+            self.geometry(f"{final_width}x{final_height}+{x}+{y}")
+        elif self._has_been_shown:
+            x = self.winfo_x()
+            y = self.winfo_y()
             self.geometry(f"{final_width}x{final_height}+{x}+{y}")
         else:
             self.geometry(f"{final_width}x{final_height}")
         
         # Defer window display until after styling is applied
         self.after(0, self._show_window_with_styling)
+        self._is_resizing = False
 
     def _show_window_with_styling(self) -> None:
         """Apply titlebar styling and show the window."""
@@ -351,6 +396,7 @@ class BHoMBaseWindow(tk.Tk):
         
         # Show window after styling
         self.deiconify()
+        self._has_been_shown = True
 
     def refresh_sizing(self) -> None:
         """Recalculate and apply window sizing (useful after adding widgets)."""
