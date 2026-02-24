@@ -2,10 +2,20 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional
 
-class RadioSelection(tk.Frame):
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+
+class RadioSelection(BHoMBaseWidget):
 	"""A reusable radio selection widget built from a list of fields."""
 
-	def __init__(self, parent, fields=None, command=None, default=None, orient="vertical", max_per_line=None, item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
+	def __init__(
+			self, 
+			parent, 
+			fields=None, 
+			command=None, 
+			default=None, 
+			orient="vertical", 
+			max_per_line=None, 
+			**kwargs):
 		"""
 		Args:
 			parent (tk.Widget): The parent widget.
@@ -24,20 +34,8 @@ class RadioSelection(tk.Frame):
 		self.command = command
 		self.orient = orient.lower()
 		self.max_per_line = max_per_line
-		self.item_title = item_title
-		self.helper_text = helper_text
 		self.value_var = tk.StringVar()
 		self._buttons = []
-
-		# Optional header/title label at the top of the widget
-		if self.item_title:
-			self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
-			self.title_label.pack(side="top", anchor="w")
-
-		# Optional helper/requirements label above the input
-		if self.helper_text:
-			self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
-			self.helper_label.pack(side="top", anchor="w")
 
 		# Sub-frame for radio button controls
 		self.buttons_frame = ttk.Frame(self)
@@ -57,13 +55,12 @@ class RadioSelection(tk.Frame):
 		self._buttons.clear()
 
 		for index, field in enumerate(self.fields):
-			button = ttk.Radiobutton(
+			button = ttk.Label(
 				self.buttons_frame,
-				text=field,
-				value=field,
-				variable=self.value_var,
-				command=self._on_select,
+				text=f"○ {field}",
+				cursor="hand2"
 			)
+			button.bind("<Button-1>", lambda _event, f=field: self._select_field(f))
 			if self.max_per_line and self.max_per_line > 0:
 				if self.orient == "horizontal":
 					row = index // self.max_per_line
@@ -78,10 +75,25 @@ class RadioSelection(tk.Frame):
 				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky="w")
 			self._buttons.append(button)
 
-	def _on_select(self):
-		"""Handle option selection."""
+		self._update_visual_state()
+
+	def _select_field(self, field):
+		"""Select a field when clicked."""
+		self.value_var.set(field)
+		self._update_visual_state()
 		if self.command:
 			self.command(self.get())
+
+	def _update_visual_state(self):
+		"""Update visual indicators for all buttons."""
+		selected_value = self.value_var.get()
+		for button in self._buttons:
+			button_text = button.cget("text")
+			current_field = button_text[2:]
+			if current_field == selected_value:
+				button.configure(text=f"● {current_field}")
+			else:
+				button.configure(text=f"○ {current_field}")
 
 	def get(self):
 		"""Return the currently selected value."""
@@ -92,6 +104,7 @@ class RadioSelection(tk.Frame):
 		value = str(value)
 		if value in self.fields:
 			self.value_var.set(value)
+			self._update_visual_state()
 
 	def set_fields(self, fields, default=None):
 		"""Replace the available fields and rebuild the widget."""
@@ -108,12 +121,12 @@ class RadioSelection(tk.Frame):
 
 if __name__ == "__main__":
 
-	from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+	from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 	def on_selection(value):
 		print(f"Selected: {value}")
 
-	root = DefaultRoot()
+	root = BHoMBaseWindow()
 	parent_frame = root.content_frame
 
 	widget = RadioSelection(

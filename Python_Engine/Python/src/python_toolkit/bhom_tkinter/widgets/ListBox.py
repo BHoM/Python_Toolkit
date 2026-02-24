@@ -2,13 +2,22 @@ import tkinter as tk
 from tkinter import filedialog, ttk
 from typing import Optional
 
-class ScrollableListBox(ttk.Frame):
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+
+class ScrollableListBox(BHoMBaseWidget):
     """A reusable listbox widget with auto-hiding scrollbar."""
 
-    def __init__(self, parent, items=None, selectmode=tk.MULTIPLE, height=None, show_selection_controls=False,  item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
+    def __init__(
+            self, 
+            parent: ttk.Frame, 
+            items=None, 
+            selectmode=tk.MULTIPLE, 
+            height=None, 
+            show_selection_controls=False,
+            **kwargs):
         """
         Args:
-            parent (tk.Widget): The parent widget.
+            parent (ttk.Frame): The parent widget.
             items (list, optional): List of items to populate the listbox.
             selectmode (str): Selection mode for the listbox (SINGLE, MULTIPLE, etc.).
             height (int, optional): Height of the listbox. Defaults to number of items.
@@ -20,22 +29,6 @@ class ScrollableListBox(ttk.Frame):
         self.items = items or []
         if height is None:
             height = len(self.items) if self.items else 5
-
-        self.item_title = item_title
-        self.helper_text = helper_text
-
-        # Optional header/title label at the top of the widget
-        if self.item_title:
-            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
-            self.title_label.pack(side="top", anchor="w")
-
-        # Optional helper/requirements label above the input
-        if self.helper_text:
-            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
-            self.helper_label.pack(side="top", anchor="w")
-        
-        self.content_frame = ttk.Frame(self)
-        self.content_frame.pack(fill=tk.BOTH, expand=True)
 
         # Create scrollbar
         self.scrollbar = ttk.Scrollbar(self.content_frame)
@@ -116,17 +109,43 @@ class ScrollableListBox(ttk.Frame):
         self.listbox.delete(0, tk.END)
         self._on_configure()
 
+    def pack(self, **kwargs):
+        """Pack the widget with the given options."""
+        super().pack(**kwargs)
+        self._on_configure()  # Ensure scrollbar visibility is updated when packed
+
+    def set(self, value):
+        """Set the listbox items to the provided list."""
+        self.clear()
+        for item in value:
+            self.listbox.insert(tk.END, item)
+        self._on_configure(        )
+    
+    def get(self):
+        """Get the current list of items in the listbox."""
+        return [self.listbox.get(i) for i in range(self.listbox.size())]
+
 
 if __name__ == "__main__":
 
-    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
-    root = DefaultRoot()
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+
+    root = BHoMBaseWindow()
     parent_container = root.content_frame
     
     items = [f"Item {i}" for i in range(1, 21)]
-    listbox = ScrollableListBox(parent_container, items=items, height=10, show_selection_controls=True, item_title="List Box", helper_text="Select items from the list.")
-    listbox.pack(padx=20, pady=20)
+    root.widgets.append(ScrollableListBox(
+        parent_container, 
+        items=items, 
+        height=10, 
+        show_selection_controls=True, 
+        item_title="List Box", 
+        helper_text="Select items from the list.",
+        packing_options=PackingOptions(padx=10, pady=10)
+    ))
+    root.widgets[-1].build()
 
-    print("Selected items:", listbox.get_selection())
+    print("Selected items:", root.widgets[-1].get())
     
     root.mainloop()

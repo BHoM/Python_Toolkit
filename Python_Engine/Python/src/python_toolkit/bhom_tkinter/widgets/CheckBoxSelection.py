@@ -2,10 +2,22 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional, List, Callable
 
-class CheckboxSelection(tk.Frame):
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+
+class CheckboxSelection(BHoMBaseWidget):
 	"""A reusable checkbox selection widget built from a list of fields, allowing multiple selections."""
 
-	def __init__(self, parent, fields=None, command: Optional[Callable[[List[str]], None]] = None, defaults: Optional[List[str]] = None, orient="vertical", max_per_line=None, item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
+	def __init__(
+			self, 
+			parent, 
+			fields=None, 
+			command: Optional[Callable[[List[str]], None]] = None, 
+			defaults: Optional[List[str]] = None, 
+			orient="vertical", 
+			max_per_line=None, 
+			item_title: Optional[str] = None, 
+			helper_text: Optional[str] = None, 
+			**kwargs):
 		"""
 		Args:
 			parent (tk.Widget): The parent widget.
@@ -18,29 +30,17 @@ class CheckboxSelection(tk.Frame):
 			helper_text (str, optional): Optional helper text shown above the checkboxes.
 			**kwargs: Additional Frame options.
 		"""
-		super().__init__(parent, **kwargs)
+		super().__init__(parent, item_title=item_title, helper_text=helper_text, **kwargs)
 
 		self.fields = [str(field) for field in (fields or [])]
 		self.command = command
 		self.orient = orient.lower()
 		self.max_per_line = max_per_line
-		self.item_title = item_title
-		self.helper_text = helper_text
 		self.value_vars = {}  # Dictionary mapping field names to BooleanVars
 		self._buttons = []
 
-		# Optional header/title label at the top of the widget
-		if self.item_title:
-			self.title_label = ttk.Label(self, text=self.item_title)
-			self.title_label.pack(side="top", anchor="w")
-
-		# Optional helper/requirements label above the input
-		if self.helper_text:
-			self.helper_label = ttk.Label(self, text=self.helper_text)
-			self.helper_label.pack(side="top", anchor="w")
-
 		# Sub-frame for checkbox controls
-		self.buttons_frame = ttk.Frame(self)
+		self.buttons_frame = ttk.Frame(self.content_frame)
 		self.buttons_frame.pack(side="top", fill="x", expand=True)
 
 		self._build_buttons()
@@ -106,9 +106,9 @@ class CheckboxSelection(tk.Frame):
 		"""Return a list of currently selected values."""
 		return [field for field, var in self.value_vars.items() if var.get()]
 
-	def set(self, values: List[str]):
+	def set(self, value: List[str]):
 		"""Set the selected values. Accepts a list of field names to check."""
-		values = [str(v) for v in (values or [])]
+		values = [str(v) for v in (value or [])]
 		for field, var in self.value_vars.items():
 			var.set(field in values)
 		
@@ -168,15 +168,18 @@ class CheckboxSelection(tk.Frame):
 		if defaults:
 			self.set(defaults)
 
+	def pack(self, **kwargs):
+		"""Pack the widget with the given options."""
+		super().pack(**kwargs)
 
 if __name__ == "__main__":
 
-	from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+	from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 	def on_selection(values):
 		print(f"Selected: {values}")
 
-	root = DefaultRoot()
+	root = BHoMBaseWindow()
 	parent_frame = root.content_frame
 
 	widget = CheckboxSelection(

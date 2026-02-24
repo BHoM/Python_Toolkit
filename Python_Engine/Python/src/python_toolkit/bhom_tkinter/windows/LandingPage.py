@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable
-from DefaultRoot import DefaultRoot
+from Python_Engine.Python.src.python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 
-class LandingPage(DefaultRoot):
+class LandingPage(BHoMBaseWindow):
     """
     A reusable landing page GUI with configurable title, message, and buttons.
-    Uses DefaultRoot as the base template.
+    Uses BHoMBaseWindow as the base template.
     """
 
     def __init__(

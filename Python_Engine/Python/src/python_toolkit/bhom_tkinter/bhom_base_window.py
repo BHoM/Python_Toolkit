@@ -1,12 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
-from typing import Optional, Callable, Literal
+from typing import Optional, Callable, Literal, List
 import darkdetect 
 import platform
 import ctypes
 
-class DefaultRoot(tk.Tk):
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+
+class BHoMBaseWindow(tk.Tk):
     """
     A reusable default root window template for tkinter applications.
     Includes a branded banner, content area, and optional action buttons.
@@ -35,6 +37,7 @@ class DefaultRoot(tk.Tk):
         theme_path: Path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_light_theme.tcl"),
         theme_path_dark: Path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_dark_theme.tcl"),
         theme_mode: Literal["light", "dark", "auto"] = "auto",
+        widgets: List[BHoMBaseWidget] = [],
         **kwargs
     ):
         """
@@ -66,6 +69,8 @@ class DefaultRoot(tk.Tk):
         self._icon_image = None
         self.minsize(min_width, min_height)
         self.resizable(resizable, resizable)
+
+        self.widgets = widgets
         
         # Hide window during setup to prevent flash
         self.withdraw()
@@ -390,9 +395,9 @@ if __name__ == "__main__":
 
     ### TEST SIMPLE
 
-    test = DefaultRoot(
+    test = BHoMBaseWindow(
         title="Test Window",
-        theme_mode="auto",
+        theme_mode="light",
     )
 
     test.mainloop()
@@ -422,7 +427,7 @@ if __name__ == "__main__":
     def on_close():
         print("Window closed without submitting")
 
-    window = DefaultRoot(
+    window = BHoMBaseWindow(
         title="Example Form Application",
         min_width=600,
         min_height=500,

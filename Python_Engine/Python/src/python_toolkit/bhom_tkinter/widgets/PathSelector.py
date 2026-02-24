@@ -3,10 +3,20 @@ from tkinter import filedialog, ttk
 from pathlib import Path
 from typing import Optional
 
-class PathSelector(ttk.Frame):
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+
+class PathSelector(BHoMBaseWidget):
     """A reusable path/file selector widget with a button and a readonly entry."""
 
-    def __init__(self, parent, button_text="Browse...", filetypes=None, command=None, initialdir=None, mode="file", item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
+    def __init__(
+            self, 
+            parent: ttk.Frame,
+            button_text="Browse...", 
+            filetypes=None, 
+            command=None, 
+            initialdir=None, 
+            mode="file", 
+            **kwargs):
         """
         Args:
             parent (tk.Widget): The parent widget.
@@ -22,23 +32,9 @@ class PathSelector(ttk.Frame):
         super().__init__(parent, **kwargs)
         self.path_var = tk.StringVar()
         self.command = command
-        self.filetypes = filetypes
-        self.initialdir = initialdir
         self.mode = mode
-
-        self.item_title = item_title
-        self.helper_text = helper_text
-
-        # Optional header/title label at the top of the widget
-        if self.item_title:
-            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
-            self.title_label.pack(side="top", anchor="w")
-
-        # Optional helper/requirements label above the input
-        if self.helper_text:
-            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
-            self.helper_label.pack(side="top", anchor="w")
-
+        self.initialdir = initialdir
+        self.filetypes = filetypes if filetypes is not None else [("All Files", "*.*")]
         self.display_name = tk.StringVar()
         self.entry = ttk.Entry(self, textvariable=self.display_name, width=40)
         self.entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
@@ -66,13 +62,18 @@ class PathSelector(ttk.Frame):
             if self.command:
                 self.command(str(selected_path))
 
-    def get(self):
+    def get(self) -> str:
         """Return the currently selected file path."""
         return self.path_var.get()
     
-    def set(self, path):
+    def set(self, value: Optional[str]):
         """Set the file path in the entry."""
-        selected_path = Path(path)
+        if not value:
+            self.path_var.set("")
+            self.display_name.set("")
+            return
+
+        selected_path = Path(value)
         self.path_var.set(str(selected_path))
         if self.mode == "directory":
             self.display_name.set(str(selected_path))
@@ -83,15 +84,15 @@ class PathSelector(ttk.Frame):
 
 if __name__ == "__main__":
 
-    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
-    root = DefaultRoot()
+    root = BHoMBaseWindow()
     parent_container = root.content_frame
 
     def on_file_selected(path):
         print(f"Selected: {path}")
 
-    path_selector = PathSelector(parent_container, button_text="Select File", filetypes=[("All Files", "*.*")], command=on_file_selected, item_title="File Selector", helper_text="Please select a file to process.")
+    path_selector = PathSelector(parent_container, button_text="Select File", filetypes=[("All Files", "*.*")], command=on_file_selected)
     path_selector.pack(padx=20, pady=20)
 
     root.mainloop()

@@ -4,17 +4,18 @@ from pathlib import Path
 from typing import Iterable, List
 
 from widgets.ListBox import ScrollableListBox
-from DefaultRoot import DefaultRoot
+from widgets._packing_options import PackingOptions
+from Python_Engine.Python.src.python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
-class DirectoryFileSelector(DefaultRoot):
+class DirectoryFileSelector(BHoMBaseWindow):
+
     def __init__(self, directory: Path, file_types: Iterable[str], selection_label: str = "file(s)") -> None:
         self.directory = Path(directory)
         self.file_types = self._normalise_file_types(file_types)
         self.selection_label = selection_label
         self._cancelled = False
         self.selected_files = []
-
-        # Create DefaultRoot window
+        # Create BHoMBaseWindow
         super().__init__(
             title=f"Select {selection_label}",
             min_width=600,
@@ -39,15 +40,14 @@ class DirectoryFileSelector(DefaultRoot):
             justify=tk.LEFT,
         ).pack(anchor="w", pady=(0, 10))
 
-        self.listbox = ScrollableListBox(
+        self.widgets.append(ScrollableListBox(
             self.content_frame,
             items=self.display_items,
             selectmode=tk.MULTIPLE,
             height=12,
             show_selection_controls=True,
-        )
-        self.listbox.pack(fill=tk.BOTH, expand=True)
-        self.listbox.select_all()
+            packing_options=PackingOptions(fill='both', expand=True),
+        ))
 
         # Refresh sizing after adding widgets
         self.refresh_sizing()

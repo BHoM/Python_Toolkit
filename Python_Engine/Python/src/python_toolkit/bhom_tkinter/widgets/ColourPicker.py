@@ -2,19 +2,18 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Callable, Optional
 
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
-class ColourPicker(ttk.Frame):
+class ColourPicker(BHoMBaseWidget):
 	"""A simple colour picker widget where the swatch opens a themed colour dialog."""
 
 	def __init__(
 		self,
-		parent: tk.Widget,
+		parent: ttk.Frame,
 		default_colour: str = "#ffffff",
 		swatch_width: int = 48,
 		swatch_height: int = 28,
 		command: Optional[Callable[[str], None]] = None,
-		item_title: Optional[str] = None,
-		helper_text: Optional[str] = None,
 		**kwargs,
 	) -> None:
 		"""
@@ -24,8 +23,6 @@ class ColourPicker(ttk.Frame):
 			swatch_width: Width of the clickable colour swatch in pixels.
 			swatch_height: Height of the clickable colour swatch in pixels.
 			command: Optional callback called with selected hex colour.
-			item_title: Optional header text shown at the top of the widget frame.
-			helper_text: Optional helper text shown above the controls.
 			**kwargs: Additional Frame options.
 		"""
 		super().__init__(parent, **kwargs)
@@ -36,19 +33,11 @@ class ColourPicker(ttk.Frame):
 		self.swatch_height = max(1, int(swatch_height))
 		self._picker_window: Optional[tk.Toplevel] = None
 		self._popup_preview: Optional[tk.Canvas] = None
-		self._popup_swatch = None
+		self._popup_swatch: Optional[int] = None
 		self._popup_hex_var: Optional[tk.StringVar] = None
 		self._popup_red_var: Optional[tk.IntVar] = None
 		self._popup_green_var: Optional[tk.IntVar] = None
 		self._popup_blue_var: Optional[tk.IntVar] = None
-
-		if item_title:
-			self.title_label = ttk.Label(self, text=item_title, style="Header.TLabel")
-			self.title_label.pack(side="top", anchor="w", pady=(0, 4))
-
-		if helper_text:
-			self.helper_label = ttk.Label(self, text=helper_text, style="Caption.TLabel")
-			self.helper_label.pack(side="top", anchor="center", pady=(0, 8))
 
 		controls = ttk.Frame(self)
 		controls.pack(side="top", anchor="center")
@@ -219,16 +208,16 @@ class ColourPicker(ttk.Frame):
 		"""Return the currently selected hex colour."""
 		return self.colour_var.get()
 
-	def set(self, colour: str) -> None:
+	def set(self, value: str) -> None:
 		"""Set the current colour and refresh the preview swatch."""
-		self.colour_var.set(colour)
-		self._update_preview(colour)
+		self.colour_var.set(value)
+		self._update_preview(value)
 
 
 if __name__ == "__main__":
-	from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+	from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
-	root = DefaultRoot()
+	root = BHoMBaseWindow()
 	parent_container = root.content_frame
 
 	def on_colour_changed(colour: str) -> None:

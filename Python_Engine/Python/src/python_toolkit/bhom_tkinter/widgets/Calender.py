@@ -4,8 +4,20 @@ from tkinter import ttk
 import calendar
 import datetime
 
-class CalendarWidget(tk.Frame):
-    def __init__(self, parent, def_year: int, def_month: int, def_day: int, show_year_selector: bool = False, year_min: int = 1900, year_max: int = 2100, item_title: Optional[str] = None, helper_text: Optional[str] = None, **kwargs):
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+
+class CalendarWidget(BHoMBaseWidget):
+    def __init__(
+            self,
+            parent: ttk.Frame, 
+            def_year: int, 
+            def_month: int, 
+            def_day: int,
+            show_year_selector: bool = True,
+            year_min: int = 1900,
+            year_max: int = 2100,
+            **kwargs):
+        
         super().__init__(parent, **kwargs)
 
         self.year = def_year
@@ -14,26 +26,13 @@ class CalendarWidget(tk.Frame):
         self.year_min = year_min
         self.year_max = year_max
 
-        self.item_title = item_title
-        self.helper_text = helper_text
-
-        # Optional header/title label at the top of the widget
-        if self.item_title:
-            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
-            self.title_label.pack(side="top", anchor="w")
-
-        # Optional helper/requirements label above the input
-        if self.helper_text:
-            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
-            self.helper_label.pack(side="top", anchor="w")
-
-        self.cal_frame = tk.Frame(self)
+        self.cal_frame = ttk.Frame(self)
         self.cal_frame.pack(side="top", fill="x")
 
-        self.month_frame = tk.Frame(self)
+        self.month_frame = ttk.Frame(self)
         self.month_frame.pack(side="top", fill="x")
 
-        self.date_frame = tk.Frame(self)
+        self.date_frame = ttk.Frame(self)
         self.date_frame.pack(side="top", fill="x")
 
         if self.show_year_selector:
@@ -43,10 +42,10 @@ class CalendarWidget(tk.Frame):
         self.redraw()
 
     def year_selector(self):
-        year_var = tk.IntVar()
-        year_var.set(self.year)
+        year_var = tk.StringVar()
+        year_var.set(str(self.year))
 
-        years = list(range(self.year_min, self.year_max + 1))
+        years = [str(year) for year in range(self.year_min, self.year_max + 1)]
         drop = tk.OptionMenu(self.month_frame, year_var, *years)
         year_var.trace_add("write", lambda *args: self.set_year(year_var))
         drop.pack(side="left", padx=4, pady=4)
@@ -62,7 +61,7 @@ class CalendarWidget(tk.Frame):
         drop.pack(side="left", padx=4, pady=4)
 
     def set_year(self, var):
-        year = var.get()
+        year = int(var.get())
         self.year = year
         self.redraw()
 
@@ -76,7 +75,7 @@ class CalendarWidget(tk.Frame):
             child.destroy()
 
         for col, day in enumerate(("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")):
-            label = tk.Label(self.cal_frame, text=day)
+            label = ttk.Label(self.cal_frame, text=day)
             label.grid(row=0, column=col, sticky="nsew")
 
         cal = calendar.monthcalendar(self.year, self.month)
@@ -85,7 +84,7 @@ class CalendarWidget(tk.Frame):
             for col, day in enumerate(week):
                 text = "" if day == 0 else day
                 state = "normal" if day > 0 else "disabled"
-                cell = tk.Button(self.cal_frame, text=text, state=state, command=lambda day=day: self.set_day(day))
+                cell = ttk.Button(self.cal_frame, text=text, state=state, command=lambda day=day: self.set_day(day))
                 cell.grid(row=row+1, column=col, sticky="nsew")
         
     def set_day(self, num):
@@ -95,21 +94,41 @@ class CalendarWidget(tk.Frame):
             child.destroy()
 
         date = self.months[self.month-1] + " " + str(self.day)
-        label = tk.Label(self.date_frame, text=f"Selected Date: {date}")
+        label = ttk.Label(self.date_frame, text=f"Selected Date: {date}")
         label.pack(padx=4, pady=4)
     
     def get_date(self):
         return datetime.date(self.year, self.month, self.day)
     
+    def get(self):
+        return datetime.date(self.year, self.month, self.day)
+    
+    def set(self, value: datetime.date):
+        self.year = value.year
+        self.month = value.month
+        self.day = value.day
+        self.redraw()
+    
+    def pack(self, **kwargs):
+        super().pack(**kwargs)
+        self.redraw()
+        
 if __name__ == "__main__":
 
-    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
-    root = DefaultRoot(min_height=500)
+    root = BHoMBaseWindow(min_height=500)
     root.title("Calendar Widget Test")
 
     # Example without year selector
-    cal_widget1 = CalendarWidget(root.content_frame, def_year=2024, def_month=6, def_day=15, item_title="Select Start Date")
+    cal_widget1 = CalendarWidget(
+        root.content_frame,
+        def_year=2024,
+        def_month=6,
+        def_day=15,
+        item_title="Select a Date",
+        helper_text="Choose a date from the calendar below.",
+    )
     cal_widget1.pack(padx=20, pady=20)
 
     root.mainloop()

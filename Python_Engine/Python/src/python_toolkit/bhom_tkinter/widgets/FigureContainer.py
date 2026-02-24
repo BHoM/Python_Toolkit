@@ -1,23 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional
+from typing import Optional, Any
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 import matplotlib as mpl
+
 mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
-class FigureContainer(tk.Frame):
+class FigureContainer(BHoMBaseWidget):
     """
     A reusable widget for embedding matplotlib figures and images.
     """
 
     def __init__(
         self,
-        parent,
-        item_title: Optional[str] = None,
-        helper_text: Optional[str] = None,
+        parent: ttk.Frame,
         **kwargs
     ) -> None:
         """
@@ -32,29 +31,12 @@ class FigureContainer(tk.Frame):
         super().__init__(parent, **kwargs)
 
         self.figure: Optional[Figure] = None
-        self.image: Optional[tk.PhotoImage] = None
+        self.image: Optional[Any] = None
         self.image_file: Optional[str] = None
-        self._original_pil_image = None
+        self._original_pil_image: Optional[Any] = None
 
-        self.item_title = item_title
-        self.helper_text = helper_text
-
-        # Optional header/title label at the top of the widget
-        if self.item_title:
-            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
-            self.title_label.pack(side="top", anchor="w")
-
-        # Optional helper/requirements label above the input
-        if self.helper_text:
-            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
-            self.helper_label.pack(side="top", anchor="w")
-
-        # Container frame for embedded content (not title/helper)
-        self.content_frame = ttk.Frame(self)
-        self.content_frame.pack(side="top", fill=tk.BOTH, expand=True)
-
-        self.canvas = None
-        self.image_label = None
+        self.canvas: Optional[FigureCanvasTkAgg] = None
+        self.image_label: Optional[ttk.Label] = None
 
         if self.image:
             self.embed_image(self.image)
@@ -157,7 +139,7 @@ class FigureContainer(tk.Frame):
     
     def _scale_image_to_fit(self):
         """Scale the image to fit within the content frame while maintaining aspect ratio."""
-        if not hasattr(self, '_original_pil_image') or self._original_pil_image is None:
+        if self._original_pil_image is None:
             return
         
         # Get current frame dimensions
@@ -188,7 +170,7 @@ class FigureContainer(tk.Frame):
             self.image = ImageTk.PhotoImage(resized)
             if self.image_label:
                 self.image_label.configure(image=self.image)
-        except Exception as e:
+        except Exception:
             pass  # Silently handle scaling errors
 
     def clear(self) -> None:
@@ -205,15 +187,38 @@ class FigureContainer(tk.Frame):
         self.image_label = None
         self._original_pil_image = None
 
+    def get(self):
+        """Return the currently embedded figure or image."""
+        if self.figure is not None:
+            return self.figure
+        elif self.image is not None:
+            return self.image
+        else:
+            return None
+        
+    def set(self, value):
+        """Set the content of the figure container, accepting either a Figure or PhotoImage."""
+        if isinstance(value, Figure):
+            self.embed_figure(value)
+        elif isinstance(value, tk.PhotoImage):
+            self.embed_image(value)
+        elif isinstance(value, str):
+            self.embed_image_file(value)
+        else:
+            raise ValueError("Unsupported value type for FigureContainer. Must be Figure, PhotoImage, or file path string.")
+
 
 if __name__ == "__main__":
 
-    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
-    root = DefaultRoot()
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    root = BHoMBaseWindow()
     parent_container = root.content_frame
 
     # Create figure container
-    figure_container = FigureContainer(parent=parent_container, item_title="Figure Container", helper_text="This widget can embed matplotlib figures or images.")
+    figure_container = FigureContainer(
+        parent=parent_container, 
+        item_title="Figure Container", 
+        helper_text="This widget can embed matplotlib figures or images.")
     figure_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
     # Create and embed a matplotlib figure

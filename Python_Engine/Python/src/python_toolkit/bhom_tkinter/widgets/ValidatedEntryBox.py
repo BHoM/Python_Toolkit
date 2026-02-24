@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable, Any, Union
 
-class ValidatedEntryBox(tk.Frame):
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+
+class ValidatedEntryBox(BHoMBaseWidget):
     """
     A reusable entry box component with built-in validation for different data types.
     
@@ -16,8 +18,6 @@ class ValidatedEntryBox(tk.Frame):
     def __init__(
         self,
         parent,
-        item_title: Optional[str] = None,
-        helper_text: Optional[str] = None,
         variable: Optional[tk.StringVar] = None,
         width: int = 15,
         value_type: type = str,
@@ -57,37 +57,29 @@ class ValidatedEntryBox(tk.Frame):
         self.required = required
         self.custom_validator = custom_validator
         self.on_validate = on_validate
-        self.item_title = item_title
-        self.helper_text = helper_text
 
-        # Optional header/title label at the top of the widget
-        if self.item_title:
-            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
-            self.title_label.pack(side="top", anchor="w")
-
-        # Optional helper/requirements label above the input
-        if self.helper_text:
-            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
-            self.helper_label.pack(side="top", anchor="w")
-
-        # Create frame to hold entry and error label on one row
-        self.input_row = ttk.Frame(self)
-        self.input_row.pack(side="top", fill="x", expand=True)
-        
         # Create or use provided StringVar
         self.variable = variable if variable is not None else tk.StringVar(value="")
         
+        # Create frame for entry and success indicator
+        self.entry_frame = ttk.Frame(self.content_frame)
+        self.entry_frame.pack(side="top", fill="x")
+        
         # Create entry widget
-        self.entry = ttk.Entry(self.input_row, textvariable=self.variable, width=width)
+        self.entry = ttk.Entry(self.entry_frame, textvariable=self.variable, width=width)
         self.entry.pack(side="left", fill="x", expand=True)
+        
+        # Create success indicator label at end of entry
+        self.success_label = ttk.Label(self.entry_frame, text=" ", foreground="#4bb543", width=2)
+        self.success_label.pack(side="left", padx=(5, 0))
+        
+        # Create error label below entry with fixed height to prevent layout shifts
+        self.error_label = ttk.Label(self.content_frame, text=" ", style="Caption.TLabel", anchor="w")
+        self.error_label.pack(side="top", fill="x")
         
         # Bind validation events
         self.entry.bind("<FocusOut>", lambda _: self.validate())
         self.entry.bind("<Return>", lambda _: self.validate())
-        
-        # Create error label
-        self.error_label = ttk.Label(self.input_row, text="", style="Error.TLabel")
-        self.error_label.pack(side="left", padx=(10, 0))
         
     def get(self) -> str:
         """Get the current value as a string."""
@@ -244,14 +236,17 @@ class ValidatedEntryBox(tk.Frame):
     def _show_error(self, message: str) -> None:
         """Display error message."""
         self.error_label.config(text=message, foreground="#ff4444")
+        self.success_label.config(text=" ")
     
     def _show_success(self) -> None:
         """Display success indicator."""
-        self.error_label.config(text="✓", foreground="#4bb543")
+        self.error_label.config(text=" ")
+        self.success_label.config(text="✓")
     
     def clear_error(self) -> None:
         """Clear the error message."""
-        self.error_label.config(text="")
+        self.error_label.config(text=" ")
+        self.success_label.config(text=" ")
     
     def _call_validate_callback(self, is_valid: bool) -> None:
         """Call the validation callback if provided."""
@@ -263,10 +258,10 @@ class ValidatedEntryBox(tk.Frame):
 if __name__ == "__main__":
     # Test the ValidatedEntryBox
 
-    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
-    root = DefaultRoot(title="Validated Entry Box Test")
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    root = BHoMBaseWindow(title="Validated Entry Box Test")
     parent_container = getattr(root, "content_frame", root)
-    
+
     def on_validate(is_valid):
         print(f"Validation result: {is_valid}")
     

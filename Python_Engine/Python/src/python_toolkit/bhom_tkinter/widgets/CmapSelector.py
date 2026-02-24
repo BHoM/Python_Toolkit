@@ -1,14 +1,15 @@
 from typing import Dict, List, Optional
-from matplotlib import cm
 from tkinter import ttk
 import tkinter as tk
 import matplotlib as mpl
 from python_toolkit.plot.cmap_sample import cmap_sample_plot
-from python_toolkit.tkinter.widgets.FigureContainer import FigureContainer
+from python_toolkit.bhom_tkinter.widgets.FigureContainer import FigureContainer
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
-class CmapSelector(ttk.Frame):
+class CmapSelector(BHoMBaseWidget):
     """
     A widget for selecting and previewing a matplotlib colormap.
     """
@@ -57,11 +58,9 @@ class CmapSelector(ttk.Frame):
 
     def __init__(
         self,
-        parent: tk.Widget,
+        parent: ttk.Frame,
         colormaps: Optional[List[str]] = None,
         cmap_set: str = "all",
-        item_title: Optional[str] = None,
-        helper_text: Optional[str] = None,
         **kwargs
     ) -> None:
         """
@@ -76,16 +75,6 @@ class CmapSelector(ttk.Frame):
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
-
-        # Optional header/title label at the top of the widget
-        if item_title:
-            self.title_label = ttk.Label(self, text=item_title, style="Header.TLabel")
-            self.title_label.pack(side="top", anchor="w", pady=(0, 4))
-
-        # Optional helper/requirements label above the input
-        if helper_text:
-            self.helper_label = ttk.Label(self, text=helper_text, style="Caption.TLabel")
-            self.helper_label.pack(side="top", anchor="w", pady=(0, 8))
 
         mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
@@ -105,7 +94,7 @@ class CmapSelector(ttk.Frame):
         self.cmap_frame.columnconfigure(0, weight=1)
         self.cmap_frame.rowconfigure(0, weight=1)
 
-        content = ttk.Frame(self.cmap_frame, width=440, height=130)
+        content = tk.Frame(self.cmap_frame, width=440, height=130)
         content.grid(row=0, column=0, padx=4, pady=4)
         content.grid_propagate(False)
 
@@ -122,9 +111,13 @@ class CmapSelector(ttk.Frame):
         self.cmap_combobox.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.cmap_combobox.bind("<<ComboboxSelected>>", self._on_cmap_selected)
 
-        self.figure_widget = FigureContainer(content, width=420, height=90)
-        self.figure_widget.pack(anchor="w", padx=8, pady=(0, 8))
-        self.figure_widget.pack_propagate(False)
+        self.figure_widget = FigureContainer(
+            content,
+            width=420,
+            height=90,
+            packing_options=PackingOptions(anchor="w", padx=8, pady=(0, 8)),
+        )
+        self.figure_widget.build()
 
         if self._uses_explicit_colormaps:
             current_colormaps = self._with_reversed(self._filter_available(colormaps or []))
@@ -137,10 +130,7 @@ class CmapSelector(ttk.Frame):
     def _get_all_colormaps(self) -> List[str]:
         """Return all registered colormap names, including reversed variants."""
         # Base names available in this matplotlib build
-        try:
-            base_names = set(cm.cmap_d.keys())
-        except Exception:
-            base_names = set(cm.datad.keys())
+        base_names = set(mpl.colormaps())
 
         # Include reversed variants (name_r) next to each base map
         all_names = set(base_names)
@@ -207,13 +197,25 @@ class CmapSelector(ttk.Frame):
         cmap_name = self.colormap_var.get()
         return cmap_name if cmap_name else None
 
+    def get(self) -> Optional[str]:
+        """Get the currently selected colormap name."""
+        return self.get_selected_cmap()
+    
+    def set(self, value: Optional[str]):
+        """Set the selected colormap by name."""
+        if value and value in self.cmap_combobox["values"]:
+            self.colormap_var.set(value)
+            self._update_cmap_sample()
+        else:
+            self.figure_widget.clear()
+            self.colormap_var.set("")
+            
 if __name__ == "__main__":
-    from python_toolkit.tkinter.DefaultRoot import DefaultRoot
-    root = DefaultRoot()
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    root = BHoMBaseWindow()
     parent_container = root.content_frame
 
     cmap_selector = CmapSelector(parent_container, cmap_set="all", item_title="Colormap Selector", helper_text="Select a colormap from the list.")
     cmap_selector.pack(fill=tk.BOTH, expand=True)
 
     root.mainloop()
-    root.destroy()

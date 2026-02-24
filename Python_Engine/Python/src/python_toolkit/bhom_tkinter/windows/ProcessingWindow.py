@@ -3,9 +3,9 @@ from tkinter import ttk
 import os
 import time
 from typing import Optional
-from python_toolkit.tkinter.DefaultRoot import DefaultRoot
+from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
-class ProcessingWindow(DefaultRoot):
+class ProcessingWindow(BHoMBaseWindow):
     """A simple processing window with animated indicator."""
 
     def __init__(self, title="Processing", message="Processing..."):
