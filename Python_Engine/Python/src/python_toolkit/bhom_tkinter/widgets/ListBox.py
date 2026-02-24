@@ -1,3 +1,5 @@
+"""Scrollable listbox widget with optional selection helper controls."""
+
 import tkinter as tk
 from tkinter import filedialog, ttk
 from typing import Optional
@@ -71,19 +73,31 @@ class ScrollableListBox(BHoMBaseWidget):
             self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     def set_selections(self, items):
-        """Set the selection to the specified items."""
+        """Set the selection to the specified items.
+
+        Args:
+            items: Item values to select.
+        """
         self.listbox.selection_clear(0, tk.END)
         for index, item in enumerate(self.items):
             if item in items:
                 self.listbox.selection_set(index)
     
     def get_selection(self):
-        """Return a list of selected items."""
+        """Return a list of selected items.
+
+        Returns:
+            list: Selected item values.
+        """
         selected_indices = self.listbox.curselection()
         return [self.listbox.get(i) for i in selected_indices]
     
     def get_selection_indices(self):
-        """Return tuple of selected indices."""
+        """Return tuple of selected indices.
+
+        Returns:
+            tuple: Indices of selected entries.
+        """
         return self.listbox.curselection()
 
     def select_all(self):
@@ -95,12 +109,21 @@ class ScrollableListBox(BHoMBaseWidget):
         self.listbox.selection_clear(0, tk.END)
     
     def insert(self, index, item):
-        """Insert an item at the specified index."""
+        """Insert an item at the specified index.
+
+        Args:
+            index: Position at which to insert.
+            item: Item value to insert.
+        """
         self.listbox.insert(index, item)
         self._on_configure()
     
     def delete(self, index):
-        """Delete an item at the specified index."""
+        """Delete an item at the specified index.
+
+        Args:
+            index: Position of item to delete.
+        """
         self.listbox.delete(index)
         self._on_configure()
     
@@ -110,19 +133,31 @@ class ScrollableListBox(BHoMBaseWidget):
         self._on_configure()
 
     def pack(self, **kwargs):
-        """Pack the widget with the given options."""
+        """Pack the widget with the given options.
+
+        Args:
+            **kwargs: Pack geometry manager options.
+        """
         super().pack(**kwargs)
         self._on_configure()  # Ensure scrollbar visibility is updated when packed
 
     def set(self, value):
-        """Set the listbox items to the provided list."""
+        """Set the listbox items to the provided list.
+
+        Args:
+            value: Iterable of item values to display.
+        """
         self.clear()
         for item in value:
             self.listbox.insert(tk.END, item)
         self._on_configure(        )
     
     def get(self):
-        """Get the current list of items in the listbox."""
+        """Get the current list of items in the listbox.
+
+        Returns:
+            list: Current listbox items in display order.
+        """
         return [self.listbox.get(i) for i in range(self.listbox.size())]
 
 

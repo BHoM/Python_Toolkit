@@ -1,3 +1,5 @@
+"""Colour picker widget with themed popup and live RGB/hex preview."""
+
 import tkinter as tk
 from tkinter import ttk
 from typing import Callable, Optional
@@ -39,8 +41,8 @@ class ColourPicker(BHoMBaseWidget):
 		self._popup_green_var: Optional[tk.IntVar] = None
 		self._popup_blue_var: Optional[tk.IntVar] = None
 
-		controls = ttk.Frame(self)
-		controls.pack(side="top", anchor="center")
+		controls = ttk.Frame(self.content_frame)
+		controls.pack(side="top", anchor=getattr(self, "_pack_anchor"))
 
 		self.preview = tk.Canvas(
 			controls,
@@ -205,22 +207,32 @@ class ColourPicker(BHoMBaseWidget):
 			return 255, 255, 255
 
 	def get(self) -> str:
-		"""Return the currently selected hex colour."""
+		"""Return the currently selected hex colour.
+
+		Returns:
+			str: Selected colour in hex format.
+		"""
 		return self.colour_var.get()
 
 	def set(self, value: str) -> None:
-		"""Set the current colour and refresh the preview swatch."""
+		"""Set the current colour and refresh the preview swatch.
+
+		Args:
+			value: Colour value in hex format.
+		"""
 		self.colour_var.set(value)
 		self._update_preview(value)
 
 
 if __name__ == "__main__":
 	from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+	from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 	root = BHoMBaseWindow()
 	parent_container = root.content_frame
 
 	def on_colour_changed(colour: str) -> None:
+		"""Print selected colour in the standalone example."""
 		print(f"Selected colour: {colour}")
 
 	colour_picker = ColourPicker(
@@ -228,7 +240,9 @@ if __name__ == "__main__":
 		command=on_colour_changed,
 		item_title="Colour Picker",
 		helper_text="Pick a colour for plotting.",
+		alignment="center",
+		packing_options=PackingOptions(padx=10, pady=10),
 	)
-	colour_picker.pack(padx=20, pady=20, anchor="w")
+	colour_picker.build()
 
 	root.mainloop()

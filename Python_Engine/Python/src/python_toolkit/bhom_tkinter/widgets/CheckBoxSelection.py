@@ -1,3 +1,5 @@
+"""Checkbox selection widget with multi-select support and state helpers."""
+
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional, List, Callable
@@ -64,6 +66,7 @@ class CheckboxSelection(BHoMBaseWidget):
 				text=f"□ {field}",
 				cursor="hand2"
 			)
+			getattr(self, "align_child_text")(button)
 			button.bind("<Button-1>", lambda e, f=field: self._toggle_field(f))
 			
 			if self.max_per_line and self.max_per_line > 0:
@@ -73,11 +76,11 @@ class CheckboxSelection(BHoMBaseWidget):
 				else:
 					row = index % self.max_per_line
 					column = index // self.max_per_line
-				button.grid(row=row, column=column, padx=(0, 10), pady=(0, 4), sticky="w")
+				button.grid(row=row, column=column, padx=(0, 10), pady=(0, 4), sticky=getattr(self, "_grid_sticky"))
 			elif self.orient == "horizontal":
-				button.grid(row=0, column=index, padx=(0, 10), pady=(0, 4), sticky="w")
+				button.grid(row=0, column=index, padx=(0, 10), pady=(0, 4), sticky=getattr(self, "_grid_sticky"))
 			else:
-				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky="w")
+				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky=getattr(self, "_grid_sticky"))
 			self._buttons.append(button)
 
 	def _toggle_field(self, field):
@@ -103,11 +106,19 @@ class CheckboxSelection(BHoMBaseWidget):
 			self.command(self.get())
 
 	def get(self) -> List[str]:
-		"""Return a list of currently selected values."""
+		"""Return a list of currently selected values.
+
+		Returns:
+			List[str]: Selected field labels.
+		"""
 		return [field for field, var in self.value_vars.items() if var.get()]
 
 	def set(self, value: List[str]):
-		"""Set the selected values. Accepts a list of field names to check."""
+		"""Set the selected values.
+
+		Args:
+			value: Field names to mark as selected.
+		"""
 		values = [str(v) for v in (value or [])]
 		for field, var in self.value_vars.items():
 			var.set(field in values)
@@ -161,7 +172,12 @@ class CheckboxSelection(BHoMBaseWidget):
 			self.command(self.get())
 
 	def set_fields(self, fields: List[str], defaults: Optional[List[str]] = None):
-		"""Replace the available fields and rebuild the widget."""
+		"""Replace the available fields and rebuild the widget.
+
+		Args:
+			fields: New available field names.
+			defaults: Optional field names to preselect after rebuild.
+		"""
 		self.fields = [str(field) for field in (fields or [])]
 		self._build_buttons()
 
@@ -169,14 +185,20 @@ class CheckboxSelection(BHoMBaseWidget):
 			self.set(defaults)
 
 	def pack(self, **kwargs):
-		"""Pack the widget with the given options."""
+		"""Pack the widget with the given options.
+
+		Args:
+			**kwargs: Pack geometry manager options.
+		"""
 		super().pack(**kwargs)
 
 if __name__ == "__main__":
 
 	from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+	from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 	def on_selection(values):
+		"""Print selected values in the standalone example."""
 		print(f"Selected: {values}")
 
 	root = BHoMBaseWindow()
@@ -190,9 +212,10 @@ if __name__ == "__main__":
 		orient="vertical",
 		max_per_line=6,
 		item_title="Choose Options",
-		helper_text="Select one or more options below:"
+		helper_text="Select one or more options below:",
+		packing_options=PackingOptions(padx=20, pady=20)
 	)
-	widget.pack(padx=20, pady=20)
+	widget.build()
 
 	# Add control buttons for demonstration
 	control_frame = ttk.Frame(parent_frame)

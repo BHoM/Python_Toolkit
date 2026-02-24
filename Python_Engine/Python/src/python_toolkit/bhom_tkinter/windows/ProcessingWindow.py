@@ -1,3 +1,5 @@
+"""Window that displays a status message with a lightweight animated indicator."""
+
 import tkinter as tk
 from tkinter import ttk
 import time
@@ -35,6 +37,7 @@ class ProcessingWindow(BHoMBaseWindow):
         self.is_running = False
 
     def build(self):
+        """Build processing labels and the animation indicator."""
         self.title_label = ttk.Label(
             self.content_frame,
             text=self.window_title,
@@ -67,7 +70,11 @@ class ProcessingWindow(BHoMBaseWindow):
         self._animate()
 
     def keep_alive(self):
-        """Call this repeatedly to process animation updates. Returns False when done."""
+        """Call repeatedly to process animation updates.
+
+        Returns:
+            bool: `True` while running and window exists, else `False`.
+        """
         if self.is_running and self.winfo_exists():
             self.update()
             return True
@@ -89,7 +96,11 @@ class ProcessingWindow(BHoMBaseWindow):
             self.after(200, self._animate)
 
     def update_message(self, message: str):
-        """Update the message text."""
+        """Update the message text.
+
+        Args:
+            message: New status message to display.
+        """
         self.message_text = message
         if self.message_label is not None:
             self.message_label.config(text=message)

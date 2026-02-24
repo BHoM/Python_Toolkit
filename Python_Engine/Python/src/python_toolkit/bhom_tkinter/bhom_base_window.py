@@ -1,3 +1,5 @@
+"""Base themed Tk window used by BHoM toolkit GUI windows."""
+
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
@@ -131,7 +133,7 @@ class BHoMBaseWindow(tk.Tk):
         self.refresh_sizing()
 
     def _set_window_icon(self, icon_path: Path) -> None:
-        """Set a custom window icon, replacing the default uk icon."""
+        """Set a custom window icon, replacing Tk's default icon."""
 
         if not icon_path.exists():
             print(f"Warning: Icon file not found at {icon_path}")
@@ -166,7 +168,20 @@ class BHoMBaseWindow(tk.Tk):
             theme_path_light: Path, 
             theme_path_dark: Path) -> tuple[Path, Path, Path, str]:
         
-        """determin the light or dark mode usage"""
+        """Determine light or dark assets and theme based on configured mode.
+
+        Args:
+            logo_path: Light-mode logo path.
+            dark_logo_path: Optional dark-mode logo path.
+            icon_path: Light-mode icon path.
+            dark_icon_path: Optional dark-mode icon path.
+            theme_mode: Theme mode (`light`, `dark`, or `auto`).
+            theme_path_light: Light theme Tcl path.
+            theme_path_dark: Dark theme Tcl path.
+
+        Returns:
+            tuple[Path, Path, Path, str]: Theme path, logo path, icon path, and style key.
+        """
 
         if theme_mode == "light":
             return theme_path_light, logo_path, icon_path, "light"
@@ -188,6 +203,12 @@ class BHoMBaseWindow(tk.Tk):
     def _set_titlebar_theme(self, theme_style: str) -> str:
         """
         Apply titlebar theme using Windows API.
+
+        Args:
+            theme_style: Theme style key (`light` or `dark`).
+
+        Returns:
+            str: Applied titlebar style key.
         """
         try:
            
@@ -261,7 +282,13 @@ class BHoMBaseWindow(tk.Tk):
                 return "default"
 
     def _build_banner(self, parent: ttk.Frame, title: str, logo_path: Optional[Path]) -> None:
-        """Build the branded banner section."""
+        """Build the branded banner section.
+
+        Args:
+            parent: Parent frame to host the banner.
+            title: Banner title text.
+            logo_path: Optional logo image path.
+        """
         banner = ttk.Frame(parent, relief=tk.RIDGE, borderwidth=1)
         banner.pack(fill=tk.BOTH, padx=0, pady=0)
 
@@ -311,7 +338,15 @@ class BHoMBaseWindow(tk.Tk):
         show_close: bool,
         close_text: str,
     ) -> None:
-        """Build the bottom button bar."""
+        """Build the bottom button bar.
+
+        Args:
+            parent: Parent frame for the button bar.
+            show_submit: Whether to create submit button.
+            submit_text: Submit button label.
+            show_close: Whether to create close button.
+            close_text: Close button label.
+        """
         self.button_bar = ttk.Frame(parent, padding=(20, 10))
         self.button_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
@@ -423,7 +458,12 @@ class BHoMBaseWindow(tk.Tk):
             pass
 
     def _exit(self, result: str, callback: Optional[Callable] = None) -> None:
-        """Handle any exit path and always destroy the root window."""
+        """Handle any exit path and always destroy the root window.
+
+        Args:
+            result: Result token to store before closing.
+            callback: Optional callback invoked before destruction.
+        """
         self.result = result
         try:
             if callback:

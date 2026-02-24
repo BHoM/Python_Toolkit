@@ -1,3 +1,5 @@
+"""Validated entry widget supporting typed value and constraint checks."""
+
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable, Any, Union
@@ -71,22 +73,32 @@ class ValidatedEntryBox(BHoMBaseWidget):
         
         # Create success indicator label at end of entry
         self.success_label = ttk.Label(self.entry_frame, text=" ", foreground="#4bb543", width=2)
+        getattr(self, "align_child_text")(self.success_label)
         self.success_label.pack(side="left", padx=(5, 0))
         
         # Create error label below entry with fixed height to prevent layout shifts
-        self.error_label = ttk.Label(self.content_frame, text=" ", style="Caption.TLabel", anchor="w")
-        self.error_label.pack(side="top", fill="x")
+        self.error_label = ttk.Label(self.content_frame, text=" ", style="Caption.TLabel")
+        getattr(self, "align_child_text")(self.error_label)
+        self.error_label.pack(side="top", fill="x", anchor=getattr(self, "_pack_anchor"))
         
         # Bind validation events
         self.entry.bind("<FocusOut>", lambda _: self.validate())
         self.entry.bind("<Return>", lambda _: self.validate())
         
     def get(self) -> str:
-        """Get the current value as a string."""
+        """Get the current value as a string.
+
+        Returns:
+            str: Trimmed entry value.
+        """
         return self.variable.get().strip()
     
     def get_value(self) -> Optional[Union[str, int, float]]:
-        """Get the current value converted to the specified type."""
+        """Get the current value converted to the specified type.
+
+        Returns:
+            Optional[Union[str, int, float]]: Parsed value, or `None` when empty/invalid.
+        """
         value_str = self.get()
         if not value_str:
             return None
@@ -102,7 +114,11 @@ class ValidatedEntryBox(BHoMBaseWidget):
             return None
     
     def set(self, value: Union[str, int, float]) -> None:
-        """Set the entry value."""
+        """Set the entry value.
+
+        Args:
+            value: Value to display in the entry.
+        """
         self.variable.set(str(value))
         
     def validate(self) -> bool:
@@ -139,7 +155,14 @@ class ValidatedEntryBox(BHoMBaseWidget):
             return False
     
     def _validate_string(self, value: str) -> bool:
-        """Validate string value."""
+        """Validate string value.
+
+        Args:
+            value: String value to validate.
+
+        Returns:
+            bool: `True` when valid, otherwise `False`.
+        """
         # Check length constraints
         if self.min_length is not None and len(value) < self.min_length:
             self._show_error(f"Minimum length: {self.min_length}")
@@ -164,7 +187,14 @@ class ValidatedEntryBox(BHoMBaseWidget):
         return True
     
     def _validate_int(self, value_str: str) -> bool:
-        """Validate integer value."""
+        """Validate integer value.
+
+        Args:
+            value_str: Raw entry text to parse as integer.
+
+        Returns:
+            bool: `True` when valid, otherwise `False`.
+        """
         try:
             value = int(value_str)
         except ValueError:
@@ -196,7 +226,14 @@ class ValidatedEntryBox(BHoMBaseWidget):
         return True
     
     def _validate_float(self, value_str: str) -> bool:
-        """Validate float value."""
+        """Validate float value.
+
+        Args:
+            value_str: Raw entry text to parse as float.
+
+        Returns:
+            bool: `True` when valid, otherwise `False`.
+        """
         try:
             value = float(value_str)
         except ValueError:
@@ -259,10 +296,13 @@ if __name__ == "__main__":
     # Test the ValidatedEntryBox
 
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+    
     root = BHoMBaseWindow(title="Validated Entry Box Test")
     parent_container = getattr(root, "content_frame", root)
 
     def on_validate(is_valid):
+        """Print validation state in the standalone example."""
         print(f"Validation result: {is_valid}")
     
     entry_box = ValidatedEntryBox(
@@ -272,8 +312,9 @@ if __name__ == "__main__":
         value_type=int,
         min_value=0,
         max_value=100,
-        on_validate=on_validate
+        on_validate=on_validate,
+        packing_options=PackingOptions(padx=20, pady=20)
     )
-    entry_box.pack(padx=20, pady=20)
+    entry_box.build()
     
     root.mainloop()

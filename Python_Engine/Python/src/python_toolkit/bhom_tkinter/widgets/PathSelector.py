@@ -1,3 +1,5 @@
+"""Path selection widget for file or directory browsing."""
+
 import tkinter as tk
 from tkinter import filedialog, ttk
 from pathlib import Path
@@ -36,10 +38,10 @@ class PathSelector(BHoMBaseWidget):
         self.initialdir = initialdir
         self.filetypes = filetypes if filetypes is not None else [("All Files", "*.*")]
         self.display_name = tk.StringVar()
-        self.entry = ttk.Entry(self, textvariable=self.display_name, width=40)
+        self.entry = ttk.Entry(self.content_frame, textvariable=self.display_name, width=40)
         self.entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
 
-        self.button = ttk.Button(self, text=button_text, command=self._on_click)
+        self.button = ttk.Button(self.content_frame, text=button_text, command=self._on_click)
         self.button.pack(side=tk.LEFT)
 
     def _on_click(self):
@@ -63,11 +65,19 @@ class PathSelector(BHoMBaseWidget):
                 self.command(str(selected_path))
 
     def get(self) -> str:
-        """Return the currently selected file path."""
+        """Return the currently selected file path.
+
+        Returns:
+            str: Selected file or directory path.
+        """
         return self.path_var.get()
     
     def set(self, value: Optional[str]):
-        """Set the file path in the entry."""
+        """Set the file path in the entry.
+
+        Args:
+            value: File or directory path to display.
+        """
         if not value:
             self.path_var.set("")
             self.display_name.set("")
@@ -85,14 +95,24 @@ class PathSelector(BHoMBaseWidget):
 if __name__ == "__main__":
 
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
     root = BHoMBaseWindow()
     parent_container = root.content_frame
 
     def on_file_selected(path):
+        """Print selected path in the standalone example."""
         print(f"Selected: {path}")
 
-    path_selector = PathSelector(parent_container, button_text="Select File", filetypes=[("All Files", "*.*")], command=on_file_selected)
-    path_selector.pack(padx=20, pady=20)
+    path_selector = PathSelector(
+        parent_container, 
+        button_text="Select File", 
+        filetypes=[("All Files", "*.*")], 
+        command=on_file_selected,
+        item_title="Path Selector",
+        helper_text="Select a file from your system.",
+        packing_options=PackingOptions(padx=20, pady=20)
+    )
+    path_selector.build()
 
     root.mainloop()

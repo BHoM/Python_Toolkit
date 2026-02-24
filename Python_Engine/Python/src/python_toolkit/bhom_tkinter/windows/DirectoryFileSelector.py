@@ -1,3 +1,5 @@
+"""Window for selecting multiple files by extension from a directory tree."""
+
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
@@ -8,6 +10,7 @@ from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
 class DirectoryFileSelector(BHoMBaseWindow):
+    """Display matching files and return the user's multi-selection."""
 
     def __init__(
         self,
@@ -27,23 +30,25 @@ class DirectoryFileSelector(BHoMBaseWindow):
         self.file_lookup = dict(zip(self.display_items, self.files))
         self.file_selector_listbox: Optional[ScrollableListBox] = None
 
-        kwargs.setdefault("title", f"Select {selection_label}")
-        kwargs.setdefault("min_width", 600)
-        kwargs.setdefault("min_height", 400)
-        kwargs.setdefault("submit_text", "OK")
-        kwargs.setdefault("submit_command", self._on_submit)
-        kwargs.setdefault("close_text", "Cancel")
-        kwargs.setdefault("close_command", self._on_cancel)
-        kwargs.setdefault("on_close_window", self._on_cancel)
-
-        super().__init__(**kwargs)
+        super().__init__(
+            title=f"Select {selection_label}",
+            min_width=600,
+            min_height=400,
+            submit_text="OK",
+            submit_command=self._on_submit,
+            close_text="Cancel",
+            close_command=self._on_cancel,
+            on_close_window=self._on_cancel,
+            **kwargs,
+        )
 
     def build(self):
-        ttk.Label(
+        """Build the list-based file selection UI."""
+        instruction_label = ttk.Label(
             self.content_frame,
             text=f"Select the {self.selection_label} to analyse.",
-            justify=tk.LEFT,
-        ).pack(anchor="w", pady=(0, 10))
+        )
+        instruction_label.pack(anchor="w", pady=(0, 10))
 
         if self.file_selector_listbox is None:
             self.file_selector_listbox = ScrollableListBox(

@@ -1,3 +1,5 @@
+"""Calendar date-picker widget with optional year selector."""
+
 import tkinter as tk
 from typing import Optional
 from tkinter import ttk
@@ -7,6 +9,8 @@ import datetime
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
 class CalendarWidget(BHoMBaseWidget):
+    """Render a month grid and allow date selection."""
+
     def __init__(
             self,
             parent: ttk.Frame, 
@@ -26,13 +30,13 @@ class CalendarWidget(BHoMBaseWidget):
         self.year_min = year_min
         self.year_max = year_max
 
-        self.cal_frame = ttk.Frame(self)
+        self.cal_frame = ttk.Frame(self.content_frame)
         self.cal_frame.pack(side="top", fill="x")
 
-        self.month_frame = ttk.Frame(self)
+        self.month_frame = ttk.Frame(self.content_frame)
         self.month_frame.pack(side="top", fill="x")
 
-        self.date_frame = ttk.Frame(self)
+        self.date_frame = ttk.Frame(self.content_frame)
         self.date_frame.pack(side="top", fill="x")
 
         if self.show_year_selector:
@@ -42,6 +46,7 @@ class CalendarWidget(BHoMBaseWidget):
         self.redraw()
 
     def year_selector(self):
+        """Build the year dropdown selector."""
         year_var = tk.StringVar()
         year_var.set(str(self.year))
 
@@ -51,6 +56,7 @@ class CalendarWidget(BHoMBaseWidget):
         drop.pack(side="left", padx=4, pady=4)
 
     def month_selector(self):
+        """Build the month dropdown selector."""
         self.months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
         clicked = tk.StringVar()
@@ -61,21 +67,33 @@ class CalendarWidget(BHoMBaseWidget):
         drop.pack(side="left", padx=4, pady=4)
 
     def set_year(self, var):
+        """Update the selected year and redraw the calendar.
+
+        Args:
+            var: Tk variable containing the selected year.
+        """
         year = int(var.get())
         self.year = year
         self.redraw()
 
     def set_month(self, var):
+        """Update the selected month and redraw the calendar.
+
+        Args:
+            var: Tk variable containing the selected month name.
+        """
         month = var.get()
         self.month = self.months.index(month) + 1
         self.redraw()
 
     def redraw(self):
+        """Rebuild the month grid buttons for the current month and year."""
         for child in self.cal_frame.winfo_children():
             child.destroy()
 
         for col, day in enumerate(("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")):
             label = ttk.Label(self.cal_frame, text=day)
+            getattr(self, "align_child_text")(label)
             label.grid(row=0, column=col, sticky="nsew")
 
         cal = calendar.monthcalendar(self.year, self.month)
@@ -88,6 +106,11 @@ class CalendarWidget(BHoMBaseWidget):
                 cell.grid(row=row+1, column=col, sticky="nsew")
         
     def set_day(self, num):
+        """Set the selected day and refresh the date summary label.
+
+        Args:
+            num: Day of month to mark as selected.
+        """
         self.day = num
 
         for child in self.date_frame.winfo_children():
@@ -95,27 +118,49 @@ class CalendarWidget(BHoMBaseWidget):
 
         date = self.months[self.month-1] + " " + str(self.day)
         label = ttk.Label(self.date_frame, text=f"Selected Date: {date}")
-        label.pack(padx=4, pady=4)
+        getattr(self, "align_child_text")(label)
+        label.pack(anchor=getattr(self, "_pack_anchor"), padx=4, pady=4)
     
     def get_date(self):
+        """Return the selected date as a `datetime.date` instance.
+
+        Returns:
+            datetime.date: Currently selected date.
+        """
         return datetime.date(self.year, self.month, self.day)
     
     def get(self):
+        """Return the selected date value.
+
+        Returns:
+            datetime.date: Currently selected date.
+        """
         return datetime.date(self.year, self.month, self.day)
     
     def set(self, value: datetime.date):
+        """Set the selected date from a `datetime.date` value.
+
+        Args:
+            value: Date to apply to the widget.
+        """
         self.year = value.year
         self.month = value.month
         self.day = value.day
         self.redraw()
     
     def pack(self, **kwargs):
+        """Pack the widget and ensure the calendar grid is rendered.
+
+        Args:
+            **kwargs: Pack geometry manager options.
+        """
         super().pack(**kwargs)
         self.redraw()
         
 if __name__ == "__main__":
 
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
     root = BHoMBaseWindow(min_height=500)
     root.title("Calendar Widget Test")
@@ -128,7 +173,8 @@ if __name__ == "__main__":
         def_day=15,
         item_title="Select a Date",
         helper_text="Choose a date from the calendar below.",
+        packing_options=PackingOptions(padx=20, pady=20)
     )
-    cal_widget1.pack(padx=20, pady=20)
+    cal_widget1.build()
 
     root.mainloop()

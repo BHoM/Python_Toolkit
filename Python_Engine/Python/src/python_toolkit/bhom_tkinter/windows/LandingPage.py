@@ -1,3 +1,5 @@
+"""Landing page window with configurable header, message text, and custom actions."""
+
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable
@@ -87,6 +89,7 @@ if __name__ == "__main__":
 
     #simple example of using the landing page
     def on_button_click():
+        """Handle demo button clicks in the standalone example."""
         print("Button clicked!")
 
     landing_page = LandingPage(

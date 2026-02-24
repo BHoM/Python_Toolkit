@@ -1,12 +1,13 @@
+"""Standardized warning dialog window for errors, warnings, and info messages."""
+
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
-"""This will be used in place of warning / pop up boxes, to ensure consistent style"""
-
 
 class WarningBox(BHoMBaseWindow):
+    """Show categorized messages using the shared BHoM window styling."""
 
     def __init__(
             self, 
@@ -31,6 +32,7 @@ class WarningBox(BHoMBaseWindow):
         )
 
     def build(self):
+        """Render current messages into the content area."""
         self._render_messages()
         super().build()
 
@@ -59,17 +61,29 @@ class WarningBox(BHoMBaseWindow):
 
 
     def add_error_message(self, message: str):
-        """Add an error message to the warning box."""
+        """Add an error message to the warning box.
+
+        Args:
+            message: Error text to append.
+        """
         self.errors.append(message)
         self.update_messages()
 
     def add_warning_message(self, message: str):
-        """Add a warning message to the warning box."""
+        """Add a warning message to the warning box.
+
+        Args:
+            message: Warning text to append.
+        """
         self.warnings.append(message)
         self.update_messages()
 
     def add_info_message(self, message: str):
-        """Add an informational message to the warning box."""
+        """Add an informational message to the warning box.
+
+        Args:
+            message: Informational text to append.
+        """
         self.infos.append(message)
         self.update_messages()
 

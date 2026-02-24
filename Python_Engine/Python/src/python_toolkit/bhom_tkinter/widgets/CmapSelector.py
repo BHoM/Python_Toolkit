@@ -1,3 +1,5 @@
+"""Colormap selector widget with embedded matplotlib preview."""
+
 from typing import Dict, List, Optional
 from tkinter import ttk
 import tkinter as tk
@@ -79,7 +81,7 @@ class CmapSelector(BHoMBaseWidget):
         mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
         # Create frame for cmap selection content
-        self.cmap_frame = ttk.Frame(self)
+        self.cmap_frame = ttk.Frame(self.content_frame)
         self.cmap_frame.pack(side="top", fill="both", expand=True)
 
         self.colormap_var = tk.StringVar(value="viridis")
@@ -94,7 +96,7 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame.columnconfigure(0, weight=1)
         self.cmap_frame.rowconfigure(0, weight=1)
 
-        content = tk.Frame(self.cmap_frame, width=440, height=130)
+        content = ttk.Frame(self.cmap_frame, width=440, height=130)
         content.grid(row=0, column=0, padx=4, pady=4)
         content.grid_propagate(False)
 
@@ -128,7 +130,11 @@ class CmapSelector(BHoMBaseWidget):
         self._select_default_cmap(current_colormaps)
 
     def _get_all_colormaps(self) -> List[str]:
-        """Return all registered colormap names, including reversed variants."""
+        """Return all registered colormap names, including reversed variants.
+
+        Returns:
+            List[str]: Sorted list of available colormap names.
+        """
         # Base names available in this matplotlib build
         base_names = set(mpl.colormaps())
 
@@ -141,12 +147,26 @@ class CmapSelector(BHoMBaseWidget):
         return sorted(all_names)
 
     def _filter_available(self, names: List[str]) -> List[str]:
-        """Filter a candidate list to names available in the current matplotlib build."""
+        """Filter a candidate list to names available in the current matplotlib build.
+
+        Args:
+            names: Candidate colormap names.
+
+        Returns:
+            List[str]: Candidate names available in the current environment.
+        """
         available = set(self._all_colormaps)
         return [name for name in names if name in available]
 
     def _with_reversed(self, names: List[str]) -> List[str]:
-        """Return colormap names with reversed variants added next to each base map when available."""
+        """Return colormap names with reversed variants next to base maps.
+
+        Args:
+            names: Base colormap names.
+
+        Returns:
+            List[str]: Ordered list with available `_r` variants inserted.
+        """
         available = set(self._all_colormaps)
         selected: List[str] = []
         for name in names:
@@ -159,7 +179,14 @@ class CmapSelector(BHoMBaseWidget):
         return selected
 
     def _preset_colormaps(self, cmap_set: str) -> List[str]:
-        """Resolve a preset colormap set name to a colormap list."""
+        """Resolve a preset colormap set name to a colormap list.
+
+        Args:
+            cmap_set: Preset set key.
+
+        Returns:
+            List[str]: Colormap names for the requested preset.
+        """
         key = (cmap_set or "all").lower()
         return self._with_reversed(self._preset_map.get(key, self._preset_map["all"]))
 
@@ -183,7 +210,11 @@ class CmapSelector(BHoMBaseWidget):
         self._update_cmap_sample()
 
     def _update_cmap_sample(self, *args) -> None:
-        """Update the colormap sample plot."""
+        """Update the colormap sample plot.
+
+        Args:
+            *args: Unused callback arguments from Tk traces/events.
+        """
         cmap_name = self.colormap_var.get()
         if not cmap_name:
             self.figure_widget.clear()
@@ -193,16 +224,28 @@ class CmapSelector(BHoMBaseWidget):
         self.figure_widget.embed_figure(fig)
 
     def get_selected_cmap(self) -> Optional[str]:
-        """Return the currently selected colormap name, or None if no selection."""
+        """Return the currently selected colormap name, or `None` if empty.
+
+        Returns:
+            Optional[str]: Current colormap name.
+        """
         cmap_name = self.colormap_var.get()
         return cmap_name if cmap_name else None
 
     def get(self) -> Optional[str]:
-        """Get the currently selected colormap name."""
+        """Get the currently selected colormap name.
+
+        Returns:
+            Optional[str]: Current colormap name.
+        """
         return self.get_selected_cmap()
     
     def set(self, value: Optional[str]):
-        """Set the selected colormap by name."""
+        """Set the selected colormap by name.
+
+        Args:
+            value: Colormap name to select. Clears selection when invalid.
+        """
         if value and value in self.cmap_combobox["values"]:
             self.colormap_var.set(value)
             self._update_cmap_sample()
@@ -215,7 +258,13 @@ if __name__ == "__main__":
     root = BHoMBaseWindow()
     parent_container = root.content_frame
 
-    cmap_selector = CmapSelector(parent_container, cmap_set="all", item_title="Colormap Selector", helper_text="Select a colormap from the list.")
-    cmap_selector.pack(fill=tk.BOTH, expand=True)
+    cmap_selector = CmapSelector(
+        parent_container, 
+        cmap_set="all", 
+        item_title="Colormap Selector", 
+        helper_text="Select a colormap from the list.",
+        packing_options=PackingOptions(fill='both', expand=True)
+    )
+    cmap_selector.build()
 
     root.mainloop()

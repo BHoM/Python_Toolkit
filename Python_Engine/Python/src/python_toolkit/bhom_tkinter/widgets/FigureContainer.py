@@ -1,3 +1,5 @@
+"""Container widget for embedding matplotlib figures or image content."""
+
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Any
@@ -55,7 +57,11 @@ class FigureContainer(BHoMBaseWidget):
         self.image_label = None
 
     def _resolved_background(self) -> str:
-        """Resolve a background colour suitable for embedded Tk canvas widgets."""
+        """Resolve a background colour suitable for embedded Tk canvas widgets.
+
+        Returns:
+            str: Resolved background colour string.
+        """
         try:
             bg = ttk.Style().lookup("TFrame", "background")
             if bg:
@@ -69,11 +75,10 @@ class FigureContainer(BHoMBaseWidget):
             return "white"
 
     def embed_figure(self, figure: Figure) -> None:
+        """Embed a matplotlib figure in the container, replacing existing content.
 
-        """ add matplotlib figure to the container, replacing any existing content. 
-        
         Args:
-            figure: Matplotlib Figure object to embed
+            figure: Matplotlib Figure object to embed.
         """
 
         self._clear_children()
@@ -188,7 +193,11 @@ class FigureContainer(BHoMBaseWidget):
         self._original_pil_image = None
 
     def get(self):
-        """Return the currently embedded figure or image."""
+        """Return the currently embedded figure or image.
+
+        Returns:
+            Optional[Any]: Embedded figure/image, or `None` when empty.
+        """
         if self.figure is not None:
             return self.figure
         elif self.image is not None:
@@ -197,7 +206,11 @@ class FigureContainer(BHoMBaseWidget):
             return None
         
     def set(self, value):
-        """Set the content of the figure container, accepting either a Figure or PhotoImage."""
+        """Set the content of the figure container.
+
+        Args:
+            value: `Figure`, `PhotoImage`, or image file path string.
+        """
         if isinstance(value, Figure):
             self.embed_figure(value)
         elif isinstance(value, tk.PhotoImage):
@@ -211,6 +224,8 @@ class FigureContainer(BHoMBaseWidget):
 if __name__ == "__main__":
 
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+    
     root = BHoMBaseWindow()
     parent_container = root.content_frame
 
@@ -218,8 +233,10 @@ if __name__ == "__main__":
     figure_container = FigureContainer(
         parent=parent_container, 
         item_title="Figure Container", 
-        helper_text="This widget can embed matplotlib figures or images.")
-    figure_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        helper_text="This widget can embed matplotlib figures or images.",
+        packing_options=PackingOptions(padx=10, pady=10, fill='both', expand=True)
+    )
+    figure_container.build()
 
     # Create and embed a matplotlib figure
     fig, ax = plt.subplots(figsize=(5, 4), dpi=80)

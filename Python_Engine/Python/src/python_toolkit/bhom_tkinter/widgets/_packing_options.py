@@ -1,8 +1,11 @@
+"""Typed packing options shared by BHoM Tkinter widgets."""
+
 from dataclasses import dataclass, asdict
 from typing import Any, Literal
 
 @dataclass
 class PackingOptions:
+    """Container for `pack` geometry keyword arguments with type hints."""
 
     after: Any = None
     anchor: Literal['nw', 'n', 'ne', 'w', 'center', 'e', 'sw', 's', 'se'] = 'center'
@@ -17,7 +20,11 @@ class PackingOptions:
     in_: Any = None
 
     def to_dict(self) -> dict:
-        """Convert the dataclass to a dictionary, excluding None values."""
+        """Convert the dataclass to a dictionary, excluding `None` values.
+
+        Returns:
+            dict: Packing options filtered to keys with concrete values.
+        """
         return {k: v for k, v in asdict(self).items() if v is not None}
                 
 if __name__ == "__main__":
