@@ -55,6 +55,7 @@ class BHoMBaseWindow(tk.Tk):
         theme_path_dark: Path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_dark_theme.tcl"),
         theme_mode: Literal["light", "dark", "auto"] = "auto",
         widgets: List[BHoMBaseWidget] = [],
+        top_most: bool = True,
         **kwargs
     ):
         """
@@ -86,6 +87,10 @@ class BHoMBaseWindow(tk.Tk):
         self._icon_image = None
         self.minsize(min_width, min_height)
         self.resizable(resizable, resizable)
+
+        self.top_most = top_most
+        if self.top_most:
+            self.attributes("-topmost", True)
 
         self.widgets = widgets
         
