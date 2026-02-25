@@ -1,7 +1,7 @@
 """Calendar date-picker widget with optional year selector."""
 
 import tkinter as tk
-from typing import Optional
+from typing import Optional, Literal
 from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
 import calendar
@@ -25,6 +25,7 @@ class CalendarWidget(BHoMBaseWidget):
             day_button_width: int = 4,
             day_button_padx: int = 1,
             day_button_pady: int = 1,
+            day_button_text_alignment: Literal["left", "center", "right"] = "center",
             **kwargs):
         
         super().__init__(parent, **kwargs)
@@ -37,6 +38,18 @@ class CalendarWidget(BHoMBaseWidget):
         self.day_button_width = max(1, int(day_button_width))
         self.day_button_padx = int(day_button_padx)
         self.day_button_pady = int(day_button_pady)
+        alignment_candidate = str(day_button_text_alignment).strip().lower()
+        if alignment_candidate not in {"left", "center", "right"}:
+            alignment_candidate = "center"
+        self.day_button_text_alignment = alignment_candidate
+        self.day_button_style = f"CalendarDay.{id(self)}.TButton"
+
+        anchor_map = {
+            "left": "w",
+            "center": "center",
+            "right": "e",
+        }
+        ttk.Style(self).configure(self.day_button_style, anchor=anchor_map[self.day_button_text_alignment])
 
         self.cal_frame = ttk.Frame(self.content_frame)
         self.cal_frame.pack(side="top", fill="x")
@@ -116,6 +129,7 @@ class CalendarWidget(BHoMBaseWidget):
                     command=(lambda d=day: self.set_day(d)),
                     width=self.day_button_width,
                 )
+                cell_widget.button.configure(style=self.day_button_style, state=state)
                 cell_widget.grid(
                     row=row+1,
                     column=col,
@@ -190,9 +204,10 @@ if __name__ == "__main__":
         def_year=2024,
         def_month=6,
         def_day=15,
-        day_button_width=1,
+        day_button_width=3,
         day_button_padx=2,
         day_button_pady=2,
+        day_button_text_alignment="center",
         item_title="Select a Date",
         helper_text="Choose a date from the calendar below.",
         packing_options=PackingOptions(padx=20, pady=20)
