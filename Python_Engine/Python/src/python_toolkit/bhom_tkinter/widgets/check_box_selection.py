@@ -42,6 +42,7 @@ class CheckboxSelection(BHoMBaseWidget):
 		self.max_per_line = max_per_line
 		self.value_vars = {}  # Dictionary mapping field names to BooleanVars
 		self._buttons = []
+		self._field_buttons = {}
 
 		# Sub-frame for checkbox controls
 		self.buttons_frame = ttk.Frame(self.content_frame)
@@ -57,6 +58,7 @@ class CheckboxSelection(BHoMBaseWidget):
 		for button in self._buttons:
 			button.destroy()
 		self._buttons.clear()
+		self._field_buttons.clear()
 		self.value_vars.clear()
 
 		for index, field in enumerate(self.fields):
@@ -84,6 +86,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			else:
 				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky=getattr(self, "_grid_sticky"))
 			self._buttons.append(button)
+			self._field_buttons[field] = button
 
 	def _toggle_field(self, field):
 		"""Toggle a field's state when clicked."""
@@ -92,17 +95,12 @@ class CheckboxSelection(BHoMBaseWidget):
 
 	def _on_select_field(self, field):
 		"""Handle checkbox selection change and update visual indicator."""
-		# Find the button for this field and update its text
-		for button in self._buttons:
-			button_text = button.cget("text")
-			# Extract field name (remove the box indicator)
-			current_field = button_text[2:]  # Skip "□ " or "■ "
-			if current_field == field:
-				if self.value_vars[field].get():
-					button.configure(text=f"■ {field}")
-				else:
-					button.configure(text=f"□ {field}")
-				break
+		button = self._field_buttons.get(field)
+		if button is not None:
+			if self.value_vars[field].get():
+				button.set(f"■ {field}")
+			else:
+				button.set(f"□ {field}")
 		
 		if self.command:
 			self.command(self.get())
@@ -126,23 +124,19 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(field in values)
 		
 		# Update visual indicators
-		for button in self._buttons:
-			button_text = button.cget("text")
-			current_field = button_text[2:]  # Skip "□ " or "■ "
-			if current_field in values:
-				button.configure(text=f"■ {current_field}")
+		for field, button in self._field_buttons.items():
+			if field in values:
+				button.set(f"■ {field}")
 			else:
-				button.configure(text=f"□ {current_field}")
+				button.set(f"□ {field}")
 
 	def select_all(self):
 		"""Select all checkboxes."""
 		for var in self.value_vars.values():
 			var.set(True)
 		# Update visual indicators
-		for button in self._buttons:
-			button_text = button.cget("text")
-			field = button_text[2:]  # Skip box indicator
-			button.configure(text=f"■ {field}")
+		for field, button in self._field_buttons.items():
+			button.set(f"■ {field}")
 		if self.command:
 			self.command(self.get())
 
@@ -151,10 +145,8 @@ class CheckboxSelection(BHoMBaseWidget):
 		for var in self.value_vars.values():
 			var.set(False)
 		# Update visual indicators
-		for button in self._buttons:
-			button_text = button.cget("text")
-			field = button_text[2:]  # Skip box indicator
-			button.configure(text=f"□ {field}")
+		for field, button in self._field_buttons.items():
+			button.set(f"□ {field}")
 		if self.command:
 			self.command(self.get())
 
@@ -163,13 +155,11 @@ class CheckboxSelection(BHoMBaseWidget):
 		for var in self.value_vars.values():
 			var.set(not var.get())
 		# Update visual indicators
-		for button in self._buttons:
-			button_text = button.cget("text")
-			field = button_text[2:]  # Skip box indicator
+		for field, button in self._field_buttons.items():
 			if self.value_vars[field].get():
-				button.configure(text=f"■ {field}")
+				button.set(f"■ {field}")
 			else:
-				button.configure(text=f"□ {field}")
+				button.set(f"□ {field}")
 		if self.command:
 			self.command(self.get())
 

@@ -22,6 +22,9 @@ class CalendarWidget(BHoMBaseWidget):
             show_year_selector: bool = True,
             year_min: int = 1900,
             year_max: int = 2100,
+            day_button_width: int = 4,
+            day_button_padx: int = 1,
+            day_button_pady: int = 1,
             **kwargs):
         
         super().__init__(parent, **kwargs)
@@ -31,6 +34,9 @@ class CalendarWidget(BHoMBaseWidget):
         self.show_year_selector = show_year_selector
         self.year_min = year_min
         self.year_max = year_max
+        self.day_button_width = max(1, int(day_button_width))
+        self.day_button_padx = int(day_button_padx)
+        self.day_button_pady = int(day_button_pady)
 
         self.cal_frame = ttk.Frame(self.content_frame)
         self.cal_frame.pack(side="top", fill="x")
@@ -104,8 +110,19 @@ class CalendarWidget(BHoMBaseWidget):
             for col, day in enumerate(week):
                 text = "" if day == 0 else day
                 state = "normal" if day > 0 else "disabled"
-                cell_widget = Button(self.cal_frame, text=str(text) if text != "" else "", command=(lambda d=day: self.set_day(d)))
-                cell_widget.grid(row=row+1, column=col, sticky="nsew")
+                cell_widget = Button(
+                    self.cal_frame,
+                    text=str(text) if text != "" else "",
+                    command=(lambda d=day: self.set_day(d)),
+                    width=self.day_button_width,
+                )
+                cell_widget.grid(
+                    row=row+1,
+                    column=col,
+                    sticky="nsew",
+                    padx=self.day_button_padx,
+                    pady=self.day_button_pady,
+                )
         
     def set_day(self, num):
         """Set the selected day and refresh the date summary label.
@@ -173,6 +190,9 @@ if __name__ == "__main__":
         def_year=2024,
         def_month=6,
         def_day=15,
+        day_button_width=1,
+        day_button_padx=2,
+        day_button_pady=2,
         item_title="Select a Date",
         helper_text="Choose a date from the calendar below.",
         packing_options=PackingOptions(padx=20, pady=20)
