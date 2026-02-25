@@ -71,18 +71,27 @@ class Label(BHoMBaseWidget):
     def get(self) -> str:
         """Return the current label text."""
         try:
-            return str(self.label.cget("text"))
+            # Prefer text if present, otherwise return any image reference
+            text = self.label.cget("text")
+            if text:
+                return str(text)
+            # Fall back to any stored image reference
+            return getattr(self, "_image_ref", "")
         except Exception:
             return ""
 
-    def set(self, value: str):
-        """Set the label text."""
+    def set(self, value):
+        """Set the label text or image."""
         if isinstance(value, str):
-            try:
-                self.text = value
-                self.label.configure(text=self.text)
-            except Exception:
-                pass
+            self.text = value
+            self.label.configure(text=self.text, image="")
+            if hasattr(self, "_image_ref"):
+                delattr(self, "_image_ref")
+        else:
+            # Assume it's an image object
+            self._image_ref = value
+            self.label.configure(image=self._image_ref, text="")
+
 
     def update_text(self, new_text: str):
         """Backward-compatible method name used previously to update label text."""

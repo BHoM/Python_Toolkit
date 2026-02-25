@@ -64,11 +64,19 @@ class RadioSelection(BHoMBaseWidget):
 				self.buttons_frame,
 				text=f"○ {field}",
 				style="Caption.TLabel",
-				cursor="hand2"
 			)
 			if callable(align_child_text):
 				align_child_text(button)
+			# Bind clicks on both wrapper and inner label so user clicks register
 			button.bind("<Button-1>", lambda _event, f=field: self._select_field(f))
+			try:
+				button.label.configure(cursor="hand2")
+			except Exception:
+				pass
+			try:
+				button.label.bind("<Button-1>", lambda _event, f=field: self._select_field(f))
+			except Exception:
+				pass
 			if self.max_per_line and self.max_per_line > 0:
 				if self.orient == "horizontal":
 					row = index // self.max_per_line
@@ -94,12 +102,12 @@ class RadioSelection(BHoMBaseWidget):
 		"""Update visual indicators for all buttons."""
 		selected_value = self.value_var.get()
 		for button in self._buttons:
-			button_text = button.cget("text")
+			button_text = button.get()
 			current_field = button_text[2:]
 			if current_field == selected_value:
-				button.configure(text=f"● {current_field}")
+				button.set(f"● {current_field}")
 			else:
-				button.configure(text=f"○ {current_field}")
+				button.set(f"○ {current_field}")
 
 	def get(self):
 		"""Return the currently selected value.

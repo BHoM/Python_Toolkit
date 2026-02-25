@@ -2,21 +2,23 @@
 
 import tkinter as tk
 from tkinter import ttk
-from python_toolkit.bhom_tkinter.widgets.label import Label
 import time
+
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+from python_toolkit.bhom_tkinter.widgets.label import Label
+
 
 class ProcessingWindow(BHoMBaseWindow):
-    """A simple processing window with animated indicator."""
+    """A processing window with animated indicator, built on the BHoM window protocol."""
 
     def __init__(self, title="Processing", message="Processing..."):
-        """
-        Args:
-            title (str): Window title.
-            message (str): Message to display.
-        """
         self.window_title = title
         self.message_text = message
+        self.message_label = None
+        self.animation_label = None
+        self.current_frame = 0
+        self.is_running = False
+        self._after_id = None
 
         super().__init__(
             title=title,
@@ -27,39 +29,33 @@ class ProcessingWindow(BHoMBaseWindow):
             resizable=False,
         )
 
+        self.root = self
         self.attributes("-topmost", True)
-
-        self.title_label = None
-        self.message_label = None
-        self.animation_label = None
-
-        # Animation state
-        self.current_frame = 0
-        self.is_running = False
 
     def build(self):
         """Build processing labels and the animation indicator."""
-        self.title_label = Label(
-            self.content_frame,
-            text=self.window_title,
-            style="Title.TLabel",
-            justify="center",
-            wraplength=400,
-        )
-        self.title_label.pack(pady=(0, 8))
+        container = ttk.Frame(self.content_frame)
+        container.pack(fill=tk.BOTH, expand=True)
 
         self.message_label = Label(
-            self.content_frame,
+            container,
             text=self.message_text,
+            style="Title.TLabel",
             justify="center",
             wraplength=400,
+            alignment="center",
         )
-        self.message_label.pack(pady=(0, 20))
+        self.message_label.pack(fill=tk.X, pady=(0, 20))
 
-        self.animation_label = Label(
-            self.content_frame,
+        animation_frame = ttk.Frame(container)
+        animation_frame.pack(expand=True)
+
+        self.animation_label = ttk.Label(
+            animation_frame,
             text="●",
             style="Title.TLabel",
+            justify="center",
+            anchor="center",
         )
         self.animation_label.pack()
 
@@ -67,55 +63,57 @@ class ProcessingWindow(BHoMBaseWindow):
 
     def start(self):
         """Start the processing window and animation."""
+        if self.is_running:
+            return
         self.is_running = True
+        self.current_frame = 0
         self._animate()
 
     def keep_alive(self):
-        """Call repeatedly to process animation updates.
-
-        Returns:
-            bool: `True` while running and window exists, else `False`.
-        """
-        if self.is_running and self.winfo_exists():
-            self.update()
-            return True
+        """Call this repeatedly to process animation updates. Returns False when done."""
+        try:
+            if self.is_running and self.root.winfo_exists():
+                self.root.update_idletasks()
+                self.root.update()
+                return True
+        except tk.TclError:
+            return False
         return False
 
     def stop(self):
         """Stop the animation and close the window."""
         self.is_running = False
-        self.destroy()
+        if self._after_id is not None:
+            try:
+                self.root.after_cancel(self._after_id)
+            except Exception:
+                pass
+            self._after_id = None
+        self.destroy_root()
 
     def _animate(self):
         """Update animation frames."""
-        if self.is_running:
-            # Create rotating dot animation
+        if self.is_running and self.root.winfo_exists():
             dots = ["◐", "◓", "◑", "◒"]
-            if self.animation_label is not None:
-                self.animation_label.config(text=dots[self.current_frame % len(dots)])
+            self.animation_label.config(text=dots[self.current_frame % len(dots)])
             self.current_frame += 1
-            self.after(200, self._animate)
+            self._after_id = self.root.after(200, self._animate)
 
     def update_message(self, message: str):
-        """Update the message text.
-
-        Args:
-            message: New status message to display.
-        """
+        """Update the message text."""
         self.message_text = message
-        if self.message_label is not None:
-            self.message_label.config(text=message)
-        self.update()
+        if self.root.winfo_exists() and self.message_label is not None:
+            self.message_label.set(message)
+            self.root.update_idletasks()
+            self.root.update()
 
 
 if __name__ == "__main__":
-    # Test the processing window
-    
-    processing = ProcessingWindow(title="Test Processing", message="Running Test Calculation...")
+    processing = ProcessingWindow(title="Test Processing", message="Running Comfort and Safety Calculation...")
     processing.start()
-    
-    # Simulate some work
-    for i in range(50):
+
+    for _ in range(50):
         time.sleep(0.1)
-        processing.update_message(f"Running Test Calculation... {i+1}/50")
+        processing.keep_alive()
+
     processing.stop()

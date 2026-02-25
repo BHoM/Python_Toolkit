@@ -229,3 +229,50 @@ def run_predefined_windows_demo() -> None:
 if __name__ == "__main__":
 	run_widget_gallery()
 	run_predefined_windows_demo()
+
+
+def test_widget_validation():
+	"""Ensure widget validation logic returns expected results."""
+	# Integer field valid range
+	root = BHoMBaseWindow(title="Validation test")
+	parent = root.content_frame
+
+	int_box = ValidatedEntryBox(
+		parent,
+		value_type=int,
+		min_value=0,
+		max_value=100,
+		required=True,
+	)
+	int_box.build()
+
+	int_box.set(50)
+	ok, msg, sev = int_box.validate()
+	assert ok is True and msg is None
+
+	int_box.set(150)
+	ok, msg, sev = int_box.validate()
+	assert ok is False and sev == "error"
+
+	# Required field empty
+	int_box.set("")
+	ok, msg, sev = int_box.validate()
+	assert ok is False and msg == "Required"
+
+	# Non-required empty is valid
+	opt_box = ValidatedEntryBox(parent, value_type=str, required=False)
+	opt_box.build()
+	opt_box.set("")
+	ok, msg, sev = opt_box.validate()
+	assert ok is True
+
+	# Custom validator overriding
+	def fail_validator(_v):
+		return False, "Custom failed"
+
+	custom_box = ValidatedEntryBox(parent, value_type=str, required=True, custom_validator=fail_validator)
+	custom_box.build()
+	custom_box.set("abc")
+	ok, msg, sev = custom_box.validate()
+	assert ok is False and msg == "Custom failed"
+

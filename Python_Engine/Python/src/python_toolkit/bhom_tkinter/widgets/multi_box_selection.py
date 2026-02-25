@@ -65,10 +65,18 @@ class CheckboxSelection(BHoMBaseWidget):
 				self.buttons_frame,
 				text=f"□ {field}",
 				style="Caption.TLabel",
-				cursor="hand2"
 			)
 			getattr(self, "align_child_text")(button)
+			# Bind clicks on both the wrapper and the inner ttk.Label so clicks register
 			button.bind("<Button-1>", lambda _event, f=field: self._toggle_field(f))
+			try:
+				button.label.configure(cursor="hand2")
+			except Exception:
+				pass
+			try:
+				button.label.bind("<Button-1>", lambda _event, f=field: self._toggle_field(f))
+			except Exception:
+				pass
 			if self.max_per_line and self.max_per_line > 0:
 				if self.orient == "horizontal":
 					row = index // self.max_per_line
@@ -91,13 +99,13 @@ class CheckboxSelection(BHoMBaseWidget):
 	def _on_select_field(self, field):
 		"""Handle checkbox selection change and update visual indicator."""
 		for button in self._buttons:
-			button_text = button.cget("text")
+			button_text = button.get()
 			current_field = button_text[2:]
 			if current_field == field:
 				if self.value_vars[field].get():
-					button.configure(text=f"■ {field}")
+					button.set(f"■ {field}")
 				else:
-					button.configure(text=f"□ {field}")
+					button.set(f"□ {field}")
 				break
 
 		if self.command:
@@ -122,21 +130,21 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(field in values)
 
 		for button in self._buttons:
-			button_text = button.cget("text")
+			button_text = button.get()
 			current_field = button_text[2:]
 			if current_field in values:
-				button.configure(text=f"■ {current_field}")
+				button.set(f"■ {current_field}")
 			else:
-				button.configure(text=f"□ {current_field}")
+				button.set(f"□ {current_field}")
 
 	def select_all(self):
 		"""Select all checkboxes."""
 		for var in self.value_vars.values():
 			var.set(True)
 		for button in self._buttons:
-			button_text = button.cget("text")
+			button_text = button.get()
 			field = button_text[2:]
-			button.configure(text=f"■ {field}")
+			button.set(f"■ {field}")
 		if self.command:
 			self.command(self.get())
 
@@ -145,9 +153,9 @@ class CheckboxSelection(BHoMBaseWidget):
 		for var in self.value_vars.values():
 			var.set(False)
 		for button in self._buttons:
-			button_text = button.cget("text")
+			button_text = button.get()
 			field = button_text[2:]
-			button.configure(text=f"□ {field}")
+			button.set(f"□ {field}")
 		if self.command:
 			self.command(self.get())
 

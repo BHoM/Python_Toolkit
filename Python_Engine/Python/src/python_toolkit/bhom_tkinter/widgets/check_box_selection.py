@@ -75,10 +75,19 @@ class CheckboxSelection(BHoMBaseWidget):
 				self.buttons_frame,
 				text=f"□ {field}",
 				style="Caption.TLabel",
-				cursor="hand2"
 			)
 			getattr(self, "align_child_text")(button)
+			# Make both the wrapper frame and the inner ttk.Label clickable
 			button.bind("<Button-1>", lambda e, f=field: self._toggle_field(f))
+			try:
+				button.label.configure(cursor="hand2")
+			except Exception:
+				pass
+			# Ensure clicks on the inner label also toggle the field
+			try:
+				button.label.bind("<Button-1>", lambda e, f=field: self._toggle_field(f))
+			except Exception:
+				pass
 			
 			if self.max_per_line and self.max_per_line > 0:
 				if self.orient == "horizontal":
@@ -237,6 +246,5 @@ if __name__ == "__main__":
 
 	Button(control_frame, text="Select All", command=widget.select_all).pack(side="left", padx=5)
 	Button(control_frame, text="Deselect All", command=widget.deselect_all).pack(side="left", padx=5)
-	Button(control_frame, text="Toggle All", command=widget.toggle_all).pack(side="left", padx=5)
 
 	root.mainloop()
