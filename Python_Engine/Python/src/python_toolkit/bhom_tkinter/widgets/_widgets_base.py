@@ -24,6 +24,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             item_title: Optional[str] = None, 
             helper_text: Optional[str] = None, 
             alignment: Literal['left', 'center', 'right'] = 'left',
+            fill_extents: bool = False,
             custom_validation: Optional[Callable[[object], Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]]] = None,
             disable_validation: bool = False,
             packing_options: PackingOptions = PackingOptions(),
@@ -37,6 +38,8 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             item_title: Optional header text shown at the top of the widget frame.
             helper_text: Optional helper text shown above the entry box.
             alignment: Horizontal alignment for built-in text elements.
+            fill_extents: If `True`, built-in title/helper labels fill horizontal
+                extent (`fill='x'`). If `False`, labels use natural width.
             custom_validation: Optional callable used to extend widget validation.
                 Receives the current widget value and must return
                 `(is_valid, message, severity)`.
@@ -49,6 +52,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         self.helper_text = helper_text
         self.packing_options = packing_options
         self.alignment: Literal['left', 'center', 'right'] = self._normalise_alignment(alignment)
+        self.fill_extents = self._normalise_bool(fill_extents)
         self.custom_validation = custom_validation
         self.disable_validation = bool(disable_validation)
 
@@ -60,13 +64,19 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         # Optional header/title label at the top of the widget
         if self.item_title:
             self.title_label = ttk.Label(self, text=self.item_title, style="Subtitle.TLabel")
-            self.title_label.pack(side="top", anchor=self._pack_anchor)
+            if self.fill_extents:
+                self.title_label.pack(side="top", anchor=self._pack_anchor, fill=tk.X)
+            else:
+                self.title_label.pack(side="top", anchor=self._pack_anchor)
             self._apply_text_alignment(self.title_label)
 
         # Optional helper/requirements label above the input
         if self.helper_text:
             self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
-            self.helper_label.pack(side="top", anchor=self._pack_anchor)
+            if self.fill_extents:
+                self.helper_label.pack(side="top", anchor=self._pack_anchor, fill=tk.X)
+            else:
+                self.helper_label.pack(side="top", anchor=self._pack_anchor)
             self._apply_text_alignment(self.helper_label)
 
         # Container frame for embedded content (not title/helper)
@@ -135,6 +145,25 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             return "left"
         return cast(Literal['left', 'center', 'right'], candidate)
 
+    def _normalise_bool(self, value: object) -> bool:
+        """Normalise bool-like input with safe defaults.
+
+        Args:
+            value: Candidate boolean input.
+
+        Returns:
+            bool: Parsed boolean value.
+        """
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            candidate = value.strip().lower()
+            if candidate in {"1", "true", "yes", "y", "on"}:
+                return True
+            if candidate in {"0", "false", "no", "n", "off", ""}:
+                return False
+        return bool(value)
+
     def _apply_text_alignment(self, widget: tk.Widget) -> None:
         """Apply current alignment settings to a text-capable Tk widget.
 
@@ -187,6 +216,22 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             if label is not None:
                 label.pack_configure(anchor=self._pack_anchor)
                 self._apply_text_alignment(label)
+
+    def set_fill_extents(self, fill_extents: bool) -> None:
+        """Set whether built-in title/helper labels fill horizontal extent.
+
+        Args:
+            fill_extents: `True` for `fill='x'`, else natural-width packing.
+        """
+        self.fill_extents = self._normalise_bool(fill_extents)
+
+        for label_name in ("title_label", "helper_label"):
+            label = getattr(self, label_name, None)
+            if label is None:
+                continue
+            label.pack_configure(fill=(tk.X if self.fill_extents else "none"))
+            label.pack_configure(anchor=self._pack_anchor)
+            self._apply_text_alignment(label)
 
     @abstractmethod
     def get(self):

@@ -17,6 +17,7 @@ class RadioSelection(BHoMBaseWidget):
 			command=None, 
 			default=None, 
 			orient="vertical", 
+			options_fill_extents: bool = False,
 			max_per_line=None, 
 			**kwargs):
 		"""
@@ -26,6 +27,8 @@ class RadioSelection(BHoMBaseWidget):
 			command (callable, optional): Called with selected value when changed.
 			default (str, optional): Default selected value.
 			orient (str): Either "vertical" or "horizontal".
+			options_fill_extents (bool): If `True`, radio option rows expand to
+				fill their available width in the options frame.
 			max_per_line (int, optional): Maximum items per row/column before wrapping.
 			item_title (str, optional): Optional header text shown at the top of the widget frame.
 			helper_text (str, optional): Optional helper text shown above the entry box.
@@ -36,6 +39,7 @@ class RadioSelection(BHoMBaseWidget):
 		self.fields = [str(field) for field in (fields or [])]
 		self.command = command
 		self.orient = orient.lower()
+		self.options_fill_extents = self._normalise_bool(options_fill_extents)
 		self.max_per_line = max_per_line
 		self.value_var = tk.StringVar()
 		self._buttons = []
@@ -56,6 +60,8 @@ class RadioSelection(BHoMBaseWidget):
 		for button in self._buttons:
 			button.destroy()
 		self._buttons.clear()
+		for index in range(self.buttons_frame.grid_size()[0] + 1):
+			self.buttons_frame.grid_columnconfigure(index, weight=0)
 
 		for index, field in enumerate(self.fields):
 			sticky = cast(str, getattr(self, "_grid_sticky", "w"))
@@ -84,11 +90,35 @@ class RadioSelection(BHoMBaseWidget):
 				else:
 					row = index % self.max_per_line
 					column = index // self.max_per_line
-				button.grid(row=row, column=column, padx=(0, 10), pady=(0, 4), sticky=sticky)
+				button.grid(
+					row=row,
+					column=column,
+					padx=(0, 10),
+					pady=(0, 4),
+					sticky=("ew" if self.options_fill_extents else sticky),
+				)
+				if self.options_fill_extents:
+					self.buttons_frame.grid_columnconfigure(column, weight=1)
 			elif self.orient == "horizontal":
-				button.grid(row=0, column=index, padx=(0, 10), pady=(0, 4), sticky=sticky)
+				button.grid(
+					row=0,
+					column=index,
+					padx=(0, 10),
+					pady=(0, 4),
+					sticky=("ew" if self.options_fill_extents else sticky),
+				)
+				if self.options_fill_extents:
+					self.buttons_frame.grid_columnconfigure(index, weight=1)
 			else:
-				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky=sticky)
+				button.grid(
+					row=index,
+					column=0,
+					padx=(0, 10),
+					pady=(0, 4),
+					sticky=("ew" if self.options_fill_extents else sticky),
+				)
+				if self.options_fill_extents:
+					self.buttons_frame.grid_columnconfigure(0, weight=1)
 			self._buttons.append(button)
 
 	def _select_field(self, field):
@@ -175,11 +205,12 @@ if __name__ == "__main__":
 
 	widget = RadioSelection(
 		parent_frame,
-		fields=["Option A", "Option B", "Option C", "Option D", "Option E", "Option F", "Option G"],
+		fields=["Option A", "Option B", "Option C"],
 		command=on_selection,
 		default="Option B",
 		alignment="center",
-		orient="vertical",
+		options_fill_extents=True,
+		orient="horizontal",
 		max_per_line=3,
 		item_title="Choose an Option",
 		helper_text="Select one of the options below:",

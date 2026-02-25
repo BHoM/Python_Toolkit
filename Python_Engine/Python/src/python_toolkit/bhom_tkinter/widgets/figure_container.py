@@ -26,8 +26,6 @@ class FigureContainer(BHoMBaseWidget):
 
         Args:
             parent: Parent widget
-            item_title: Optional header text shown at the top of the widget frame.
-            helper_text: Optional helper text shown above the entry box.
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
@@ -174,7 +172,9 @@ class FigureContainer(BHoMBaseWidget):
             # Convert to PhotoImage and update label
             self.image = ImageTk.PhotoImage(resized)
             if self.image_label:
-                self.image_label.configure(image=self.image)
+                # `image_label` is a BHoM Label wrapper; use wrapper API so
+                # the inner ttk.Label gets updated and image references persist.
+                self.image_label.set(self.image)
         except Exception:
             pass  # Silently handle scaling errors
 
@@ -251,13 +251,20 @@ if __name__ == "__main__":
     )
     figure_container.build()
 
-    # Create and embed a matplotlib figure
-    fig, ax = plt.subplots(figsize=(5, 4), dpi=80)
-    ax.plot([1, 2, 3, 4], [1, 4, 2, 3], marker='o')
-    ax.set_title("Sample Plot")
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
+    # Create and embed the initial matplotlib figure
+    fig_initial, ax_initial = plt.subplots(figsize=(5, 4), dpi=80)
+    ax_initial.plot([1, 2, 3, 4], [1, 4, 2, 3], marker='o')
+    ax_initial.set_title("Initial Plot")
+    ax_initial.set_xlabel("X")
+    ax_initial.set_ylabel("Y")
+    figure_container.embed_figure(fig_initial)
 
-    figure_container.embed_figure(fig)
+    def push_new_plot() -> None:
+        """Replace the existing plot with a new one after a delay."""
+        image_path = r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\assets\BHoM_Logo.png"
+        figure_container.embed_image_file(image_path)
+
+    # Push a new plot after 10 seconds
+    root.after(4_000, push_new_plot)
 
     root.mainloop()

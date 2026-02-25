@@ -1,52 +1,53 @@
-"""Window that displays a status message with a lightweight animated indicator."""
-
 import tkinter as tk
 from tkinter import ttk
+import os
+
 import time
+import threading
 
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
-from python_toolkit.bhom_tkinter.widgets.label import Label
-
 
 class ProcessingWindow(BHoMBaseWindow):
-    """A processing window with animated indicator, built on the BHoM window protocol."""
+    """A simple processing window with animated indicator."""
 
-    def __init__(self, title="Processing", message="Processing..."):
-        self.window_title = title
-        self.message_text = message
-        self.message_label = None
-        self.animation_label = None
-        self.current_frame = 0
-        self.is_running = False
-        self._after_id = None
-
+    def __init__(self, title="Processing", message="Processing...", *args, **kwargs):
+        """
+        Args:
+            title (str): Window title.
+            message (str): Message to display.
+        """
         super().__init__(
             title=title,
             min_width=300,
             min_height=150,
-            show_submit=False,
+            width=400,
+            height=200,
+            theme_mode="auto",
             show_close=False,
-            resizable=False,
+            show_submit=False,
+            *args,
+            **kwargs
         )
-
-        self.root = self
+        
+        self.title(title)
         self.attributes("-topmost", True)
+        self.resizable(False, False)
 
-    def build(self):
-        """Build processing labels and the animation indicator."""
-        container = ttk.Frame(self.content_frame)
-        container.pack(fill=tk.BOTH, expand=True)
+        # Container
+        container = ttk.Frame(self, padding=20)
+        container.pack(fill="both", expand=True)
 
-        self.message_label = Label(
+        # Message label (to calculate size)
+        self.message_label = ttk.Label(
             container,
-            text=self.message_text,
+            text=message,
             style="Title.TLabel",
             justify="center",
-            wraplength=400,
-            alignment="center",
+            wraplength=400
         )
-        self.message_label.pack(fill=tk.X, pady=(0, 20))
+        self.message_label.pack(pady=(0, 20))
 
+        # Animation frame
         animation_frame = ttk.Frame(container)
         animation_frame.pack(expand=True)
 
@@ -54,66 +55,135 @@ class ProcessingWindow(BHoMBaseWindow):
             animation_frame,
             text="●",
             style="Title.TLabel",
-            justify="center",
-            anchor="center",
+            foreground="#0078d4"
         )
         self.animation_label.pack()
 
-        super().build()
+        # Animation state
+        self.animation_frames = ["●", "●", "●"]
+        self.current_frame = 0
+        self.is_running = False
+
+        # Update to calculate the required size
+        self.update_idletasks()
+        
+        # Get the required width and height
+        required_width = self.winfo_reqwidth()
+        required_height = self.winfo_reqheight()
+        
+        # Set minimum size
+        min_width = 300
+        min_height = 150
+        window_width = max(required_width, min_width)
+        window_height = max(required_height, min_height)
+
+        # Center on screen
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
+        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
 
     def start(self):
         """Start the processing window and animation."""
         if self.is_running:
             return
         self.is_running = True
-        self.current_frame = 0
-        self._animate()
+
+        # Run the Tk mainloop on the calling thread (must be main thread on many platforms).
+        try:
+            self._animate()
+            self.mainloop()
+        except Exception as e:
+            print("ProcessingWindow mainloop error:", e)
+            raise
+
+    def start_with_worker(self, worker, args=(), kwargs=None):
+        """Start the GUI mainloop on this (main) thread and run `worker` in a background thread.
+
+        The worker should not call Tkinter methods directly. When the worker finishes,
+        the window is closed via a call scheduled on the Tk event loop.
+        """
+        if kwargs is None:
+            kwargs = {}
+
+        if self.is_running:
+            return
+        self.is_running = True
+
+        def run_worker():
+            try:
+                worker(*args, **kwargs)
+            finally:
+                try:
+                    self.after(0, self.stop)
+                except Exception:
+                    pass
+
+        t = threading.Thread(target=run_worker, daemon=True)
+        t.start()
+
+        try:
+            self._animate()
+            self.mainloop()
+        except Exception as e:
+            print("ProcessingWindow mainloop error:", e)
+            raise
 
     def keep_alive(self):
         """Call this repeatedly to process animation updates. Returns False when done."""
-        try:
-            if self.is_running and self.root.winfo_exists():
-                self.root.update_idletasks()
-                self.root.update()
-                return True
-        except tk.TclError:
-            return False
+        if self.is_running and self.winfo_exists():
+            self.update()
+            return True
         return False
 
     def stop(self):
         """Stop the animation and close the window."""
         self.is_running = False
-        if self._after_id is not None:
-            try:
-                self.root.after_cancel(self._after_id)
-            except Exception:
-                pass
-            self._after_id = None
-        self.destroy_root()
+        try:
+            # Stop the mainloop if running and then destroy the window
+            if self.winfo_exists():
+                try:
+                    self.quit()
+                except Exception:
+                    pass
+                try:
+                    self.destroy()
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
     def _animate(self):
         """Update animation frames."""
-        if self.is_running and self.root.winfo_exists():
+        if self.is_running:
+            # Create rotating dot animation
             dots = ["◐", "◓", "◑", "◒"]
             self.animation_label.config(text=dots[self.current_frame % len(dots)])
             self.current_frame += 1
-            self._after_id = self.root.after(200, self._animate)
+            self.after(200, self._animate)
 
     def update_message(self, message: str):
         """Update the message text."""
-        self.message_text = message
-        if self.root.winfo_exists() and self.message_label is not None:
-            self.message_label.set(message)
-            self.root.update_idletasks()
-            self.root.update()
+        try:
+            self.message_label.config(text=message)
+            # schedule an idle update so the UI refreshes promptly
+            self.update_idletasks()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
+    # Test the processing window
+    
     processing = ProcessingWindow(title="Test Processing", message="Running Comfort and Safety Calculation...")
-    processing.start()
+    def worker():
+        for i in range(50):
+            time.sleep(0.1)
+            try:
+                processing.after(0, processing.update_message, f"Step {i+1}/50")
+            except Exception:
+                pass
 
-    for _ in range(50):
-        time.sleep(0.1)
-        processing.keep_alive()
-
-    processing.stop()
+    processing.start_with_worker(worker)
