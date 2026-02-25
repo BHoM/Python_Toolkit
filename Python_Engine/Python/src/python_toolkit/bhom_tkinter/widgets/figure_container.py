@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 import matplotlib as mpl
 
-mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
 class FigureContainer(BHoMBaseWidget):
     """

@@ -7,6 +7,19 @@ from typing import Optional, Callable, Literal, List
 import darkdetect 
 import platform
 import ctypes
+import os
+import matplotlib as mpl
+
+# Centralized matplotlib backend selection:
+# - Allow override via `MPLBACKEND` environment variable (e.g. set to 'Agg' for headless CI).
+# - Default to 'TkAgg' for Tkinter embedding; fallback to 'Agg' if the requested backend is unavailable.
+backend = os.environ.get("MPLBACKEND")
+if not backend:
+    backend = "TkAgg"
+try:
+    mpl.use(backend, force=True)
+except Exception:
+    mpl.use("Agg", force=True)
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
@@ -499,11 +512,11 @@ if __name__ == "__main__":
     test.mainloop()
     
     r""" 
-    from widgets.PathSelector import PathSelector
-    from widgets.RadioSelection import RadioSelection
-    from widgets.ValidatedEntryBox import ValidatedEntryBox
-    from widgets.ListBox import ScrollableListBox
-    from widgets.CmapSelector import CmapSelector
+    from widgets.path_selector import PathSelector
+    from widgets.radio_selection import RadioSelection
+    from widgets.validated_entry_box import ValidatedEntryBox
+    from widgets.list_box import ScrollableListBox
+    from widgets.cmap_selector import CmapSelector
 
     # Store form state
     form_data = {}

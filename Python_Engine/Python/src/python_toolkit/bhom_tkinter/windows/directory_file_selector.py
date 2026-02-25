@@ -5,7 +5,7 @@ from tkinter import ttk
 from pathlib import Path
 from typing import Iterable, List, Optional
 
-from python_toolkit.bhom_tkinter.widgets.ListBox import ScrollableListBox
+from python_toolkit.bhom_tkinter.widgets.list_box import ScrollableListBox
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 

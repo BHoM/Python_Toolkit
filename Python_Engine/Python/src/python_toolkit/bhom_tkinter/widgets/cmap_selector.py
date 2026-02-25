@@ -5,11 +5,9 @@ from tkinter import ttk
 import tkinter as tk
 import matplotlib as mpl
 from python_toolkit.plot.cmap_sample import cmap_sample_plot
-from python_toolkit.bhom_tkinter.widgets.FigureContainer import FigureContainer
+from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-
-mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
 class CmapSelector(BHoMBaseWidget):
     """
@@ -77,8 +75,6 @@ class CmapSelector(BHoMBaseWidget):
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
-
-        mpl.use("Agg")  # Use non-interactive backend for embedding in Tkinter
 
         # Create frame for cmap selection content
         self.cmap_frame = ttk.Frame(self.content_frame)
