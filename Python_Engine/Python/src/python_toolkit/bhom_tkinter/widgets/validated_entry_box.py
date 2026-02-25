@@ -305,18 +305,19 @@ class ValidatedEntryBox(BHoMBaseWidget):
     
     def _show_error(self, message: str) -> None:
         """Display error message."""
-        self.error_label.config(text=message, foreground="#ff4444")
-        self.success_label.config(text=" ")
+        self.error_label.set(message)
+        self.error_label.label.configure(foreground="#ff4444")
+        self.success_label.set(" ")
     
     def _show_success(self) -> None:
         """Display success indicator."""
-        self.error_label.config(text=" ")
-        self.success_label.config(text="✓")
+        self.error_label.set(" ")
+        self.success_label.set("✓")
     
     def clear_error(self) -> None:
         """Clear the error message."""
-        self.error_label.config(text=" ")
-        self.success_label.config(text=" ")
+        self.error_label.set(" ")
+        self.success_label.set(" ")
     
     def _call_validate_callback(self, is_valid: bool) -> None:
         """Call the validation callback if provided."""

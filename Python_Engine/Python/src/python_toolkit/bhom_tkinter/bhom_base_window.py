@@ -107,6 +107,7 @@ class BHoMBaseWindow(tk.Tk):
         self.submit_command = submit_command
         self.close_command = close_command
         self.result = None
+        self._is_exiting = False
         self.button_bar: Optional[ttk.Frame] = None
         self._has_been_shown = False
         self._pending_resize_job: Optional[str] = None
@@ -479,10 +480,17 @@ class BHoMBaseWindow(tk.Tk):
             result: Result token to store before closing.
             callback: Optional callback invoked before destruction.
         """
+        if self._is_exiting:
+            return
+        self._is_exiting = True
         self.result = result
         try:
             if callback:
                 callback()
+        except tk.TclError as ex:
+            message = str(ex).lower()
+            if not ("image" in message and "doesn't exist" in message):
+                print(f"Warning: Exit callback raised an exception: {ex}")
         except Exception as ex:
             print(f"Warning: Exit callback raised an exception: {ex}")
         finally:
