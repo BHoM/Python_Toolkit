@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
-from typing import Callable, Optional
+from typing import Callable, Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
@@ -224,6 +224,24 @@ class ColourPicker(BHoMBaseWidget):
 		"""
 		self.colour_var.set(value)
 		self._update_preview(value)
+
+	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+		"""Validate the current colour value.
+		
+		Returns:
+			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+				`(is_valid, message, severity)` where severity is `None` when
+				valid, or `"error"` for an invalid colour.
+		"""
+
+		colour = self.get()
+		if not colour:
+			return self.apply_validation((False, "No colour selected.", "error"))
+		try:
+			self._hex_to_rgb(colour)
+			return self.apply_validation((True, None, None))
+		except ValueError:
+			return self.apply_validation((False, f"Invalid colour value: '{colour}'.", "error"))
 
 
 if __name__ == "__main__":

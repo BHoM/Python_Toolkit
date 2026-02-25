@@ -1,6 +1,6 @@
 """Colormap selector widget with embedded matplotlib preview."""
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Literal
 from tkinter import ttk
 import tkinter as tk
 import matplotlib as mpl
@@ -248,6 +248,20 @@ class CmapSelector(BHoMBaseWidget):
         else:
             self.figure_widget.clear()
             self.colormap_var.set("")
+
+    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Validate the current colormap selection.
+        Returns:
+            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                `(is_valid, message, severity)` where severity is `None` when
+                valid, or `"error"` for an invalid selection.
+        """
+        selected_cmap = self.get_selected_cmap()
+        if selected_cmap is None:
+            return self.apply_validation((False, "No colormap selected.", "error"))
+        if selected_cmap not in self.cmap_combobox["values"]:
+            return self.apply_validation((False, f"Selected colormap '{selected_cmap}' is not available.", "error"))
+        return self.apply_validation((True, None, None))
             
 if __name__ == "__main__":
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow

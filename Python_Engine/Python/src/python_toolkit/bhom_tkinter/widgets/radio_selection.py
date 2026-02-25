@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
-from typing import Optional, cast
+from typing import Optional, cast, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
@@ -63,6 +63,7 @@ class RadioSelection(BHoMBaseWidget):
 			button = Label(
 				self.buttons_frame,
 				text=f"○ {field}",
+				style="Caption.TLabel",
 				cursor="hand2"
 			)
 			if callable(align_child_text):
@@ -135,6 +136,21 @@ class RadioSelection(BHoMBaseWidget):
 			self.value_var.set(self.fields[0])
 		else:
 			self.value_var.set("")
+
+	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+		"""Validate the currently selected radio option.
+
+		Returns:
+			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+				`(is_valid, message, severity)` where severity is `None` when
+				valid, or `"error"` for an invalid selection.
+		"""
+		selected = self.get()
+		if not selected:
+			return self.apply_validation((False, "No option selected.", "error"))
+		if selected not in self.fields:
+			return self.apply_validation((False, f"Selected option '{selected}' is not available.", "error"))
+		return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":

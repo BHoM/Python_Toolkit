@@ -5,7 +5,7 @@ from typing import cast
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional, Literal, Union
+from typing import Optional, Literal, Union, Tuple, Callable
 
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
@@ -24,6 +24,8 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             item_title: Optional[str] = None, 
             helper_text: Optional[str] = None, 
             alignment: Literal['left', 'center', 'right'] = 'left',
+            custom_validation: Optional[Callable[[object], Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]]] = None,
+            disable_validation: bool = False,
             packing_options: PackingOptions = PackingOptions(),
             **kwargs):
         """
@@ -35,6 +37,10 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             item_title: Optional header text shown at the top of the widget frame.
             helper_text: Optional helper text shown above the entry box.
             alignment: Horizontal alignment for built-in text elements.
+            custom_validation: Optional callable used to extend widget validation.
+                Receives the current widget value and must return
+                `(is_valid, message, severity)`.
+            disable_validation: When `True`, all validation returns valid.
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
@@ -43,6 +49,8 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         self.helper_text = helper_text
         self.packing_options = packing_options
         self.alignment: Literal['left', 'center', 'right'] = self._normalise_alignment(alignment)
+        self.custom_validation = custom_validation
+        self.disable_validation = bool(disable_validation)
 
         if id is None:
             self.id = str(uuid4())
@@ -51,7 +59,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
 
         # Optional header/title label at the top of the widget
         if self.item_title:
-            self.title_label = ttk.Label(self, text=self.item_title, style="Header.TLabel")
+            self.title_label = ttk.Label(self, text=self.item_title, style="Subtitle.TLabel")
             self.title_label.pack(side="top", anchor=self._pack_anchor)
             self._apply_text_alignment(self.title_label)
 
@@ -193,6 +201,61 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             value: Value to apply to the widget state.
         """
         raise NotImplementedError("Subclasses must implement the set() method.")
+
+    @abstractmethod
+    def validate(self) -> Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Validate the current widget value.
+
+        Returns:
+            bool: True if the current value is valid, False otherwise.
+            Optional[str]: Error message if the value is invalid, None otherwise.
+            Optional[Literal['info', 'warning', 'error']]: Severity level of the validation result, or None if valid.
+        """
+        raise NotImplementedError("Subclasses must implement the validate() method.")
+
+    def apply_validation(
+            self,
+            base_result: Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]
+        ) -> Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Apply global validation switches and optional custom validation.
+
+        Subclasses should call this from their `validate()` implementation,
+        passing built-in validation output as `base_result`.
+
+        Args:
+            base_result: Built-in widget validation result in the form
+                `(is_valid, message, severity)`.
+
+        Returns:
+            Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                Final validation result after applying disable/custom rules.
+        """
+        if self.disable_validation:
+            return True, None, None
+
+        is_valid, message, severity = base_result
+        if not is_valid:
+            return is_valid, message, severity or "error"
+
+        if self.custom_validation is None:
+            return is_valid, message, severity
+
+        try:
+            custom_result = self.custom_validation(self.get())
+        except Exception as ex:
+            return False, f"Custom validation failed: {ex}", "error"
+
+        if not isinstance(custom_result, tuple) or len(custom_result) != 3:
+            return False, "Custom validation must return (is_valid, message, severity).", "error"
+
+        custom_valid, custom_message, custom_severity = custom_result
+        if not custom_valid:
+            return False, custom_message, custom_severity or "error"
+
+        if custom_message is not None or custom_severity is not None:
+            return True, custom_message, custom_severity
+
+        return is_valid, message, severity
     
     def build(
             self, 

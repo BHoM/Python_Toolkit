@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, Tuple, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
@@ -21,6 +21,8 @@ class CheckboxSelection(BHoMBaseWidget):
 			max_per_line=None, 
 			item_title: Optional[str] = None, 
 			helper_text: Optional[str] = None, 
+			min_selections: Optional[int] = None,
+			max_selections: Optional[int] = None,
 			**kwargs):
 		"""
 		Args:
@@ -32,6 +34,8 @@ class CheckboxSelection(BHoMBaseWidget):
 			max_per_line (int, optional): Maximum items per row/column before wrapping.
 			item_title (str, optional): Optional header text shown at the top of the widget frame.
 			helper_text (str, optional): Optional helper text shown above the checkboxes.
+			min_selections (int, optional): Minimum number of selections required.
+			max_selections (int, optional): Maximum number of selections allowed.
 			**kwargs: Additional Frame options.
 		"""
 		super().__init__(parent, item_title=item_title, helper_text=helper_text, **kwargs)
@@ -43,6 +47,8 @@ class CheckboxSelection(BHoMBaseWidget):
 		self.value_vars = {}  # Dictionary mapping field names to BooleanVars
 		self._buttons = []
 		self._field_buttons = {}
+		self.min_selections = min_selections
+		self.max_selections = max_selections
 
 		# Sub-frame for checkbox controls
 		self.buttons_frame = ttk.Frame(self.content_frame)
@@ -68,6 +74,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			button = Label(
 				self.buttons_frame,
 				text=f"□ {field}",
+				style="Caption.TLabel",
 				cursor="hand2"
 			)
 			getattr(self, "align_child_text")(button)
@@ -183,6 +190,21 @@ class CheckboxSelection(BHoMBaseWidget):
 			**kwargs: Pack geometry manager options.
 		"""
 		super().pack(**kwargs)
+
+	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+		"""Validate the current selection against min/max constraints.
+
+		Returns:
+			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+				`(is_valid, message, severity)` where severity is `None` when
+				valid, or `"error"` for an invalid selection.
+		"""
+		selected_count = len(self.get())
+		if self.min_selections is not None and selected_count < self.min_selections:
+			return getattr(self, "apply_validation")((False, f"Select at least {self.min_selections} options.", "error"))
+		if self.max_selections is not None and selected_count > self.max_selections:
+			return getattr(self, "apply_validation")((False, f"Select no more than {self.max_selections} options.", "error"))
+		return getattr(self, "apply_validation")((True, None, None))
 
 if __name__ == "__main__":
 

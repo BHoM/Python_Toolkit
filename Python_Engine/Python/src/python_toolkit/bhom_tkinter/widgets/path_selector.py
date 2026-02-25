@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
@@ -93,6 +93,28 @@ class PathSelector(BHoMBaseWidget):
 
         else:
             self.display_name.set(selected_path.name)
+
+    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Validate the currently selected path.
+
+        Returns:
+            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                `(is_valid, message, severity)` where severity is `None` when
+                valid, or `"error"` for an invalid path selection.
+        """
+        selected_path = self.get().strip()
+        if not selected_path:
+            return self.apply_validation((False, "No path selected.", "error"))
+
+        path = Path(selected_path)
+        if self.mode == "directory":
+            if not path.is_dir():
+                return self.apply_validation((False, f"Directory does not exist: {selected_path}", "error"))
+        else:
+            if not path.is_file():
+                return self.apply_validation((False, f"File does not exist: {selected_path}", "error"))
+
+        return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":

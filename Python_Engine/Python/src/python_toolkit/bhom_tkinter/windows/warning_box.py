@@ -60,7 +60,6 @@ class WarningBox(BHoMBaseWindow):
         self._render_messages()
         self.refresh_sizing()
 
-
     def add_error_message(self, message: str):
         """Add an error message to the warning box.
 

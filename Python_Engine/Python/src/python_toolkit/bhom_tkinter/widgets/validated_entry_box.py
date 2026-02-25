@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
-from typing import Optional, Callable, Any, Union
+from typing import Optional, Callable, Any, Union, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
@@ -122,38 +122,70 @@ class ValidatedEntryBox(BHoMBaseWidget):
         """
         self.variable.set(str(value))
         
-    def validate(self) -> bool:
+    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
         """
         Validate the current entry value.
         
         Returns:
-            bool: True if valid, False otherwise
+            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                `(is_valid, message, severity)` where severity is `None` when
+                valid, or `"error"` for invalid input.
         """
+        if self.disable_validation:
+            self._show_success()
+            self._call_validate_callback(True)
+            return self.apply_validation((True, None, None))
+
         value_str = self.get()
+        base_result: tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]
         
         # Check if required
         if self.required and not value_str:
             self._show_error("Required")
             self._call_validate_callback(False)
-            return False
+            base_result = (False, "Required", "error")
+            return self.apply_validation(base_result)
         
         # If not required and empty, it's valid
         if not self.required and not value_str:
             self._show_success()
             self._call_validate_callback(True)
-            return True
+            base_result = (True, None, None)
+            return self.apply_validation(base_result)
         
         # Type-specific validation
         if self.value_type == str:
-            return self._validate_string(value_str)
+            is_valid = self._validate_string(value_str)
         elif self.value_type == int:
-            return self._validate_int(value_str)
+            is_valid = self._validate_int(value_str)
         elif self.value_type == float:
-            return self._validate_float(value_str)
+            is_valid = self._validate_float(value_str)
         else:
             self._show_error(f"Unsupported type: {self.value_type}")
             self._call_validate_callback(False)
-            return False
+            base_result = (False, f"Unsupported type: {self.value_type}", "error")
+            return self.apply_validation(base_result)
+
+        if is_valid:
+            base_result = (True, None, None)
+        else:
+            message = self.error_label.get().strip()
+            base_result = (False, message if message else "Validation failed.", "error")
+
+        final_result = self.apply_validation(base_result)
+        final_valid, final_message, final_severity = final_result
+
+        if final_valid:
+            self._show_success()
+            self._call_validate_callback(True)
+        else:
+            if final_message:
+                self._show_error(final_message)
+            else:
+                self._show_error("Validation failed.")
+            self._call_validate_callback(False)
+
+        return final_result
     
     def _validate_string(self, value: str) -> bool:
         """Validate string value.

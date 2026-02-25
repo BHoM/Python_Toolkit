@@ -1,8 +1,10 @@
 """Scrollable listbox widget with optional selection helper controls."""
 
+from __future__ import annotations
+
 import tkinter as tk
 from tkinter import filedialog, ttk
-from typing import Optional
+from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
@@ -153,7 +155,7 @@ class ScrollableListBox(BHoMBaseWidget):
         self.clear()
         for item in value:
             self.listbox.insert(tk.END, item)
-        self._on_configure(        )
+        self._on_configure()
     
     def get(self):
         """Get the current list of items in the listbox.
@@ -162,6 +164,17 @@ class ScrollableListBox(BHoMBaseWidget):
             list: Current listbox items in display order.
         """
         return [self.listbox.get(i) for i in range(self.listbox.size())]
+    
+    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Validate the current listbox state.
+
+        Returns:
+            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                `(is_valid, message, severity)` where severity is `None` when
+                valid, or `"error"` for an invalid state.
+        """
+        # In this simple implementation, all states are valid, so we return True.
+        return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":

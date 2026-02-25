@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional, Callable
+from typing import Optional, Callable, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
@@ -53,6 +53,10 @@ class Button(BHoMBaseWidget):
 		"""If given a string, set the button's label; otherwise ignore."""
 		if isinstance(value, str):
 			self.button.configure(text=value)
+
+	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+		"""Button has no user-editable state, so validation is always valid unless overridden."""
+		return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":

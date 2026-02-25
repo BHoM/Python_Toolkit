@@ -1,5 +1,5 @@
 from tkinter import ttk
-from typing import Optional
+from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
@@ -88,9 +88,25 @@ class Label(BHoMBaseWidget):
         """Backward-compatible method name used previously to update label text."""
         self.set(new_text)
 
-    # Provide a generic `update` alias for convenience (matches previous API).
-    def update(self, new_text: str):
+    # Provide a generic `update` alias for convenience (matches previous API),
+    # while remaining compatible with tkinter's parameterless `update()`.
+    def update(self, new_text: Optional[str] = None):
+        if new_text is None:
+            super().update()
+            return
         self.update_text(new_text)
+
+    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Validate the current content of the label.
+
+        Returns:
+            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                `(is_valid, message, severity)` where severity is `None` when
+                valid, or `"error"` for invalid content.
+        """
+
+        #always true
+        return getattr(self, "apply_validation")((True, None, None))
 
 
 if __name__ == "__main__":

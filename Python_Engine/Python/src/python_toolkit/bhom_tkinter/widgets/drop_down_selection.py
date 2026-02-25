@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional, Callable, List
+from typing import Optional, Callable, List, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
@@ -110,7 +110,21 @@ class DropDownSelection(BHoMBaseWidget):
 			return self.options.index(self.get())
 		except ValueError:
 			return -1
+		
+	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+		"""Validate the current selection.
 
+		Returns:
+			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+				`(is_valid, message, severity)` where severity is `None` when
+				valid, or `"error"` for an invalid selection.
+		"""
+		selected = self.get()
+		if not selected:
+			return getattr(self, "apply_validation")((False, "No option selected.", "error"))
+		if selected not in self.options:
+			return getattr(self, "apply_validation")((False, f"Selected option '{selected}' is not available.", "error"))
+		return getattr(self, "apply_validation")((True, None, None))
 
 if __name__ == "__main__":
 

@@ -180,6 +180,20 @@ class CalendarWidget(BHoMBaseWidget):
         self.month = value.month
         self.day = value.day
         self.redraw()
+
+    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Validate the currently selected date.
+
+        Returns:
+            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                `(is_valid, message, severity)` where severity is `None` when
+                valid, or `"error"` for an invalid date.
+        """
+        try:
+            datetime.date(self.year, self.month, self.day)
+            return self.apply_validation((True, None, None))
+        except ValueError as ex:
+            return self.apply_validation((False, f"Invalid date: {ex}", "error"))
     
     def pack(self, **kwargs):
         """Pack the widget and ensure the calendar grid is rendered.

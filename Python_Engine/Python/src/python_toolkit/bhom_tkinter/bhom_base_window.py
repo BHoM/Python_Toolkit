@@ -333,7 +333,7 @@ class BHoMBaseWindow(tk.Tk):
         title_label = Label(
             text_container,
             text=title,
-            style="Title.TLabel"
+            style="LargeTitle.TLabel"
         )
         title_label.pack(anchor="w")
 

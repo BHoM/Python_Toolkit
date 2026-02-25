@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
-from typing import Optional, Any
+from typing import Optional, Any, Literal
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -220,6 +220,19 @@ class FigureContainer(BHoMBaseWidget):
         else:
             raise ValueError("Unsupported value type for FigureContainer. Must be Figure, PhotoImage, or file path string.")
 
+    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        """Validate the current content of the figure container.
+
+        Returns:
+            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                `(is_valid, message, severity)` where severity is `None` when
+                valid, or `"error"` for invalid content.
+        """
+        if self.figure is not None:
+            return self.apply_validation((True, None, None))
+        if self.image is not None:
+            return self.apply_validation((True, None, None))
+        return self.apply_validation((False, "FigureContainer is empty. Please embed a figure or image.", "error"))
 
 if __name__ == "__main__":
 

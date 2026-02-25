@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
@@ -64,6 +64,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			button = Label(
 				self.buttons_frame,
 				text=f"□ {field}",
+				style="Caption.TLabel",
 				cursor="hand2"
 			)
 			getattr(self, "align_child_text")(button)
@@ -162,6 +163,22 @@ class CheckboxSelection(BHoMBaseWidget):
 
 		if defaults:
 			self.set(defaults)
+
+	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+		"""Validate checkbox state against available field definitions.
+
+		Returns:
+			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+				`(is_valid, message, severity)` where severity is `None` when
+				valid, or `"error"` for an invalid selection state.
+		"""
+		available_fields = set(self.fields)
+		selected_fields = set(self.get())
+		invalid_fields = selected_fields - available_fields
+		if invalid_fields:
+			invalid_text = ", ".join(sorted(invalid_fields))
+			return self.apply_validation((False, f"Invalid selected fields: {invalid_text}", "error"))
+		return self.apply_validation((True, None, None))
 
 if __name__ == "__main__":
 
