@@ -3,10 +3,12 @@
 import tkinter as tk
 from typing import Optional
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 import calendar
 import datetime
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets.button import Button
 
 class CalendarWidget(BHoMBaseWidget):
     """Render a month grid and allow date selection."""
@@ -92,7 +94,7 @@ class CalendarWidget(BHoMBaseWidget):
             child.destroy()
 
         for col, day in enumerate(("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")):
-            label = ttk.Label(self.cal_frame, text=day)
+            label = Label(self.cal_frame, text=day)
             getattr(self, "align_child_text")(label)
             label.grid(row=0, column=col, sticky="nsew")
 
@@ -102,8 +104,8 @@ class CalendarWidget(BHoMBaseWidget):
             for col, day in enumerate(week):
                 text = "" if day == 0 else day
                 state = "normal" if day > 0 else "disabled"
-                cell = ttk.Button(self.cal_frame, text=text, state=state, command=lambda day=day: self.set_day(day))
-                cell.grid(row=row+1, column=col, sticky="nsew")
+                cell_widget = Button(self.cal_frame, text=str(text) if text != "" else "", command=(lambda d=day: self.set_day(d)))
+                cell_widget.grid(row=row+1, column=col, sticky="nsew")
         
     def set_day(self, num):
         """Set the selected day and refresh the date summary label.
@@ -117,7 +119,7 @@ class CalendarWidget(BHoMBaseWidget):
             child.destroy()
 
         date = self.months[self.month-1] + " " + str(self.day)
-        label = ttk.Label(self.date_frame, text=f"Selected Date: {date}")
+        label = Label(self.date_frame, text=f"Selected Date: {date}")
         getattr(self, "align_child_text")(label)
         label.pack(anchor=getattr(self, "_pack_anchor"), padx=4, pady=4)
     

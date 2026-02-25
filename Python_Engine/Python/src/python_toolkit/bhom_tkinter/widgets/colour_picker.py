@@ -2,9 +2,11 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Callable, Optional
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets.button import Button
 
 class ColourPicker(BHoMBaseWidget):
 	"""A simple colour picker widget where the swatch opens a themed colour dialog."""
@@ -88,22 +90,22 @@ class ColourPicker(BHoMBaseWidget):
 
 		hex_row = ttk.Frame(container)
 		hex_row.grid(row=3, column=0, sticky="ew", pady=(8, 4))
-		ttk.Label(hex_row, text="Hex").pack(side=tk.LEFT)
+		Label(hex_row, text="Hex").pack(side=tk.LEFT)
 		hex_entry = ttk.Entry(hex_row, textvariable=self._popup_hex_var, width=10)
 		hex_entry.pack(side=tk.LEFT, padx=(8, 0))
 		hex_entry.bind("<Return>", lambda _event: self._on_hex_entered())
 
 		preview_row = ttk.Frame(container)
 		preview_row.grid(row=4, column=0, sticky="w", pady=(4, 8))
-		ttk.Label(preview_row, text="Preview").pack(side=tk.LEFT)
+		Label(preview_row, text="Preview").pack(side=tk.LEFT)
 		self._popup_preview = tk.Canvas(preview_row, width=48, height=28, highlightthickness=1)
 		self._popup_preview.pack(side=tk.LEFT, padx=(8, 0))
 		self._popup_swatch = self._popup_preview.create_rectangle(0, 0, 48, 28, outline="#666666")
 
 		button_row = ttk.Frame(container)
 		button_row.grid(row=5, column=0, sticky="e")
-		ttk.Button(button_row, text="Cancel", command=self._close_picker).pack(side=tk.LEFT, padx=(0, 6))
-		ttk.Button(button_row, text="Apply", command=self._apply_popup_colour).pack(side=tk.LEFT)
+		Button(button_row, text="Cancel", command=self._close_picker).pack(side=tk.LEFT, padx=(0, 6))
+		Button(button_row, text="Apply", command=self._apply_popup_colour).pack(side=tk.LEFT)
 
 		container.columnconfigure(0, weight=1)
 
@@ -119,7 +121,7 @@ class ColourPicker(BHoMBaseWidget):
 		row_frame = ttk.Frame(parent)
 		row_frame.grid(row=row, column=0, sticky="ew", pady=2)
 
-		ttk.Label(row_frame, text=label_text).pack(side=tk.LEFT)
+		Label(row_frame, text=label_text).pack(side=tk.LEFT)
 		slider = ttk.Scale(
 			row_frame,
 			from_=0,
@@ -130,7 +132,7 @@ class ColourPicker(BHoMBaseWidget):
 		)
 		slider.set(value_var.get())
 		slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(8, 8))
-		value_label = ttk.Label(row_frame, textvariable=value_var, width=4, anchor="e")
+		value_label = Label(row_frame, textvariable=value_var, width=4, anchor="e")
 		value_label.pack(side=tk.LEFT)
 
 	def _on_slider_move(self, value_var: tk.IntVar, value: str) -> None:

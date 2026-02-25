@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Optional, Any
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -106,7 +107,7 @@ class FigureContainer(BHoMBaseWidget):
         self._original_pil_image = None
         
         # Create label to display the image
-        self.image_label = ttk.Label(self.content_frame, image=image)
+        self.image_label = Label(self.content_frame, image=image)
         self.image_label.pack(fill=tk.BOTH, expand=True)
 
     def embed_image_file(self, file_path: str) -> None:
@@ -127,7 +128,7 @@ class FigureContainer(BHoMBaseWidget):
             self._original_pil_image = pil_image
             
             # Create label
-            self.image_label = ttk.Label(self.content_frame)
+            self.image_label = Label(self.content_frame)
             self.image_label.pack(fill=tk.BOTH, expand=True)
             
             # Scale and display
@@ -138,7 +139,7 @@ class FigureContainer(BHoMBaseWidget):
             # Fallback to basic PhotoImage without scaling
             image = tk.PhotoImage(file=file_path)
             self.image = image
-            self.image_label = ttk.Label(self.content_frame, image=image)
+            self.image_label = Label(self.content_frame, image=image)
             self.image_label.pack(fill=tk.BOTH, expand=True)
     
     def _scale_image_to_fit(self):

@@ -5,6 +5,8 @@ from tkinter import ttk
 from typing import Optional, List, Callable
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets.button import Button
+from python_toolkit.bhom_tkinter.widgets.label import Label
 
 class CheckboxSelection(BHoMBaseWidget):
 	"""A reusable checkbox selection widget built from a list of fields, allowing multiple selections."""
@@ -61,7 +63,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			var = tk.BooleanVar(value=False)
 			self.value_vars[field] = var
 			
-			button = ttk.Label(
+			button = Label(
 				self.buttons_frame,
 				text=f"□ {field}",
 				cursor="hand2"
@@ -221,8 +223,8 @@ if __name__ == "__main__":
 	control_frame = ttk.Frame(parent_frame)
 	control_frame.pack(padx=20, pady=10)
 
-	ttk.Button(control_frame, text="Select All", command=widget.select_all).pack(side="left", padx=5)
-	ttk.Button(control_frame, text="Deselect All", command=widget.deselect_all).pack(side="left", padx=5)
-	ttk.Button(control_frame, text="Toggle All", command=widget.toggle_all).pack(side="left", padx=5)
+	Button(control_frame, text="Select All", command=widget.select_all).pack(side="left", padx=5)
+	Button(control_frame, text="Deselect All", command=widget.deselect_all).pack(side="left", padx=5)
+	Button(control_frame, text="Toggle All", command=widget.toggle_all).pack(side="left", padx=5)
 
 	root.mainloop()

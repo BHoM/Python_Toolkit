@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 from pathlib import Path
 from typing import Optional, Callable, Literal, List
 import darkdetect 
@@ -22,6 +23,7 @@ except Exception:
     mpl.use("Agg", force=True)
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets.button import Button
 
 class BHoMBaseWindow(tk.Tk):
     """
@@ -322,13 +324,13 @@ class BHoMBaseWindow(tk.Tk):
                 img = Image.open(logo_path)
                 img.thumbnail((80, 80), Image.Resampling.LANCZOS)
                 self.logo_image = ImageTk.PhotoImage(img)
-                logo_label = ttk.Label(logo_container, image=self.logo_image)
+                logo_label = Label(logo_container, image=self.logo_image)
                 logo_label.pack(fill=tk.BOTH, expand=True)
             except ImportError:
                 pass  # PIL not available, skip logo
 
         # Title
-        title_label = ttk.Label(
+        title_label = Label(
             text_container,
             text=title,
             style="Title.TLabel"
@@ -336,7 +338,7 @@ class BHoMBaseWindow(tk.Tk):
         title_label.pack(anchor="w")
 
         # Subtitle
-        subtitle_label = ttk.Label(
+        subtitle_label = Label(
             text_container,
             text="powered by BHoM",
             style="Caption.TLabel"
@@ -367,16 +369,16 @@ class BHoMBaseWindow(tk.Tk):
         button_container.pack(anchor=tk.E)
 
         if show_close:
-            self.close_button = ttk.Button(
-                button_container, text=close_text, command=self._on_close
-            )
-            self.close_button.pack(side=tk.LEFT, padx=5)
+            close_widget = Button(button_container, text=close_text, command=self._on_close)
+            close_widget.pack(side=tk.LEFT, padx=5)
+            # expose inner ttk.Button for compatibility
+            self.close_button = close_widget.button
 
         if show_submit:
-            self.submit_button = ttk.Button(
-                button_container, text=submit_text, command=self._on_submit
-            )
-            self.submit_button.pack(side=tk.LEFT, padx=5)
+            submit_widget = Button(button_container, text=submit_text, command=self._on_submit)
+            submit_widget.pack(side=tk.LEFT, padx=5)
+            # expose inner ttk.Button for compatibility
+            self.submit_button = submit_widget.button
 
     def _bind_dynamic_sizing(self) -> None:
         """Bind layout changes to schedule auto sizing updates."""
@@ -549,7 +551,7 @@ if __name__ == "__main__":
     )
 
     # Add form widgets to the content area
-    ttk.Label(window.content_frame, text="Name:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
+    Label(window.content_frame, text="Name:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
     name_entry = ValidatedEntryBox(
         window.content_frame,
         value_type=str,
@@ -559,7 +561,7 @@ if __name__ == "__main__":
     )
     name_entry.pack(fill=tk.X, pady=(0, 15))
 
-    ttk.Label(window.content_frame, text="Age:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
+    Label(window.content_frame, text="Age:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
     age_entry = ValidatedEntryBox(
         window.content_frame,
         value_type=int,
@@ -570,7 +572,7 @@ if __name__ == "__main__":
     age_entry.pack(fill=tk.X, pady=(0, 15))
     age_entry.set(25)
 
-    ttk.Label(window.content_frame, text="Select a file:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
+    Label(window.content_frame, text="Select a file:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
     file_selector = PathSelector(
         window.content_frame,
         button_text="Browse...",
@@ -579,7 +581,7 @@ if __name__ == "__main__":
     )
     file_selector.pack(fill=tk.X, pady=(0, 15))
 
-    ttk.Label(window.content_frame, text="Priority:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
+    Label(window.content_frame, text="Priority:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
     priority_radio = RadioSelection(
         window.content_frame,
         fields=["Low", "Medium", "High", "Critical"],
@@ -589,7 +591,7 @@ if __name__ == "__main__":
     )
     priority_radio.pack(anchor="w", pady=(0, 15))
 
-    ttk.Label(window.content_frame, text="Select items:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
+    Label(window.content_frame, text="Select items:", style="Subtitle.TLabel").pack(anchor="w", pady=(0, 5))
     items = [f"Item {i}" for i in range(1, 11)]
     listbox = ScrollableListBox(
         window.content_frame,

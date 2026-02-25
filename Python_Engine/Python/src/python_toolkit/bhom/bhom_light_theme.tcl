@@ -71,8 +71,7 @@ namespace eval ttk::theme::bhom_light {
         ttk::style configure TLabel \
             -background $colors(-bg) \
             -foreground $colors(-fg) \
-            -font {{Segoe UI} 10 bold} \
-            -padding {8 6}
+            -font {{Segoe UI} 10 bold}
 
         ttk::style configure Display.TLabel \
             -font {{Segoe UI} 28 bold} \
@@ -106,18 +105,15 @@ namespace eval ttk::theme::bhom_light {
 
         ttk::style configure Body.TLabel \
             -font {{Segoe UI} 10} \
-            -foreground $colors(-fg) \
-            -padding {6 4}
+            -foreground $colors(-fg)
 
         ttk::style configure Caption.TLabel \
             -font {{Segoe UI} 9} \
-            -foreground $colors(-text-secondary) \
-            -padding {6 4}
+            -foreground $colors(-text-secondary)
 
         ttk::style configure Small.TLabel \
             -font {{Segoe UI} 8} \
-            -foreground $colors(-text-secondary) \
-            -padding {4 2}
+            -foreground $colors(-text-secondary)
 
         ttk::style configure Success.TLabel \
             -font {{Segoe UI} 10 bold} \

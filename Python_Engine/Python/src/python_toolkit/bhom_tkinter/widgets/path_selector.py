@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets.button import Button
 
 class PathSelector(BHoMBaseWidget):
     """A reusable path/file selector widget with a button and a readonly entry."""
@@ -41,8 +42,10 @@ class PathSelector(BHoMBaseWidget):
         self.entry = ttk.Entry(self.content_frame, textvariable=self.display_name, width=40)
         self.entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
 
-        self.button = ttk.Button(self.content_frame, text=button_text, command=self._on_click)
-        self.button.pack(side=tk.LEFT)
+        # Use Button wrapper but expose inner ttk.Button for backward compatibility
+        button_widget = Button(self.content_frame, text=button_text, command=self._on_click)
+        button_widget.pack(side=tk.LEFT)
+        self.button = button_widget.button
 
     def _on_click(self):
         if self.mode == "directory":

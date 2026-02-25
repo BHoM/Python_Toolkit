@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Optional, cast
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
@@ -59,7 +60,7 @@ class RadioSelection(BHoMBaseWidget):
 		for index, field in enumerate(self.fields):
 			sticky = cast(str, getattr(self, "_grid_sticky", "w"))
 			align_child_text = getattr(self, "align_child_text", None)
-			button = ttk.Label(
+			button = Label(
 				self.buttons_frame,
 				text=f"○ {field}",
 				cursor="hand2"

@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Optional
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
@@ -48,11 +49,11 @@ class WarningBox(BHoMBaseWindow):
             widget.destroy()
 
         for message in self.errors:
-            ttk.Label(self.content_frame, text=message, style="Error.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
+            Label(self.content_frame, text=message, style="Error.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
         for message in self.warnings:
-            ttk.Label(self.content_frame, text=message, style="Warning.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
+            Label(self.content_frame, text=message, style="Warning.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
         for message in self.infos:
-            ttk.Label(self.content_frame, text=message, style="Caption.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
+            Label(self.content_frame, text=message, style="Caption.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
 
     def update_messages(self):
         """Clear and re-render all messages in the warning box."""

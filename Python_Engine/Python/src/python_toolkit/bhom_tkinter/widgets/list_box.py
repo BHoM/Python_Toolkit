@@ -5,6 +5,7 @@ from tkinter import filedialog, ttk
 from typing import Optional
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets.button import Button
 
 class ScrollableListBox(BHoMBaseWidget):
     """A reusable listbox widget with auto-hiding scrollbar."""
@@ -59,11 +60,13 @@ class ScrollableListBox(BHoMBaseWidget):
             controls = ttk.Frame(self)
             controls.pack(fill=tk.X, pady=(8, 0))
 
-            self.select_all_button = ttk.Button(controls, text="Select All", command=self.select_all)
-            self.select_all_button.pack(side=tk.LEFT)
+            select_widget = Button(controls, text="Select All", command=self.select_all)
+            select_widget.pack(side=tk.LEFT)
+            self.select_all_button = select_widget.button
 
-            self.deselect_all_button = ttk.Button(controls, text="Deselect All", command=self.deselect_all)
-            self.deselect_all_button.pack(side=tk.LEFT, padx=(8, 0))
+            deselect_widget = Button(controls, text="Deselect All", command=self.deselect_all)
+            deselect_widget.pack(side=tk.LEFT, padx=(8, 0))
+            self.deselect_all_button = deselect_widget.button
     
     def _on_configure(self, event=None):
         """Hide scrollbar if all items fit in the visible area."""

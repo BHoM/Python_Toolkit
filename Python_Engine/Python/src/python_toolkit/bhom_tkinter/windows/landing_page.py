@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+from python_toolkit.bhom_tkinter.widgets.button import Button
+from python_toolkit.bhom_tkinter.widgets.label import Label
 
 
 class LandingPage(BHoMBaseWindow):
@@ -40,12 +42,12 @@ class LandingPage(BHoMBaseWindow):
     def build(self):
         """Build landing-page content using the base window's content area."""
         if self.header:
-            ttk.Label(self.content_frame, text=self.header, style="Header.TLabel").pack(
+            Label(self.content_frame, text=self.header, style="Header.TLabel").pack(
                 side="top", anchor="w", pady=(0, 10)
             )
 
         if self.message:
-            ttk.Label(
+            Label(
                 self.content_frame,
                 text=self.message,
                 style="Body.TLabel",
@@ -53,7 +55,7 @@ class LandingPage(BHoMBaseWindow):
             ).pack(side="top", anchor="w", pady=(0, 10))
         
         if self.sub_title:
-            ttk.Label(self.content_frame, text=self.sub_title, style="Caption.TLabel").pack(
+            Label(self.content_frame, text=self.sub_title, style="Caption.TLabel").pack(
                 side="top", anchor="w", pady=(0, 10)
             )
 
@@ -78,11 +80,12 @@ class LandingPage(BHoMBaseWindow):
             self.custom_buttons_frame = ttk.Frame(self.content_frame)
             self.custom_buttons_frame.pack(fill=tk.X, pady=(0, 20))
 
-        button = ttk.Button(self.custom_buttons_frame, text=text, command=command, **kwargs)
-        button.pack(pady=5, fill=tk.X)
+        button_widget = Button(self.custom_buttons_frame, text=text, command=command, **kwargs)
+        button_widget.pack(pady=5, fill=tk.X)
         # Recalculate window size after adding button
         self.refresh_sizing()
-        return button
+        # Return inner ttk.Button for compatibility
+        return button_widget.button
 
 
 if __name__ == "__main__":

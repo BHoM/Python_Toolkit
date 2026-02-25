@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Optional, Callable, Any, Union
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
@@ -72,12 +73,12 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self.entry.pack(side="left", fill="x", expand=True)
         
         # Create success indicator label at end of entry
-        self.success_label = ttk.Label(self.entry_frame, text=" ", foreground="#4bb543", width=2)
+        self.success_label = Label(self.entry_frame, text=" ", foreground="#4bb543", width=2)
         getattr(self, "align_child_text")(self.success_label)
         self.success_label.pack(side="left", padx=(5, 0))
         
         # Create error label below entry with fixed height to prevent layout shifts
-        self.error_label = ttk.Label(self.content_frame, text=" ", style="Caption.TLabel")
+        self.error_label = Label(self.content_frame, text=" ", style="Caption.TLabel")
         getattr(self, "align_child_text")(self.error_label)
         self.error_label.pack(side="top", fill="x", anchor=getattr(self, "_pack_anchor"))
         

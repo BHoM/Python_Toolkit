@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 import time
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 
@@ -38,7 +39,7 @@ class ProcessingWindow(BHoMBaseWindow):
 
     def build(self):
         """Build processing labels and the animation indicator."""
-        self.title_label = ttk.Label(
+        self.title_label = Label(
             self.content_frame,
             text=self.window_title,
             style="Title.TLabel",
@@ -47,7 +48,7 @@ class ProcessingWindow(BHoMBaseWindow):
         )
         self.title_label.pack(pady=(0, 8))
 
-        self.message_label = ttk.Label(
+        self.message_label = Label(
             self.content_frame,
             text=self.message_text,
             justify="center",
@@ -55,7 +56,7 @@ class ProcessingWindow(BHoMBaseWindow):
         )
         self.message_label.pack(pady=(0, 20))
 
-        self.animation_label = ttk.Label(
+        self.animation_label = Label(
             self.content_frame,
             text="●",
             style="Title.TLabel",

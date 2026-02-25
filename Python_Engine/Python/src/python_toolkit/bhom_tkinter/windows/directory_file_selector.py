@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from python_toolkit.bhom_tkinter.widgets.label import Label
 from pathlib import Path
 from typing import Iterable, List, Optional
 
@@ -44,7 +45,7 @@ class DirectoryFileSelector(BHoMBaseWindow):
 
     def build(self):
         """Build the list-based file selection UI."""
-        instruction_label = ttk.Label(
+        instruction_label = Label(
             self.content_frame,
             text=f"Select the {self.selection_label} to analyse.",
         )
