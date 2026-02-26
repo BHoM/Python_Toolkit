@@ -24,6 +24,7 @@ except Exception:
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
+import python_toolkit
 
 class BHoMBaseWindow(tk.Tk):
     """
@@ -34,8 +35,8 @@ class BHoMBaseWindow(tk.Tk):
     def __init__(
         self,
         title: str = "Application",
-        logo_path: Path = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\BHoM_Logo.png"),
-        icon_path: Path = Path(r"C:\ProgramData\BHoM\Extensions\PythonCode\Python_Toolkit\src\python_toolkit\bhom\assets\bhom_icon.png"),
+        logo_path: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "BHoM_Logo.png",
+        icon_path: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "bhom_icon.png",
         dark_logo_path: Optional[Path] = None,
         dark_icon_path: Optional[Path] = None,
         min_width: int = 500,
@@ -51,11 +52,12 @@ class BHoMBaseWindow(tk.Tk):
         close_text: str = "Close",
         close_command: Optional[Callable] = None,
         on_close_window: Optional[Callable] = None,
-        theme_path: Path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_light_theme.tcl"),
-        theme_path_dark: Path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_dark_theme.tcl"),
+        theme_path: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "bhom_light_theme.tcl",
+        theme_path_dark: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "bhom_dark_theme.tcl",
         theme_mode: Literal["light", "dark", "auto"] = "auto",
         widgets: List[BHoMBaseWidget] = [],
         top_most: bool = True,
+        buttons_side: Literal["left", "right"] = "right",
         **kwargs
     ):
         """
@@ -80,6 +82,7 @@ class BHoMBaseWindow(tk.Tk):
             on_close_window (callable, optional): Command when X is pressed.
             theme_path (Path, optional): Path to custom TCL theme file. If None, uses default style.tcl.
             theme_mode (str): Theme mode - "light", "dark", or "auto" to detect from system (default: "auto").
+            buttons_side (str): Side for buttons - "left" or "right" (default: "right").
             **kwargs
         """
         super().__init__(**kwargs)
@@ -136,7 +139,7 @@ class BHoMBaseWindow(tk.Tk):
 
         # Bottom button frame (if needed)
         if show_submit or show_close:
-            self._build_buttons(self.main_container, show_submit, submit_text, show_close, close_text)
+            self._build_buttons(self.main_container, show_submit, submit_text, show_close, close_text, buttons_side)
 
         self._bind_dynamic_sizing()
 
@@ -358,6 +361,7 @@ class BHoMBaseWindow(tk.Tk):
         submit_text: str,
         show_close: bool,
         close_text: str,
+        buttons_side: Literal["left", "right"] = "right"
     ) -> None:
         """Build the bottom button bar.
 
@@ -372,7 +376,7 @@ class BHoMBaseWindow(tk.Tk):
         self.button_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
         button_container = ttk.Frame(self.button_bar)
-        button_container.pack(anchor=tk.E)
+        button_container.pack(anchor=tk.E if buttons_side == "right" else tk.W)
 
         if show_close:
             close_widget = Button(button_container, text=close_text, command=self._on_close)

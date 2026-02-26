@@ -66,7 +66,10 @@ class Label(BHoMBaseWidget):
         # Create inner ttk.Label with the collected options
         self.label = ttk.Label(self.content_frame, **label_options)
         self.align_child_text(self.label)
-        self.label.pack(side="top", anchor=self._pack_anchor)
+        # Allow the inner label to expand horizontally so parent frames
+        # using grid/pack with `fill='x'` will cause this label to fill
+        # the available width (useful for option rows that should stretch).
+        self.label.pack(side="top", anchor=self._pack_anchor, fill="x", expand=True)
 
     def get(self) -> str:
         """Return the current label text."""

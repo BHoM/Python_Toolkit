@@ -214,7 +214,7 @@ if __name__ == "__main__":
 		max_per_line=3,
 		item_title="Choose an Option",
 		helper_text="Select one of the options below:",
-		packing_options=PackingOptions(padx=20, pady=20)
+		packing_options=PackingOptions(pady=20)
 	)
 	widget.build()
 

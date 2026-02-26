@@ -61,6 +61,8 @@ class CmapSelector(BHoMBaseWidget):
         parent: ttk.Frame,
         colormaps: Optional[List[str]] = None,
         cmap_set: str = "all",
+        cmap_bins: int = 256,
+        default_cmap: Optional[str] = None,
         **kwargs
     ) -> None:
         """
@@ -72,9 +74,14 @@ class CmapSelector(BHoMBaseWidget):
                 If provided, preset set selection is disabled.
             cmap_set: Preset colormap set to use when colormaps is None.
                 Allowed values: "all", "continuous", "categorical".
+            default_cmap: Optional default colormap to select.
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
+
+        #set custom cmap args 
+        self.cmap_bins = cmap_bins
+        self.default_cmap = default_cmap
 
         # Create frame for cmap selection content
         self.cmap_frame = ttk.Frame(self.content_frame)
@@ -196,9 +203,8 @@ class CmapSelector(BHoMBaseWidget):
             self.figure_widget.clear()
             self.colormap_var.set("")
             return
-
-        default_cmap = "viridis" if "viridis" in colormaps else colormaps[0]
-        self.colormap_var.set(default_cmap)
+        
+        self.colormap_var.set(self.default_cmap if self.default_cmap in colormaps else colormaps[0])
         self._update_cmap_sample()
 
     def _on_cmap_selected(self, event=None) -> None:
@@ -216,7 +222,7 @@ class CmapSelector(BHoMBaseWidget):
             self.figure_widget.clear()
             return
 
-        fig = cmap_sample_plot(cmap_name, figsize=(4, 1))
+        fig = cmap_sample_plot(cmap_name, figsize=(4, 1), bins = self.cmap_bins)
         self.figure_widget.embed_figure(fig)
 
     def get_selected_cmap(self) -> Optional[str]:
@@ -273,7 +279,8 @@ if __name__ == "__main__":
         cmap_set="all", 
         item_title="Colormap Selector", 
         helper_text="Select a colormap from the list.",
-        packing_options=PackingOptions(fill='both', expand=True)
+        packing_options=PackingOptions(fill='both', expand=True),
+        cmap_bins=2
     )
     cmap_selector.build()
 
