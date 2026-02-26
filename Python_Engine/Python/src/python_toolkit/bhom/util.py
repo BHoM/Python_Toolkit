@@ -20,11 +20,12 @@ def bson_unix_ticks(date_time: datetime = datetime.utcnow(), short: bool = False
     if short:
         return int(_ticks)
 
-    return int(_ticks * (10**4))
+    return int(_ticks*(10**3))
 
 def bson_unix_ticks_to_datetime(ticks: int, short:bool = False) -> datetime:
 
     if not short:
-        _ticks *= (10**-4)
+        ticks = int(ticks / (10**3))
 
-    return datetime(1, 1, 1) + timedelta(milliseconds=ticks)
+    return datetime(1970, 1, 1) + timedelta(milliseconds=ticks)
+
