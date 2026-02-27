@@ -280,7 +280,7 @@ if __name__ == "__main__":
         item_title="Colormap Selector", 
         helper_text="Select a colormap from the list.",
         packing_options=PackingOptions(fill='both', expand=True),
-        cmap_bins=2
+        cmap_bins=6
     )
     cmap_selector.build()
 

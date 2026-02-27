@@ -54,6 +54,15 @@ class FigureContainer(BHoMBaseWidget):
         self.canvas = None
         self.image_label = None
 
+    def _close_held_figure(self) -> None:
+        """Close any currently held matplotlib figure to release resources."""
+        if self.figure is not None:
+            try:
+                plt.close(self.figure)
+            except Exception:
+                pass
+            self.figure = None
+
     def _resolved_background(self) -> str:
         """Resolve a background colour suitable for embedded Tk canvas widgets.
 
@@ -79,6 +88,7 @@ class FigureContainer(BHoMBaseWidget):
             figure: Matplotlib Figure object to embed.
         """
 
+        self._close_held_figure()
         self._clear_children()
 
         self.figure = figure
@@ -99,6 +109,7 @@ class FigureContainer(BHoMBaseWidget):
         Args:
             image: Tk PhotoImage object to embed
         """
+        self._close_held_figure()
         self._clear_children()
 
         self.image = image
@@ -116,6 +127,7 @@ class FigureContainer(BHoMBaseWidget):
             file_path: Path to image file
         """
         self.image_file = file_path
+        self._close_held_figure()
         self._clear_children()
         
         try:
@@ -180,14 +192,8 @@ class FigureContainer(BHoMBaseWidget):
 
     def clear(self) -> None:
         """Clear the figure container."""
+        self._close_held_figure()
         self._clear_children()
-        # Close any held figure to free matplotlib resources
-        if self.figure is not None:
-            try:
-                plt.close(self.figure)
-            except Exception:
-                pass
-        self.figure = None
         self.image = None
         self.image_label = None
         self._original_pil_image = None
