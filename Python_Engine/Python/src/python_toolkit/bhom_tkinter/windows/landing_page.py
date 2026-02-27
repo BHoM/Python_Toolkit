@@ -42,7 +42,7 @@ class LandingPage(BHoMBaseWindow):
     def build(self):
         """Build landing-page content using the base window's content area."""
         if self.header:
-            Label(self.content_frame, text=self.header, style="Header.TLabel").pack(
+            Label(self.content_frame, text=self.header, style="Headline.TLabel").pack(
                 side="top", anchor="w", pady=(0, 10)
             )
 

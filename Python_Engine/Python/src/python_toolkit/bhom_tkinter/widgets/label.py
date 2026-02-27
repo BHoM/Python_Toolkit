@@ -29,6 +29,7 @@ class Label(BHoMBaseWidget):
             compound=None,
             textvariable=None,
             foreground=None,
+            font=None,
             **kwargs):
         def resolve(explicit_value, key: str, default=None):
             fallback = kwargs.pop(key, default)
@@ -51,6 +52,7 @@ class Label(BHoMBaseWidget):
             "compound": resolve(compound, "compound"),
             "textvariable": resolve(textvariable, "textvariable"),
             "foreground": resolve(foreground, "foreground"),
+            "font": resolve(font, "font"),
         }
         label_options = {key: value for key, value in label_options.items() if value is not None}
 
@@ -63,6 +65,14 @@ class Label(BHoMBaseWidget):
         )
 
         self.text = label_options.get("text", "")
+        style_name = label_options.get("style")
+        if "font" not in label_options and style_name:
+            try:
+                style_font = ttk.Style(self).lookup(style_name, "font")
+                if style_font:
+                    label_options["font"] = style_font
+            except Exception:
+                pass
         # Create inner ttk.Label with the collected options
         self.label = ttk.Label(self.content_frame, **label_options)
         self.align_child_text(self.label)

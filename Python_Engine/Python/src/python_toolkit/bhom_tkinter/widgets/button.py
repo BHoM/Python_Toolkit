@@ -20,6 +20,7 @@ class Button(BHoMBaseWidget):
 		text: str = "Click",
 		command: Optional[Callable[[], None]] = None,
 		width: int = 25,
+		style: Optional[str] = None,
 		**kwargs,
 	):
 		super().__init__(parent, **kwargs)
@@ -32,6 +33,7 @@ class Button(BHoMBaseWidget):
 			text=text,
 			command=self._on_click,
 			width=width,
+			style=style,
 		)
 		self.button.pack(side="top", anchor=getattr(self, "_pack_anchor"))
 

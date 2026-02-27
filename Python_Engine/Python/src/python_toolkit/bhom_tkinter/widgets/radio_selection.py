@@ -69,7 +69,7 @@ class RadioSelection(BHoMBaseWidget):
 			button = Label(
 				self.buttons_frame,
 				text=f"○ {field}",
-				style="Caption.TLabel",
+				style="Body.TLabel",
 			)
 			if callable(align_child_text):
 				align_child_text(button)

@@ -74,7 +74,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			button = Label(
 				self.buttons_frame,
 				text=f"□ {field}",
-				style="Caption.TLabel",
+				style="Body.TLabel",
 			)
 			getattr(self, "align_child_text")(button)
 			# Make both the wrapper frame and the inner ttk.Label clickable

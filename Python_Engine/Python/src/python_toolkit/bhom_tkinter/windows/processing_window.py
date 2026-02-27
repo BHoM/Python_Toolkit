@@ -45,6 +45,12 @@ class ProcessingWindow(BHoMBaseWindow):
             justify="center",
             wraplength=400
         )
+        try:
+            title_font = ttk.Style(self).lookup("Title.TLabel", "font")
+            if title_font:
+                self.message_label.configure(font=title_font)
+        except Exception:
+            pass
         self.message_label.pack(pady=(0, 20))
 
         # Animation frame
@@ -57,6 +63,12 @@ class ProcessingWindow(BHoMBaseWindow):
             style="Title.TLabel",
             foreground="#0078d4"
         )
+        try:
+            title_font = ttk.Style(self).lookup("Title.TLabel", "font")
+            if title_font:
+                self.animation_label.configure(font=title_font)
+        except Exception:
+            pass
         self.animation_label.pack()
 
         # Animation state

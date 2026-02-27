@@ -282,28 +282,84 @@ class BHoMBaseWindow(tk.Tk):
                 theme_path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_style.tcl")
             
             if theme_path.exists():
+                expected_theme = theme_path.stem.replace("_theme", "")
                 # Load the TCL theme file
-                self.tk.call('source', str(theme_path))
+                try:
+                    self.tk.call('source', str(theme_path))
+                except tk.TclError as source_error:
+                    if "already exists" not in str(source_error).lower():
+                        raise
 
                 available_theme_names = style.theme_names()
                 newly_added = [name for name in available_theme_names if name not in current_themes]
-                selected_theme = newly_added[-1] if newly_added else (available_theme_names[0] if available_theme_names else "default")
+                if expected_theme in available_theme_names:
+                    selected_theme = expected_theme
+                elif newly_added:
+                    selected_theme = newly_added[-1]
+                else:
+                    selected_theme = style.theme_use() if available_theme_names else "default"
 
                 style.theme_use(selected_theme)
+                self._ensure_typography_styles(style)
                 return selected_theme
             else:
                 print(f"Warning: Theme file not found at {theme_path}")
                 available_theme_names = style.theme_names()
                 selected_theme = available_theme_names[0] if available_theme_names else "default"
                 style.theme_use(selected_theme)
+                self._ensure_typography_styles(style)
                 return selected_theme
             
         except Exception as e:
             print(f"Warning: Could not load custom theme: {e}")
             try:
-                return style.theme_use()
+                active_theme = style.theme_use()
+                self._ensure_typography_styles(style)
+                return active_theme
             except Exception:
                 return "default"
+
+    def _ensure_typography_styles(self, style: ttk.Style) -> None:
+        """Ensure key typography styles exist and remain visually distinct."""
+        defaults = {
+            "TLabel": ("Segoe UI", 10, "bold"),
+            "Body.TLabel": ("Segoe UI", 10),
+            "Caption.TLabel": ("Segoe UI", 9),
+            "Small.TLabel": ("Segoe UI", 8),
+            "Heading.TLabel": ("Segoe UI", 12, "bold"),
+            "Subtitle.TLabel": ("Segoe UI", 14, "bold"),
+            "Headline.TLabel": ("Segoe UI", 16, "bold"),
+            "Title.TLabel": ("Segoe UI", 24, "bold"),
+            "LargeTitle.TLabel": ("Segoe UI", 24, "bold"),
+            "Display.TLabel": ("Segoe UI", 28, "bold"),
+        }
+
+        def _lookup_font(style_name: str) -> str:
+            try:
+                return str(style.lookup(style_name, "font") or "").strip()
+            except Exception:
+                return ""
+
+        for style_name, font_spec in defaults.items():
+            if not _lookup_font(style_name):
+                try:
+                    style.configure(style_name, font=font_spec)
+                except Exception:
+                    pass
+
+        base_font = _lookup_font("TLabel")
+        for style_name, font_spec in (
+            ("Caption.TLabel", defaults["Caption.TLabel"]),
+            ("Subtitle.TLabel", defaults["Subtitle.TLabel"]),
+            ("Headline.TLabel", defaults["Headline.TLabel"]),
+            ("LargeTitle.TLabel", defaults["LargeTitle.TLabel"]),
+        ):
+            resolved = _lookup_font(style_name)
+            if not resolved or resolved == base_font:
+                try:
+                    style.configure(style_name, font=font_spec)
+                except Exception:
+                    pass
 
     def _build_banner(self, parent: ttk.Frame, title: str, logo_path: Optional[Path]) -> None:
         """Build the branded banner section.
@@ -378,17 +434,30 @@ class BHoMBaseWindow(tk.Tk):
         button_container = ttk.Frame(self.button_bar)
         button_container.pack(anchor=tk.E if buttons_side == "right" else tk.W)
 
-        if show_close:
-            close_widget = Button(button_container, text=close_text, command=self._on_close)
-            close_widget.pack(side=tk.LEFT, padx=5)
-            # expose inner ttk.Button for compatibility
-            self.close_button = close_widget.button
-
         if show_submit:
-            submit_widget = Button(button_container, text=submit_text, command=self._on_submit)
+            submit_widget = Button(
+                button_container,
+                text=submit_text,
+                command=self._on_submit,
+                style="Primary.TButton",
+                width=12,
+                alignment="center",
+            )
             submit_widget.pack(side=tk.LEFT, padx=5)
             # expose inner ttk.Button for compatibility
             self.submit_button = submit_widget.button
+
+        if show_close:
+            close_widget = Button(
+                button_container, 
+                text=close_text, 
+                command=self._on_close, 
+                width=12,
+                alignment="center",
+            )
+            close_widget.pack(side=tk.LEFT, padx=5)
+            # expose inner ttk.Button for compatibility
+            self.close_button = close_widget.button
 
     def _bind_dynamic_sizing(self) -> None:
         """Bind layout changes to schedule auto sizing updates."""
@@ -523,9 +592,15 @@ if __name__ == "__main__":
 
     ### TEST SIMPLE
 
+    from python_toolkit.bhom_tkinter.widgets import Label, Button
+
     test = BHoMBaseWindow(
         title="Test Window",
         theme_mode="dark",
     )
 
+    test.widgets.append(Label(test.content_frame, text="Hello, World!"))
+    test.widgets.append(Button(test.content_frame, text="Click Me", command=lambda: print("Button Clicked!"), helper_text="This is a button.", item_title="Button Widget Title"))
+
+    test.build()
     test.mainloop()

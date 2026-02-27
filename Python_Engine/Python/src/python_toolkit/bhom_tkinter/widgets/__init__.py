@@ -7,7 +7,7 @@ from .colour_picker import ColourPicker
 from .drop_down_selection import DropDownSelection
 from .figure_container import FigureContainer
 from .list_box import ScrollableListBox
-from .multi_box_selection import CheckboxSelection as MultiBoxSelection
+from .check_box_selection import CheckboxSelection as MultiBoxSelection
 from .path_selector import PathSelector
 from .radio_selection import RadioSelection
 from .validated_entry_box import ValidatedEntryBox

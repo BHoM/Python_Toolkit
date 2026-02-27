@@ -64,6 +64,12 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         # Optional header/title label at the top of the widget
         if self.item_title:
             self.title_label = ttk.Label(self, text=self.item_title, style="Subtitle.TLabel")
+            try:
+                title_font = ttk.Style(self).lookup("Subtitle.TLabel", "font")
+                if title_font:
+                    self.title_label.configure(font=title_font)
+            except Exception:
+                pass
             if self.fill_extents:
                 self.title_label.pack(side="top", anchor=self._pack_anchor, fill=tk.X)
             else:
@@ -73,6 +79,12 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         # Optional helper/requirements label above the input
         if self.helper_text:
             self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
+            try:
+                helper_font = ttk.Style(self).lookup("Caption.TLabel", "font")
+                if helper_font:
+                    self.helper_label.configure(font=helper_font)
+            except Exception:
+                pass
             if self.fill_extents:
                 self.helper_label.pack(side="top", anchor=self._pack_anchor, fill=tk.X)
             else:
