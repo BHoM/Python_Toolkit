@@ -3,8 +3,10 @@
 from dataclasses import dataclass, asdict
 from typing import Any, Literal
 
+from python_toolkit.bhom_tkinter.widgets._build_options import BuildOptions
+
 @dataclass
-class PackingOptions:
+class PackingOptions(BuildOptions):
     """Container for `pack` geometry keyword arguments with type hints."""
 
     after: Any = None

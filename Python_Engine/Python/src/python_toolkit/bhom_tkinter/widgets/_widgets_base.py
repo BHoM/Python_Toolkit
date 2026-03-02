@@ -8,6 +8,8 @@ from tkinter import ttk
 from typing import Optional, Literal, Union, Tuple, Callable
 
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+from python_toolkit.bhom_tkinter.widgets._build_options import BuildOptions
+from python_toolkit.bhom_tkinter.widgets._grid_options import GridOptions
 
 from uuid import uuid4
 
@@ -27,7 +29,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             fill_extents: bool = False,
             custom_validation: Optional[Callable[[object], Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]]] = None,
             disable_validation: bool = False,
-            packing_options: PackingOptions = PackingOptions(),
+            build_options: BuildOptions = PackingOptions(),
             **kwargs):
         """
         Initialize the widget base.
@@ -50,7 +52,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
 
         self.item_title = item_title
         self.helper_text = helper_text
-        self.packing_options = packing_options
+        self.build_options = build_options
         self.alignment: Literal['left', 'center', 'right'] = self._normalise_alignment(alignment)
         self.fill_extents = self._normalise_bool(fill_extents)
         self.custom_validation = custom_validation
@@ -316,7 +318,6 @@ class BHoMBaseWidget(ttk.Frame, ABC):
     
     def build(
             self, 
-            build_type: Literal['pack', 'grid', 'place'] = 'pack',
             **kwargs
         ):
         """Place the widget in its parent container.
@@ -325,11 +326,38 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             build_type: Geometry manager strategy (`pack`, `grid`, or `place`).
             **kwargs: Additional geometry manager options.
         """
-        if build_type == 'pack':
-            self.pack(**self.packing_options.to_dict())
+        if isinstance(self.build_options, PackingOptions):
+            self.pack(**self.build_options.to_dict())
 
-        elif build_type == 'grid':
-            raise NotImplementedError("Grid packing is not yet implemented for BHoMBaseWidget.")
+        elif isinstance(self.build_options, GridOptions):
+            self.grid(**self.build_options.to_dict())
         
-        elif build_type == 'place':
-            raise NotImplementedError("Place packing is not yet implemented for BHoMBaseWidget.")
+        else:
+            raise NotImplementedError(f"Unsupported build options type: {type(self.build_options)}")
+
+
+
+if __name__ == "__main__":
+
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+    from python_toolkit.bhom_tkinter.widgets._grid_options import GridOptions
+
+    from python_toolkit.bhom_tkinter.widgets.button import Button 
+    from python_toolkit.bhom_tkinter.widgets.label import Label    
+
+    #gridding test
+
+    root = BHoMBaseWindow(grid_dimensions=(3, 3))
+
+    grid_options = GridOptions(sticky="n", padx=5, pady=5)
+
+    for i in range(3):
+        for j in range(3):
+            sub = grid_options.__class__(**{**grid_options.to_dict(), "row": i, "column": j})
+            label = Label(root.content_frame, text=f"Row {i} - Column {j}", build_options=sub)
+
+            root.widgets.append(label)
+
+    root.build()
+    root.mainloop()

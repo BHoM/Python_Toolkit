@@ -147,7 +147,7 @@ if __name__ == "__main__":
 		item_title="Choose an Option",
 		helper_text="Select one option from the dropdown list.",
 		alignment="center",
-		packing_options=PackingOptions(padx=20, pady=20)
+		build_options=PackingOptions(padx=20, pady=20)
 	)
 	widget.build()
 

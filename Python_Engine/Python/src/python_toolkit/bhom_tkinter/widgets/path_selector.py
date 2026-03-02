@@ -136,7 +136,7 @@ if __name__ == "__main__":
         command=on_file_selected,
         item_title="Path Selector",
         helper_text="Select a file from your system.",
-        packing_options=PackingOptions(padx=20, pady=20)
+        build_options=PackingOptions(padx=20, pady=20)
     )
     path_selector.build()
 

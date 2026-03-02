@@ -45,6 +45,7 @@ class DirectoryFileSelector(BHoMBaseWindow):
 
     def build(self):
         """Build the list-based file selection UI."""
+
         instruction_label = Label(
             self.content_frame,
             text=f"Select the {self.selection_label} to analyse.",
@@ -59,7 +60,7 @@ class DirectoryFileSelector(BHoMBaseWindow):
                 selectmode=tk.MULTIPLE,
                 height=12,
                 show_selection_controls=True,
-                packing_options=PackingOptions(fill='both', expand=True),
+                build_options=PackingOptions(fill='both', expand=True),
             )
             self.widgets.append(self.file_selector_listbox)
 
@@ -104,9 +105,11 @@ class DirectoryFileSelector(BHoMBaseWindow):
         self.destroy_root()
 
 if __name__ == "__main__":
+
+    print(Path(__file__).resolve().parent, flush=True)
     # Example usage
     selector = DirectoryFileSelector(
-        directory=Path.home(),
+        directory=Path(__file__).resolve().parent,
         file_types=[".py", ".txt"],
         selection_label="scripts and text files",
     )

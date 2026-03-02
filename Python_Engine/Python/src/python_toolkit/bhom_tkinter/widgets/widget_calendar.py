@@ -224,7 +224,7 @@ if __name__ == "__main__":
         day_button_text_alignment="center",
         item_title="Select a Date",
         helper_text="Choose a date from the calendar below.",
-        packing_options=PackingOptions(padx=20, pady=20)
+        build_options=PackingOptions(padx=20, pady=20)
     )
     cal_widget1.build()
 

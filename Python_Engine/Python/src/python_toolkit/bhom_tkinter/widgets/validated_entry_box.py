@@ -347,7 +347,7 @@ if __name__ == "__main__":
         min_value=0,
         max_value=100,
         on_validate=on_validate,
-        packing_options=PackingOptions(padx=20, pady=20)
+        build_options=PackingOptions(padx=20, pady=20)
     )
     entry_box.build()
     

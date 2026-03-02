@@ -120,7 +120,7 @@ class CmapSelector(BHoMBaseWidget):
             content,
             width=420,
             height=90,
-            packing_options=PackingOptions(anchor="w", padx=8, pady=(0, 8)),
+            build_options=PackingOptions(anchor="w", padx=8, pady=(0, 8)),
         )
         self.figure_widget.build()
 
@@ -279,7 +279,7 @@ if __name__ == "__main__":
         cmap_set="all", 
         item_title="Colormap Selector", 
         helper_text="Select a colormap from the list.",
-        packing_options=PackingOptions(fill='both', expand=True),
+        build_options=PackingOptions(fill='both', expand=True),
         cmap_bins=6
     )
     cmap_selector.build()

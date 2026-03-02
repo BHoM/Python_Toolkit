@@ -1,4 +1,5 @@
 from ._packing_options import PackingOptions
+from ._grid_options import GridOptions
 from ._widgets_base import BHoMBaseWidget
 from .widget_calendar import CalendarWidget
 from .check_box_selection import CheckboxSelection
@@ -17,6 +18,7 @@ from .label import Label
 __all__ = [
 	"BHoMBaseWidget",
 	"PackingOptions",
+	"GridOptions",
 	"CalendarWidget",
 	"CheckboxSelection",
 	"MultiBoxSelection",

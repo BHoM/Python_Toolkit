@@ -58,6 +58,7 @@ class BHoMBaseWindow(tk.Tk):
         widgets: List[BHoMBaseWidget] = [],
         top_most: bool = True,
         buttons_side: Literal["left", "right"] = "right",
+        grid_dimensions: Optional[tuple[int, int]] = None,
         **kwargs
     ):
         """
@@ -83,6 +84,7 @@ class BHoMBaseWindow(tk.Tk):
             theme_path (Path, optional): Path to custom TCL theme file. If None, uses default style.tcl.
             theme_mode (str): Theme mode - "light", "dark", or "auto" to detect from system (default: "auto").
             buttons_side (str): Side for buttons - "left" or "right" (default: "right").
+            grid_dimensions (tuple[int, int], optional): If provided, configures content area with specified rows and columns for grid layout.
             **kwargs
         """
         super().__init__(**kwargs)
@@ -122,6 +124,7 @@ class BHoMBaseWindow(tk.Tk):
         self._is_resizing = False
         self._auto_fit_width = width is None
         self._auto_fit_height = height is None
+        self.grid_dimensions = grid_dimensions
 
         # Handle window close (X button)
         self.protocol("WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window))
@@ -137,6 +140,9 @@ class BHoMBaseWindow(tk.Tk):
         self.content_frame = ttk.Frame(self.main_container, padding=20)
         self.content_frame.pack(fill=tk.BOTH, expand=True)
 
+        if self.grid_dimensions:
+            self.grid_content_frame(*self.grid_dimensions)
+
         # Bottom button frame (if needed)
         if show_submit or show_close:
             self._build_buttons(self.main_container, show_submit, submit_text, show_close, close_text, buttons_side)
@@ -146,6 +152,14 @@ class BHoMBaseWindow(tk.Tk):
         # Apply sizing
         self._apply_sizing()
         self.build()
+
+    def grid_content_frame(self, x_count: int, y_count: int) -> None:
+        """Configure the content frame with a grid layout of specified dimensions."""
+        self.grid_dimensions = (x_count, y_count)
+        for r in range(y_count):
+            self.content_frame.rowconfigure(r, weight=1)
+        for c in range(x_count):
+            self.content_frame.columnconfigure(c, weight=1)
         
     def build(self):
         """Call build on all child widgets that have it (for deferred widget construction)."""

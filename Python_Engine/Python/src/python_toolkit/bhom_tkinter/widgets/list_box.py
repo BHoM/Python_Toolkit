@@ -37,7 +37,11 @@ class ScrollableListBox(BHoMBaseWidget):
 
         # Create scrollbar
         self.scrollbar = ttk.Scrollbar(self.content_frame)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.content_frame.columnconfigure(0, weight=1) 
+        self.content_frame.columnconfigure(1, weight=1)
+        self.content_frame.rowconfigure(0, weight=1)
+        self.content_frame.rowconfigure(1, weight=1)
         
         # Create listbox
         self.listbox = tk.Listbox(
@@ -47,7 +51,7 @@ class ScrollableListBox(BHoMBaseWidget):
             yscrollcommand=self.scrollbar.set,
             exportselection=False,
         )
-        self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.listbox.grid(row=0, column=0, columnspan=2, sticky="nsew")
         self.scrollbar.config(command=self.listbox.yview)
         
         # Populate with items
@@ -59,23 +63,21 @@ class ScrollableListBox(BHoMBaseWidget):
         self._on_configure()
 
         if show_selection_controls:
-            controls = ttk.Frame(self)
-            controls.pack(fill=tk.X, pady=(8, 0))
 
-            select_widget = Button(controls, text="Select All", command=self.select_all)
-            select_widget.pack(side=tk.LEFT)
+            select_widget = Button(self.content_frame, text="Select All", command=self.select_all)
+            select_widget.grid(row=1, column=0, sticky="ns", padx=(0, 4), pady=(8, 0))
             self.select_all_button = select_widget.button
 
-            deselect_widget = Button(controls, text="Deselect All", command=self.deselect_all)
-            deselect_widget.pack(side=tk.LEFT, padx=(8, 0))
+            deselect_widget = Button(self.content_frame, text="Deselect All", command=self.deselect_all)
+            deselect_widget.grid(row=1, column=1, sticky="ns", padx=(4, 0), pady=(8, 0))
             self.deselect_all_button = deselect_widget.button
     
     def _on_configure(self, event=None):
         """Hide scrollbar if all items fit in the visible area."""
         if self.listbox.size() <= int(self.listbox.cget("height")):
-            self.scrollbar.pack_forget()
+            self.scrollbar.grid_forget()
         else:
-            self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            self.scrollbar.grid(row=0, column=1, sticky="ns")
 
     def set_selections(self, items):
         """Set the selection to the specified items.
@@ -193,7 +195,7 @@ if __name__ == "__main__":
         show_selection_controls=True, 
         item_title="List Box", 
         helper_text="Select items from the list.",
-        packing_options=PackingOptions(padx=10, pady=10)
+        build_options=PackingOptions(padx=10, pady=10)
     ))
     root.widgets[-1].build()
 

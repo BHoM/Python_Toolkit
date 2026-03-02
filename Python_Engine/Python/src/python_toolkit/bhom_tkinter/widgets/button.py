@@ -77,7 +77,7 @@ if __name__ == "__main__":
 		command=demo_action,
 		item_title="Demo Button",
 		helper_text="A minimal clickable button.",
-		packing_options=PackingOptions(anchor="w", padx=20, pady=20),
+		build_options=PackingOptions(anchor="w", padx=20, pady=20),
 		alignment="center",
 	)
 	widget.build()

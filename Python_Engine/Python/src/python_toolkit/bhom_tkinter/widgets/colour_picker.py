@@ -261,7 +261,7 @@ if __name__ == "__main__":
 		item_title="Colour Picker",
 		helper_text="Pick a colour for plotting.",
 		alignment="center",
-		packing_options=PackingOptions(padx=10, pady=10),
+		build_options=PackingOptions(padx=10, pady=10),
 	)
 	colour_picker.build()
 

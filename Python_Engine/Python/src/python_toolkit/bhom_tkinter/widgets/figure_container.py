@@ -253,7 +253,7 @@ if __name__ == "__main__":
         parent=parent_container, 
         item_title="Figure Container", 
         helper_text="This widget can embed matplotlib figures or images.",
-        packing_options=PackingOptions(padx=10, pady=10, fill='both', expand=True)
+        build_options=PackingOptions(padx=10, pady=10, fill='both', expand=True)
     )
     figure_container.build()
 

@@ -58,7 +58,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		item_title="Label",
 		helper_text="Basic BHoM Label wrapper",
 		alignment=alignments[0],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	Button(
@@ -68,7 +68,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		item_title="Button",
 		helper_text="Simple action button",
 		alignment=alignments[1],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	ValidatedEntryBox(
@@ -79,7 +79,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		min_value=0,
 		max_value=100,
 		alignment=alignments[2],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	DropDownSelection(
@@ -89,7 +89,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		options=["A", "B", "C"],
 		default="B",
 		alignment=alignments[0],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	RadioSelection(
@@ -100,7 +100,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		orient="horizontal",
 		max_per_line=3,
 		alignment=alignments[1],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	CheckboxSelection(
@@ -111,7 +111,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		defaults=["Two"],
 		max_per_line=4,
 		alignment=alignments[2],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	MultiBoxSelection(
@@ -122,7 +122,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		orient="horizontal",
 		max_per_line=2,
 		alignment=alignments[0],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	ScrollableListBox(
@@ -133,7 +133,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		height=5,
 		show_selection_controls=True,
 		alignment=alignments[1],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	PathSelector(
@@ -143,7 +143,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		button_text="Browse",
 		mode="file",
 		alignment=alignments[2],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	ColourPicker(
@@ -152,7 +152,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		helper_text="Pick a colour",
 		default_colour="#4A90E2",
 		alignment=alignments[0],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	CalendarWidget(
@@ -164,7 +164,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		def_day=max(1, min(date.today().day, 28)),
 		show_year_selector=True,
 		alignment=alignments[1],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	figure_container = FigureContainer(
@@ -172,7 +172,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		item_title="FigureContainer",
 		helper_text="Embedded matplotlib figure",
 		alignment=alignments[2],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	)
 	figure_container.build()
 	figure, axis = plt.subplots(figsize=(3.2, 1.2))
@@ -186,7 +186,7 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		helper_text="Colormap preview",
 		cmap_set="continuous",
 		alignment=alignments[0],
-		packing_options=PackingOptions(fill="x", pady=6),
+		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
 	if auto_close_ms is not None:
