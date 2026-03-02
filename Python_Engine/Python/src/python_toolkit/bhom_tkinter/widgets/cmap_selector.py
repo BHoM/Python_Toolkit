@@ -63,6 +63,7 @@ class CmapSelector(BHoMBaseWidget):
         cmap_set: str = "all",
         cmap_bins: int = 256,
         default_cmap: Optional[str] = None,
+        plot_size: tuple[int, int] = (400, 50),
         **kwargs
     ) -> None:
         """
@@ -82,6 +83,7 @@ class CmapSelector(BHoMBaseWidget):
         #set custom cmap args 
         self.cmap_bins = cmap_bins
         self.default_cmap = default_cmap
+        self.plot_size = plot_size
 
         # Create frame for cmap selection content
         self.cmap_frame = ttk.Frame(self.content_frame)
@@ -99,7 +101,7 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame.columnconfigure(0, weight=1)
         self.cmap_frame.rowconfigure(0, weight=1)
 
-        content = ttk.Frame(self.cmap_frame, width=440, height=130)
+        content = ttk.Frame(self.cmap_frame, width=plot_size[0], height=plot_size[1])
         content.grid(row=0, column=0, padx=4, pady=4)
         content.grid_propagate(False)
 
@@ -118,8 +120,8 @@ class CmapSelector(BHoMBaseWidget):
 
         self.figure_widget = FigureContainer(
             content,
-            width=420,
-            height=90,
+            width=plot_size[0],
+            height=plot_size[1],
             build_options=PackingOptions(anchor="w", padx=8, pady=(0, 8)),
         )
         self.figure_widget.build()
@@ -222,7 +224,7 @@ class CmapSelector(BHoMBaseWidget):
             self.figure_widget.clear()
             return
 
-        fig = cmap_sample_plot(cmap_name, figsize=(4, 1), bins = self.cmap_bins)
+        fig = cmap_sample_plot(cmap_name, figsize=(self.plot_size[0]/100, self.plot_size[1]/100), bins = self.cmap_bins)
         self.figure_widget.embed_figure(fig)
 
     def get_selected_cmap(self) -> Optional[str]:
@@ -280,8 +282,23 @@ if __name__ == "__main__":
         item_title="Colormap Selector", 
         helper_text="Select a colormap from the list.",
         build_options=PackingOptions(fill='both', expand=True),
-        cmap_bins=6
+        cmap_bins=6,
+        plot_size=(400, 50),
     )
+
+    cmap_selector_2 = CmapSelector(
+        parent_container, 
+        cmap_set="categorical", 
+        item_title="Categorical Colormap Selector", 
+        helper_text="Select a categorical colormap from the list.",
+        build_options=PackingOptions(fill='both', expand=True),
+        cmap_bins=6,
+        plot_size=(50, 25),
+    )
+
+
+
     cmap_selector.build()
+    cmap_selector_2.build()
 
     root.mainloop()
