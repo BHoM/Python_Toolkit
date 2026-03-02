@@ -138,10 +138,10 @@ if __name__ == "__main__":
     root = BHoMBaseWindow()
     parent_frame = root.content_frame
 
-    label_widget = Label(parent_frame, text="Hello, World!", build_options=PackingOptions(anchor="e", padx=10, pady=10))
+    label_widget = Label(parent_frame, text="Hello, World!", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="right")
     label_widget.build()
 
-    label_widget2 = Label(parent_frame, text="This is a BHoM Label widget.", build_options=PackingOptions(anchor="w", padx=10, pady=10))
+    label_widget2 = Label(parent_frame, text="This is a BHoM Label widget.", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="left")
     label_widget2.build()
 
     root.mainloop()

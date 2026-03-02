@@ -87,7 +87,7 @@ class CmapSelector(BHoMBaseWidget):
 
         # Create frame for cmap selection content
         self.cmap_frame = ttk.Frame(self.content_frame)
-        self.cmap_frame.pack(side="top", fill="both", expand=True)
+        self.cmap_frame.pack(side="top", fill="both", expand=True, anchor=self._pack_anchor)
 
         self.colormap_var = tk.StringVar(value="viridis")
         self._all_colormaps = self._get_all_colormaps()
@@ -102,11 +102,11 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame.rowconfigure(0, weight=1)
 
         content = ttk.Frame(self.cmap_frame, width=plot_size[0], height=plot_size[1])
-        content.grid(row=0, column=0, padx=4, pady=4)
+        content.grid(row=0, column=0, padx=0, pady=4, sticky=self._grid_sticky)
         content.grid_propagate(False)
 
         header = ttk.Frame(content)
-        header.pack(fill=tk.X, padx=8, pady=(8, 4))
+        header.pack(fill=tk.X, anchor=self._pack_anchor, padx=0, pady=(8, 4))
 
         self.cmap_set_var = tk.StringVar(value=cmap_set.lower())
 
@@ -114,15 +114,16 @@ class CmapSelector(BHoMBaseWidget):
             header,
             textvariable=self.colormap_var,
             state="readonly",
+            justify=self._text_justify,
         )
-        self.cmap_combobox.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.cmap_combobox.pack(side=tk.TOP, anchor=self._pack_anchor, padx=0)
         self.cmap_combobox.bind("<<ComboboxSelected>>", self._on_cmap_selected)
 
         self.figure_widget = FigureContainer(
             content,
             width=plot_size[0],
             height=plot_size[1],
-            build_options=PackingOptions(anchor="w", padx=8, pady=(0, 8)),
+            build_options=PackingOptions(anchor=self._pack_anchor, padx=0, pady=(0, 8)),
         )
         self.figure_widget.build()
 
@@ -284,6 +285,7 @@ if __name__ == "__main__":
         build_options=PackingOptions(fill='both', expand=True),
         cmap_bins=6,
         plot_size=(400, 50),
+        alignment="left",
     )
 
     cmap_selector_2 = CmapSelector(
@@ -294,6 +296,7 @@ if __name__ == "__main__":
         build_options=PackingOptions(fill='both', expand=True),
         cmap_bins=6,
         plot_size=(50, 25),
+        alignment="right",
     )
 
 

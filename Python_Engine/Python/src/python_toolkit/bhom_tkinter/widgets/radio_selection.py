@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
-from typing import Optional, cast, Literal
+from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
@@ -64,15 +64,13 @@ class RadioSelection(BHoMBaseWidget):
 			self.buttons_frame.grid_columnconfigure(index, weight=0)
 
 		for index, field in enumerate(self.fields):
-			sticky = cast(str, getattr(self, "_grid_sticky", "w"))
-			align_child_text = getattr(self, "align_child_text", None)
+			sticky = self._grid_sticky
 			button = Label(
 				self.buttons_frame,
 				text=f"○ {field}",
 				style="Body.TLabel",
 			)
-			if callable(align_child_text):
-				align_child_text(button)
+			self.align_child_text(button)
 			# Bind clicks on both wrapper and inner label so user clicks register
 			button.bind("<Button-1>", lambda _event, f=field: self._select_field(f))
 			try:

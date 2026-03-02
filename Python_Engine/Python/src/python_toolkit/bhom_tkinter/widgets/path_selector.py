@@ -18,6 +18,8 @@ class PathSelector(BHoMBaseWidget):
             filetypes=None, 
             command=None, 
             initialdir=None, 
+            entry_width=40,
+            button_width=25,
             mode="file", 
             **kwargs):
         """
@@ -39,11 +41,11 @@ class PathSelector(BHoMBaseWidget):
         self.initialdir = initialdir
         self.filetypes = filetypes if filetypes is not None else [("All Files", "*.*")]
         self.display_name = tk.StringVar()
-        self.entry = ttk.Entry(self.content_frame, textvariable=self.display_name, width=40)
+        self.entry = ttk.Entry(self.content_frame, textvariable=self.display_name, width=entry_width)
         self.entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
 
         # Use Button wrapper but expose inner ttk.Button for backward compatibility
-        button_widget = Button(self.content_frame, text=button_text, command=self._on_click)
+        button_widget = Button(self.content_frame, text=button_text, command=self._on_click, width=button_width)
         button_widget.pack(side=tk.LEFT)
         self.button = button_widget.button
 
@@ -136,7 +138,10 @@ if __name__ == "__main__":
         command=on_file_selected,
         item_title="Path Selector",
         helper_text="Select a file from your system.",
-        build_options=PackingOptions(padx=20, pady=20)
+        build_options=PackingOptions(padx=20, pady=20),
+        button_width=15,
+        entry_width=50,
+        alignment="center"
     )
     path_selector.build()
 

@@ -1,10 +1,8 @@
 """Standardized warning dialog window for errors, warnings, and info messages."""
 
-import tkinter as tk
-from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
-from typing import Optional
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 
 class WarningBox(BHoMBaseWindow):
@@ -49,11 +47,38 @@ class WarningBox(BHoMBaseWindow):
             widget.destroy()
 
         for message in self.errors:
-            Label(self.content_frame, text=message, style="Error.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
+            error_label = Label(
+                self.content_frame,
+                text=message,
+                style="Error.TLabel",
+                wraplength=400,
+                justify="left",
+                alignment="left",
+                build_options=PackingOptions(anchor="w", pady=(0, 5)),
+            )
+            error_label.build()
         for message in self.warnings:
-            Label(self.content_frame, text=message, style="Warning.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
+            warning_label = Label(
+                self.content_frame,
+                text=message,
+                style="Warning.TLabel",
+                wraplength=400,
+                justify="left",
+                alignment="left",
+                build_options=PackingOptions(anchor="w", pady=(0, 5)),
+            )
+            warning_label.build()
         for message in self.infos:
-            Label(self.content_frame, text=message, style="Caption.TLabel", wraplength=400, justify=tk.LEFT).pack(anchor="w", pady=(0, 5))
+            info_label = Label(
+                self.content_frame,
+                text=message,
+                style="Caption.TLabel",
+                wraplength=400,
+                justify="left",
+                alignment="left",
+                build_options=PackingOptions(anchor="w", pady=(0, 5)),
+            )
+            info_label.build()
 
     def update_messages(self):
         """Clear and re-render all messages in the warning box."""

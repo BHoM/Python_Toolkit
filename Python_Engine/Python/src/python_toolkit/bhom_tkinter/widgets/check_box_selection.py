@@ -76,7 +76,7 @@ class CheckboxSelection(BHoMBaseWidget):
 				text=f"□ {field}",
 				style="Body.TLabel",
 			)
-			getattr(self, "align_child_text")(button)
+			self.align_child_text(button)
 			# Make both the wrapper frame and the inner ttk.Label clickable
 			button.bind("<Button-1>", lambda e, f=field: self._toggle_field(f))
 			try:
@@ -96,11 +96,11 @@ class CheckboxSelection(BHoMBaseWidget):
 				else:
 					row = index % self.max_per_line
 					column = index // self.max_per_line
-				button.grid(row=row, column=column, padx=(0, 10), pady=(0, 4), sticky=getattr(self, "_grid_sticky"))
+				button.grid(row=row, column=column, padx=(0, 10), pady=(0, 4), sticky=self._grid_sticky)
 			elif self.orient == "horizontal":
-				button.grid(row=0, column=index, padx=(0, 10), pady=(0, 4), sticky=getattr(self, "_grid_sticky"))
+				button.grid(row=0, column=index, padx=(0, 10), pady=(0, 4), sticky=self._grid_sticky)
 			else:
-				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky=getattr(self, "_grid_sticky"))
+				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky=self._grid_sticky)
 			self._buttons.append(button)
 			self._field_buttons[field] = button
 

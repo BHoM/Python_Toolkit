@@ -114,7 +114,7 @@ class CalendarWidget(BHoMBaseWidget):
 
         for col, day in enumerate(("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")):
             label = Label(self.cal_frame, text=day)
-            getattr(self, "align_child_text")(label)
+            self.align_child_text(label)
             label.grid(row=0, column=col, sticky="nsew")
 
         cal = calendar.monthcalendar(self.year, self.month)
@@ -151,8 +151,8 @@ class CalendarWidget(BHoMBaseWidget):
 
         date = self.months[self.month-1] + " " + str(self.day)
         label = Label(self.date_frame, text=f"Selected Date: {date}")
-        getattr(self, "align_child_text")(label)
-        label.pack(anchor=getattr(self, "_pack_anchor"), padx=4, pady=4)
+        self.align_child_text(label)
+        label.pack(anchor=self._pack_anchor, padx=4, pady=4)
     
     def get_date(self):
         """Return the selected date as a `datetime.date` instance.

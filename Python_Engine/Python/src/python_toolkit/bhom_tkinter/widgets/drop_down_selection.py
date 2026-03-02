@@ -42,9 +42,10 @@ class DropDownSelection(BHoMBaseWidget):
 			textvariable=self.value_var,
 			values=self.options,
 			width=width,
-			state=state
+			state=state,
+			justify=self._text_justify,
 		)
-		self.combobox.pack(side="top", anchor=getattr(self, "_pack_anchor"), fill="x")
+		self.combobox.pack(side="top", anchor=self._pack_anchor, fill="x")
 
 		# Bind selection event
 		self.combobox.bind("<<ComboboxSelected>>", self._on_select)

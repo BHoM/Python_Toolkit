@@ -74,13 +74,13 @@ class ValidatedEntryBox(BHoMBaseWidget):
         
         # Create success indicator label at end of entry
         self.success_label = Label(self.entry_frame, text=" ", foreground="#4bb543", width=2)
-        getattr(self, "align_child_text")(self.success_label)
+        self.align_child_text(self.success_label)
         self.success_label.pack(side="left", padx=(5, 0))
         
         # Create error label below entry with fixed height to prevent layout shifts
         self.error_label = Label(self.content_frame, text=" ", style="Caption.TLabel")
-        getattr(self, "align_child_text")(self.error_label)
-        self.error_label.pack(side="top", fill="x", anchor=getattr(self, "_pack_anchor"))
+        self.align_child_text(self.error_label)
+        self.error_label.pack(side="top", fill="x", anchor=self._pack_anchor)
         
         # Bind validation events
         self.entry.bind("<FocusOut>", lambda _: self.validate())

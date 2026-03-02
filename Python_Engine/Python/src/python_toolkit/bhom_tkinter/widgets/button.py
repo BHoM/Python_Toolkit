@@ -34,8 +34,9 @@ class Button(BHoMBaseWidget):
 			command=self._on_click,
 			width=width,
 			style=style,
+			
 		)
-		self.button.pack(side="top", anchor=getattr(self, "_pack_anchor"))
+		self.button.pack(side="top", anchor=self._pack_anchor)
 
 	def _on_click(self):
 		"""Internal click handler increments counter and calls user callback."""
@@ -77,7 +78,7 @@ if __name__ == "__main__":
 		command=demo_action,
 		item_title="Demo Button",
 		helper_text="A minimal clickable button.",
-		build_options=PackingOptions(anchor="w", padx=20, pady=20),
+		build_options=PackingOptions(anchor="n", padx=20, pady=20),
 		alignment="center",
 	)
 	widget.build()

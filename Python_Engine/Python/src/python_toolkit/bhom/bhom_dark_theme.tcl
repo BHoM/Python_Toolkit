@@ -136,6 +136,7 @@ namespace eval ttk::theme::bhom_dark {
                         -font {{Segoe UI} 10 bold} \
             -background $colors(-active-bg) \
             -foreground $colors(-fg) \
+            -anchor center \
                         -bordercolor $colors(-border-light) \
             -lightcolor $colors(-hover-bg) \
             -darkcolor $colors(-border) \

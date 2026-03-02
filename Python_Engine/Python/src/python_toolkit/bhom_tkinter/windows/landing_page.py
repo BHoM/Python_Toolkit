@@ -1,11 +1,11 @@
 """Landing page window with configurable header, message text, and custom actions."""
 
-import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 from python_toolkit.bhom_tkinter.widgets.button import Button
 from python_toolkit.bhom_tkinter.widgets.label import Label
+from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 
 class LandingPage(BHoMBaseWindow):
@@ -42,22 +42,35 @@ class LandingPage(BHoMBaseWindow):
     def build(self):
         """Build landing-page content using the base window's content area."""
         if self.header:
-            Label(self.content_frame, text=self.header, style="Headline.TLabel").pack(
-                side="top", anchor="w", pady=(0, 10)
+            header_label = Label(
+                self.content_frame,
+                text=self.header,
+                style="Headline.TLabel",
+                alignment="left",
+                build_options=PackingOptions(side="top", anchor="w", pady=(0, 10)),
             )
+            header_label.build()
 
         if self.message:
-            Label(
+            message_label = Label(
                 self.content_frame,
                 text=self.message,
                 style="Body.TLabel",
-                justify=tk.LEFT,
-            ).pack(side="top", anchor="w", pady=(0, 10))
+                justify="left",
+                alignment="left",
+                build_options=PackingOptions(side="top", anchor="w", pady=(0, 10)),
+            )
+            message_label.build()
         
         if self.sub_title:
-            Label(self.content_frame, text=self.sub_title, style="Caption.TLabel").pack(
-                side="top", anchor="w", pady=(0, 10)
+            sub_title_label = Label(
+                self.content_frame,
+                text=self.sub_title,
+                style="Caption.TLabel",
+                alignment="left",
+                build_options=PackingOptions(side="top", anchor="w", pady=(0, 10)),
             )
+            sub_title_label.build()
 
         self.custom_buttons_frame = ttk.Frame(self.content_frame)
         self.custom_buttons_frame.pack(fill=tk.X, pady=(0, 20))

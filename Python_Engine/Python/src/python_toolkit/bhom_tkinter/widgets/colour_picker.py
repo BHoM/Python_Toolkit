@@ -44,7 +44,7 @@ class ColourPicker(BHoMBaseWidget):
 		self._popup_blue_var: Optional[tk.IntVar] = None
 
 		controls = ttk.Frame(self.content_frame)
-		controls.pack(side="top", anchor=getattr(self, "_pack_anchor"))
+		controls.pack(side="top", anchor=self._pack_anchor)
 
 		self.preview = tk.Canvas(
 			controls,
