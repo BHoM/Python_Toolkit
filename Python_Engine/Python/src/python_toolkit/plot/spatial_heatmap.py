@@ -28,6 +28,7 @@ def spatial_heatmap(
     highlight_pts: dict[str, tuple[int]] = None,
     show_legend_title: bool = True,
     clabels: bool = False,
+    style_context:str = "python_toolkit.bhom",
 ) -> Figure:
     """Plot a spatial map of a variable using a triangulation and associated values.
 
@@ -67,6 +68,8 @@ def spatial_heatmap(
             A convenient flag to hide the legend and title.
         clabels (bool, optional):
             A flag to show contour labels. Defaults to False.
+        style_context (string, optional):
+            The matplotlib style to use. Defaults to python_toolkit.bhom
 
     Returns:
         Figure: A matplotlib Figure object.
@@ -93,77 +96,78 @@ def spatial_heatmap(
             min(i.y.min() for i in triangulations),
             max(i.y.max() for i in triangulations),
         ]
+        
+    with plt.style.context(style_context):
+        fig, ax = plt.subplots(1, 1, figsize=(8, 8))
 
-    fig, ax = plt.subplots(1, 1, figsize=(8, 8))
+        ax.set_aspect("equal")
+        ax.axis("off")
 
-    ax.set_aspect("equal")
-    ax.axis("off")
+        ax.set_xlim(xlims)
+        ax.set_ylim(ylims)
 
-    ax.set_xlim(xlims)
-    ax.set_ylim(ylims)
+        tcls = []
+        for tri, zs in list(zip(*[triangulations, values])):
+            tcf = ax.tricontourf(
+                tri, zs, extend=extend, cmap=cmap, levels=levels, norm=norm
+            )
+            # add contour lines
+            if contours is not None:
+                if not (
+                    all(i < np.amin(zs) for i in contours)
+                    or all(i > np.amax(zs) for i in contours)
+                ):
+                    if contour_widths is None:
+                        contour_widths = [1.5] * len(contours)
+                    if contour_colors is None:
+                        contour_colors = ["k"] * len(contours)
+                    if len(contour_colors) != len(contours) != len(contour_widths):
+                        raise ValueError("contour vars must be same length")
+                    tcl = ax.tricontour(
+                        tri,
+                        zs,
+                        levels=contours,
+                        colors=contour_colors,
+                        linewidths=contour_widths,
+                    )
+                    if clabels:
+                        ax.clabel(tcl, inline=1, fontsize="small", colors=contour_colors)
+                    tcls.append(tcl)
 
-    tcls = []
-    for tri, zs in list(zip(*[triangulations, values])):
-        tcf = ax.tricontourf(
-            tri, zs, extend=extend, cmap=cmap, levels=levels, norm=norm
-        )
-        # add contour lines
-        if contours is not None:
-            if not (
-                all(i < np.amin(zs) for i in contours)
-                or all(i > np.amax(zs) for i in contours)
-            ):
-                if contour_widths is None:
-                    contour_widths = [1.5] * len(contours)
-                if contour_colors is None:
-                    contour_colors = ["k"] * len(contours)
-                if len(contour_colors) != len(contours) != len(contour_widths):
-                    raise ValueError("contour vars must be same length")
-                tcl = ax.tricontour(
-                    tri,
-                    zs,
-                    levels=contours,
-                    colors=contour_colors,
-                    linewidths=contour_widths,
+        if highlight_pts is not None:
+            if len(triangulations) > 1:
+                raise ValueError(
+                    "Point highlighting is only possible for 1-length triangulations."
                 )
-                if clabels:
-                    ax.clabel(tcl, inline=1, fontsize="small", colors=contour_colors)
-                tcls.append(tcl)
+            pt_size = (xlims[1] - xlims[0]) / 5
+            for k, v in highlight_pts.items():
+                ax.scatter(
+                    triangulations[0].x[v], triangulations[0].y[v], s=pt_size, c="red"
+                )
+                ax.text(
+                    triangulations[0].x[v] + (pt_size / 10),
+                    triangulations[0].y[v],
+                    k,
+                    ha="left",
+                    va="center",
+                )
 
-    if highlight_pts is not None:
-        if len(triangulations) > 1:
-            raise ValueError(
-                "Point highlighting is only possible for 1-length triangulations."
+        if show_legend_title:
+            # Plot colorbar
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.1, aspect=20)
+
+            cbar = plt.colorbar(
+                tcf, cax=cax  # , format=mticker.StrMethodFormatter("{x:04.1f}")
             )
-        pt_size = (xlims[1] - xlims[0]) / 5
-        for k, v in highlight_pts.items():
-            ax.scatter(
-                triangulations[0].x[v], triangulations[0].y[v], s=pt_size, c="red"
-            )
-            ax.text(
-                triangulations[0].x[v] + (pt_size / 10),
-                triangulations[0].y[v],
-                k,
-                ha="left",
-                va="center",
-            )
+            cbar.outline.set_visible(False)
+            cbar.set_label(colorbar_label)
 
-    if show_legend_title:
-        # Plot colorbar
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.1, aspect=20)
+            for tcl in tcls:
+                cbar.add_lines(tcl)
 
-        cbar = plt.colorbar(
-            tcf, cax=cax  # , format=mticker.StrMethodFormatter("{x:04.1f}")
-        )
-        cbar.outline.set_visible(False)
-        cbar.set_label(colorbar_label)
+            ax.set_title(title, ha="left", va="bottom", x=0)
 
-        for tcl in tcls:
-            cbar.add_lines(tcl)
-
-        ax.set_title(title, ha="left", va="bottom", x=0)
-
-    plt.tight_layout()
+        plt.tight_layout()
 
     return fig

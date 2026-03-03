@@ -29,6 +29,8 @@ def timeseries(
             Set the y-limits. Defaults to None.
         **kwargs:
             Additional keyword arguments to pass to the plt.plot() function.
+            style_context (string, optional):
+                The matplotlib style to use. Defaults to python_toolkit.bhom
 
     Returns:
         plt.Axes:
@@ -36,22 +38,25 @@ def timeseries(
     """
 
     validate_timeseries(series)
+    
+    style_context = kwargs.pop("style_context", "python_toolkit.bhom")
 
-    if ax is None:
-        ax = plt.gca()
+    with plt.style.context(style_context):
+        if ax is None:
+            ax = plt.gca()
 
-    ax.plot(series.index, series.values, **kwargs)  ## example plot here
+        ax.plot(series.index, series.values, **kwargs)  ## example plot here
 
-    # TODO - add cmap arg to color line by y value -
-    # https://matplotlib.org/stable/gallery/lines_bars_and_markers/multicolored_line.html
+        # TODO - add cmap arg to color line by y value -
+        # https://matplotlib.org/stable/gallery/lines_bars_and_markers/multicolored_line.html
 
-    if xlims is None:
-        ax.set_xlim(series.index.min(), series.index.max())
-    else:
-        ax.set_xlim(xlims)
-    if ylims is None:
-        ax.set_ylim(ax.get_ylim())
-    else:
-        ax.set_ylim(ylims)
+        if xlims is None:
+            ax.set_xlim(series.index.min(), series.index.max())
+        else:
+            ax.set_xlim(xlims)
+        if ylims is None:
+            ax.set_ylim(ax.get_ylim())
+        else:
+            ax.set_ylim(ylims)
 
     return ax
