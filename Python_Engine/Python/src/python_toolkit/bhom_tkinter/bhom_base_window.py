@@ -39,7 +39,7 @@ class BHoMBaseWindow(tk.Tk):
         icon_path: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "bhom_icon.png",
         dark_logo_path: Optional[Path] = None,
         dark_icon_path: Optional[Path] = None,
-        min_width: int = 500,
+        min_width: int = 400,
         min_height: int = 400,
         width: Optional[int] = None,
         height: Optional[int] = None,
@@ -122,8 +122,11 @@ class BHoMBaseWindow(tk.Tk):
         self._has_been_shown = False
         self._pending_resize_job: Optional[str] = None
         self._is_resizing = False
+        self._rigid_width = width is not None
+        self._rigid_height = height is not None
         self._auto_fit_width = width is None
         self._auto_fit_height = height is None
+        self._post_show_size_applied = False
         self.grid_dimensions = grid_dimensions
 
         # Handle window close (X button)
@@ -482,6 +485,10 @@ class BHoMBaseWindow(tk.Tk):
 
     def _schedule_dynamic_sizing(self, _event=None) -> None:
         """Debounce dynamic sizing updates triggered by layout changes."""
+        # Avoid fighting user-driven manual resize after the window is visible.
+        # Initial sizing is handled by `_apply_sizing` + one post-show pass.
+        if self._has_been_shown:
+            return
         if self._is_resizing:
             return
         if not (self._auto_fit_width or self._auto_fit_height):
@@ -509,19 +516,15 @@ class BHoMBaseWindow(tk.Tk):
         if self.button_bar is not None and self.button_bar.winfo_manager():
             required_height = max(required_height, self.button_bar.winfo_reqheight() + self.content_frame.winfo_reqheight())
 
-        # Determine final dimensions
-        if self.fixed_width and self.fixed_height:
-            final_width = max(self.min_width, self.fixed_width, required_width)
-            final_height = max(self.min_height, self.fixed_height, required_height)
-        elif self.fixed_width:
-            final_width = max(self.min_width, self.fixed_width, required_width)
-            final_height = max(self.min_height, required_height)
-        elif self.fixed_height:
-            final_width = max(self.min_width, required_width)
-            final_height = max(self.min_height, self.fixed_height, required_height)
+        # Determine final dimensions: auto-size unless a rigid dimension is explicitly provided.
+        if self._rigid_width:
+            final_width = max(self.min_width, int(self.fixed_width or 0))
         else:
-            # Dynamic sizing
             final_width = max(self.min_width, required_width)
+
+        if self._rigid_height:
+            final_height = max(self.min_height, int(self.fixed_height or 0))
+        else:
             final_height = max(self.min_height, required_height)
 
         # Position
@@ -542,6 +545,51 @@ class BHoMBaseWindow(tk.Tk):
         self.after(0, self._show_window_with_styling)
         self._is_resizing = False
 
+    def _apply_post_show_sizing(self) -> None:
+        """Run one extra grow-only size pass after first show.
+
+        On some Windows setups, control metrics settle after deiconify/theme
+        application, which can under-estimate initial required height and clip
+        bottom controls.
+        """
+        if self._post_show_size_applied:
+            return
+
+        self.update_idletasks()
+
+        required_width = self.winfo_reqwidth()
+        required_height = self.winfo_reqheight()
+
+        if hasattr(self, "main_container"):
+            required_width = max(required_width, self.main_container.winfo_reqwidth())
+            required_height = max(required_height, self.main_container.winfo_reqheight())
+
+        if self.button_bar is not None and self.button_bar.winfo_manager():
+            required_height = max(required_height, self.button_bar.winfo_reqheight() + self.content_frame.winfo_reqheight())
+
+        current_width = self.winfo_width()
+        current_height = self.winfo_height()
+
+        target_width = current_width
+        target_height = current_height
+
+        if self._auto_fit_width:
+            target_width = max(current_width, self.min_width, required_width)
+        elif self._rigid_width and self.fixed_width is not None:
+            target_width = max(self.min_width, int(self.fixed_width))
+
+        if self._auto_fit_height:
+            target_height = max(current_height, self.min_height, required_height)
+        elif self._rigid_height and self.fixed_height is not None:
+            target_height = max(self.min_height, int(self.fixed_height))
+
+        if target_width != current_width or target_height != current_height:
+            x = self.winfo_x()
+            y = self.winfo_y()
+            self.geometry(f"{target_width}x{target_height}+{x}+{y}")
+
+        self._post_show_size_applied = True
+
     def _show_window_with_styling(self) -> None:
         """Apply titlebar styling and show the window."""
         # Apply titlebar theme
@@ -550,6 +598,8 @@ class BHoMBaseWindow(tk.Tk):
         # Show window after styling
         self.deiconify()
         self._has_been_shown = True
+        if not self._post_show_size_applied and (self._auto_fit_width or self._auto_fit_height):
+            self.after_idle(self._apply_post_show_sizing)
 
     def refresh_sizing(self) -> None:
         """Recalculate and apply window sizing (useful after adding widgets)."""

@@ -19,6 +19,9 @@ class FigureContainer(BHoMBaseWidget):
     def __init__(
         self,
         parent: ttk.Frame,
+        auto_size: bool = False,
+        rigid_width: Optional[int] = None,
+        rigid_height: Optional[int] = None,
         **kwargs
     ) -> None:
         """
@@ -26,9 +29,16 @@ class FigureContainer(BHoMBaseWidget):
 
         Args:
             parent: Parent widget
+            auto_size: If `True`, fit content once to current frame size.
+            rigid_width: Optional fixed target width (pixels) for content sizing.
+            rigid_height: Optional fixed target height (pixels) for content sizing.
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
+
+        self.auto_size = bool(auto_size)
+        self.rigid_width = int(rigid_width) if rigid_width is not None else None
+        self.rigid_height = int(rigid_height) if rigid_height is not None else None
 
         self.figure: Optional[Figure] = None
         self.image: Optional[Any] = None
@@ -37,6 +47,8 @@ class FigureContainer(BHoMBaseWidget):
 
         self.canvas: Optional[FigureCanvasTkAgg] = None
         self.image_label: Optional[ttk.Label] = None
+        self._fit_after_id: Optional[str] = None
+        self._fit_attempts: int = 0
 
         if self.image:
             self.embed_image(self.image)
@@ -49,10 +61,34 @@ class FigureContainer(BHoMBaseWidget):
 
     def _clear_children(self) -> None:
         """Destroy any child widgets hosted by the content frame only."""
+        if self._fit_after_id is not None:
+            try:
+                self.after_cancel(self._fit_after_id)
+            except Exception:
+                pass
+            self._fit_after_id = None
+        self._fit_attempts = 0
         for widget in self.content_frame.winfo_children():
             widget.destroy()
         self.canvas = None
         self.image_label = None
+
+    def _resolve_target_size(self) -> tuple[int, int]:
+        """Resolve sizing target from rigid args or, optionally, frame dimensions."""
+        if self.rigid_width is not None and self.rigid_height is not None:
+            return self.rigid_width, self.rigid_height
+
+        self.update_idletasks()
+
+        if self.auto_size:
+            frame_width = max(self.content_frame.winfo_width(), self.content_frame.winfo_reqwidth())
+            frame_height = max(self.content_frame.winfo_height(), self.content_frame.winfo_reqheight())
+            return frame_width, frame_height
+
+        # No frame-derived sizing by default.
+        frame_width = self.rigid_width or 0
+        frame_height = self.rigid_height or 0
+        return frame_width, frame_height
 
     def _close_held_figure(self) -> None:
         """Close any currently held matplotlib figure to release resources."""
@@ -97,9 +133,12 @@ class FigureContainer(BHoMBaseWidget):
         # Set canvas background to match the frame background for transparency
         bg_color = self._resolved_background()
         self.canvas.get_tk_widget().configure(bg=bg_color, highlightthickness=0)
-        
-        self.canvas.draw()
+
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        if self.auto_size or self.rigid_width is not None or self.rigid_height is not None:
+            self._fit_figure_once()
+        else:
+            self.canvas.draw_idle()
 
     def embed_image(self, image: tk.PhotoImage) -> None:
         """
@@ -142,8 +181,12 @@ class FigureContainer(BHoMBaseWidget):
             self.image_label.pack(fill=tk.BOTH, expand=True)
             
             # Scale and display
-            self.content_frame.bind("<Configure>", lambda e: self._scale_image_to_fit())
-            self._scale_image_to_fit()
+            if self.auto_size or self.rigid_width is not None or self.rigid_height is not None:
+                self._scale_image_to_fit_once()
+            else:
+                # Default path: preserve original image dimensions, no frame-based fit.
+                self.image = ImageTk.PhotoImage(self._original_pil_image)
+                self.image_label.set(self.image)
             
         except ImportError:
             # Fallback to basic PhotoImage without scaling
@@ -151,18 +194,72 @@ class FigureContainer(BHoMBaseWidget):
             self.image = image
             self.image_label = Label(self.content_frame, image=image)
             self.image_label.pack(fill=tk.BOTH, expand=True)
-    
-    def _scale_image_to_fit(self):
+
+    def _fit_figure_once(self) -> None:
+        """Size the figure to the current frame once and stop resizing afterwards."""
+        if self.figure is None or self.canvas is None:
+            return
+
+        frame_width, frame_height = self._resolve_target_size()
+
+        # If only one rigid dimension is provided, derive the other from current figure aspect.
+        if (self.rigid_width is not None) != (self.rigid_height is not None):
+            try:
+                dpi = float(self.figure.get_dpi())
+                if dpi <= 0:
+                    dpi = 100.0
+                current_w_in, current_h_in = self.figure.get_size_inches()
+                aspect = (current_w_in / current_h_in) if current_h_in else 1.0
+                if self.rigid_width is not None:
+                    frame_width = self.rigid_width
+                    frame_height = int(round(self.rigid_width / aspect)) if aspect else self.rigid_width
+                else:
+                    frame_height = self.rigid_height or 0
+                    frame_width = int(round(frame_height * aspect))
+            except Exception:
+                pass
+
+        if frame_width <= 1 or frame_height <= 1:
+            if not self.auto_size:
+                self._fit_after_id = None
+                return
+            self._fit_attempts += 1
+            if self._fit_attempts > 25:
+                self._fit_after_id = None
+                return
+            self._fit_after_id = self.after(20, self._fit_figure_once)
+            return
+
+        try:
+            dpi = float(self.figure.get_dpi())
+            if dpi <= 0:
+                dpi = 100.0
+            self.figure.set_size_inches(frame_width / dpi, frame_height / dpi, forward=True)
+            self.canvas.draw_idle()
+        except Exception:
+            self.canvas.draw_idle()
+        finally:
+            self._fit_after_id = None
+            self._fit_attempts = 0
+
+    def _scale_image_to_fit_once(self):
         """Scale the image to fit within the content frame while maintaining aspect ratio."""
         if self._original_pil_image is None:
             return
         
         # Get current frame dimensions
-        frame_width = self.content_frame.winfo_width()
-        frame_height = self.content_frame.winfo_height()
+        frame_width, frame_height = self._resolve_target_size()
         
         # Skip if frame not yet sized
         if frame_width <= 1 or frame_height <= 1:
+            if not self.auto_size:
+                self._fit_after_id = None
+                return
+            self._fit_attempts += 1
+            if self._fit_attempts > 25:
+                self._fit_after_id = None
+                return
+            self._fit_after_id = self.after(20, self._scale_image_to_fit_once)
             return
         
         try:
@@ -187,6 +284,8 @@ class FigureContainer(BHoMBaseWidget):
                 # `image_label` is a BHoM Label wrapper; use wrapper API so
                 # the inner ttk.Label gets updated and image references persist.
                 self.image_label.set(self.image)
+            self._fit_after_id = None
+            self._fit_attempts = 0
         except Exception:
             pass  # Silently handle scaling errors
 

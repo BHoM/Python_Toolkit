@@ -66,20 +66,34 @@ class ValidatedEntryBox(BHoMBaseWidget):
         
         # Create frame for entry and success indicator
         self.entry_frame = ttk.Frame(self.content_frame)
-        self.entry_frame.pack(side="top", fill="x")
+        self.entry_frame.pack(side="top", fill="x", anchor=self._pack_anchor)
         
         # Create entry widget
-        self.entry = ttk.Entry(self.entry_frame, textvariable=self.variable, width=width)
+        self.entry = ttk.Entry(
+            self.entry_frame,
+            textvariable=self.variable,
+            width=width,
+            justify=self._text_justify,
+        )
         self.entry.pack(side="left", fill="x", expand=True)
         
         # Create success indicator label at end of entry
-        self.success_label = Label(self.entry_frame, text=" ", foreground="#4bb543", width=2)
-        self.align_child_text(self.success_label)
+        self.success_label = Label(
+            self.entry_frame,
+            text=" ",
+            foreground="#4bb543",
+            width=2,
+            alignment=self.alignment,
+        )
         self.success_label.pack(side="left", padx=(5, 0))
         
         # Create error label below entry with fixed height to prevent layout shifts
-        self.error_label = Label(self.content_frame, text=" ", style="Caption.TLabel")
-        self.align_child_text(self.error_label)
+        self.error_label = Label(
+            self.content_frame,
+            text=" ",
+            style="Caption.TLabel",
+            alignment=self.alignment,
+        )
         self.error_label.pack(side="top", fill="x", anchor=self._pack_anchor)
         
         # Bind validation events
@@ -323,6 +337,15 @@ class ValidatedEntryBox(BHoMBaseWidget):
         """Call the validation callback if provided."""
         if self.on_validate:
             self.on_validate(is_valid)
+
+    def set_alignment(self, alignment: Literal['left', 'center', 'right']) -> None:
+        """Set widget alignment and refresh entry + labels accordingly."""
+        super().set_alignment(alignment)
+        self.entry.configure(justify=self._text_justify)
+        self.entry_frame.pack_configure(anchor=self._pack_anchor)
+        self.error_label.set_alignment(self.alignment)
+        self.error_label.pack_configure(anchor=self._pack_anchor)
+        self.success_label.set_alignment(self.alignment)
 
 
 
