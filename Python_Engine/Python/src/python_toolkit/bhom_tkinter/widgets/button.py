@@ -25,9 +25,7 @@ class Button(BHoMBaseWidget):
 	):
 		super().__init__(parent, **kwargs)
 
-		self._click_count = 0
 		self._user_command = command
-
 		self.button = ttk.Button(
 			self.content_frame,
 			text=text,
@@ -40,22 +38,19 @@ class Button(BHoMBaseWidget):
 
 	def _on_click(self):
 		"""Internal click handler increments counter and calls user callback."""
-		self._click_count += 1
 		if self._user_command:
 			try:
 				self._user_command()
-			except Exception:
-				# Keep widget robust; do not propagate callback errors
+			except Exception as e:
 				pass
 
-	def get(self) -> int:
-		"""Return the number of clicks recorded."""
-		return self._click_count
+	def get(self):
+		"""Return None as nothing to get."""
+		return None
 
 	def set(self, value):
-		"""If given a string, set the button's label; otherwise ignore."""
-		if isinstance(value, str):
-			self.button.configure(text=value)
+		"""No set method."""
+		pass
 
 	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
 		"""Button has no user-editable state, so validation is always valid unless overridden."""

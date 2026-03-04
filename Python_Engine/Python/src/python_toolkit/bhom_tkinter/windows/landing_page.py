@@ -73,7 +73,7 @@ class LandingPage(BHoMBaseWindow):
             sub_title_label.build()
 
         self.custom_buttons_frame = ttk.Frame(self.content_frame)
-        self.custom_buttons_frame.pack(fill=tk.X, pady=(0, 20))
+        self.custom_buttons_frame.pack(fill="x", pady=(0, 20))
 
         super().build()
 
@@ -91,10 +91,10 @@ class LandingPage(BHoMBaseWindow):
         """
         if self.custom_buttons_frame is None:
             self.custom_buttons_frame = ttk.Frame(self.content_frame)
-            self.custom_buttons_frame.pack(fill=tk.X, pady=(0, 20))
+            self.custom_buttons_frame.pack(fill="x", pady=(0, 20))
 
         button_widget = Button(self.custom_buttons_frame, text=text, command=command, **kwargs)
-        button_widget.pack(pady=5, fill=tk.X)
+        button_widget.pack(pady=5, fill="x")
         # Recalculate window size after adding button
         self.refresh_sizing()
         # Return inner ttk.Button for compatibility
