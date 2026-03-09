@@ -6,6 +6,8 @@ from typing import Optional, Callable, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
+from python_toolkit.bhom.analytics import CONSOLE_LOGGER
+
 
 class Button(BHoMBaseWidget):
 	"""A minimal button widget that invokes a callback when clicked.
@@ -42,7 +44,8 @@ class Button(BHoMBaseWidget):
 			try:
 				self._user_command()
 			except Exception as e:
-				pass
+				CONSOLE_LOGGER.error(f"Unhandled exception when trying to perform custom command: {e}", exc_info=True)
+        
 
 	def get(self):
 		"""Return None as nothing to get."""
@@ -62,7 +65,10 @@ if __name__ == "__main__":
 	from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 	def demo_action():
-		print("Button pressed!")
+
+		#test fail 
+
+		a = 1 / 0
 
 	root = BHoMBaseWindow()
 	parent_frame = root.content_frame
