@@ -5,7 +5,6 @@ from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
 from pathlib import Path
 from typing import Optional, Callable, Literal, List
-import darkdetect 
 import platform
 import ctypes
 import os
@@ -236,8 +235,9 @@ class BHoMBaseWindow(tk.Tk):
             return theme_path_dark, dark_logo_path, dark_icon_path, "dark"
         
         #case == auto - detect system theme preference
-        if darkdetect.isDark():
+        if self._is_windows_dark_mode():
             return theme_path_dark, dark_logo_path, dark_icon_path, "dark"
+        
         else:
             return theme_path_light, logo_path, icon_path, "light"
 
@@ -335,6 +335,27 @@ class BHoMBaseWindow(tk.Tk):
                 return active_theme
             except Exception:
                 return "default"
+
+    def _is_windows_dark_mode(self) -> bool:
+        
+        try:
+            
+            import winreg
+            key = winreg.OpenKey(
+				winreg.HKEY_CURRENT_USER,
+				r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+			)
+            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+
+            return value == 0 # 0 means dark mode, 1 means light mode
+        
+        except FileNotFoundError:
+			# Key may not exist on older Windows versions
+            return False
+        
+        except ImportError:
+            # winreg is only available on Windows
+            return False
 
     def _ensure_typography_styles(self, style: ttk.Style) -> None:
         """Ensure key typography styles exist and remain visually distinct."""
@@ -660,7 +681,7 @@ if __name__ == "__main__":
 
     test = BHoMBaseWindow(
         title="Test Window",
-        theme_mode="dark",
+        theme_mode="light",
     )
 
     test.widgets.append(Label(test.content_frame, text="Hello, World!"))

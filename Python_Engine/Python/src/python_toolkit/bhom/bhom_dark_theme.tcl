@@ -32,7 +32,7 @@ namespace eval ttk::theme::bhom_dark {
         -disabled-fg    "#666666"
         -inputbg        "#2d2d2d"
         -inputfg        "#ffffff"
-        -hover-bg       "#2a2d2e"
+        -hover-bg       "#424242"
         -active-bg      "#383838"
         -text-secondary "#999999"
     }
@@ -159,20 +159,20 @@ namespace eval ttk::theme::bhom_dark {
 
         ttk::style map TButton \
             -background [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 pressed $colors(-active-bg) \
                 disabled $colors(-disabled-bg)] \
             -foreground [list \
                 active $colors(-fg) \
                 disabled $colors(-disabled-fg)] \
             -bordercolor [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 disabled $colors(-border)] \
             -lightcolor [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 pressed $colors(-active-bg)] \
             -darkcolor [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 pressed $colors(-active-bg)] \
             -relief [list \
                 pressed sunken]

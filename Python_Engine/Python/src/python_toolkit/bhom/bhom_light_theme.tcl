@@ -32,7 +32,7 @@ namespace eval ttk::theme::bhom_light {
         -disabled-fg    "#999999"
         -inputbg        "#ffffff"
         -inputfg        "#1a1a1a"
-        -hover-bg       "#f5f5f5"
+        -hover-bg       "#e0e0e0"
         -active-bg      "#ececec"
         -text-secondary "#666666"
     }
@@ -159,20 +159,20 @@ namespace eval ttk::theme::bhom_light {
 
         ttk::style map TButton \
             -background [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 pressed $colors(-active-bg) \
                 disabled $colors(-disabled-bg)] \
             -foreground [list \
                 active $colors(-fg) \
                 disabled $colors(-disabled-fg)] \
             -bordercolor [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 disabled $colors(-border)] \
             -lightcolor [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 pressed $colors(-active-bg)] \
             -darkcolor [list \
-                active $colors(-primary-hover) \
+                active $colors(-hover-bg) \
                 pressed $colors(-active-bg)] \
             -relief [list \
                 pressed sunken]
@@ -195,11 +195,14 @@ namespace eval ttk::theme::bhom_light {
                 pressed $colors(-primary-hover) \
                 disabled $colors(-disabled-bg)] \
             -lightcolor [list \
-                active $colors(-primary-light) \
+                active $colors(-primary-hover) \
                 pressed $colors(-primary-hover)] \
             -darkcolor [list \
                 active $colors(-primary-hover) \
                 pressed $colors(-primary-hover)] \
+            -foreground [list \
+                active "#ffffff" \
+                disabled $colors(-disabled-fg)] \
             -relief [list \
                 pressed sunken]
 

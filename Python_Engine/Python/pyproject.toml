@@ -16,7 +16,6 @@ dependencies = [
     "pytest-cov>=6.0.0",
     "pytest-order",
     "virtualenv",
-    "darkdetect"
 ]
 
 [urls]
