@@ -9,6 +9,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 import matplotlib as mpl
+import darkdetect
 
 
 class FigureContainer(BHoMBaseWidget):
@@ -355,13 +356,18 @@ if __name__ == "__main__":
         build_options=PackingOptions(padx=10, pady=10, fill='both', expand=True)
     )
     figure_container.build()
+    
+    style = "python_toolkit.bhom"
+    if darkdetect.isDark():
+        style = "python_toolkit.bhom_dark"
 
     # Create and embed the initial matplotlib figure
-    fig_initial, ax_initial = plt.subplots(figsize=(5, 4), dpi=80)
-    ax_initial.plot([1, 2, 3, 4], [1, 4, 2, 3], marker='o')
-    ax_initial.set_title("Initial Plot")
-    ax_initial.set_xlabel("X")
-    ax_initial.set_ylabel("Y")
+    with plt.style.context(style):
+        fig_initial, ax_initial = plt.subplots(figsize=(5, 4), dpi=80)
+        ax_initial.plot([1, 2, 3, 4], [1, 4, 2, 3], marker='o')
+        ax_initial.set_title("Initial Plot")
+        ax_initial.set_xlabel("X")
+        ax_initial.set_ylabel("Y")
     figure_container.embed_figure(fig_initial)
 
     def push_new_plot() -> None:

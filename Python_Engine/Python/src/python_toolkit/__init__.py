@@ -18,7 +18,3 @@ TOOLKIT_NAME = "Python_Toolkit"
 if os.name == "nt":
     # override "HOME" in case this is set to something other than default for windows
     os.environ["HOME"] = (Path("C:/Users/") / getpass.getuser()).as_posix()
-
-
-# set plotting style for modules within this toolkit
-plt.style.use(BHOM_DIRECTORY / "bhom.mplstyle")
