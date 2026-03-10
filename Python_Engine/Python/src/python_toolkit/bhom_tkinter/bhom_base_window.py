@@ -24,6 +24,7 @@ except Exception:
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 import python_toolkit
+from theming.theme import ThemeManager
 
 class BHoMBaseWindow(tk.Tk):
     """
@@ -34,10 +35,6 @@ class BHoMBaseWindow(tk.Tk):
     def __init__(
         self,
         title: str = "Application",
-        logo_path: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "BHoM_Logo.png",
-        icon_path: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "bhom_icon.png",
-        dark_logo_path: Optional[Path] = None,
-        dark_icon_path: Optional[Path] = None,
         min_width: int = 400,
         min_height: int = 400,
         width: Optional[int] = None,
@@ -51,9 +48,7 @@ class BHoMBaseWindow(tk.Tk):
         close_text: str = "Close",
         close_command: Optional[Callable] = None,
         on_close_window: Optional[Callable] = None,
-        theme_path: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "bhom_light_theme.tcl",
-        theme_path_dark: Path = Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "bhom_dark_theme.tcl",
-        theme_mode: Literal["light", "dark", "auto"] = "auto",
+        theme_mode:str = "auto",
         widgets: List[BHoMBaseWidget] = [],
         top_most: bool = True,
         buttons_side: Literal["left", "right"] = "right",
@@ -100,13 +95,11 @@ class BHoMBaseWindow(tk.Tk):
         
         # Hide window during setup to prevent flash
         self.withdraw()
-
-        # Load custom themes
-        _theme_path, _logo_path, _icon_path, _theme_style = self._determine_theme(logo_path, dark_logo_path, icon_path, dark_icon_path, theme_mode, theme_path, theme_path_dark)
         
-        self._set_window_icon(_icon_path)
-        self.theme = self._load_theme(_theme_path)
-        self.titlebar_theme = self._set_titlebar_theme(_theme_style)
+        
+        self.theme = ThemeManager(theme_mode)
+        self._load_theme()
+        self._set_window_icon()
 
         self.min_width = min_width
         self.min_height = min_height
@@ -136,7 +129,7 @@ class BHoMBaseWindow(tk.Tk):
         self.main_container.pack(fill=tk.BOTH, expand=True)
 
         # Banner section
-        self._build_banner(self.main_container, title, _logo_path)
+        self._build_banner(self.main_container, title, self.theme.logo_path)
 
         # Content area (public access for adding widgets)
         self.content_frame = ttk.Frame(self.main_container, padding=20)
@@ -165,18 +158,20 @@ class BHoMBaseWindow(tk.Tk):
         
     def build(self):
         """Call build on all child widgets that have it (for deferred widget construction)."""
-        for widget in self.widgets:
-            if hasattr(widget, "build") and callable(getattr(widget, "build")):
-                widget.build()
 
+        if any(not isinstance(w, BHoMBaseWidget) for w in self.widgets):
+            raise TypeError("All items in widgets list must be instances of BHoMBaseWidget.")
         
+        for widget in self.widgets:
+            widget.build()
+
         self.refresh_sizing()
 
-    def _set_window_icon(self, icon_path: Path) -> None:
+    def _set_window_icon(self) -> None:
         """Set a custom window icon, replacing Tk's default icon."""
+        icon_path = self.theme.icon_path
 
-        if not icon_path.exists():
-            print(f"Warning: Icon file not found at {icon_path}")
+        if not icon_path:
             return
 
         # Windows prefers .ico for titlebar/taskbar icons.
@@ -198,50 +193,7 @@ class BHoMBaseWindow(tk.Tk):
         except Exception as ex:
             print(f"Warning: Could not set window icon from {icon_path}: {ex}")
 
-    def _determine_theme(
-            self, 
-            logo_path: Path, 
-            dark_logo_path: Optional[Path], 
-            icon_path: Path, 
-            dark_icon_path: Optional[Path], 
-            theme_mode: str, 
-            theme_path_light: Path, 
-            theme_path_dark: Path) -> tuple[Path, Path, Path, str]:
-        
-        """Determine light or dark assets and theme based on configured mode.
-
-        Args:
-            logo_path: Light-mode logo path.
-            dark_logo_path: Optional dark-mode logo path.
-            icon_path: Light-mode icon path.
-            dark_icon_path: Optional dark-mode icon path.
-            theme_mode: Theme mode (`light`, `dark`, or `auto`).
-            theme_path_light: Light theme Tcl path.
-            theme_path_dark: Dark theme Tcl path.
-
-        Returns:
-            tuple[Path, Path, Path, str]: Theme path, logo path, icon path, and style key.
-        """
-
-        if theme_mode == "light":
-            return theme_path_light, logo_path, icon_path, "light"
-        
-        if dark_logo_path is None:
-            dark_logo_path = logo_path
-        if dark_icon_path is None:
-            dark_icon_path = icon_path
-
-        if theme_mode == "dark":
-            return theme_path_dark, dark_logo_path, dark_icon_path, "dark"
-        
-        #case == auto - detect system theme preference
-        if self._is_windows_dark_mode():
-            return theme_path_dark, dark_logo_path, dark_icon_path, "dark"
-        
-        else:
-            return theme_path_light, logo_path, icon_path, "light"
-
-    def _set_titlebar_theme(self, theme_style: str) -> str:
+    def _set_titlebar_theme(self) -> None:
         """
         Apply titlebar theme using Windows API.
 
@@ -249,11 +201,11 @@ class BHoMBaseWindow(tk.Tk):
             theme_style: Theme style key (`light` or `dark`).
 
         Returns:
-            str: Applied titlebar style key.
+            None
         """
         try:
            
-            use_dark = 1 if theme_style == "dark" else 0
+            use_dark = 1 if self.theme.dark_theme else 0
 
             if platform.system() == "Windows" and ctypes is not None and self.winfo_exists():
                 hwnd = self.winfo_id()
@@ -266,15 +218,10 @@ class BHoMBaseWindow(tk.Tk):
                         ctypes.sizeof(ctypes.c_int)
                     )
 
-            if use_dark:
-                return "dark"
-            else:
-                return "light"
-
         except Exception:
-            return "light"
+            pass
 
-    def _load_theme(self, _theme_path: Path) -> str:
+    def _load_theme(self) -> str:
         """
         Load a custom theme from a TCL file.
         
@@ -290,42 +237,27 @@ class BHoMBaseWindow(tk.Tk):
 
         try:
             current_themes = set(style.theme_names())
-
-            # Determine which theme file to use
-            if _theme_path and _theme_path.exists():
-                theme_path = _theme_path
-            else:
-                # Use default theme
-                theme_path = Path(r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\bhom_style.tcl")
             
-            if theme_path.exists():
-                expected_theme = theme_path.stem.replace("_theme", "")
-                # Load the TCL theme file
-                try:
-                    self.tk.call('source', str(theme_path))
-                except tk.TclError as source_error:
-                    if "already exists" not in str(source_error).lower():
-                        raise
+            expected_theme = self.theme.path.stem.replace("_theme", "")
+            # Load the TCL theme file
+            try:
+                self.tk.call('source', str(self.theme.path))
+            except tk.TclError as source_error:
+                if "already exists" not in str(source_error).lower():
+                    raise
 
-                available_theme_names = style.theme_names()
-                newly_added = [name for name in available_theme_names if name not in current_themes]
-                if expected_theme in available_theme_names:
-                    selected_theme = expected_theme
-                elif newly_added:
-                    selected_theme = newly_added[-1]
-                else:
-                    selected_theme = style.theme_use() if available_theme_names else "default"
-
-                style.theme_use(selected_theme)
-                self._ensure_typography_styles(style)
-                return selected_theme
+            available_theme_names = style.theme_names()
+            newly_added = [name for name in available_theme_names if name not in current_themes]
+            if expected_theme in available_theme_names:
+                selected_theme = expected_theme
+            elif newly_added:
+                selected_theme = newly_added[-1]
             else:
-                print(f"Warning: Theme file not found at {theme_path}")
-                available_theme_names = style.theme_names()
-                selected_theme = available_theme_names[0] if available_theme_names else "default"
-                style.theme_use(selected_theme)
-                self._ensure_typography_styles(style)
-                return selected_theme
+                selected_theme = style.theme_use() if available_theme_names else "default"
+
+            style.theme_use(selected_theme)
+            self._ensure_typography_styles(style)
+            return selected_theme
             
         except Exception as e:
             print(f"Warning: Could not load custom theme: {e}")
@@ -335,27 +267,6 @@ class BHoMBaseWindow(tk.Tk):
                 return active_theme
             except Exception:
                 return "default"
-
-    def _is_windows_dark_mode(self) -> bool:
-        
-        try:
-            
-            import winreg
-            key = winreg.OpenKey(
-				winreg.HKEY_CURRENT_USER,
-				r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-			)
-            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
-
-            return value == 0 # 0 means dark mode, 1 means light mode
-        
-        except FileNotFoundError:
-			# Key may not exist on older Windows versions
-            return False
-        
-        except ImportError:
-            # winreg is only available on Windows
-            return False
 
     def _ensure_typography_styles(self, style: ttk.Style) -> None:
         """Ensure key typography styles exist and remain visually distinct."""
@@ -613,8 +524,7 @@ class BHoMBaseWindow(tk.Tk):
 
     def _show_window_with_styling(self) -> None:
         """Apply titlebar styling and show the window."""
-        # Apply titlebar theme
-        self._set_titlebar_theme(self.titlebar_theme)
+        self._set_titlebar_theme()
         
         # Show window after styling
         self.deiconify()
@@ -681,7 +591,7 @@ if __name__ == "__main__":
 
     test = BHoMBaseWindow(
         title="Test Window",
-        theme_mode="light",
+        theme_mode="auto",
     )
 
     test.widgets.append(Label(test.content_frame, text="Hello, World!"))
