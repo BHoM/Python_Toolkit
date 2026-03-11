@@ -1,5 +1,8 @@
 # Default matplotlib settings for this toolkit.
 
+# Text
+text.color: white
+
 # Set custom colors. All colors are in web style hex format.
 axes.prop_cycle: cycler('color', ['702F8A', 'E63187', '00A9E0', 'FFCF04', '6CC24E', 'EB671C', '00A499', 'D50032', '24135F', '6D104E', '006DA8', 'D06A13', '5D822D', 'F0AC1B', '1C3660', 'BC204B', '8F72B0', 'FCD16D', '8DB9CA', 'EE7837', 'AFC1A2', 'B72B77', 'A0D2C9', 'E6484D'])
 
@@ -30,6 +33,7 @@ grid.linewidth: 0.5
 # Setting font sizes and spacing
 axes.labelsize: medium
 axes.labelweight: semibold
+axes.labelcolor: white
 axes.ymargin: 0.1
 font.family: sans-serif
 font.sans-serif: Segoe UI
@@ -82,6 +86,3 @@ savefig.pad_inches: 0.2
 legend.framealpha: 0
 legend.frameon: False
 legend.facecolor: inherit
-
-# Text
-text.color: white
