@@ -109,6 +109,7 @@ namespace BH.Engine.Python
                 }
             })
             {
+                uninstall.StartInfo.Environment["PYTHONHOME"] = "";
                 uninstall.Start();
                 string stderr = uninstall.StandardError.ReadToEnd();
                 uninstall.WaitForExit();

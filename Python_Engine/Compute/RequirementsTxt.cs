@@ -69,6 +69,8 @@ namespace BH.Engine.Python
                     RedirectStandardOutput = true
                 }
             };
+
+            process.StartInfo.Environment["PYTHONHOME"] = "";
             using (Process p = Process.Start(process.StartInfo))
             {
                 StreamWriter sr = new StreamWriter(targetPath);

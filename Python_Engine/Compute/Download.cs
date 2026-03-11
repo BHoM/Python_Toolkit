@@ -122,6 +122,7 @@ namespace BH.Engine.Python
                 }
             })
             {
+                install.StartInfo.Environment["PYTHONHOME"] = "";
                 install.Start();
                 string stderr = install.StandardError.ReadToEnd();
                 install.WaitForExit();

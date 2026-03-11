@@ -52,6 +52,7 @@ namespace BH.Engine.Python
                 process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 commandMode = "/C";
             }
+            process.StartInfo.Environment["PYTHONHOME"] = "";
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
