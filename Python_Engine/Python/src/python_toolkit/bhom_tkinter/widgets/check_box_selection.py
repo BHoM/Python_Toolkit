@@ -234,6 +234,7 @@ if __name__ == "__main__":
 		defaults=["Option B", "Option D"],
 		orient="vertical",
 		max_per_line=6,
+		min_selections=2,
 		item_title="Choose Options",
 		helper_text="Select one or more options below:",
 		build_options=PackingOptions(padx=20, pady=20)

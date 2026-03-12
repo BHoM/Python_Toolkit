@@ -61,6 +61,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self.required = required
         self.custom_validator = custom_validator
         self.on_validate = on_validate
+        self.default_value = default_value
 
         # Create or use provided StringVar
         self.variable = variable if variable is not None else tk.StringVar(value="")

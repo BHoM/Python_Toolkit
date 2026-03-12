@@ -586,6 +586,18 @@ class BHoMBaseWindow(tk.Tk):
         """Handle window X button click."""
         self._exit("window_closed", callback)
 
+    def get(self):
+        widget_values = {}
+
+        for widget in self.widgets:
+            
+            if hasattr(widget, "get"):
+                try:
+                    widget_values[widget.id] = widget.get()
+                except Exception as ex:
+                    print(f"Warning: Failed to get value from widget {widget}: {ex}")
+        return widget_values
+
 
 if __name__ == "__main__":
 
@@ -604,3 +616,4 @@ if __name__ == "__main__":
 
     test.build()
     test.mainloop()
+    print(test.get())
