@@ -22,6 +22,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self,
         parent,
         variable: Optional[tk.StringVar] = None,
+        default_value: Optional[Union[str, int, float]] = None,
         width: int = 15,
         value_type: type = str,
         min_value: Optional[Union[int, float]] = None,

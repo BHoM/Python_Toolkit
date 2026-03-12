@@ -20,7 +20,7 @@ class TclTheme:
 
 LIGHT = TclTheme(
     name="light", 
-    path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "bhom_light_theme.tcl",
+    path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom_tkinter" / "theming" / "bhom_light_theme.tcl",
     logo_path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "BHoM_Logo.png",
     icon_path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "bhom_icon.png",
     dark_theme=False
@@ -28,7 +28,7 @@ LIGHT = TclTheme(
 
 DARK = TclTheme(
     name="dark", 
-    path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "bhom_dark_theme.tcl",
+    path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom_tkinter" / "theming" / "bhom_dark_theme.tcl",
     logo_path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "BHoM_Logo.png",
     icon_path=Path(list(python_toolkit.__path__)[0]).absolute() / "bhom" / "assets" / "bhom_icon.png",
     dark_theme=True

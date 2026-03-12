@@ -24,7 +24,7 @@ except Exception:
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 import python_toolkit
-from theming.theme import ThemeManager
+from python_toolkit.bhom_tkinter.theming.theme import ThemeManager
 
 class BHoMBaseWindow(tk.Tk):
     """
@@ -49,7 +49,7 @@ class BHoMBaseWindow(tk.Tk):
         close_command: Optional[Callable] = None,
         on_close_window: Optional[Callable] = None,
         theme_mode:str = "auto",
-        widgets: List[BHoMBaseWidget] = [],
+        widgets: Optional[List[BHoMBaseWidget]] = None,
         top_most: bool = True,
         buttons_side: Literal["left", "right"] = "right",
         grid_dimensions: Optional[tuple[int, int]] = None,
@@ -91,7 +91,8 @@ class BHoMBaseWindow(tk.Tk):
         if self.top_most:
             self.attributes("-topmost", True)
 
-        self.widgets = widgets
+        # Avoid sharing widget instances across windows/runs.
+        self.widgets = list(widgets) if widgets is not None else []
         
         # Hide window during setup to prevent flash
         self.withdraw()
@@ -337,9 +338,13 @@ class BHoMBaseWindow(tk.Tk):
                 from PIL import Image, ImageTk
                 img = Image.open(logo_path)
                 img.thumbnail((80, 80), Image.Resampling.LANCZOS)
-                self.logo_image = ImageTk.PhotoImage(img)
+                # Bind image to this root explicitly to avoid stale image handles
+                # when previous runs failed and tore down a different Tk interpreter.
+                self.logo_image = ImageTk.PhotoImage(img, master=self)
                 logo_label = Label(logo_container, image=self.logo_image)
                 logo_label.pack(fill=tk.BOTH, expand=True)
+            except tk.TclError:
+                pass
             except ImportError:
                 pass  # PIL not available, skip logo
 
