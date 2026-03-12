@@ -156,7 +156,7 @@ if __name__ == "__main__":
     label_widget = Label(parent_frame, text="Hello, World!", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="right")
     label_widget.build()
 
-    label_widget2 = Label(parent_frame, text="This is a BHoM Label widget.", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="left")
+    label_widget2 = Label(parent_frame, text="Warning: This is a BHoM warning label.", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="left", style="Warning.TLabel")
     label_widget2.build()
 
     root.mainloop()
