@@ -9,7 +9,6 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 import matplotlib as mpl
-import darkdetect
 
 
 class FigureContainer(BHoMBaseWidget):
@@ -357,9 +356,7 @@ if __name__ == "__main__":
     )
     figure_container.build()
     
-    style = "python_toolkit.bhom"
-    if darkdetect.isDark():
-        style = "python_toolkit.bhom_dark"
+    style = "python_toolkit.bhom_dark"
 
     # Create and embed the initial matplotlib figure
     with plt.style.context(style):
