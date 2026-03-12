@@ -91,7 +91,7 @@ namespace BH.Engine.Python
 
         [Description("Download and install a specified version of python, and return the executable for it.")]
         [Input("version", "The version of python to download.")]
-        [Output("pythonExecutable", "The executable (python.exe) for the python version that was installed")]
+        [Output("pythonExecutable", "The executable (python.exe) for the python version that was installed.")]
         public static string DownloadPythonVersion(this PythonVersion version)
         {
             string url = version.EmbeddableURL();
