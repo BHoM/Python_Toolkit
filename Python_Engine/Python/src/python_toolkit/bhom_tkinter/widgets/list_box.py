@@ -17,7 +17,8 @@ class ScrollableListBox(BHoMBaseWidget):
             parent: ttk.Frame, 
             items=None, 
             selectmode=tk.MULTIPLE, 
-            height=None, 
+            height=None,
+            width=None,
             show_selection_controls=False,
             **kwargs):
         """
@@ -26,6 +27,7 @@ class ScrollableListBox(BHoMBaseWidget):
             items (list, optional): List of items to populate the listbox.
             selectmode (str): Selection mode for the listbox (SINGLE, MULTIPLE, etc.).
             height (int, optional): Height of the listbox. Defaults to number of items.
+            width (int, optional): Width of the listbox in characters. If None, listbox expands to fill available space.
             show_selection_controls (bool): Show Select All and Deselect All buttons.
             **kwargs: Additional Frame options.
         """
@@ -44,13 +46,16 @@ class ScrollableListBox(BHoMBaseWidget):
         self.content_frame.rowconfigure(1, weight=1)
         
         # Create listbox
-        self.listbox = tk.Listbox(
-            self.content_frame,
-            selectmode=selectmode,
-            height=height,
-            yscrollcommand=self.scrollbar.set,
-            exportselection=False,
-        )
+        listbox_options = {
+            "selectmode": selectmode,
+            "height": height,
+            "yscrollcommand": self.scrollbar.set,
+            "exportselection": False,
+        }
+        if width is not None:
+            listbox_options["width"] = width
+        
+        self.listbox = tk.Listbox(self.content_frame, **listbox_options)
         self.listbox.grid(row=0, column=0, columnspan=2, sticky="nsew")
         self.scrollbar.config(command=self.listbox.yview)
         
