@@ -121,6 +121,7 @@ class BHoMBaseWindow(tk.Tk):
         self._auto_fit_height = height is None
         self._post_show_size_applied = False
         self.grid_dimensions = grid_dimensions
+        self._cached_widget_values: dict[str, object] = {}
 
         # Handle window close (X button)
         self.protocol("WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window))
@@ -572,6 +573,9 @@ class BHoMBaseWindow(tk.Tk):
         except Exception as ex:
             print(f"Warning: Exit callback raised an exception: {ex}")
         finally:
+            # Capture values while widgets still exist so `get()` remains usable
+            # after root teardown.
+            self._cached_widget_values = self._collect_widget_values()
             self.destroy_root()
 
     def _on_submit(self) -> None:
@@ -587,7 +591,19 @@ class BHoMBaseWindow(tk.Tk):
         self._exit("window_closed", callback)
 
     def get(self):
-        widget_values = {}
+        try:
+            if not self.winfo_exists():
+                return dict(self._cached_widget_values)
+        except Exception:
+            return dict(self._cached_widget_values)
+
+        widget_values = self._collect_widget_values()
+        self._cached_widget_values = dict(widget_values)
+        return widget_values
+
+    def _collect_widget_values(self) -> dict[str, object]:
+        """Collect values from all registered widgets."""
+        widget_values: dict[str, object] = {}
 
         for widget in self.widgets:
             

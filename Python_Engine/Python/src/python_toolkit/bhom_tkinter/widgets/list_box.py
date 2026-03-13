@@ -34,6 +34,9 @@ class ScrollableListBox(BHoMBaseWidget):
         super().__init__(parent, **kwargs)
         
         self.items = items or []
+        self._cached_options = [str(item) for item in self.items]
+        self._cached_selection: list[str] = []
+        self._cached_selection_indices: tuple[int, ...] = ()
         if height is None:
             height = len(self.items) if self.items else 5
 
@@ -65,6 +68,8 @@ class ScrollableListBox(BHoMBaseWidget):
         
         # Auto-hide scrollbar when not needed
         self.listbox.bind("<Configure>", self._on_configure)
+        self.listbox.bind("<<ListboxSelect>>", self._on_selection_change)
+        self._sync_cache_from_widget()
         self._on_configure()
 
         if show_selection_controls:
@@ -84,6 +89,26 @@ class ScrollableListBox(BHoMBaseWidget):
         else:
             self.scrollbar.grid(row=0, column=1, sticky="ns")
 
+    def _on_selection_change(self, _event=None):
+        """Track selection changes so values remain available after teardown."""
+        self._sync_cache_from_widget()
+
+    def _is_listbox_alive(self) -> bool:
+        """Return whether the underlying Tk listbox command still exists."""
+        try:
+            return bool(self.listbox.winfo_exists())
+        except Exception:
+            return False
+
+    def _sync_cache_from_widget(self) -> None:
+        """Synchronize cached options and selections from the live listbox."""
+        if not self._is_listbox_alive():
+            return
+        self._cached_options = [self.listbox.get(i) for i in range(self.listbox.size())]
+        self.items = list(self._cached_options)
+        self._cached_selection_indices = tuple(self.listbox.curselection())
+        self._cached_selection = [self.listbox.get(i) for i in self._cached_selection_indices]
+
     def set_selections(self, items):
         """Set the selection to the specified items.
 
@@ -91,9 +116,10 @@ class ScrollableListBox(BHoMBaseWidget):
             items: Item values to select.
         """
         self.listbox.selection_clear(0, tk.END)
-        for index, item in enumerate(self.items):
+        for index, item in enumerate(self.get_options()):
             if item in items:
                 self.listbox.selection_set(index)
+        self._sync_cache_from_widget()
     
     def get_selection(self):
         """Return a list of selected items.
@@ -101,6 +127,8 @@ class ScrollableListBox(BHoMBaseWidget):
         Returns:
             list: Selected item values.
         """
+        if not self._is_listbox_alive():
+            return list(self._cached_selection)
         selected_indices = self.listbox.curselection()
         return [self.listbox.get(i) for i in selected_indices]
     
@@ -110,15 +138,19 @@ class ScrollableListBox(BHoMBaseWidget):
         Returns:
             tuple: Indices of selected entries.
         """
+        if not self._is_listbox_alive():
+            return self._cached_selection_indices
         return self.listbox.curselection()
 
     def select_all(self):
         """Select all items in the listbox."""
         self.listbox.selection_set(0, tk.END)
+        self._sync_cache_from_widget()
 
     def deselect_all(self):
         """Clear all selected items in the listbox."""
         self.listbox.selection_clear(0, tk.END)
+        self._sync_cache_from_widget()
     
     def insert(self, index, item):
         """Insert an item at the specified index.
@@ -128,6 +160,7 @@ class ScrollableListBox(BHoMBaseWidget):
             item: Item value to insert.
         """
         self.listbox.insert(index, item)
+        self._sync_cache_from_widget()
         self._on_configure()
     
     def delete(self, index):
@@ -137,11 +170,16 @@ class ScrollableListBox(BHoMBaseWidget):
             index: Position of item to delete.
         """
         self.listbox.delete(index)
+        self._sync_cache_from_widget()
         self._on_configure()
     
     def clear(self):
         """Clear all items from the listbox."""
         self.listbox.delete(0, tk.END)
+        self._cached_options = []
+        self._cached_selection = []
+        self._cached_selection_indices = ()
+        self.items = []
         self._on_configure()
 
     def pack(self, **kwargs):
@@ -154,22 +192,49 @@ class ScrollableListBox(BHoMBaseWidget):
         self._on_configure()  # Ensure scrollbar visibility is updated when packed
 
     def set(self, value):
-        """Set the listbox items to the provided list.
+        """Set the currently selected item.
 
         Args:
-            value: Iterable of item values to display.
+            value: Item value to select. If `None`, clears all selection.
         """
-        self.clear()
-        for item in value:
-            self.listbox.insert(tk.END, item)
-        self._on_configure()
+        if not self._is_listbox_alive():
+            self._cached_selection = [] if value is None else [str(value)]
+            self._cached_selection_indices = ()
+            return
+
+        self.listbox.selection_clear(0, tk.END)
+        if value is None:
+            self._sync_cache_from_widget()
+            return
+
+        options = self.get_options()
+        selected_value = str(value)
+        if selected_value in options:
+            index = options.index(selected_value)
+            self.listbox.selection_set(index)
+            self.listbox.activate(index)
+            self.listbox.see(index)
+        self._sync_cache_from_widget()
     
     def get(self):
-        """Get the current list of items in the listbox.
+        """Get the currently selected item.
 
         Returns:
-            list: Current listbox items in display order.
+            Optional[str]: First selected item, or `None` when no selection exists.
         """
+        selection = self.get_selection()
+        if not selection:
+            return None
+        return selection[0]
+
+    def get_options(self):
+        """Get all options currently displayed in the listbox.
+
+        Returns:
+            list[str]: Current listbox options in display order.
+        """
+        if not self._is_listbox_alive():
+            return list(self._cached_options)
         return [self.listbox.get(i) for i in range(self.listbox.size())]
     
     def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
@@ -183,6 +248,21 @@ class ScrollableListBox(BHoMBaseWidget):
         # In this simple implementation, all states are valid, so we return True.
         return self.apply_validation((True, None, None))
 
+    def set_options(self, options):
+        """Replace the listbox items with new options.
+
+        Args:
+            options: Iterable of item values to display.
+        """
+        self.clear()
+        for item in options:
+            self.listbox.insert(tk.END, item)
+        self._sync_cache_from_widget()
+        self._on_configure()
+
+    def _sync_items_from_listbox(self) -> None:
+        """Synchronize cached items with the listbox contents."""
+        self._sync_cache_from_widget()
 
 if __name__ == "__main__":
 
