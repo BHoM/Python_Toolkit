@@ -16,7 +16,8 @@ class DropDownSelection(BHoMBaseWidget):
 			command: Optional[Callable[[str], None]] = None,
 			default: Optional[str] = None,
 			width: int = 20,
-			state: str = "readonly",
+			state: str = "normal",
+			value_var: Optional[tk.StringVar] = None,
 			**kwargs):
 		"""
 		Args:
@@ -34,7 +35,7 @@ class DropDownSelection(BHoMBaseWidget):
 
 		self.options = [str(option) for option in (options or [])]
 		self.command = command
-		self.value_var = tk.StringVar()
+		self.value_var = value_var or tk.StringVar()
 
 		# Create the combobox in the content frame
 		self.combobox = ttk.Combobox(

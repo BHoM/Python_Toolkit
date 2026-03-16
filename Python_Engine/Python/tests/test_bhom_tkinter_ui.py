@@ -276,3 +276,43 @@ def test_widget_validation():
 	ok, msg, sev = custom_box.validate()
 	assert ok is False and msg == "Custom failed"
 
+
+def test_rebuild():
+	"""Verify that rebuild() re-places widgets and reflects mutations to self.widgets."""
+	root = BHoMBaseWindow(title="Rebuild test")
+	parent = root.content_frame
+
+	label_a = Label(parent, text="Widget A", build_options=PackingOptions(fill="x"))
+	label_b = Label(parent, text="Widget B", build_options=PackingOptions(fill="x"))
+
+	root.widgets.extend([label_a, label_b])
+	root.build()
+
+	# Both widgets should be managed after build
+	managed_after_build = [
+		c for c in parent.winfo_children() if c.winfo_manager()
+	]
+	assert len(managed_after_build) == 2
+
+	# Add a third widget and rebuild
+	label_c = Label(parent, text="Widget C", build_options=PackingOptions(fill="x"))
+	root.widgets.append(label_c)
+	root.rebuild()
+
+	managed_after_rebuild = [
+		c for c in parent.winfo_children() if c.winfo_manager()
+	]
+	assert len(managed_after_rebuild) == 3
+
+	# Remove a widget and rebuild — it should no longer be managed
+	root.widgets.remove(label_a)
+	root.rebuild()
+
+	managed_after_remove = [
+		c for c in parent.winfo_children() if c.winfo_manager()
+	]
+	assert len(managed_after_remove) == 2
+	assert label_a not in [w for w in root.widgets]
+
+	root.destroy_root()
+

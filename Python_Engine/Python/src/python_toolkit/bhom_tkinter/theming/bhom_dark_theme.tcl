@@ -385,7 +385,41 @@ namespace eval ttk::theme::bhom_dark {
                 active $colors(-hover-bg) \
                 disabled $colors(-disabled-bg)]
 
-        # Radiobutton - sleek hover effect with bold font
+        # Larger checkbutton variant used by CheckboxSelection widget
+        ttk::style layout Checkbox.TCheckbutton {
+            Checkbutton.padding -sticky nswe -children {
+                Checkbutton.indicator -side left -sticky {}
+                Checkbutton.label -side left -sticky w
+            }
+        }
+
+        ttk::style configure Checkbox.TCheckbutton \
+            -font {{Segoe UI} 11} \
+            -padding {6 8} \
+            -indicatormargin {0 0 10 0} \
+            -indicatorrelief flat \
+            -indicatorsize 18 \
+            -borderwidth 0 \
+            -relief flat \
+            -focusthickness 0 \
+            -indicatorcolor $colors(-inputbg) \
+            -indicatorbackground $colors(-inputbg)
+
+        ttk::style map Checkbox.TCheckbutton \
+            -background [list \
+                active $colors(-bg) \
+                selected $colors(-bg)] \
+            -foreground [list \
+                active $colors(-primary) \
+                disabled $colors(-disabled-fg)] \
+            -indicatorbackground [list \
+                selected $colors(-primary) \
+                active $colors(-inputbg) \
+                disabled $colors(-disabled-bg)] \
+            -indicatorcolor [list \
+                selected $colors(-primary) \
+                active $colors(-inputbg) \
+                disabled $colors(-disabled-bg)]
         ttk::style configure TRadiobutton \
             -background $colors(-bg) \
             -foreground $colors(-fg) \

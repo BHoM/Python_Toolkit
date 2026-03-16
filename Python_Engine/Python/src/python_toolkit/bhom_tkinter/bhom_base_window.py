@@ -24,7 +24,7 @@ except Exception:
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 import python_toolkit
-from theming.theme import ThemeManager
+from python_toolkit.bhom_tkinter.theming.theme import ThemeManager
 
 class BHoMBaseWindow(tk.Tk):
     """
@@ -49,7 +49,7 @@ class BHoMBaseWindow(tk.Tk):
         close_command: Optional[Callable] = None,
         on_close_window: Optional[Callable] = None,
         theme_mode:str = "auto",
-        widgets: List[BHoMBaseWidget] = [],
+        widgets: Optional[List[BHoMBaseWidget]] = None,
         top_most: bool = True,
         buttons_side: Literal["left", "right"] = "right",
         grid_dimensions: Optional[tuple[int, int]] = None,
@@ -91,7 +91,8 @@ class BHoMBaseWindow(tk.Tk):
         if self.top_most:
             self.attributes("-topmost", True)
 
-        self.widgets = widgets
+        # Avoid sharing widget instances across windows/runs.
+        self.widgets = list(widgets) if widgets is not None else []
         
         # Hide window during setup to prevent flash
         self.withdraw()
@@ -120,6 +121,7 @@ class BHoMBaseWindow(tk.Tk):
         self._auto_fit_height = height is None
         self._post_show_size_applied = False
         self.grid_dimensions = grid_dimensions
+        self._cached_widget_values: dict[str, object] = {}
 
         # Handle window close (X button)
         self.protocol("WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window))
@@ -337,9 +339,13 @@ class BHoMBaseWindow(tk.Tk):
                 from PIL import Image, ImageTk
                 img = Image.open(logo_path)
                 img.thumbnail((80, 80), Image.Resampling.LANCZOS)
-                self.logo_image = ImageTk.PhotoImage(img)
+                # Bind image to this root explicitly to avoid stale image handles
+                # when previous runs failed and tore down a different Tk interpreter.
+                self.logo_image = ImageTk.PhotoImage(img, master=self)
                 logo_label = Label(logo_container, image=self.logo_image)
                 logo_label.pack(fill=tk.BOTH, expand=True)
+            except tk.TclError:
+                pass
             except ImportError:
                 pass  # PIL not available, skip logo
 
@@ -567,6 +573,9 @@ class BHoMBaseWindow(tk.Tk):
         except Exception as ex:
             print(f"Warning: Exit callback raised an exception: {ex}")
         finally:
+            # Capture values while widgets still exist so `get()` remains usable
+            # after root teardown.
+            self._cached_widget_values = self._collect_widget_values()
             self.destroy_root()
 
     def _on_submit(self) -> None:
@@ -580,6 +589,30 @@ class BHoMBaseWindow(tk.Tk):
     def _on_close_window(self, callback: Optional[Callable]) -> None:
         """Handle window X button click."""
         self._exit("window_closed", callback)
+
+    def get(self):
+        try:
+            if not self.winfo_exists():
+                return dict(self._cached_widget_values)
+        except Exception:
+            return dict(self._cached_widget_values)
+
+        widget_values = self._collect_widget_values()
+        self._cached_widget_values = dict(widget_values)
+        return widget_values
+
+    def _collect_widget_values(self) -> dict[str, object]:
+        """Collect values from all registered widgets."""
+        widget_values: dict[str, object] = {}
+
+        for widget in self.widgets:
+            
+            if hasattr(widget, "get"):
+                try:
+                    widget_values[widget.id] = widget.get()
+                except Exception as ex:
+                    print(f"Warning: Failed to get value from widget {widget}: {ex}")
+        return widget_values
 
 
 if __name__ == "__main__":
@@ -599,3 +632,4 @@ if __name__ == "__main__":
 
     test.build()
     test.mainloop()
+    print(test.get())

@@ -1,4 +1,5 @@
 from tkinter import ttk
+import tkinter as tk
 from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
@@ -65,6 +66,10 @@ class Label(BHoMBaseWidget):
         )
 
         self.text = label_options.get("text", "")
+        image_ref = label_options.get("image")
+        if image_ref is not None:
+            # Keep a Python-side reference so Tk image objects are not garbage-collected.
+            self._image_ref = image_ref
         style_name = label_options.get("style")
         if "font" not in label_options and style_name:
             try:
@@ -73,8 +78,18 @@ class Label(BHoMBaseWidget):
                     label_options["font"] = style_font
             except Exception:
                 pass
-        # Create inner ttk.Label with the collected options
-        self.label = ttk.Label(self.content_frame, **label_options)
+        # Create inner ttk.Label with the collected options.
+        # If a stale Tk image handle is passed from a previous failed run,
+        # recover by dropping the image and creating a text-only label.
+        try:
+            self.label = ttk.Label(self.content_frame, **label_options)
+        except tk.TclError as ex:
+            message = str(ex).lower()
+            if "image" in label_options and "image" in message and "doesn't exist" in message:
+                safe_options = {k: v for k, v in label_options.items() if k != "image"}
+                self.label = ttk.Label(self.content_frame, **safe_options)
+            else:
+                raise
         self.align_child_text(self.label)
         # Allow the inner label to expand horizontally so parent frames
         # using grid/pack with `fill='x'` will cause this label to fill
@@ -141,7 +156,7 @@ if __name__ == "__main__":
     label_widget = Label(parent_frame, text="Hello, World!", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="right")
     label_widget.build()
 
-    label_widget2 = Label(parent_frame, text="This is a BHoM Label widget.", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="left")
+    label_widget2 = Label(parent_frame, text="Warning: This is a BHoM warning label.", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="left", style="Warning.TLabel")
     label_widget2.build()
 
     root.mainloop()

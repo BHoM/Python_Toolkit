@@ -107,12 +107,19 @@ if __name__ == "__main__":
     def on_button_click():
         """Handle demo button clicks in the standalone example."""
         print("Button clicked!")
+    
+    def on_button_click_2():
+        """Handle demo button clicks in the standalone example."""
+        print("Second button clicked!")
 
     landing_page = LandingPage(
         title="Welcome to the BHoM Toolkit",
         header="Welcome to the BHoM Toolkit",
         message="This is a landing page example. You can add custom buttons below.",
         sub_title="Please click the button to proceed.",
+        show_close=True,
+        show_submit=False,
     )
     landing_page.add_custom_button(text="Click Me", command=on_button_click)
+    landing_page.add_custom_button(text="Click Me 2", command=on_button_click_2)
     landing_page.mainloop()
