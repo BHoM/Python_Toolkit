@@ -1,8 +1,7 @@
-"""Single-select radio-style widget built from clickable labels."""
+"""Single-select radio-style widget built from ttk Radiobuttons."""
 
 import tkinter as tk
 from tkinter import ttk
-from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
@@ -65,22 +64,16 @@ class RadioSelection(BHoMBaseWidget):
 
 		for index, field in enumerate(self.fields):
 			sticky = self._grid_sticky
-			button = Label(
+			button = ttk.Radiobutton(
 				self.buttons_frame,
-				text=f"○ {field}",
-				style="Body.TLabel",
+				text=field,
+				variable=self.value_var,
+				value=field,
+				style="Radio.TRadiobutton",
+				command=lambda f=field: self._select_field(f),
 			)
 			self.align_child_text(button)
-			# Bind clicks on both wrapper and inner label so user clicks register
-			button.bind("<Button-1>", lambda _event, f=field: self._select_field(f))
-			try:
-				button.label.configure(cursor="hand2")
-			except Exception:
-				pass
-			try:
-				button.label.bind("<Button-1>", lambda _event, f=field: self._select_field(f))
-			except Exception:
-				pass
+
 			if self.max_per_line and self.max_per_line > 0:
 				if self.orient == "horizontal":
 					row = index // self.max_per_line
@@ -120,22 +113,9 @@ class RadioSelection(BHoMBaseWidget):
 			self._buttons.append(button)
 
 	def _select_field(self, field):
-		"""Select a field when clicked."""
-		self.value_var.set(field)
-		self._update_visual_state()
+		"""Handle radio button selection."""
 		if self.command:
 			self.command(self.get())
-
-	def _update_visual_state(self):
-		"""Update visual indicators for all buttons."""
-		selected_value = self.value_var.get()
-		for button in self._buttons:
-			button_text = button.get()
-			current_field = button_text[2:]
-			if current_field == selected_value:
-				button.set(f"● {current_field}")
-			else:
-				button.set(f"○ {current_field}")
 
 	def get(self):
 		"""Return the currently selected value.
@@ -154,7 +134,6 @@ class RadioSelection(BHoMBaseWidget):
 		value = str(value)
 		if value in self.fields:
 			self.value_var.set(value)
-			self._update_visual_state()
 
 	def set_fields(self, fields, default=None):
 		"""Replace the available fields and rebuild the widget.

@@ -444,6 +444,51 @@ namespace eval ttk::theme::bhom_dark {
                 active $colors(-hover-bg) \
                 disabled $colors(-disabled-bg)]
 
+        # Larger radiobutton variant used by RadioSelection widget
+        ttk::style layout Radio.TRadiobutton {
+            Radiobutton.padding -sticky nswe -children {
+                Radiobutton.indicator -side left -sticky {}
+                Radiobutton.label -side left -sticky w
+            }
+        }
+
+        ttk::style configure Radio.TRadiobutton \
+            -font {{Segoe UI} 11} \
+            -padding {6 8} \
+            -indicatormargin {0 0 10 0} \
+            -indicatorsize 15 \
+            -borderwidth 0 \
+            -relief flat \
+            -focusthickness 0 \
+            -indicatorbackground $colors(-inputbg) \
+            -indicatorforeground $colors(-inputbg) \
+            -upperbordercolor $colors(-border) \
+            -lowerbordercolor $colors(-border)
+
+        ttk::style map Radio.TRadiobutton \
+            -background [list \
+                active $colors(-bg) \
+                selected $colors(-bg)] \
+            -foreground [list \
+                active $colors(-primary) \
+                disabled $colors(-disabled-fg)] \
+            -indicatorbackground [list \
+                selected $colors(-primary) \
+                active $colors(-inputbg) \
+                disabled $colors(-disabled-bg)] \
+            -indicatorforeground [list \
+                selected $colors(-primary) \
+                active $colors(-inputbg) \
+                disabled $colors(-disabled-bg)] \
+            -upperbordercolor [list \
+                selected $colors(-primary) \
+                active $colors(-border) \
+                disabled $colors(-disabled-bg)] \
+            -lowerbordercolor [list \
+                selected $colors(-primary) \
+                active $colors(-border) \
+                disabled $colors(-disabled-bg)]
+
         # Scrollbar - minimal sleek design without arrows
         ttk::style configure TScrollbar \
             -background $colors(-border) \

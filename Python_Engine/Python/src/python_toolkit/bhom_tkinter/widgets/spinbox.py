@@ -13,7 +13,7 @@ class Spinbox(BHoMBaseWidget):
 	def __init__(
 			self,
 			parent,
-			values: Optional[List[str]] = None,
+			values: Optional[Union[List[str], List[int], List[float]]] = None,
 			from_: Optional[Union[int, float]] = None,
 			to: Optional[Union[int, float]] = None,
 			increment: Union[int, float] = 1,
@@ -42,6 +42,14 @@ class Spinbox(BHoMBaseWidget):
 
 		self.command = command
 		self._value_var = tk.StringVar()
+
+		# Determine the native type for get() coercion
+		if values and len(values) > 0:
+			self._value_type = type(values[0])
+		elif from_ is not None:
+			self._value_type = type(from_)
+		else:
+			self._value_type = str
 
 		spinbox_kwargs: dict = dict(
 			textvariable=self._value_var,
@@ -75,13 +83,17 @@ class Spinbox(BHoMBaseWidget):
 		if self.command:
 			self.command(self.get())
 
-	def get(self) -> str:
-		"""Return the current value as a string.
+	def get(self) -> Union[str, int, float]:
+		"""Return the current value cast to its original type.
 
 		Returns:
-			str: Current spinbox value.
+			str | int | float: Current spinbox value in its original type.
 		"""
-		return self._value_var.get()
+		raw = self._value_var.get()
+		try:
+			return self._value_type(raw)
+		except (ValueError, TypeError):
+			return raw
 
 	def get_int(self) -> int:
 		"""Return the current value as an integer.
