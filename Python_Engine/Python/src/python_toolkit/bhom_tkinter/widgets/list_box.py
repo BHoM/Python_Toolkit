@@ -217,15 +217,12 @@ class ScrollableListBox(BHoMBaseWidget):
         self._sync_cache_from_widget()
     
     def get(self):
-        """Get the currently selected item.
+        """Get all currently selected items.
 
         Returns:
-            Optional[str]: First selected item, or `None` when no selection exists.
+            list[str]: Selected item values, or an empty list when nothing is selected.
         """
-        selection = self.get_selection()
-        if not selection:
-            return None
-        return selection[0]
+        return self.get_selection()
 
     def get_options(self):
         """Get all options currently displayed in the listbox.
@@ -284,6 +281,7 @@ if __name__ == "__main__":
     ))
     root.widgets[-1].build()
 
-    print("Selected items:", root.widgets[-1].get())
     
     root.mainloop()
+    
+    print("Selected items:", root.widgets[-1].get())
