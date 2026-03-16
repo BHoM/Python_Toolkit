@@ -91,6 +91,8 @@ namespace BH.Engine.Python
                 }
             };
 
+            process.StartInfo.Environment["PYTHONHOME"] = "";
+
             using (Process p = Process.Start(process.StartInfo))
             {
                 string standardError = p.StandardError.ReadToEnd();
@@ -113,6 +115,8 @@ namespace BH.Engine.Python
                     UseShellExecute = false,
                 }
             };
+
+            process.StartInfo.Environment["PYTHONHOME"] = "";
 
             using (Process p = Process.Start(process2.StartInfo))
             {

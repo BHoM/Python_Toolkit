@@ -59,9 +59,10 @@ namespace BH.Engine.Python
                     FileName = executable,
                     Arguments = $"-m pip install --no-warn-script-location {packagesString}",
                     UseShellExecute = false,
-                    RedirectStandardError = true,
+                    RedirectStandardError = true
                 }
             };
+            process.StartInfo.Environment["PYTHONHOME"] = "";
             using (Process p = Process.Start(process.StartInfo))
             {
                 string standardError = p.StandardError.ReadToEnd();
@@ -111,6 +112,7 @@ namespace BH.Engine.Python
                     RedirectStandardError = true,
                 }
             };
+            process.StartInfo.Environment["PYTHONHOME"] = "";
             using (Process p = Process.Start(process.StartInfo))
             {
                 string standardError = p.StandardError.ReadToEnd();
@@ -155,6 +157,7 @@ namespace BH.Engine.Python
                     RedirectStandardError = true,
                 }
             };
+            process.StartInfo.Environment["PYTHONHOME"] = "";
             using (Process p = Process.Start(process.StartInfo))
             {
                 string standardError = p.StandardError.ReadToEnd();
