@@ -51,6 +51,7 @@ class BHoMBaseWindow(tk.Tk):
         theme_mode:str = "auto",
         widgets: Optional[List[BHoMBaseWidget]] = None,
         top_most: bool = True,
+        fullscreen: bool = False,
         buttons_side: Literal["left", "right"] = "right",
         grid_dimensions: Optional[tuple[int, int]] = None,
         **kwargs
@@ -77,6 +78,7 @@ class BHoMBaseWindow(tk.Tk):
             on_close_window (callable, optional): Command when X is pressed.
             theme_path (Path, optional): Path to custom TCL theme file. If None, uses default style.tcl.
             theme_mode (str): Theme mode - "light", "dark", or "auto" to detect from system (default: "auto").
+            fullscreen (bool): Whether the window starts in fullscreen mode (default: False).
             buttons_side (str): Side for buttons - "left" or "right" (default: "right").
             grid_dimensions (tuple[int, int], optional): If provided, configures content area with specified rows and columns for grid layout.
             **kwargs
@@ -90,6 +92,8 @@ class BHoMBaseWindow(tk.Tk):
         self.top_most = top_most
         if self.top_most:
             self.attributes("-topmost", True)
+
+        self.fullscreen = fullscreen
 
         # Avoid sharing widget instances across windows/runs.
         self.widgets = list(widgets) if widgets is not None else []
@@ -464,6 +468,13 @@ class BHoMBaseWindow(tk.Tk):
             final_height = max(self.min_height, int(self.fixed_height or 0))
         else:
             final_height = max(self.min_height, required_height)
+
+        # Fullscreen overrides normal sizing/positioning
+        if self.fullscreen:
+            self.attributes("-fullscreen", True)
+            self.after(0, self._show_window_with_styling)
+            self._is_resizing = False
+            return
 
         # Position
         if self.center_on_screen and not self._has_been_shown:

@@ -132,7 +132,7 @@ class Spinbox(BHoMBaseWidget):
 			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
 				``(is_valid, message, severity)``.
 		"""
-		if not self.get().strip():
+		if not str(self.get()).strip():
 			return getattr(self, "apply_validation")((False, "A value is required.", "error"))
 		return getattr(self, "apply_validation")((True, None, None))
 
