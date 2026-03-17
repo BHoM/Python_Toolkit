@@ -9,6 +9,7 @@ import datetime
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
+from python_toolkit.bhom_tkinter.widgets.drop_down_selection import DropDownSelection
 
 class CalendarWidget(BHoMBaseWidget):
     """Render a month grid and allow date selection."""
@@ -68,43 +69,44 @@ class CalendarWidget(BHoMBaseWidget):
 
     def year_selector(self):
         """Build the year dropdown selector."""
-        year_var = tk.StringVar()
-        year_var.set(str(self.year))
-
         years = [str(year) for year in range(self.year_min, self.year_max + 1)]
-        drop = tk.OptionMenu(self.month_frame, year_var, *years)
-        year_var.trace_add("write", lambda *args: self.set_year(year_var))
-        drop.pack(side="left", padx=4, pady=4)
+        self.year_dropdown = DropDownSelection(
+            self.month_frame,
+            options=years,
+            default=str(self.year),
+            command=lambda val: self.set_year(val),
+            state="readonly",
+        )
+        self.year_dropdown.pack(side="left", padx=4, pady=4)
 
     def month_selector(self):
         """Build the month dropdown selector."""
         self.months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        self.month_dropdown = DropDownSelection(
+            self.month_frame,
+            options=self.months,
+            default=self.months[self.month - 1],
+            command=lambda val: self.set_month(val),
+            state="readonly",
+        )
+        self.month_dropdown.pack(side="left", padx=4, pady=4)
 
-        clicked = tk.StringVar()
-        clicked.set(self.months[self.month-1])
-
-        drop = tk.OptionMenu(self.month_frame, clicked, *self.months)
-        clicked.trace_add("write", lambda *args: self.set_month(clicked))
-        drop.pack(side="left", padx=4, pady=4)
-
-    def set_year(self, var):
+    def set_year(self, value):
         """Update the selected year and redraw the calendar.
 
         Args:
-            var: Tk variable containing the selected year.
+            value: The selected year as a string.
         """
-        year = int(var.get())
-        self.year = year
+        self.year = int(value)
         self.redraw()
 
-    def set_month(self, var):
+    def set_month(self, value):
         """Update the selected month and redraw the calendar.
 
         Args:
-            var: Tk variable containing the selected month name.
+            value: The selected month name as a string.
         """
-        month = var.get()
-        self.month = self.months.index(month) + 1
+        self.month = self.months.index(value) + 1
         self.redraw()
 
     def redraw(self):
@@ -209,7 +211,7 @@ if __name__ == "__main__":
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
-    root = BHoMBaseWindow(min_height=500)
+    root = BHoMBaseWindow(min_height=500, min_width=400, theme_mode="light")
     root.title("Calendar Widget Test")
 
     # Example without year selector

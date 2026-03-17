@@ -266,7 +266,7 @@ if __name__ == "__main__":
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
-    root = BHoMBaseWindow()
+    root = BHoMBaseWindow(theme_mode="light")
     parent_container = root.content_frame
     
     items = [f"Item {i}" for i in range(1, 21)]

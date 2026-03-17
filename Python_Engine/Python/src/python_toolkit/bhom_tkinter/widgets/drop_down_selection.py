@@ -137,7 +137,7 @@ if __name__ == "__main__":
 		"""Print selected value in the standalone example."""
 		print(f"Selected: {value}")
 
-	root = BHoMBaseWindow()
+	root = BHoMBaseWindow(theme_mode="light")
 	parent_frame = root.content_frame
 
 	widget = DropDownSelection(

@@ -635,7 +635,7 @@ if __name__ == "__main__":
 
     test = BHoMBaseWindow(
         title="Test Window",
-        theme_mode="auto",
+        theme_mode="light",
     )
 
     test.widgets.append(Label(test.content_frame, text="Hello, World!"))

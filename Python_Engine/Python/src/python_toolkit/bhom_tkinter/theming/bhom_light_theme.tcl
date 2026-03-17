@@ -3,7 +3,7 @@
 # Font: Segoe UI, Roboto, Helvetica, Arial, sans-serif
 
 # ============================================================================
-# DARK MODE THEME
+# LIGHT MODE THEME
 # ============================================================================
 
 # Split theme file generated from bhom_style.tcl
@@ -715,37 +715,37 @@ namespace eval ttk::theme::bhom_light {
 }
 
 # Set default options for tk widgets (non-ttk)
-option add *Background "#1e1e1e"
-option add *Foreground "#ffffff"
+option add *Background "#ffffff"
+option add *Foreground "#1a1a1a"
 option add *Font {{Segoe UI} 10 bold}
 option add *selectBackground "#1b6ec2"
 option add *selectForeground "#ffffff"
-option add *activeBackground "#2a2d2e"
-option add *activeForeground "#ffffff"
+option add *activeBackground "#e0e0e0"
+option add *activeForeground "#1a1a1a"
 option add *highlightColor "#1b6ec2"
-option add *highlightBackground "#1e1e1e"
-option add *disabledForeground "#666666"
-option add *insertBackground "#ffffff"
-option add *troughColor "#2d2d2d"
+option add *highlightBackground "#ffffff"
+option add *disabledForeground "#999999"
+option add *insertBackground "#1a1a1a"
+option add *troughColor "#f3f3f3"
 option add *borderWidth 1
 option add *relief flat
 
 # Listbox specific - matches design theme
-option add *Listbox.background "#2d2d2d"
-option add *Listbox.foreground "#ffffff"
+option add *Listbox.background "#ffffff"
+option add *Listbox.foreground "#1a1a1a"
 option add *Listbox.selectBackground "#1b6ec2"
 option add *Listbox.selectForeground "#ffffff"
 option add *Listbox.font {{Segoe UI} 10}
 option add *Listbox.borderWidth 1
 option add *Listbox.relief flat
 option add *Listbox.highlightThickness 1
-option add *Listbox.highlightColor "#3d3d3d"
-option add *Listbox.highlightBackground "#3d3d3d"
+option add *Listbox.highlightColor "#d0d0d0"
+option add *Listbox.highlightBackground "#d0d0d0"
 
 # Text widget specific
-option add *Text.background "#2d2d2d"
-option add *Text.foreground "#ffffff"
-option add *Text.insertBackground "#ffffff"
+option add *Text.background "#ffffff"
+option add *Text.foreground "#1a1a1a"
+option add *Text.insertBackground "#1a1a1a"
 option add *Text.selectBackground "#1b6ec2"
 option add *Text.selectForeground "#ffffff"
 option add *Text.font {{Segoe UI} 10}
@@ -755,12 +755,12 @@ option add *Text.highlightThickness 1
 option add *Text.highlightColor "#1b6ec2"
 
 # Canvas specific
-option add *Canvas.background "#1e1e1e"
+option add *Canvas.background "#ffffff"
 option add *Canvas.highlightThickness 0
 
 # Menu specific
-option add *Menu.background "#2d2d2d"
-option add *Menu.foreground "#ffffff"
+option add *Menu.background "#f3f3f3"
+option add *Menu.foreground "#1a1a1a"
 option add *Menu.activeBackground "#1b6ec2"
 option add *Menu.activeForeground "#ffffff"
 option add *Menu.activeBorderWidth 0
@@ -769,9 +769,9 @@ option add *Menu.relief flat
 option add *Menu.font {{Segoe UI} 10}
 
 # Toplevel/window specific
-option add *Toplevel.background "#1e1e1e"
+option add *Toplevel.background "#ffffff"
 
 # Message widget
-option add *Message.background "#1e1e1e"
-option add *Message.foreground "#ffffff"
+option add *Message.background "#ffffff"
+option add *Message.foreground "#1a1a1a"
 option add *Message.font {{Segoe UI} 10}
