@@ -44,6 +44,7 @@ class BHoMBaseWindow(tk.Tk):
         show_submit: bool = True,
         submit_text: str = "Submit",
         submit_command: Optional[Callable] = None,
+        close_on_submit: bool = True,
         show_close: bool = True,
         close_text: str = "Close",
         close_command: Optional[Callable] = None,
@@ -112,6 +113,7 @@ class BHoMBaseWindow(tk.Tk):
         self.fixed_height = height
         self.center_on_screen = center_on_screen
         self.submit_command = submit_command
+        self.close_on_submit = close_on_submit
         self.close_command = close_command
         self.result = None
         self._is_exiting = False
@@ -591,7 +593,23 @@ class BHoMBaseWindow(tk.Tk):
 
     def _on_submit(self) -> None:
         """Handle submit button click."""
-        self._exit("submit", self.submit_command)
+        if self.close_on_submit:
+            self._exit("submit", self.submit_command)
+            return
+        
+        self.result = "submit"
+        try:
+            if self.submit_command:
+                self.submit_command()
+        except tk.TclError as ex:
+            message = str(ex).lower()
+            if not ("image" in message and "doesn't exist" in message):
+                print(f"Warning: Exit callback raised an exception: {ex}")
+        except Exception as ex:
+            print(f"Warning: Exit callback raised an exception: {ex}")
+        finally:
+            self._cached_widget_values = self._collect_widget_values()
+
 
     def _on_close(self) -> None:
         """Handle close button click."""
