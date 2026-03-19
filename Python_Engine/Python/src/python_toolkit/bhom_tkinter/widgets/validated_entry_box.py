@@ -7,6 +7,8 @@ from typing import Optional, Callable, Any, Union, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
+_TkVar = Union[tk.StringVar, tk.IntVar, tk.DoubleVar, tk.BooleanVar]
+
 class ValidatedEntryBox(BHoMBaseWidget):
     """
     A reusable entry box component with built-in validation for different data types.
@@ -21,7 +23,8 @@ class ValidatedEntryBox(BHoMBaseWidget):
     def __init__(
         self,
         parent,
-        variable: Optional[tk.StringVar] = None,
+        variable: Optional[_TkVar] = None,
+        default_value: Optional[Union[str, int, float, bool]] = None,
         width: int = 15,
         value_type: type = str,
         min_value: Optional[Union[int, float]] = None,
@@ -40,9 +43,11 @@ class ValidatedEntryBox(BHoMBaseWidget):
             parent: Parent
             item_title: Optional header text shown at the top of the widget frame
             requirements_text: Optional helper text shown above the entry box
-            variable: StringVar to bind to the entry (creates one if not provided)
+            variable: StringVar, IntVar, DoubleVar or BooleanVar to bind to the entry
+                (creates a StringVar if not provided).
             width: Width of the entry widget
-            value_type: Type to validate against (str, int, float)
+            value_type: Type to validate against (str, int, float, bool).
+                Inferred automatically when an IntVar, DoubleVar or BooleanVar is passed.
             min_value: Minimum value for numeric types
             max_value: Maximum value for numeric types
             min_length: Minimum length for string type
@@ -52,6 +57,16 @@ class ValidatedEntryBox(BHoMBaseWidget):
             on_validate: Callback function called after validation with validation result
         """
         super().__init__(parent, **kwargs)
+
+        # Infer value_type from the variable kind when not explicitly set
+        if variable is not None and value_type is str:
+            if isinstance(variable, tk.IntVar):
+                value_type = int
+            elif isinstance(variable, tk.DoubleVar):
+                value_type = float
+            elif isinstance(variable, tk.BooleanVar):
+                value_type = bool
+
         self.value_type = value_type
         self.min_value = min_value
         self.max_value = max_value
@@ -60,10 +75,25 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self.required = required
         self.custom_validator = custom_validator
         self.on_validate = on_validate
+        self.default_value = default_value
 
-        # Create or use provided StringVar
-        self.variable = variable if variable is not None else tk.StringVar(value="")
-        
+        # Store the external variable (any tkinter var type)
+        self._external_var: Optional[_TkVar] = variable
+
+        # ttk.Entry only works with StringVar — always use one internally
+        self.variable = tk.StringVar(value="")
+
+        if variable is not None:
+            if isinstance(variable, tk.StringVar):
+                # Use it directly instead of bridging
+                self.variable = variable
+                self._external_var = None
+            else:
+                # Seed the StringVar from the external var's current value
+                self.variable.set(str(variable.get()))
+                # Write back to external var when the StringVar changes
+                self.variable.trace_add("write", self._sync_to_external)
+
         # Create frame for entry and success indicator
         self.entry_frame = ttk.Frame(self.content_frame)
         self.entry_frame.pack(side="top", fill="x", anchor=self._pack_anchor)
@@ -99,6 +129,24 @@ class ValidatedEntryBox(BHoMBaseWidget):
         # Bind validation events
         self.entry.bind("<FocusOut>", lambda _: self.validate())
         self.entry.bind("<Return>", lambda _: self.validate())
+
+        if default_value is not None:
+            self.set(default_value)
+
+    def _sync_to_external(self, *_) -> None:
+        """Write the current StringVar text back to the external typed variable."""
+        if self._external_var is None:
+            return
+        raw = self.variable.get()
+        try:
+            if isinstance(self._external_var, tk.IntVar):
+                self._external_var.set(int(raw))
+            elif isinstance(self._external_var, tk.DoubleVar):
+                self._external_var.set(float(raw))
+            elif isinstance(self._external_var, tk.BooleanVar):
+                self._external_var.set(raw.lower() in ("1", "true", "yes"))
+        except (ValueError, TypeError):
+            pass  # Ignore mid-edit invalid states
         
     def get(self) -> str:
         """Get the current value as a string.
@@ -108,11 +156,11 @@ class ValidatedEntryBox(BHoMBaseWidget):
         """
         return self.variable.get().strip()
     
-    def get_value(self) -> Optional[Union[str, int, float]]:
+    def get_value(self) -> Optional[Union[str, int, float, bool]]:
         """Get the current value converted to the specified type.
 
         Returns:
-            Optional[Union[str, int, float]]: Parsed value, or `None` when empty/invalid.
+            Optional[Union[str, int, float, bool]]: Parsed value, or ``None`` when empty/invalid.
         """
         value_str = self.get()
         if not value_str:
@@ -123,12 +171,14 @@ class ValidatedEntryBox(BHoMBaseWidget):
                 return int(value_str)
             elif self.value_type == float:
                 return float(value_str)
+            elif self.value_type == bool:
+                return value_str.lower() in ("1", "true", "yes")
             else:
                 return value_str
         except (ValueError, TypeError):
             return None
     
-    def set(self, value: Union[str, int, float]) -> None:
+    def set(self, value: Union[str, int, float, bool]) -> None:
         """Set the entry value.
 
         Args:
@@ -174,6 +224,8 @@ class ValidatedEntryBox(BHoMBaseWidget):
             is_valid = self._validate_int(value_str)
         elif self.value_type == float:
             is_valid = self._validate_float(value_str)
+        elif self.value_type == bool:
+            is_valid = self._validate_bool(value_str)
         else:
             self._show_error(f"Unsupported type: {self.value_type}")
             self._call_validate_callback(False)
@@ -317,6 +369,32 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self._call_validate_callback(True)
         return True
     
+    def _validate_bool(self, value_str: str) -> bool:
+        """Validate boolean value (accepts 1/0, true/false, yes/no).
+
+        Args:
+            value_str: Raw entry text to interpret as boolean.
+
+        Returns:
+            bool: ``True`` when valid, otherwise ``False``.
+        """
+        if value_str.lower() not in ("1", "0", "true", "false", "yes", "no"):
+            self._show_error("Must be true/false, yes/no, or 1/0")
+            self._call_validate_callback(False)
+            return False
+
+        if self.custom_validator:
+            parsed = value_str.lower() in ("1", "true", "yes")
+            is_valid, error_msg = self.custom_validator(parsed)
+            if not is_valid:
+                self._show_error(error_msg)
+                self._call_validate_callback(False)
+                return False
+
+        self._show_success()
+        self._call_validate_callback(True)
+        return True
+
     def _show_error(self, message: str) -> None:
         """Display error message."""
         self.error_label.set(message)

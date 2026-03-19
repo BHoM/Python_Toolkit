@@ -64,6 +64,7 @@ class CmapSelector(BHoMBaseWidget):
         cmap_bins: int = 256,
         default_cmap: Optional[str] = None,
         plot_size: tuple[int, int] = (400, 50),
+        dropdown_position: Literal["n", "e", "s", "w"] = "n",
         **kwargs
     ) -> None:
         """
@@ -76,6 +77,9 @@ class CmapSelector(BHoMBaseWidget):
             cmap_set: Preset colormap set to use when colormaps is None.
                 Allowed values: "all", "continuous", "categorical".
             default_cmap: Optional default colormap to select.
+            dropdown_position: Position of the dropdown relative to the plot.
+                "n" = above, "s" = below, "w" = left, "e" = right.
+                Defaults to "w".
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
@@ -105,10 +109,18 @@ class CmapSelector(BHoMBaseWidget):
         content.grid(row=0, column=0, padx=0, pady=4, sticky=self._grid_sticky)
         content.grid_propagate(False)
 
-        header = ttk.Frame(content)
-        header.pack(fill=tk.X, anchor=self._pack_anchor, padx=0, pady=(8, 4))
-
         self.cmap_set_var = tk.StringVar(value=cmap_set.lower())
+
+        pos = dropdown_position.lower()
+        is_horizontal = pos in ("w", "e")
+        pack_side_combo = {"n": tk.TOP, "s": tk.BOTTOM, "w": tk.LEFT, "e": tk.RIGHT}[pos]
+        pack_side_figure = {"n": tk.TOP, "s": tk.TOP, "w": tk.LEFT, "e": tk.LEFT}[pos]
+
+        combo_padx = (0, 4) if is_horizontal else 0
+        combo_pady = (8, 4) if not is_horizontal else 0
+
+        header = ttk.Frame(content)
+        header.pack(side=pack_side_combo, anchor=self._pack_anchor, padx=combo_padx, pady=combo_pady)
 
         self.cmap_combobox = ttk.Combobox(
             header,
@@ -119,11 +131,12 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_combobox.pack(side=tk.TOP, anchor=self._pack_anchor, padx=0)
         self.cmap_combobox.bind("<<ComboboxSelected>>", self._on_cmap_selected)
 
+        fill_mode = tk.Y if is_horizontal else tk.X
         self.figure_widget = FigureContainer(
             content,
             width=plot_size[0],
             height=plot_size[1],
-            build_options=PackingOptions(anchor=self._pack_anchor, padx=0, pady=(0, 8)),
+            build_options=PackingOptions(side=pack_side_figure, anchor=self._pack_anchor, fill=fill_mode, padx=0, pady=(0, 8)),
         )
         self.figure_widget.build()
 

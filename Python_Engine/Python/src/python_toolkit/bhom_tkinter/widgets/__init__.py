@@ -14,6 +14,7 @@ from .radio_selection import RadioSelection
 from .validated_entry_box import ValidatedEntryBox
 from .button import Button
 from .label import Label
+from .spinbox import Spinbox
 
 __all__ = [
 	"BHoMBaseWidget",
@@ -32,4 +33,5 @@ __all__ = [
 	"ValidatedEntryBox",
 	"Button",
 	"Label",
+	"Spinbox",
 ]

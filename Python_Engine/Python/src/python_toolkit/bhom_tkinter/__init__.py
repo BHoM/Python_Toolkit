@@ -20,6 +20,13 @@ from .windows import (
 	WarningBox,
 )
 
+from .theming import (
+	TclTheme,
+	ThemeManager,
+	LIGHT,
+	DARK,
+)
+
 __all__ = [
 	"BHoMBaseWidget",
 	"PackingOptions",
@@ -38,4 +45,6 @@ __all__ = [
 	"LandingPage",
 	"ProcessingWindow",
 	"WarningBox",
+	"TclTheme",
+	"ThemeManager"
 ]

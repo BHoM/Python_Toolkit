@@ -6,7 +6,6 @@ from typing import Optional, List, Callable, Tuple, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
-from python_toolkit.bhom_tkinter.widgets.label import Label
 
 class CheckboxSelection(BHoMBaseWidget):
 	"""A reusable checkbox selection widget built from a list of fields, allowing multiple selections."""
@@ -70,25 +69,16 @@ class CheckboxSelection(BHoMBaseWidget):
 		for index, field in enumerate(self.fields):
 			var = tk.BooleanVar(value=False)
 			self.value_vars[field] = var
-			
-			button = Label(
+
+			button = ttk.Checkbutton(
 				self.buttons_frame,
-				text=f"□ {field}",
-				style="Body.TLabel",
+				text=field,
+				variable=var,
+				style="Checkbox.TCheckbutton",
+				command=lambda f=field: self._on_select_field(f),
 			)
 			self.align_child_text(button)
-			# Make both the wrapper frame and the inner ttk.Label clickable
-			button.bind("<Button-1>", lambda e, f=field: self._toggle_field(f))
-			try:
-				button.label.configure(cursor="hand2")
-			except Exception:
-				pass
-			# Ensure clicks on the inner label also toggle the field
-			try:
-				button.label.bind("<Button-1>", lambda e, f=field: self._toggle_field(f))
-			except Exception:
-				pass
-			
+
 			if self.max_per_line and self.max_per_line > 0:
 				if self.orient == "horizontal":
 					row = index // self.max_per_line
@@ -104,20 +94,8 @@ class CheckboxSelection(BHoMBaseWidget):
 			self._buttons.append(button)
 			self._field_buttons[field] = button
 
-	def _toggle_field(self, field):
-		"""Toggle a field's state when clicked."""
-		self.value_vars[field].set(not self.value_vars[field].get())
-		self._on_select_field(field)
-
 	def _on_select_field(self, field):
-		"""Handle checkbox selection change and update visual indicator."""
-		button = self._field_buttons.get(field)
-		if button is not None:
-			if self.value_vars[field].get():
-				button.set(f"■ {field}")
-			else:
-				button.set(f"□ {field}")
-		
+		"""Handle checkbox selection change."""
 		if self.command:
 			self.command(self.get())
 
@@ -138,21 +116,11 @@ class CheckboxSelection(BHoMBaseWidget):
 		values = [str(v) for v in (value or [])]
 		for field, var in self.value_vars.items():
 			var.set(field in values)
-		
-		# Update visual indicators
-		for field, button in self._field_buttons.items():
-			if field in values:
-				button.set(f"■ {field}")
-			else:
-				button.set(f"□ {field}")
 
 	def select_all(self):
 		"""Select all checkboxes."""
 		for var in self.value_vars.values():
 			var.set(True)
-		# Update visual indicators
-		for field, button in self._field_buttons.items():
-			button.set(f"■ {field}")
 		if self.command:
 			self.command(self.get())
 
@@ -160,9 +128,6 @@ class CheckboxSelection(BHoMBaseWidget):
 		"""Deselect all checkboxes."""
 		for var in self.value_vars.values():
 			var.set(False)
-		# Update visual indicators
-		for field, button in self._field_buttons.items():
-			button.set(f"□ {field}")
 		if self.command:
 			self.command(self.get())
 
@@ -170,12 +135,6 @@ class CheckboxSelection(BHoMBaseWidget):
 		"""Toggle all checkbox states."""
 		for var in self.value_vars.values():
 			var.set(not var.get())
-		# Update visual indicators
-		for field, button in self._field_buttons.items():
-			if self.value_vars[field].get():
-				button.set(f"■ {field}")
-			else:
-				button.set(f"□ {field}")
 		if self.command:
 			self.command(self.get())
 
@@ -234,6 +193,7 @@ if __name__ == "__main__":
 		defaults=["Option B", "Option D"],
 		orient="vertical",
 		max_per_line=6,
+		min_selections=2,
 		item_title="Choose Options",
 		helper_text="Select one or more options below:",
 		build_options=PackingOptions(padx=20, pady=20)
