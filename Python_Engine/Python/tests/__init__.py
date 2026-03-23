@@ -11,7 +11,13 @@ def get_timeseries():
     df = df.set_index(pd.to_datetime(df.index))
     return pd.Series(df["Value"], index=df.index)
 
-TIMESERIES_COLLECTION = get_timeseries()
+def get_test_data():
+    df = pd.read_csv(Path(__file__).parent / "assets" / "example_timeseries.csv", index_col="Timestamp")
+    df = df.set_index(pd.to_datetime(df.index))
+    return df
+
+TEST_DATA = get_test_data()
+TIMESERIES_COLLECTION = pd.Series(TEST_DATA["Value"], index=TEST_DATA.index)
 
 #use 'agg' for testing plot methods, as tkinter occasionally throws strange errors (missing component/library when component isn't missing) when the default backend is used only when using pytest
 mpl.use("agg")
