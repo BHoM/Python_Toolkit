@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2025, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2026, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -83,12 +83,14 @@ namespace BH.Engine.Python
                 { PythonVersion.v3_11_2,  "https://www.python.org/ftp/python/3.11.2/python-3.11.2-amd64.exe" },
                 { PythonVersion.v3_11_3,  "https://www.python.org/ftp/python/3.11.3/python-3.11.3-amd64.exe" },*/
                 { PythonVersion.v3_11,  "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" },
+                { PythonVersion.v3_12, "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe" }
             };
 
             return versions[version];
         }
     }
 }
+
 
 
 

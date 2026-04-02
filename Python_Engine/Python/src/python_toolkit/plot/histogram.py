@@ -30,6 +30,8 @@ def histogram(
             Whether to show the legend. Defaults to False.
         **kwargs:
             Additional keyword arguments to pass to plt.hist.
+            style_context (string, optional):
+                The matplotlib style to use. Defaults to python_toolkit.bhom
 
     Returns:
         plt.Axes:
@@ -39,16 +41,19 @@ def histogram(
         bins = np.linspace(series.values.min(), series.values.max(), 31)
     elif len(bins) <= 1:
         bins = np.linspace(series.values.min(), series.values.max(), 31)
+        
+    style_context = kwargs.pop("style_context", "python_toolkit.bhom")
 
-    if ax is None:
-        ax = plt.gca()
+    with plt.style.context(style_context):
+        if ax is None:
+            ax = plt.gca()
 
-    show_legend = kwargs.pop("show_legend", True)
+        show_legend = kwargs.pop("show_legend", True)
 
-    ax.hist(series.values, bins=bins, label = series.name, density=False, **kwargs)
+        ax.hist(series.values, bins=bins, label = series.name, density=False, **kwargs)
 
-    if show_legend:
-        ax.legend()
+        if show_legend:
+            ax.legend()
 
     return ax
 
@@ -82,6 +87,8 @@ def monthly_proportional_histogram(
             Whether to show the legend. Defaults to False.
         **kwargs:
             Additional keyword arguments to pass to plt.bar.
+            style_context (string, optional):
+                The matplotlib style to use. Defaults to python_toolkit.bhom
 
     Returns:
         plt.Axes:
@@ -89,59 +96,62 @@ def monthly_proportional_histogram(
     """
 
     validate_timeseries(series)
-
-    if ax is None:
-        ax = plt.gca()
     
-    counts = timeseries_summary_monthly(series, bins, labels, density=True)
+    style_context = kwargs.pop("style_context", "python_toolkit.bhom")
 
-    if show_year_in_label:
-        counts.columns = [
-            f"{year}\n{calendar.month_abbr[month]}" for year, month in counts.columns.values
-        ]
-
-    counts.plot(
-        ax = ax,
-        kind = "bar",
-        stacked = True,
-        width = kwargs.pop("width", 1),
-        legend = False,
-        **kwargs
-        )
-
-    ax.set_xlim(-0.5, len(counts) - 0.5)
-    ax.set_ylim(0, 1)
-
-    ax.set_xticklabels(
-        [calendar.month_abbr[int(i._text)] for i in ax.get_xticklabels()],
-        ha="center",
-        rotation=0,
-    )
+    with plt.style.context(style_context):
+        if ax is None:
+            ax = plt.gca()
     
-    for spine in ["top", "right", "left", "bottom"]:
-        ax.spines[spine].set_visible(False)
-    ax.yaxis.set_major_formatter(mticker.PercentFormatter(1))
+        counts = timeseries_summary_monthly(series, bins, labels, density=True)
 
-    if show_legend:
-        ax.legend(
-            bbox_to_anchor=(1, 1),
-            loc="upper left",
-            borderaxespad=0.0,
-            frameon=False,
-        )
-
-    if show_labels:
-        for i, c in enumerate(ax.containers):
-            label_colors = [contrasting_colour(i.get_facecolor()) for i in c.patches]
-            labels = [
-                f"{v.get_height():0.1%}" if v.get_height() > 0.15 else "" for v in c
+        if show_year_in_label:
+            counts.columns = [
+                f"{year}\n{calendar.month_abbr[month]}" for year, month in counts.columns.values
             ]
-            ax.bar_label(
-                c,
-                labels=labels,
-                label_type="center",
-                color=label_colors[i],
-                fontsize="x-small",
+
+        counts.plot(
+            ax = ax,
+            kind = "bar",
+            stacked = True,
+            width = kwargs.pop("width", 1),
+            legend = False,
+            **kwargs
             )
+
+        ax.set_xlim(-0.5, len(counts) - 0.5)
+        ax.set_ylim(0, 1)
+
+        ax.set_xticklabels(
+            [calendar.month_abbr[int(i._text)] for i in ax.get_xticklabels()],
+            ha="center",
+            rotation=0,
+        )
+    
+        for spine in ["top", "right", "left", "bottom"]:
+            ax.spines[spine].set_visible(False)
+        ax.yaxis.set_major_formatter(mticker.PercentFormatter(1))
+
+        if show_legend:
+            ax.legend(
+                bbox_to_anchor=(1, 1),
+                loc="upper left",
+                borderaxespad=0.0,
+                frameon=False,
+            )
+
+        if show_labels:
+            for i, c in enumerate(ax.containers):
+                label_colors = [contrasting_colour(i.get_facecolor()) for i in c.patches]
+                labels = [
+                    f"{v.get_height():0.1%}" if v.get_height() > 0.15 else "" for v in c
+                ]
+                ax.bar_label(
+                    c,
+                    labels=labels,
+                    label_type="center",
+                    color=label_colors[i],
+                    fontsize="x-small",
+                )
 
     return ax
