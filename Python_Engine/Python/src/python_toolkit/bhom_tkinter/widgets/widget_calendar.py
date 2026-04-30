@@ -56,7 +56,7 @@ class CalendarWidget(BHoMBaseWidget):
         self.cal_frame.pack(side="top", fill="x")
 
         self.month_frame = ttk.Frame(self.content_frame)
-        self.month_frame.pack(side="top", fill="x")
+        self.month_frame.pack(side="top", anchor=self._pack_anchor)
 
         self.date_frame = ttk.Frame(self.content_frame)
         self.date_frame.pack(side="top", fill="x")
@@ -113,6 +113,9 @@ class CalendarWidget(BHoMBaseWidget):
         """Rebuild the month grid buttons for the current month and year."""
         for child in self.cal_frame.winfo_children():
             child.destroy()
+
+        for col in range(7):
+            self.cal_frame.columnconfigure(col, weight=1)
 
         for col, day in enumerate(("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")):
             label = Label(self.cal_frame, text=day)

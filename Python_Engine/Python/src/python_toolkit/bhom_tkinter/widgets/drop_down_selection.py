@@ -46,7 +46,7 @@ class DropDownSelection(BHoMBaseWidget):
 			state=state,
 			justify=self._text_justify,
 		)
-		self.combobox.pack(side="top", anchor=self._pack_anchor, fill="x")
+		self.combobox.pack(side="top", fill="x")
 
 		# Bind selection event
 		self.combobox.bind("<<ComboboxSelected>>", self._on_select)

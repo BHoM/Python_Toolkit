@@ -50,7 +50,7 @@ class CheckboxSelection(BHoMBaseWidget):
 
 		# Sub-frame for checkbox controls
 		self.buttons_frame = ttk.Frame(self.content_frame)
-		self.buttons_frame.pack(side="top", fill="x", expand=True)
+		self.buttons_frame.pack(side="top", anchor=self._pack_anchor)
 
 		self._build_buttons()
 

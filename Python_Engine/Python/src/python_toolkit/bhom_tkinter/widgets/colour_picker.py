@@ -53,7 +53,7 @@ class ColourPicker(BHoMBaseWidget):
 			highlightthickness=1,
 			cursor="hand2",
 		)
-		self.preview.pack()
+		self.preview.pack(anchor=self._pack_anchor)
 		self._swatch = self.preview.create_rectangle(0, 0, self.swatch_width, self.swatch_height, outline="#666666")
 		self.preview.bind("<Button-1>", lambda _event: self._select_colour())
 
