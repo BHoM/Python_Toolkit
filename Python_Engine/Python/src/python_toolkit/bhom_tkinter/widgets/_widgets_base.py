@@ -212,10 +212,11 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         if alignment is not None:
             self.alignment = self._normalise_alignment(alignment)
 
-        self._apply_text_alignment(widget)
-
-        if alignment is not None:
-            self.alignment = previous_alignment
+        try:
+            self._apply_text_alignment(widget)
+        finally:
+            if alignment is not None:
+                self.alignment = previous_alignment
 
     def set_alignment(self, alignment: Literal['left', 'center', 'right']) -> None:
         """Set widget-wide alignment and refresh built-in labels.

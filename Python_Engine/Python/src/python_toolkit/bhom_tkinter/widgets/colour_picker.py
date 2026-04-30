@@ -233,15 +233,19 @@ class ColourPicker(BHoMBaseWidget):
 				`(is_valid, message, severity)` where severity is `None` when
 				valid, or `"error"` for an invalid colour.
 		"""
-
 		colour = self.get()
 		if not colour:
 			return self.apply_validation((False, "No colour selected.", "error"))
+		stripped = colour.strip().lstrip("#")
+		if len(stripped) == 3:
+			stripped = "".join(ch * 2 for ch in stripped)
+		if len(stripped) != 6:
+			return self.apply_validation((False, f"Invalid colour value: '{colour}'.", "error"))
 		try:
-			self._hex_to_rgb(colour)
-			return self.apply_validation((True, None, None))
+			int(stripped, 16)
 		except ValueError:
 			return self.apply_validation((False, f"Invalid colour value: '{colour}'.", "error"))
+		return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":

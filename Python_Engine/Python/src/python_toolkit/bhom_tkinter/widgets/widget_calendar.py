@@ -146,6 +146,8 @@ class CalendarWidget(BHoMBaseWidget):
         Args:
             num: Day of month to mark as selected.
         """
+        if not num or num <= 0:
+            return
         self.day = num
 
         for child in self.date_frame.winfo_children():
@@ -181,7 +183,12 @@ class CalendarWidget(BHoMBaseWidget):
         self.year = value.year
         self.month = value.month
         self.day = value.day
+        if hasattr(self, 'year_dropdown'):
+            self.year_dropdown.set(str(self.year))
+        if hasattr(self, 'month_dropdown'):
+            self.month_dropdown.set(self.months[self.month - 1])
         self.redraw()
+        self.set_day(self.day)
 
     def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
         """Validate the currently selected date.

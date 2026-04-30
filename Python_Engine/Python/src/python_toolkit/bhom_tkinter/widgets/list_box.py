@@ -86,7 +86,9 @@ class ScrollableListBox(BHoMBaseWidget):
         """Hide scrollbar if all items fit in the visible area."""
         if self.listbox.size() <= int(self.listbox.cget("height")):
             self.scrollbar.grid_forget()
+            self.listbox.grid_configure(columnspan=2)
         else:
+            self.listbox.grid_configure(columnspan=1)
             self.scrollbar.grid(row=0, column=1, sticky="ns")
 
     def _on_selection_change(self, _event=None):

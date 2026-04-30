@@ -5,7 +5,6 @@ from tkinter import ttk
 from typing import Optional, List, Callable, Tuple, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
-from python_toolkit.bhom_tkinter.widgets.button import Button
 
 class CheckboxSelection(BHoMBaseWidget):
 	"""A reusable checkbox selection widget built from a list of fields, allowing multiple selections."""
@@ -150,14 +149,6 @@ class CheckboxSelection(BHoMBaseWidget):
 
 		if defaults:
 			self.set(defaults)
-
-	def pack(self, **kwargs):
-		"""Pack the widget with the given options.
-
-		Args:
-			**kwargs: Pack geometry manager options.
-		"""
-		super().pack(**kwargs)
 
 	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
 		"""Validate the current selection against min/max constraints.
