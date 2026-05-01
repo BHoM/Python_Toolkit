@@ -97,6 +97,7 @@ class CheckboxSelection(BHoMBaseWidget):
 		"""Handle checkbox selection change."""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self) -> List[str]:
 		"""Return a list of currently selected values.
@@ -122,6 +123,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(True)
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def deselect_all(self):
 		"""Deselect all checkboxes."""
@@ -129,6 +131,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(False)
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def toggle_all(self):
 		"""Toggle all checkbox states."""
@@ -136,6 +139,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(not var.get())
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def set_fields(self, fields: List[str], defaults: Optional[List[str]] = None):
 		"""Replace the available fields and rebuild the widget.

@@ -171,6 +171,7 @@ class ColourPicker(BHoMBaseWidget):
 		self.set(selected)
 		if self.command:
 			self.command(selected)
+		self._fire_on_change(selected)
 		self._close_picker()
 
 	def _close_picker(self) -> None:

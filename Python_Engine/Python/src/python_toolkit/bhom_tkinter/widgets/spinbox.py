@@ -89,6 +89,7 @@ class Spinbox(BHoMBaseWidget):
 		"""Fire the command callback when the value changes."""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self) -> Union[str, int, float]:
 		"""Return the current value cast to its original type.

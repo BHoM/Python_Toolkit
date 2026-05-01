@@ -63,6 +63,7 @@ class PathSelector(BHoMBaseWidget):
             self.path_var.set(str(selected_path))
             if self.command:
                 self.command(str(selected_path))
+            self._fire_on_change(str(selected_path))
 
     def get(self) -> str:
         """Return the currently selected file path.

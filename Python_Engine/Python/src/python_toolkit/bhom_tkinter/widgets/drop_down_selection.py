@@ -65,6 +65,7 @@ class DropDownSelection(BHoMBaseWidget):
 		"""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self) -> str:
 		"""Return the currently selected value.

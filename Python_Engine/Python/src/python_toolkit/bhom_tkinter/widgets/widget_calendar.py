@@ -64,8 +64,10 @@ class CalendarWidget(BHoMBaseWidget):
         if self.show_year_selector:
             self.year_selector()
         self.month_selector()
+        self._initialized = False
         self.set_day(def_day)
         self.redraw()
+        self._initialized = True
 
     def year_selector(self):
         """Build the year dropdown selector."""
@@ -160,6 +162,9 @@ class CalendarWidget(BHoMBaseWidget):
         label = Label(self.date_frame, text=f"Selected Date: {date}")
         self.align_child_text(label)
         label.pack(anchor=self._pack_anchor, padx=4, pady=4)
+
+        if getattr(self, "_initialized", False):
+            self._fire_on_change(self.get())
     
     def get_date(self):
         """Return the selected date as a `datetime.date` instance.

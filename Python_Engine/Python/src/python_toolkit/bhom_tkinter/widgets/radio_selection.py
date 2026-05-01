@@ -119,6 +119,7 @@ class RadioSelection(BHoMBaseWidget):
 		"""Handle radio button selection."""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self):
 		"""Return the currently selected value.

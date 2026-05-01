@@ -133,6 +133,14 @@ class ValidatedEntryBox(BHoMBaseWidget):
         if default_value is not None:
             self.set(default_value)
 
+        # Attach trace after initial value is set so callback does not fire
+        # during construction.
+        self.variable.trace_add("write", self._on_value_change)
+
+    def _on_value_change(self, *_) -> None:
+        """Fire the on_change callback when the entry value changes."""
+        self._fire_on_change(self.get())
+
     def _sync_to_external(self, *_) -> None:
         """Write the current StringVar text back to the external typed variable."""
         if self._external_var is None:

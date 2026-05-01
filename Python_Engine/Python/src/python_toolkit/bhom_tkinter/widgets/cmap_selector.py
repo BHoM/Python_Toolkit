@@ -344,6 +344,7 @@ class CmapSelector(BHoMBaseWidget):
     def _on_cmap_selected(self, event=None) -> None:
         """Handle combobox selection changes."""
         self._update_cmap_sample()
+        self._fire_on_change(self.get())
 
     def _update_cmap_sample(self, *args) -> None:
         """Update the colormap sample plot.

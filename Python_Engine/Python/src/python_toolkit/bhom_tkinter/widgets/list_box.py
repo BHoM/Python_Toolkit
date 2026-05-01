@@ -94,6 +94,7 @@ class ScrollableListBox(BHoMBaseWidget):
     def _on_selection_change(self, _event=None):
         """Track selection changes so values remain available after teardown."""
         self._sync_cache_from_widget()
+        self._fire_on_change(self.get_selection())
 
     def _is_listbox_alive(self) -> bool:
         """Return whether the underlying Tk listbox command still exists."""
