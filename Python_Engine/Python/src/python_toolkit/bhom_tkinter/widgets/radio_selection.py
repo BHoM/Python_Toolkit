@@ -45,7 +45,10 @@ class RadioSelection(BHoMBaseWidget):
 
 		# Sub-frame for radio button controls
 		self.buttons_frame = ttk.Frame(self.content_frame)
-		self.buttons_frame.pack(side="top", fill="x", expand=True)
+		if self.options_fill_extents:
+			self.buttons_frame.pack(side="top", fill="x", expand=True)
+		else:
+			self.buttons_frame.pack(side="top", anchor=self._pack_anchor)
 
 		self._build_buttons()
 
@@ -116,6 +119,7 @@ class RadioSelection(BHoMBaseWidget):
 		"""Handle radio button selection."""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self):
 		"""Return the currently selected value.

@@ -46,7 +46,7 @@ class DropDownSelection(BHoMBaseWidget):
 			state=state,
 			justify=self._text_justify,
 		)
-		self.combobox.pack(side="top", anchor=self._pack_anchor, fill="x")
+		self.combobox.pack(side="top", fill="x")
 
 		# Bind selection event
 		self.combobox.bind("<<ComboboxSelected>>", self._on_select)
@@ -65,6 +65,7 @@ class DropDownSelection(BHoMBaseWidget):
 		"""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self) -> str:
 		"""Return the currently selected value.
@@ -75,15 +76,13 @@ class DropDownSelection(BHoMBaseWidget):
 		return self.value_var.get()
 
 	def set(self, value: str):
-		"""Set the selected value.
+		"""Set the selected value. Silently ignores values not in the current options.
 
 		Args:
 			value: Option value to select.
 		"""
 		if value in self.options:
 			self.value_var.set(value)
-		else:
-			raise ValueError(f"Value '{value}' not in available options: {self.options}")
 
 	def set_options(self, options: List[str], default: Optional[str] = None):
 		"""Replace the available options and optionally set a new default.

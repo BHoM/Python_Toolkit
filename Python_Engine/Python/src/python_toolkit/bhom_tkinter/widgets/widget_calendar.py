@@ -56,7 +56,7 @@ class CalendarWidget(BHoMBaseWidget):
         self.cal_frame.pack(side="top", fill="x")
 
         self.month_frame = ttk.Frame(self.content_frame)
-        self.month_frame.pack(side="top", fill="x")
+        self.month_frame.pack(side="top", anchor=self._pack_anchor)
 
         self.date_frame = ttk.Frame(self.content_frame)
         self.date_frame.pack(side="top", fill="x")
@@ -64,8 +64,10 @@ class CalendarWidget(BHoMBaseWidget):
         if self.show_year_selector:
             self.year_selector()
         self.month_selector()
+        self._initialized = False
         self.set_day(def_day)
         self.redraw()
+        self._initialized = True
 
     def year_selector(self):
         """Build the year dropdown selector."""
@@ -114,6 +116,9 @@ class CalendarWidget(BHoMBaseWidget):
         for child in self.cal_frame.winfo_children():
             child.destroy()
 
+        for col in range(7):
+            self.cal_frame.columnconfigure(col, weight=1)
+
         for col, day in enumerate(("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")):
             label = Label(self.cal_frame, text=day)
             self.align_child_text(label)
@@ -146,6 +151,8 @@ class CalendarWidget(BHoMBaseWidget):
         Args:
             num: Day of month to mark as selected.
         """
+        if not num or num <= 0:
+            return
         self.day = num
 
         for child in self.date_frame.winfo_children():
@@ -155,6 +162,9 @@ class CalendarWidget(BHoMBaseWidget):
         label = Label(self.date_frame, text=f"Selected Date: {date}")
         self.align_child_text(label)
         label.pack(anchor=self._pack_anchor, padx=4, pady=4)
+
+        if getattr(self, "_initialized", False):
+            self._fire_on_change(self.get())
     
     def get_date(self):
         """Return the selected date as a `datetime.date` instance.
@@ -181,7 +191,12 @@ class CalendarWidget(BHoMBaseWidget):
         self.year = value.year
         self.month = value.month
         self.day = value.day
+        if hasattr(self, 'year_dropdown'):
+            self.year_dropdown.set(str(self.year))
+        if hasattr(self, 'month_dropdown'):
+            self.month_dropdown.set(self.months[self.month - 1])
         self.redraw()
+        self.set_day(self.day)
 
     def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
         """Validate the currently selected date.

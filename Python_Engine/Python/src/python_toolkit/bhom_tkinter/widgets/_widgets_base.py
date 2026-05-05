@@ -30,6 +30,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             custom_validation: Optional[Callable[[object], Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]]] = None,
             disable_validation: bool = False,
             build_options: BuildOptions = PackingOptions(),
+            on_change: Optional[Callable] = None,
             **kwargs):
         """
         Initialize the widget base.
@@ -46,6 +47,10 @@ class BHoMBaseWidget(ttk.Frame, ABC):
                 Receives the current widget value and must return
                 `(is_valid, message, severity)`.
             disable_validation: When `True`, all validation returns valid.
+            on_change: Optional callback invoked whenever the widget value
+                changes.  The current value is passed as the single argument.
+                Supported by all widgets; supplements widget-specific ``command``
+                parameters where those exist.
             **kwargs: Additional Frame options
         """
         super().__init__(parent, **kwargs)
@@ -57,6 +62,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         self.fill_extents = self._normalise_bool(fill_extents)
         self.custom_validation = custom_validation
         self.disable_validation = bool(disable_validation)
+        self.on_change: Optional[Callable] = on_change
 
         if id is None:
             self.id = str(uuid4())
@@ -212,10 +218,11 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         if alignment is not None:
             self.alignment = self._normalise_alignment(alignment)
 
-        self._apply_text_alignment(widget)
-
-        if alignment is not None:
-            self.alignment = previous_alignment
+        try:
+            self._apply_text_alignment(widget)
+        finally:
+            if alignment is not None:
+                self.alignment = previous_alignment
 
     def set_alignment(self, alignment: Literal['left', 'center', 'right']) -> None:
         """Set widget-wide alignment and refresh built-in labels.
@@ -246,6 +253,21 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             label.pack_configure(fill=(tk.X if self.fill_extents else "none"))
             label.pack_configure(anchor=self._pack_anchor)
             self._apply_text_alignment(label)
+
+    def _fire_on_change(self, value: object) -> None:
+        """Invoke the ``on_change`` callback with the current widget value.
+
+        This is called internally by each widget subclass whenever its value
+        changes.  It is safe to call even when ``on_change`` is ``None``.
+
+        Args:
+            value: The current widget value to pass to the callback.
+        """
+        if self.on_change is not None:
+            try:
+                self.on_change(value)
+            except Exception:
+                pass
 
     @abstractmethod
     def get(self):

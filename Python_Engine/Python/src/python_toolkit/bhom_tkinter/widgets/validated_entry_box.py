@@ -133,6 +133,14 @@ class ValidatedEntryBox(BHoMBaseWidget):
         if default_value is not None:
             self.set(default_value)
 
+        # Attach trace after initial value is set so callback does not fire
+        # during construction.
+        self.variable.trace_add("write", self._on_value_change)
+
+    def _on_value_change(self, *_) -> None:
+        """Fire the on_change callback when the entry value changes."""
+        self._fire_on_change(self.get())
+
     def _sync_to_external(self, *_) -> None:
         """Write the current StringVar text back to the external typed variable."""
         if self._external_var is None:
@@ -265,12 +273,10 @@ class ValidatedEntryBox(BHoMBaseWidget):
         # Check length constraints
         if self.min_length is not None and len(value) < self.min_length:
             self._show_error(f"Minimum length: {self.min_length}")
-            self._call_validate_callback(False)
             return False
         
         if self.max_length is not None and len(value) > self.max_length:
             self._show_error(f"Maximum length: {self.max_length}")
-            self._call_validate_callback(False)
             return False
         
         # Custom validation
@@ -278,11 +284,8 @@ class ValidatedEntryBox(BHoMBaseWidget):
             is_valid, error_msg = self.custom_validator(value)
             if not is_valid:
                 self._show_error(error_msg)
-                self._call_validate_callback(False)
                 return False
         
-        self._show_success()
-        self._call_validate_callback(True)
         return True
     
     def _validate_int(self, value_str: str) -> bool:
@@ -298,18 +301,15 @@ class ValidatedEntryBox(BHoMBaseWidget):
             value = int(value_str)
         except ValueError:
             self._show_error("Must be a valid integer")
-            self._call_validate_callback(False)
             return False
         
         # Check range constraints
         if self.min_value is not None and value < self.min_value:
             self._show_error(f"Must be >= {self.min_value}")
-            self._call_validate_callback(False)
             return False
         
         if self.max_value is not None and value > self.max_value:
             self._show_error(f"Must be <= {self.max_value}")
-            self._call_validate_callback(False)
             return False
         
         # Custom validation
@@ -317,11 +317,8 @@ class ValidatedEntryBox(BHoMBaseWidget):
             is_valid, error_msg = self.custom_validator(value)
             if not is_valid:
                 self._show_error(error_msg)
-                self._call_validate_callback(False)
                 return False
         
-        self._show_success()
-        self._call_validate_callback(True)
         return True
     
     def _validate_float(self, value_str: str) -> bool:
@@ -337,7 +334,6 @@ class ValidatedEntryBox(BHoMBaseWidget):
             value = float(value_str)
         except ValueError:
             self._show_error("Must be a valid number")
-            self._call_validate_callback(False)
             return False
         
         # Check range constraints
@@ -346,7 +342,6 @@ class ValidatedEntryBox(BHoMBaseWidget):
                 self._show_error(f"Must be between {self.min_value} and {self.max_value}")
             else:
                 self._show_error(f"Must be >= {self.min_value}")
-            self._call_validate_callback(False)
             return False
         
         if self.max_value is not None and value > self.max_value:
@@ -354,7 +349,6 @@ class ValidatedEntryBox(BHoMBaseWidget):
                 self._show_error(f"Must be between {self.min_value} and {self.max_value}")
             else:
                 self._show_error(f"Must be <= {self.max_value}")
-            self._call_validate_callback(False)
             return False
         
         # Custom validation
@@ -362,11 +356,8 @@ class ValidatedEntryBox(BHoMBaseWidget):
             is_valid, error_msg = self.custom_validator(value)
             if not is_valid:
                 self._show_error(error_msg)
-                self._call_validate_callback(False)
                 return False
         
-        self._show_success()
-        self._call_validate_callback(True)
         return True
     
     def _validate_bool(self, value_str: str) -> bool:
@@ -380,7 +371,6 @@ class ValidatedEntryBox(BHoMBaseWidget):
         """
         if value_str.lower() not in ("1", "0", "true", "false", "yes", "no"):
             self._show_error("Must be true/false, yes/no, or 1/0")
-            self._call_validate_callback(False)
             return False
 
         if self.custom_validator:
@@ -388,11 +378,8 @@ class ValidatedEntryBox(BHoMBaseWidget):
             is_valid, error_msg = self.custom_validator(parsed)
             if not is_valid:
                 self._show_error(error_msg)
-                self._call_validate_callback(False)
                 return False
 
-        self._show_success()
-        self._call_validate_callback(True)
         return True
 
     def _show_error(self, message: str) -> None:

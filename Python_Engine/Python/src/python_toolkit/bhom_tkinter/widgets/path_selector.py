@@ -40,8 +40,7 @@ class PathSelector(BHoMBaseWidget):
         self.mode = mode
         self.initialdir = initialdir
         self.filetypes = filetypes if filetypes is not None else [("All Files", "*.*")]
-        self.display_name = tk.StringVar()
-        self.entry = ttk.Entry(self.content_frame, textvariable=self.display_name, width=entry_width)
+        self.entry = ttk.Entry(self.content_frame, textvariable=self.path_var, width=entry_width)
         self.entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
 
         # Use Button wrapper but expose inner ttk.Button for backward compatibility
@@ -62,12 +61,9 @@ class PathSelector(BHoMBaseWidget):
         if path:
             selected_path = Path(path)
             self.path_var.set(str(selected_path))
-            if self.mode == "directory":
-                self.display_name.set(str(selected_path))
-            else:
-                self.display_name.set(selected_path.name)
             if self.command:
                 self.command(str(selected_path))
+            self._fire_on_change(str(selected_path))
 
     def get(self) -> str:
         """Return the currently selected file path.
@@ -85,16 +81,9 @@ class PathSelector(BHoMBaseWidget):
         """
         if not value:
             self.path_var.set("")
-            self.display_name.set("")
             return
 
-        selected_path = Path(value)
-        self.path_var.set(str(selected_path))
-        if self.mode == "directory":
-            self.display_name.set(str(selected_path))
-
-        else:
-            self.display_name.set(selected_path.name)
+        self.path_var.set(str(Path(value)))
 
     def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
         """Validate the currently selected path.

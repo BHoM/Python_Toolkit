@@ -555,6 +555,10 @@ class BHoMBaseWindow(tk.Tk):
         """Recalculate and apply window sizing (useful after adding widgets)."""
         self._apply_sizing()
 
+    def close(self) -> None:
+        """Close and destroy the window. Override in subclasses for custom close behaviour."""
+        self.destroy_root()
+
     def destroy_root(self) -> None:
         """Safely terminate and destroy the Tk root window."""
 

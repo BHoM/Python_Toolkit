@@ -53,7 +53,7 @@ class ColourPicker(BHoMBaseWidget):
 			highlightthickness=1,
 			cursor="hand2",
 		)
-		self.preview.pack()
+		self.preview.pack(anchor=self._pack_anchor)
 		self._swatch = self.preview.create_rectangle(0, 0, self.swatch_width, self.swatch_height, outline="#666666")
 		self.preview.bind("<Button-1>", lambda _event: self._select_colour())
 
@@ -171,6 +171,7 @@ class ColourPicker(BHoMBaseWidget):
 		self.set(selected)
 		if self.command:
 			self.command(selected)
+		self._fire_on_change(selected)
 		self._close_picker()
 
 	def _close_picker(self) -> None:
@@ -233,15 +234,19 @@ class ColourPicker(BHoMBaseWidget):
 				`(is_valid, message, severity)` where severity is `None` when
 				valid, or `"error"` for an invalid colour.
 		"""
-
 		colour = self.get()
 		if not colour:
 			return self.apply_validation((False, "No colour selected.", "error"))
+		stripped = colour.strip().lstrip("#")
+		if len(stripped) == 3:
+			stripped = "".join(ch * 2 for ch in stripped)
+		if len(stripped) != 6:
+			return self.apply_validation((False, f"Invalid colour value: '{colour}'.", "error"))
 		try:
-			self._hex_to_rgb(colour)
-			return self.apply_validation((True, None, None))
+			int(stripped, 16)
 		except ValueError:
 			return self.apply_validation((False, f"Invalid colour value: '{colour}'.", "error"))
+		return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":

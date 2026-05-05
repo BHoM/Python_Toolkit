@@ -86,12 +86,15 @@ class ScrollableListBox(BHoMBaseWidget):
         """Hide scrollbar if all items fit in the visible area."""
         if self.listbox.size() <= int(self.listbox.cget("height")):
             self.scrollbar.grid_forget()
+            self.listbox.grid_configure(columnspan=2)
         else:
+            self.listbox.grid_configure(columnspan=1)
             self.scrollbar.grid(row=0, column=1, sticky="ns")
 
     def _on_selection_change(self, _event=None):
         """Track selection changes so values remain available after teardown."""
         self._sync_cache_from_widget()
+        self._fire_on_change(self.get_selection())
 
     def _is_listbox_alive(self) -> bool:
         """Return whether the underlying Tk listbox command still exists."""

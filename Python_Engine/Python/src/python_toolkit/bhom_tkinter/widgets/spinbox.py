@@ -43,6 +43,11 @@ class Spinbox(BHoMBaseWidget):
 		self.command = command
 		self._value_var = tk.StringVar()
 
+		# Store range/list constraints for validation
+		self._from = from_
+		self._to = to
+		self._allowed_values: Optional[list] = [str(v) for v in values] if values else None
+
 		# Determine the native type for get() coercion
 		if values and len(values) > 0:
 			self._value_type = type(values[0])
@@ -69,8 +74,6 @@ class Spinbox(BHoMBaseWidget):
 		self.spinbox = ttk.Spinbox(self.content_frame, **spinbox_kwargs)
 		self.spinbox.pack(side="top", anchor=self._pack_anchor)
 
-		self._value_var.trace_add("write", self._on_change)
-
 		if default is not None:
 			self.set(default)
 		elif values:
@@ -78,10 +81,15 @@ class Spinbox(BHoMBaseWidget):
 		elif from_ is not None:
 			self._value_var.set(str(from_))
 
+		# Attach the trace after the initial value is set so the callback
+		# does not fire during construction.
+		self._value_var.trace_add("write", self._on_change)
+
 	def _on_change(self, *_):
 		"""Fire the command callback when the value changes."""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self) -> Union[str, int, float]:
 		"""Return the current value cast to its original type.
@@ -126,14 +134,29 @@ class Spinbox(BHoMBaseWidget):
 		self._value_var.set(str(value))
 
 	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-		"""Validate that the current value is non-empty.
+		"""Validate that the current value is non-empty and within any configured range.
 
 		Returns:
 			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
 				``(is_valid, message, severity)``.
 		"""
-		if not str(self.get()).strip():
+		raw = str(self.get()).strip()
+		if not raw:
 			return getattr(self, "apply_validation")((False, "A value is required.", "error"))
+
+		if self._value_type in (int, float):
+			try:
+				numeric_val = self._value_type(raw)
+			except (ValueError, TypeError):
+				label = "integer" if self._value_type == int else "number"
+				return getattr(self, "apply_validation")((False, f"Must be a valid {label}.", "error"))
+			if self._from is not None and numeric_val < self._from:
+				return getattr(self, "apply_validation")((False, f"Must be >= {self._from}.", "error"))
+			if self._to is not None and numeric_val > self._to:
+				return getattr(self, "apply_validation")((False, f"Must be <= {self._to}.", "error"))
+		elif self._allowed_values is not None and raw not in self._allowed_values:
+			return getattr(self, "apply_validation")((False, f"Value must be one of: {', '.join(self._allowed_values)}.", "error"))
+
 		return getattr(self, "apply_validation")((True, None, None))
 
 
