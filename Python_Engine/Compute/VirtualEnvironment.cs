@@ -116,7 +116,7 @@ namespace BH.Engine.Python
                 }
             };
 
-            process.StartInfo.Environment["PYTHONHOME"] = "";
+            process2.StartInfo.Environment["PYTHONHOME"] = "";
 
             using (Process p = Process.Start(process2.StartInfo))
             {
