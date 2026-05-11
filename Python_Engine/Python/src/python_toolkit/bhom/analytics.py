@@ -212,7 +212,7 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                         json.dumps(exec_metadata, default=str, indent=None)
                     )
                 except Exception:
-                    pass
+                    CONSOLE_LOGGER.error("An error occurred while writing logs to a BHoM log folder.", exc_info=1)
 
             return result
 
