@@ -10,23 +10,20 @@ from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
+from python_toolkit.bhom.analytics import CONSOLE_LOGGER
+
 # Accepted colormap input types for colormaps parameter and set()/add_cmap()
 CmapInput = Union[str, Colormap, List[str]]
 
 class CmapSelector(BHoMBaseWidget):
     """A widget for selecting and previewing a matplotlib colormap.
 
-    The ``colormaps`` parameter accepts a mixed list of three input types which
+    The `colormaps` parameter accepts a mixed list of three input types which
     may be freely combined:
 
-    - ``str`` — a registered matplotlib colormap name (e.g. ``"viridis"``).
-    - ``Colormap`` — any matplotlib ``Colormap``, ``ListedColormap`` or
-      ``LinearSegmentedColormap`` object.
-    - ``List[str]`` — a list of colour strings (hex codes or named colours)
-      that is auto-converted to a ``ListedColormap``.
-
-    All three types are fully backwards-compatible; existing code that passes
-    only string names continues to work without any changes.
+    * `str`: a registered matplotlib `Colormap` name (e.g. "viridis").
+    * `Colormap`: any matplotlib `Colormap`, `ListedColormap` or `LinearSegmentedColormap` object.
+    * `List[str]`: a list of colour strings (hex codes or named colours) that is auto-converted to a `ListedColormap`.
     """
 
     CATEGORICAL_CMAPS = [
@@ -88,18 +85,18 @@ class CmapSelector(BHoMBaseWidget):
         Args:
             parent: Parent widget.
             colormaps: Optional list of colormaps to populate the selector.
-                Each item may be a ``str`` name, a ``Colormap`` object, or a
-                ``List[str]`` of colour strings.  When provided the preset
-                ``cmap_set`` selection is ignored.
-            cmap_set: Preset colormap set used when ``colormaps`` is ``None``.
-                Allowed values: ``"all"``, ``"continuous"``, ``"categorical"``.
+                Each item may be a `str` name, a `Colormap` object, or a
+                `List[str]` of colour strings.  When provided the preset
+                `cmap_set` selection is ignored.
+            cmap_set: Preset colormap set used when `colormaps` is `None`.
+                Allowed values: "all", "continuous", "categorical".
             cmap_bins: Number of discrete gradient bands in the preview swatch.
             default_cmap: Optional default colormap to pre-select.  Accepts
-                the same input types as items in ``colormaps``.
-            plot_size: ``(width, height)`` in pixels for the preview swatch.
+                the same input types as items in `colormaps`.
+            plot_size: `(width, height)` in pixels for the preview swatch.
             dropdown_position: Position of the dropdown relative to the
-                preview swatch. ``"n"`` = above, ``"s"`` = below,
-                ``"w"`` = left, ``"e"`` = right.
+                preview swatch. "n" = above, "s" = below,
+                "w" = left, "e" = right.
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
@@ -134,8 +131,8 @@ class CmapSelector(BHoMBaseWidget):
 
         pos = dropdown_position.lower()
         is_horizontal = pos in ("w", "e")
-        pack_side_combo: Literal["left", "right", "top", "bottom"] = {"n": "top", "s": "bottom", "w": "left", "e": "right"}[pos]  # type: ignore[assignment]
-        pack_side_figure: Literal["left", "right", "top", "bottom"] = {"n": "top", "s": "top", "w": "left", "e": "left"}[pos]  # type: ignore[assignment]
+        pack_side_combo = {"n": tk.TOP, "s": tk.BOTTOM, "w": tk.LEFT, "e": tk.RIGHT}[pos]  # type: ignore[assignment]
+        pack_side_figure = {"n": tk.TOP, "s": tk.TOP, "w": tk.LEFT, "e": tk.LEFT}[pos]  # type: ignore[assignment]
 
         combo_padx = (0, 4) if is_horizontal else 0
         combo_pady = (8, 4) if not is_horizontal else 0
@@ -240,18 +237,15 @@ class CmapSelector(BHoMBaseWidget):
 
         Each item is handled as follows:
 
-        - ``str``: treated as a named matplotlib colormap; silently skipped if
-          not registered in the current build.
-        - ``Colormap``: registered under ``cmap.name`` (or an auto-generated
-          label when the name is empty or conflicts with an existing entry).
-        - ``List[str]``: converted to a ``ListedColormap``; auto-labelled.
+        * `str`: treated as a named matplotlib colormap
+        * `Colormap`: registered under `cmap.name` (or an auto-generated label when the name is empty or conflicts with an existing entry).
+        * `List[str]`: converted to a `ListedColormap`; auto-labelled.
 
         Args:
             colormaps: Mixed list of colormap inputs.
 
         Returns:
-            tuple[List[str], Dict[str, Colormap]]: Ordered display label list
-                and a mapping of label → Colormap for non-standard entries.
+            tuple[List[str], Dict[str, Colormap]]: Ordered display label list and a mapping of label → Colormap for non-standard entries.
         """
         display_names: List[str] = []
         custom_cmaps: Dict[str, Colormap] = {}
@@ -262,68 +256,64 @@ class CmapSelector(BHoMBaseWidget):
                 if item in self._all_colormaps and item not in display_names:
                     display_names.append(item)
             elif isinstance(item, Colormap):
-                label = self._unique_label(item.name or "custom", display_names, custom_cmaps)
+                label = self._unique_label(item.name or "custom", display_names)
                 display_names.append(label)
                 custom_cmaps[label] = item
             elif isinstance(item, list):
                 list_counter += 1
                 try:
                     cmap = ListedColormap(item, name=f"custom_{list_counter}")
-                    label = self._unique_label(cmap.name, display_names, custom_cmaps)
+                    label = self._unique_label(cmap.name, display_names)
                     display_names.append(label)
                     custom_cmaps[label] = cmap
                 except Exception:
-                    pass  # Invalid colour strings - skip silently
+                    CONSOLE_LOGGER.warning(f"An error occurred when trying to convert a list of colours ({item}) to a `ListedColormap`. This cmap will not be available to select in UI.", exc_info=1)
+                    pass
 
         return display_names, custom_cmaps
 
-    def _unique_label(self, candidate: str, existing: List[str], custom_map: Dict[str, Colormap]) -> str:
-        """Return a label that is unique within ``existing`` and ``custom_map``.
+    def _unique_label(self, candidate: str, existing: List[str]) -> str:
+        """Return a label that is unique within `existing`.
 
         Args:
             candidate: Preferred label string.
             existing: Already-used display labels.
-            custom_map: Already-registered custom colormap entries.
 
         Returns:
-            str: Unique label derived from ``candidate``.
+            str: Unique label derived from `candidate`.
         """
         base = (candidate or "custom").strip() or "custom"
         label = base
         counter = 1
-        while label in existing or label in custom_map:
+        while label in existing:
             label = f"{base}_{counter}"
             counter += 1
         return label
 
     def _resolve_default_label(self, default: Optional[CmapInput], available: List[str]) -> Optional[str]:
-        """Resolve a ``default_cmap`` value of any input type to a display label.
+        """Resolve a `default_cmap` value of any input type to a display label.
 
         Args:
-            default: The raw ``default_cmap`` argument passed by the caller.
+            default: The raw `default_cmap` argument passed by the caller.
             available: Currently populated display label list.
 
         Returns:
-            Optional[str]: Matching display label, or ``None`` when not found.
+            Optional[str]: Matching display label, or `None` when not found.
         """
         if default is None:
             return None
-        if isinstance(default, str):
+        elif isinstance(default, str):
             return default if default in available else None
-        if isinstance(default, Colormap):
+        elif isinstance(default, Colormap):
             for label, cmap in self._custom_cmaps.items():
                 if cmap is default:
                     return label
-            return None
-        if isinstance(default, list):
+        elif isinstance(default, list):
             for label, cmap in self._custom_cmaps.items():
                 if isinstance(cmap, ListedColormap):
-                    try:
-                        if list(cmap.colors) == default:  # type: ignore[arg-type]
-                            return label
-                    except Exception:
-                        pass
-            return None
+                    if list(cmap.colors) == default:  # type: ignore[arg-type]
+                        return label
+
         return None
 
     def _populate_cmap_list(self, colormaps: List[str]) -> None:
@@ -349,9 +339,9 @@ class CmapSelector(BHoMBaseWidget):
     def _update_cmap_sample(self, *args) -> None:
         """Update the colormap sample plot.
 
-        Resolves the selected label to a ``Colormap`` object (for custom entries)
+        Resolves the selected label to a `Colormap` object (for custom entries)
         or a name string (for registered matplotlib colormaps), then delegates
-        to ``cmap_sample_plot``.
+        to `cmap_sample_plot`.
 
         Args:
             *args: Unused callback arguments from Tk traces/events.
@@ -370,12 +360,12 @@ class CmapSelector(BHoMBaseWidget):
     def get_selected_cmap(self) -> Optional[Union[str, Colormap]]:
         """Return the currently selected colormap.
 
-        Returns the ``Colormap`` object for custom entries or the name string
-        for registered matplotlib colormaps.  Returns ``None`` when nothing
+        Returns the `Colormap` object for custom entries or the name string
+        for registered matplotlib colormaps.  Returns `None` when nothing
         is selected.
 
         Returns:
-            Optional[Union[str, Colormap]]: Selected colormap or ``None``.
+            Optional[Union[str, Colormap]]: Selected colormap or `None`.
         """
         name = self.colormap_var.get()
         if not name:
@@ -385,51 +375,49 @@ class CmapSelector(BHoMBaseWidget):
     def get(self) -> Optional[Union[str, Colormap]]:
         """Return the currently selected colormap.
 
-        - For standard matplotlib colormaps: returns the name string (backwards
+        * For standard matplotlib colormaps: returns the name string (backwards
           compatible with existing callers).
-        - For custom colormaps (objects or colour lists): returns the
-          ``Colormap`` object so it can be passed directly to matplotlib.
+        * For custom colormaps (objects or colour lists): returns the
+          `Colormap` object so it can be passed directly to matplotlib.
 
         Returns:
-            Optional[Union[str, Colormap]]: Selected colormap or ``None``.
+            Optional[Union[str, Colormap]]: Selected colormap or `None`.
         """
         return self.get_selected_cmap()
 
     def get_cmap(self) -> Optional[Colormap]:
-        """Return the selected colormap always as a resolved ``Colormap`` object.
+        """Return the selected colormap always as a resolved `Colormap` object.
 
-        Unlike ``get()``, this method resolves named matplotlib colormaps to
-        their ``Colormap`` object, making it suitable for direct use in
+        Unlike `get()`, this method resolves named matplotlib colormaps to
+        their `Colormap` object, making it suitable for direct use in
         matplotlib calls regardless of input type.
 
         Returns:
-            Optional[Colormap]: Resolved ``Colormap``, or ``None`` when empty.
+            Optional[Colormap]: Resolved `Colormap`, or `None` when empty.
         """
         name = self.colormap_var.get()
         if not name:
             return None
         if name in self._custom_cmaps:
             return self._custom_cmaps[name]
-        try:
-            return mpl.colormaps[name]
-        except KeyError:
-            return None
+
+        return mpl.colormaps.get(name)
 
     def add_cmap(self, cmap: CmapInput, label: Optional[str] = None) -> Optional[str]:
         """Dynamically add a new colormap entry to the selector.
 
         The new entry is appended to the combobox and becomes immediately
-        selectable.  If ``label`` is not provided, one is derived from
-        ``cmap.name`` (for ``Colormap`` objects) or auto-generated.
+        selectable.  If `label` is not provided, one is derived from
+        `cmap.name` (for `Colormap` objects) or auto-generated.
 
         Args:
-            cmap: Colormap to add.  May be a ``str`` name, ``Colormap``
-                object, or ``List[str]`` of colour strings.
+            cmap: Colormap to add.  May be a `str` name, `Colormap`
+                object, or `List[str]` of colour strings.
             label: Optional display label override.
 
         Returns:
             Optional[str]: The display label used for the new entry, or
-                ``None`` if the input was invalid or already present.
+                `None` if the input was invalid or already present.
         """
         existing = list(self.cmap_combobox["values"])
 
@@ -446,12 +434,14 @@ class CmapSelector(BHoMBaseWidget):
             base = label or "custom"
             try:
                 cmap = ListedColormap(cmap, name=base)
-            except Exception:
+            except Exception: #currently these are warnings, but maybe they should be replaced with raised exceptions? ValueError here and TypeError for the fallback.
+                CONSOLE_LOGGER.warning(f"List-like cmap ({cmap}) could not be added due to an error when converting to a `ListedColormap`.", exc_info=1)
                 return None
         else:
+            CONSOLE_LOGGER.warning(f"Input of type {type(cmap)} was not a valid type for cmap. Expected a str, list or matplotlib Colormap")
             return None
 
-        final_label = self._unique_label(base, existing, self._custom_cmaps)
+        final_label = self._unique_label(base, existing)
         self._custom_cmaps[final_label] = cmap
         existing.append(final_label)
         self._populate_cmap_list(existing)
@@ -460,17 +450,17 @@ class CmapSelector(BHoMBaseWidget):
     def set(self, value: Optional[CmapInput]) -> None:
         """Set the selected colormap.
 
-        Accepts the same input types as ``colormaps`` list items:
+        Accepts the same input types as `colormaps` list items:
 
-        - ``str``: selects by name if present in the combobox.
-        - ``Colormap``: selects the matching registered custom entry by object
+        * `str`: selects by name if present in the combobox.
+        * `Colormap`: selects the matching registered custom entry by object
           identity.
-        - ``List[str]``: selects the matching ``ListedColormap`` entry by
+        * `List[str]`: selects the matching `ListedColormap` entry by
           colour list equality.
-        - ``None``: clears the selection.
+        * `None`: clears the selection.
 
         Args:
-            value: Colormap to select, or ``None`` to clear.
+            value: Colormap to select, or `None` to clear.
         """
         if value is None:
             self.figure_widget.clear()
@@ -505,6 +495,7 @@ class CmapSelector(BHoMBaseWidget):
                             self._update_cmap_sample()
                             return
                     except Exception:
+                        CONSOLE_LOGGER.debug("exception thrown when updating cmap sample from list value. visual cmap sample may be in invalid state?", exc_info=1)
                         pass
             self.figure_widget.clear()
             self.colormap_var.set("")
@@ -514,8 +505,8 @@ class CmapSelector(BHoMBaseWidget):
 
         Returns:
             tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-                ``(is_valid, message, severity)`` where severity is ``None``
-                when valid, or ``"error"`` for an invalid selection.
+                `(is_valid, message, severity)` where severity is `None`
+                when valid, or `"error"` for an invalid selection.
         """
         name = self.colormap_var.get()
         if not name:

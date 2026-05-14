@@ -163,7 +163,7 @@ class CalendarWidget(BHoMBaseWidget):
         self.align_child_text(label)
         label.pack(anchor=self._pack_anchor, padx=4, pady=4)
 
-        if getattr(self, "_initialized", False):
+        if self._initialized:
             self._fire_on_change(self.get())
     
     def get_date(self):
@@ -195,8 +195,8 @@ class CalendarWidget(BHoMBaseWidget):
             self.year_dropdown.set(str(self.year))
         if hasattr(self, 'month_dropdown'):
             self.month_dropdown.set(self.months[self.month - 1])
-        self.redraw()
         self.set_day(self.day)
+        self.redraw()
 
     def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
         """Validate the currently selected date.

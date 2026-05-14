@@ -142,22 +142,22 @@ class Spinbox(BHoMBaseWidget):
 		"""
 		raw = str(self.get()).strip()
 		if not raw:
-			return getattr(self, "apply_validation")((False, "A value is required.", "error"))
+			return self.apply_validation((False, "A value is required.", "error"))
 
 		if self._value_type in (int, float):
 			try:
 				numeric_val = self._value_type(raw)
 			except (ValueError, TypeError):
 				label = "integer" if self._value_type == int else "number"
-				return getattr(self, "apply_validation")((False, f"Must be a valid {label}.", "error"))
+				return self.apply_validation((False, f"Must be a valid {label}.", "error"))
 			if self._from is not None and numeric_val < self._from:
-				return getattr(self, "apply_validation")((False, f"Must be >= {self._from}.", "error"))
+				return self.apply_validation((False, f"Must be >= {self._from}.", "error"))
 			if self._to is not None and numeric_val > self._to:
-				return getattr(self, "apply_validation")((False, f"Must be <= {self._to}.", "error"))
+				return self.apply_validation((False, f"Must be <= {self._to}.", "error"))
 		elif self._allowed_values is not None and raw not in self._allowed_values:
-			return getattr(self, "apply_validation")((False, f"Value must be one of: {', '.join(self._allowed_values)}.", "error"))
+			return self.apply_validation((False, f"Value must be one of: {', '.join(self._allowed_values)}.", "error"))
 
-		return getattr(self, "apply_validation")((True, None, None))
+		return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":

@@ -201,18 +201,15 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                 exec_metadata["Errors"].extend(convert_exc_info_to_bhom_error(sys.exc_info()))
                 raise exc
             finally:
-                try:
-                    log_file = BHOM_LOG_FOLDER / f"Usage_{function.__module__.split('.')[0]}_{datetime.now().strftime('%Y%m%d')}.log"
+                log_file = BHOM_LOG_FOLDER / f"Usage_{function.__module__.split('.')[0]}_{datetime.now().strftime('%Y%m%d')}.log"
 
-                    if ANALYTICS_LOGGER.handlers[0].baseFilename != str(log_file):
-                        ANALYTICS_LOGGER.handlers[0].close()
-                        ANALYTICS_LOGGER.handlers[0].baseFilename = str(log_file)
+                if ANALYTICS_LOGGER.handlers[0].baseFilename != str(log_file):
+                    ANALYTICS_LOGGER.handlers[0].close()
+                    ANALYTICS_LOGGER.handlers[0].baseFilename = str(log_file)
 
-                    ANALYTICS_LOGGER.info(
-                        json.dumps(exec_metadata, default=str, indent=None)
-                    )
-                except Exception:
-                    CONSOLE_LOGGER.error("An error occurred while writing logs to a BHoM log folder.", exc_info=1)
+                ANALYTICS_LOGGER.info(
+                    json.dumps(exec_metadata, default=str, indent=None)
+                )
 
             return result
 

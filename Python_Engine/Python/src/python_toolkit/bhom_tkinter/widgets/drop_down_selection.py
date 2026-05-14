@@ -83,6 +83,8 @@ class DropDownSelection(BHoMBaseWidget):
 		"""
 		if value in self.options:
 			self.value_var.set(value)
+		else:
+			CONSOLE_LOGGER.warning("Selected value was not in the given options, and so was not set.")
 
 	def set_options(self, options: List[str], default: Optional[str] = None):
 		"""Replace the available options and optionally set a new default.

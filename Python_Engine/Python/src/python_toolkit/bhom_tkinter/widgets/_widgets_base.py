@@ -266,6 +266,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             try:
                 self.on_change(value)
             except Exception:
+                CONSOLE_LOGGER.error("An error occurred when handling an `on_change` event.", exc_info=1)
                 pass
 
     @abstractmethod
