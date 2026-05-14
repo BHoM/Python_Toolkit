@@ -76,7 +76,7 @@ class DropDownSelection(BHoMBaseWidget):
 		return self.value_var.get()
 
 	def set(self, value: str):
-		"""Set the selected value. Silently ignores values not in the current options.
+		"""Set the selected value.
 
 		Args:
 			value: Option value to select.
