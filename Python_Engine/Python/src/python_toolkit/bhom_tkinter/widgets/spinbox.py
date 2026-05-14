@@ -26,7 +26,7 @@ class Spinbox(BHoMBaseWidget):
 		Args:
 			parent (tk.Widget): The parent widget.
 			values (list, optional): Explicit list of string values to step through.
-				If provided, ``from_``, ``to`` and ``increment`` are ignored.
+				If provided, `from_`, `to` and `increment` are ignored.
 			from_ (int | float, optional): Minimum value for numeric mode.
 			to (int | float, optional): Maximum value for numeric mode.
 			increment (int | float): Step size for numeric mode. Defaults to 1.
@@ -138,7 +138,7 @@ class Spinbox(BHoMBaseWidget):
 
 		Returns:
 			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-				``(is_valid, message, severity)``.
+				`(is_valid, message, severity)`.
 		"""
 		raw = str(self.get()).strip()
 		if not raw:

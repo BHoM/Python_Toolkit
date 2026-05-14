@@ -168,7 +168,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         """Get the current value converted to the specified type.
 
         Returns:
-            Optional[Union[str, int, float, bool]]: Parsed value, or ``None`` when empty/invalid.
+            Optional[Union[str, int, float, bool]]: Parsed value, or `None` when empty/invalid.
         """
         value_str = self.get()
         if not value_str:
@@ -367,7 +367,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
             value_str: Raw entry text to interpret as boolean.
 
         Returns:
-            bool: ``True`` when valid, otherwise ``False``.
+            bool: `True` when valid, otherwise `False`.
         """
         if value_str.lower() not in ("1", "0", "true", "false", "yes", "no"):
             self._show_error("Must be true/false, yes/no, or 1/0")

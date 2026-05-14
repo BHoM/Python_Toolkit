@@ -49,7 +49,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             disable_validation: When `True`, all validation returns valid.
             on_change: Optional callback invoked whenever the widget value
                 changes.  The current value is passed as the single argument.
-                Supported by all widgets; supplements widget-specific ``command``
+                Supported by all widgets; supplements widget-specific `command`
                 parameters where those exist.
             **kwargs: Additional Frame options
         """
@@ -254,10 +254,10 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             self._apply_text_alignment(label)
 
     def _fire_on_change(self, value: object) -> None:
-        """Invoke the ``on_change`` callback with the current widget value.
+        """Invoke the `on_change` callback with the current widget value.
 
         This is called internally by each widget subclass whenever its value
-        changes.  It is safe to call even when ``on_change`` is ``None``.
+        changes.  It is safe to call even when `on_change` is `None`.
 
         Args:
             value: The current widget value to pass to the callback.
