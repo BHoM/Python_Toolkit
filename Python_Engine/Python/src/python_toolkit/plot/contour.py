@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 import matplotlib.ticker as ticker
 import pandas as pd
+from typing import Literal
 
 def contour(
     x_series: pd.Series,
     y_series: pd.Series,
     z_series: pd.Series,
-    ax: plt.Axes = None,
     interpolation_method: Literal['linear', 'nearest', 'cubic'] = 'cubic',
     **kwargs
     ) -> plt.Axes:
@@ -41,19 +41,18 @@ def contour(
             The populated plt.Axes object.
     """
 
-    if not ((len(x_series) == len(y_series)) and (len(x_series) == len(z_series)))
+    if not ((len(x_series) == len(y_series)) and (len(x_series) == len(z_series))):
         raise ValueError("Length of x, y and z serieses must be identical.")
 
     df = pd.DataFrame([x_series, y_series])
-    if df.nunique() != len(x_series):
+    if df.duplicated().any():
         raise ValueError("There must only be one z value for each combination of x and y values.")
 
-    title = kwargs.pop("title")
+    title = kwargs.pop("title", None)
 
     style_context = kwargs.pop("style_context", "python_toolkit.bhom")
-    with plt.style.context(style_context)
-        if ax is None:
-            ax = plt.gca()
+    with plt.style.context(style_context):
+        fig, ax = plt.subplots()
 
         # Convert data from pandas dataframes to numpy arrays
         X0, Y0, Z0, = np.array([]), np.array([]), np.array([])
@@ -77,11 +76,11 @@ def contour(
         CS2 = ax.contour(xi, yi, zi, intervals, colors='k')
 
         # Format contour and colourbar labels.
-        ax.clabel(CS2, inline=1, fontsize=10, colors='k', fmt=ticker.FuncFormatter(lambda x, pos: return '{0:.0f}'.format(x)))
-        ax.colorbar(CS, label=z_series.name, format=ticker.FuncFormatter(lambda x, pos: return '{0:.1f}'.format(x)))
+        ax.clabel(CS2, inline=1, fontsize=10, colors='k', fmt=ticker.FuncFormatter(lambda x, pos: '{0:.0f}'.format(x)))
+        fig.colorbar(CS, label=z_series.name, format=ticker.FuncFormatter(lambda x, pos: '{0:.1f}'.format(x)))
 
-        ax.xlabel(x_series.name)
-        ax.ylabel(y_series.name)
+        ax.set_xlabel(x_series.name)
+        ax.set_ylabel(y_series.name)
 
         if title is not None:
             ax.title(title)
