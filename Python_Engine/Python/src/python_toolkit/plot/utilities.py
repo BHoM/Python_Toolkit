@@ -4,8 +4,10 @@ import base64
 import colorsys
 import io
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 import copy
+
+import pandas as pd
 
 import numpy as np
 from matplotlib.colors import (
@@ -24,6 +26,7 @@ import matplotlib.ticker as mticker
 from matplotlib.tri import Triangulation
 from PIL import Image
 from ..bhom.analytics import bhom_analytics
+from ..bhom.logging import CONSOLE_LOGGER
 
 @bhom_analytics()
 def average_color(colors: Any, keep_alpha: bool = False) -> str:
@@ -595,3 +598,100 @@ def format_polar_plot(ax: plt.Axes, yticklabels: bool = True) -> plt.Axes:
     )
     if not yticklabels:
         ax.set_yticklabels([])
+
+def process_polar_data(data:pd.DataFrame, values_column:str, directions_column:str, directions:int=36, value_bins:List[float]=None, density:bool=True):
+    """Process data for a polar plot by grouping by value and direction bins, either as value counts, or sums (determined by density)
+
+    """
+    if values_column not in data.columns:
+        raise ValueError(f"Values column `{values_column}` could not be found in the input dataframe.")
+
+    if directions_column not in data.columns:
+        raise ValueError(f"Directions column `{directions_column}` could not be found in the input dataframe")
+
+    if value_bins is None:
+        value_bins = np.linspace(min(data[values_column]), max(data[values_column]), 11)
+
+    direction_bins = np.unique(
+            ((np.linspace(0, 360, directions + 1) - ((360 / directions) / 2)) % 360).tolist()
+            + [0, 360]
+        )
+
+    values_ser = data[values_column].copy()
+    directions_ser = data[directions_column].copy()
+
+    categories = pd.cut(values_ser, bins=value_bins, include_lowest=False)
+    dir_categories = pd.cut(directions_ser, bins=direction_bins, include_lowest=True)
+    bin_tuples = [tuple([i.left, i.right]) for i in categories.cat.categories.tolist()]
+    dir_tuples = [tuple([i.left, i.right]) for i in dir_categories.cat.categories.tolist()][1:-1]
+    dir_tuples.append((dir_tuples[-1][1], dir_tuples[0][0]))
+
+    mapper = dict(
+        zip(
+            *[
+                categories.cat.categories.tolist(),
+                bin_tuples,
+            ]
+        )
+    )
+    mapper[np.nan] = bin_tuples[0]
+
+    dir_mapper = dict(
+        zip(
+            *[
+                dir_categories.cat.categories.tolist(),
+                [dir_tuples[-1]] + dir_tuples,
+            ]
+        )
+    )
+
+    categories = pd.Series(
+        [mapper[i] for i in categories],
+        index=categories.index,
+        name=categories.name,
+    )
+
+    dir_categories = pd.Series(
+        [dir_mapper[i] for i in dir_categories],
+        index=dir_categories.index,
+        name=dir_categories.name,
+    )
+
+    # pivot dataframe
+    if density:
+        df = pd.concat([dir_categories, categories], axis=1)
+        df = (
+            df.groupby([df.columns[0], df.columns[1]], observed=True)
+            .value_counts()
+            .unstack()
+            .fillna(0)
+            .astype(int)
+        )
+    else:
+        #This allows plots like radiation roses, where the sum of the radiation from that direction is more useful than the counts
+        df = pd.concat([dir_categories, categories, values_ser], axis=1)
+        df.columns = [df.columns[0], df.columns[1], "Value"]
+        df = (
+            df.groupby([df.columns[0], df.columns[1]], observed=True)
+            .sum()
+            .unstack()
+            .fillna(0)
+            .astype(float)
+        )
+        df.droplevel(level=0, axis=1)
+
+    for b in bin_tuples:
+        if b not in df.columns:
+            df[b] = 0
+    df.sort_index(axis=1, inplace=True)
+    df = df.T
+    for b in dir_tuples:
+        if b not in df.columns:
+            df[b] = 0
+    df.sort_index(axis=1, inplace=True)
+    df = df.T
+
+    if density:
+        df = df / df.values.sum() #show density values as a percentage of the total number of values.
+
+    return df
