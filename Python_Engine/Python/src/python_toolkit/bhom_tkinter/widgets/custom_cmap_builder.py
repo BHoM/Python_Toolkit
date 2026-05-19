@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Callable, Optional, Literal
 
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Colormap, to_rgba
 
@@ -26,7 +27,7 @@ class CmapBuilder(BHoMBaseWidget):
 		self,
 		parent: ttk.Frame,
 		no_colours: int = 4,
-		command: Optional[Callable[[Colormap], None]] = None,
+		command: Optional[Callable[[Colormap, tuple], None]] = None,
 		**kwargs,
 	) -> None:
 		"""
@@ -62,6 +63,12 @@ class CmapBuilder(BHoMBaseWidget):
 		invalid_chars = set(r'\/:*?"<>|')
 		if any(c in invalid_chars for c in value):
 			return False, "Name contains invalid characters."
+		# Block clashes with matplotlib's registered colormaps.
+		if value in matplotlib.colormaps:
+			return False, f"'{value}' is already a matplotlib colormap name."
+		# Block duplicate saved names.
+		if value in list_custom_cmap_names():
+			return False, f"'{value}' already exists in saved collections. Delete it first."
 		return True, ""
 
 	# ------------------------------------------------------------------
@@ -91,21 +98,24 @@ class CmapBuilder(BHoMBaseWidget):
 				padx=12, pady=12
 			)
 		else:
-			# Scrollable list of saved entries
+			# Scrollable list — canvas has a fixed height with NO expand=True so it
+			# cannot grow to match its content (which would kill scrolling).
 			list_frame = ttk.LabelFrame(container, text="Saved Collections", padding=6)
-			list_frame.pack(side="top", fill="both", expand=True, pady=(0, 8))
+			list_frame.pack(side="top", fill="x", pady=(0, 8))
 
-			canvas = tk.Canvas(list_frame, highlightthickness=0, height=min(len(names), 8) * 30)
+			ROW_H = 34
+			canvas_h = min(len(names), 8) * ROW_H
+			canvas = tk.Canvas(list_frame, highlightthickness=0, height=canvas_h)
 			scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
 			canvas.configure(yscrollcommand=scrollbar.set)
 			scrollbar.pack(side="right", fill="y")
-			canvas.pack(side="left", fill="both", expand=True)
+			canvas.pack(side="left", fill="x")  # fill="x" only — height stays fixed
 
 			inner = ttk.Frame(canvas)
 			win = canvas.create_window((0, 0), window=inner, anchor="nw")
 			inner.bind(
 				"<Configure>",
-				lambda _e: canvas.configure(scrollregion=canvas.bbox("all")),
+				lambda e: canvas.configure(scrollregion=(0, 0, e.width, e.height)),
 			)
 			canvas.bind(
 				"<Configure>",
@@ -176,6 +186,14 @@ class CmapBuilder(BHoMBaseWidget):
 		self._name_entry_widget = ttk.Entry(name_row, textvariable=self._name_var)
 		self._name_entry_widget.pack(side="left", fill="x", expand=True, padx=(8, 0))
 
+		# Inline validation status shown below the name field.
+		self._name_status_var = tk.StringVar(value="")
+		self._name_status_label = ttk.Label(
+			settings_frame, textvariable=self._name_status_var, foreground="red"
+		)
+		self._name_status_label.pack(fill="x", padx=(0, 0))
+		self._name_var.trace_add("write", lambda *_: self._on_name_changed())
+
 		colours_row = ttk.Frame(settings_frame)
 		colours_row.pack(fill="x", pady=2)
 		ttk.Label(colours_row, text="Colours:").pack(side="left")
@@ -215,40 +233,33 @@ class CmapBuilder(BHoMBaseWidget):
 		stops_frame = ttk.LabelFrame(container, text="Colour Stops", padding=6)
 		stops_frame.pack(side="top", fill="x", pady=(0, 8))
 
-		# _stops_outer is the clipping viewport.  pack_propagate(False) keeps it
-		# at whatever height we set in _fit_stops_canvas, preventing the canvas
-		# (and its expand=True) from stretching to fill the popup's content_frame.
-		self._stops_outer = ttk.Frame(stops_frame)
-		self._stops_outer.pack(fill="x")
-		self._stops_outer.pack_propagate(False)
-		self._stops_outer.configure(height=160)  # corrected after idle
-
-		self._stops_canvas = tk.Canvas(self._stops_outer, highlightthickness=0)
+		# Canvas uses fill="x" with NO expand so its height is always exactly
+		# what we configure — it cannot grow to match content, which is what
+		# makes the scrollbar usable.
+		self._stops_canvas = tk.Canvas(stops_frame, highlightthickness=0, height=160)
 		self._stops_scrollbar = ttk.Scrollbar(
-			self._stops_outer, orient="vertical", command=self._stops_canvas.yview
+			stops_frame, orient="vertical", command=self._stops_canvas.yview
 		)
 		self._stops_canvas.configure(yscrollcommand=self._stops_scrollbar.set)
 		self._stops_scrollbar.pack(side="right", fill="y")
-		self._stops_canvas.pack(side="left", fill="both", expand=True)
+		self._stops_canvas.pack(side="left", fill="x")  # NO expand, NO fill="both"
 
 		self._colour_rows_frame = ttk.Frame(self._stops_canvas)
 		self._canvas_window = self._stops_canvas.create_window(
 			(0, 0), window=self._colour_rows_frame, anchor="nw"
 		)
 
-		# Keep scrollregion equal to the inner frame's full required height.
-		self._colour_rows_frame.bind(
-			"<Configure>",
-			lambda e: self._stops_canvas.configure(
-				scrollregion=(0, 0, e.width, self._colour_rows_frame.winfo_reqheight())
-			),
-		)
-		# Keep inner frame width in sync with canvas width.
+		# e.height from <Configure> is the actual settled height — more reliable
+		# than winfo_reqheight() called asynchronously.
+		self._stops_content_h: int = 1
+		def _on_rows_configure(e):
+			self._stops_content_h = e.height
+			self._stops_canvas.configure(scrollregion=(0, 0, e.width, e.height))
+		self._colour_rows_frame.bind("<Configure>", _on_rows_configure)
 		self._stops_canvas.bind(
 			"<Configure>",
 			lambda e: self._stops_canvas.itemconfigure(self._canvas_window, width=e.width),
 		)
-		# Mouse-wheel scrolling.
 		self._stops_canvas.bind(
 			"<MouseWheel>",
 			lambda e: self._stops_canvas.yview_scroll(-1 * (e.delta // 120), "units"),
@@ -360,33 +371,32 @@ class CmapBuilder(BHoMBaseWidget):
 				style="Caption.TLabel",
 			).pack(anchor="w", pady=(2, 0))
 
-		# Resize the viewport after geometry has settled.
-		if hasattr(self, "_stops_outer"):
-			self._stops_outer.after_idle(self._fit_stops_canvas)
+		# Resize the viewport after the window is on screen.
+		if hasattr(self, "_stops_canvas"):
+			self._stops_canvas.after(10, self._fit_stops_canvas)
+
+	def _on_name_changed(self) -> None:
+		"""Real-time validation feedback as the user types a name."""
+		if not hasattr(self, "_name_status_var"):
+			return
+		name = self._name_var.get().strip()
+		valid, msg = self._validate_name(name)
+		self._name_status_var.set("" if valid else msg)
 
 	def _fit_stops_canvas(self) -> None:
-		"""Pin the viewport frame to show up to 4 rows; more triggers the scrollbar.
-
-		Called via after_idle so geometry is fully settled. Sizes _stops_outer
-		(which has pack_propagate=False) so the canvas is clipped to exactly the
-		right height regardless of the popup's expand=True content_frame.
-		"""
-		if not hasattr(self, "_stops_outer") or not hasattr(self, "_colour_rows_frame"):
+		"""Resize the canvas height to show up to 4 rows; more activates the scrollbar."""
+		if not hasattr(self, "_stops_canvas") or not hasattr(self, "_colour_rows_frame"):
 			return
-		self._stops_outer.update_idletasks()
 		n = len(self._colour_rows)
-		content_h = self._colour_rows_frame.winfo_reqheight()
-		if content_h <= 0:
+		content_h = getattr(self, "_stops_content_h", 0)
+		if content_h <= 1:
+			self._stops_canvas.after(20, self._fit_stops_canvas)
 			return
-		if n <= 4:
-			visible_h = content_h
-		else:
-			visible_h = max(40, round(content_h * 4 / n))
-		self._stops_outer.configure(height=visible_h)
-		# Scrollregion is already kept up-to-date by the <Configure> binding;
-		# set it explicitly here too in case binding fired before layout settled.
-		content_w = self._colour_rows_frame.winfo_reqwidth()
-		self._stops_canvas.configure(scrollregion=(0, 0, content_w, content_h))
+		visible_h = content_h if n <= 4 else max(40, round(content_h * 4 / n))
+		self._stops_canvas.configure(height=visible_h)
+		self._stops_canvas.configure(
+			scrollregion=(0, 0, self._colour_rows_frame.winfo_width(), content_h)
+		)
 
 	def _is_interpolation(self) -> bool:
 		if not hasattr(self, "_type_radio"):
@@ -501,8 +511,10 @@ class CmapBuilder(BHoMBaseWidget):
 	def _apply_cmap(self) -> None:
 		"""Validate, build the colormap, fire the command, and close the popup."""
 		name = self._name_var.get().strip() if hasattr(self, "_name_var") else ""
-		valid, _msg = self._validate_name(name)
+		valid, msg = self._validate_name(name)
 		if not valid:
+			if hasattr(self, "_name_status_var"):
+				self._name_status_var.set(msg)
 			return
 
 		cmap = self._build_current_cmap()
