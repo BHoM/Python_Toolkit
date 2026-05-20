@@ -11,7 +11,6 @@ from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
-from python_toolkit.bhom.custom_cmaps import load_custom_cmaps
 
 # Accepted colormap input types for colormaps parameter and set()/add_cmap()
 CmapInput = Union[str, Colormap, List[str]]
@@ -78,7 +77,6 @@ class CmapSelector(BHoMBaseWidget):
         default_cmap: Optional[CmapInput] = None,
         plot_size: tuple[int, int] = (400, 50),
         dropdown_position: Literal["n", "e", "s", "w"] = "n",
-        load_custom: bool = False,
         **kwargs
     ) -> None:
         """
@@ -99,8 +97,6 @@ class CmapSelector(BHoMBaseWidget):
             dropdown_position: Position of the dropdown relative to the
                 preview swatch. "n" = above, "s" = below,
                 "w" = left, "e" = right.
-            load_custom: When ``True``, user-saved colormaps from
-                ``~/.bhom/custom_cmaps.json`` are prepended to the list.
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
@@ -168,16 +164,6 @@ class CmapSelector(BHoMBaseWidget):
             current_colormaps = display_names
         else:
             current_colormaps = self._preset_colormaps(self.cmap_set_var.get())
-
-        # Prepend user-saved custom colormaps when requested.
-        if load_custom:
-            try:
-                for _name, _cmap, _bounds in load_custom_cmaps():
-                    _label = self._unique_label(_name, current_colormaps)
-                    self._custom_cmaps[_label] = _cmap
-                    current_colormaps.insert(0, _label)
-            except Exception:
-                pass
 
         self._populate_cmap_list(current_colormaps)
 
@@ -545,7 +531,6 @@ if __name__ == "__main__":
         helper_text="Standard matplotlib colormap names.",
         build_options=PackingOptions(fill="both", expand=True),
         cmap_bins=64,
-        load_custom=True,
         plot_size=(400, 40),
     )
     selector_strings.build()

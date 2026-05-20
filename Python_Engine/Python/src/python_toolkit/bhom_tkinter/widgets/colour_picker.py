@@ -5,7 +5,6 @@ from tkinter import ttk
 from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Callable, Optional, Literal
 
-from python_toolkit.bhom_tkinter.bhom_base_popup import BHoMBasePopup
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 
@@ -36,7 +35,7 @@ class ColourPicker(BHoMBaseWidget):
 		self.colour_var = tk.StringVar(value=default_colour)
 		self.swatch_width = max(1, int(swatch_width))
 		self.swatch_height = max(1, int(swatch_height))
-		self._picker_window: Optional[BHoMBasePopup] = None
+		self._picker_window: Optional[tk.Toplevel] = None
 		self._popup_preview: Optional[tk.Canvas] = None
 		self._popup_swatch: Optional[int] = None
 		self._popup_hex_var: Optional[tk.StringVar] = None
@@ -69,15 +68,21 @@ class ColourPicker(BHoMBaseWidget):
 		current_colour = self.get()
 		red, green, blue = self._hex_to_rgb(current_colour)
 
-		popup = BHoMBasePopup(self, title="Select Colour", on_close=self._close_picker)
-		self._picker_window = popup
+		root_window = self.winfo_toplevel()
+		window = tk.Toplevel(root_window)
+		window.title("Select Colour")
+		window.transient(root_window)
+		window.resizable(False, False)
+		window.protocol("WM_DELETE_WINDOW", self._close_picker)
 
+		self._picker_window = window
 		self._popup_red_var = tk.IntVar(value=red)
 		self._popup_green_var = tk.IntVar(value=green)
 		self._popup_blue_var = tk.IntVar(value=blue)
 		self._popup_hex_var = tk.StringVar(value=current_colour)
 
-		container = popup.content_frame
+		container = ttk.Frame(window, padding=10)
+		container.pack(fill=tk.BOTH, expand=True)
 
 		self._build_slider_row(container, "R", self._popup_red_var, 0)
 		self._build_slider_row(container, "G", self._popup_green_var, 1)
@@ -99,13 +104,14 @@ class ColourPicker(BHoMBaseWidget):
 
 		button_row = ttk.Frame(container)
 		button_row.grid(row=5, column=0, sticky="e")
-		Button(button_row, text="Cancel", command=popup.close).pack(side=tk.LEFT, padx=(0, 6))
+		Button(button_row, text="Cancel", command=self._close_picker).pack(side=tk.LEFT, padx=(0, 6))
 		Button(button_row, text="Apply", command=self._apply_popup_colour).pack(side=tk.LEFT)
 
 		container.columnconfigure(0, weight=1)
 
 		self._on_rgb_changed()
-		popup.show(focus_widget=hex_entry)
+		window.grab_set()
+		hex_entry.focus_set()
 
 	def _update_preview(self, colour: str) -> None:
 		"""Render the selected colour in the preview swatch."""
@@ -166,11 +172,16 @@ class ColourPicker(BHoMBaseWidget):
 		if self.command:
 			self.command(selected)
 		self._fire_on_change(selected)
-		if self._picker_window:
-			self._picker_window.close()
+		self._close_picker()
 
 	def _close_picker(self) -> None:
-		"""Reset popup state after the picker has been closed."""
+		if self._picker_window and self._picker_window.winfo_exists():
+			try:
+				self._picker_window.grab_release()
+			except tk.TclError:
+				pass
+			self._picker_window.destroy()
+
 		self._picker_window = None
 		self._popup_preview = None
 		self._popup_swatch = None

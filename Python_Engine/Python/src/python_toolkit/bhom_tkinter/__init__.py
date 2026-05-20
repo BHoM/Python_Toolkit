@@ -1,4 +1,3 @@
-from .bhom_base_popup import BHoMBasePopup
 from .widgets import (
 	BHoMBaseWidget,
 	PackingOptions,
@@ -29,7 +28,6 @@ from .theming import (
 )
 
 __all__ = [
-	"BHoMBasePopup",
 	"BHoMBaseWidget",
 	"PackingOptions",
 	"CalendarWidget",
