@@ -12,7 +12,6 @@ from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 from python_toolkit.bhom.custom_cmaps import load_custom_cmaps
-from python_toolkit.bhom_tkinter.widgets.button import Button
 
 # Accepted colormap input types for colormaps parameter and set()/add_cmap()
 CmapInput = Union[str, Colormap, List[str]]
@@ -78,10 +77,8 @@ class CmapSelector(BHoMBaseWidget):
         cmap_bins: int = 256,
         default_cmap: Optional[CmapInput] = None,
         plot_size: tuple[int, int] = (400, 50),
-        dropdown_position: Literal["n", "e", "s", "w", "top", "bottom", "left", "right"] = "w",
-        allow_custom: bool = False,
-        control_width: Optional[int] = None,
-        control_spacing: int = 4,
+        dropdown_position: Literal["n", "e", "s", "w"] = "n",
+        load_custom: bool = False,
         **kwargs
     ) -> None:
         """
@@ -99,20 +96,11 @@ class CmapSelector(BHoMBaseWidget):
             default_cmap: Optional default colormap to pre-select.  Accepts
                 the same input types as items in `colormaps`.
             plot_size: `(width, height)` in pixels for the preview swatch.
-            dropdown_position: Where the dropdown (and "Add Custom" button) sits
-                relative to the preview swatch. Accepts cardinal directions
-                (``"n"``, ``"e"``, ``"s"``, ``"w"``) or full words
-                (``"top"``, ``"right"``, ``"bottom"``, ``"left"``).
-                Default ``"w"`` places the controls on the left with the
-                preview swatch to the right.
-            allow_custom: When ``True``, user-saved colormaps from
-                ``~/.bhom/custom_cmaps.json`` are prepended to the list and
-                an "Add Custom" button is shown below the dropdown.
-            control_width: Width of the dropdown and button in characters.
-                Both controls share this width. When ``None`` the combobox
-                sizes to its content and the button matches.
-            control_spacing: Pixel gap between the controls column and the
-                preview swatch. Default ``4``.
+            dropdown_position: Position of the dropdown relative to the
+                preview swatch. "n" = above, "s" = below,
+                "w" = left, "e" = right.
+            load_custom: When ``True``, user-saved colormaps from
+                ``~/.bhom/custom_cmaps.json`` are prepended to the list.
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
@@ -145,27 +133,24 @@ class CmapSelector(BHoMBaseWidget):
 
         self.cmap_set_var = tk.StringVar(value=cmap_set.lower())
 
-        _aliases = {"top": "n", "bottom": "s", "left": "w", "right": "e"}
-        pos = _aliases.get(dropdown_position.lower(), dropdown_position.lower())
+        pos = dropdown_position.lower()
         is_horizontal = pos in ("w", "e")
         pack_side_combo = {"n": tk.TOP, "s": tk.BOTTOM, "w": tk.LEFT, "e": tk.RIGHT}[pos]  # type: ignore[assignment]
         pack_side_figure = {"n": tk.TOP, "s": tk.TOP, "w": tk.LEFT, "e": tk.LEFT}[pos]  # type: ignore[assignment]
 
-        combo_padx = (0, control_spacing) if is_horizontal else 0
-        combo_pady = (0, control_spacing) if not is_horizontal else 0
+        combo_padx = (0, 4) if is_horizontal else 0
+        combo_pady = (8, 4) if not is_horizontal else 0
 
-        self._header = ttk.Frame(content)
-        self._header.pack(side=pack_side_combo, anchor=self._pack_anchor, padx=combo_padx, pady=combo_pady)
+        header = ttk.Frame(content)
+        header.pack(side=pack_side_combo, anchor=self._pack_anchor, padx=combo_padx, pady=combo_pady)
 
         self.cmap_combobox = ttk.Combobox(
-            self._header,
+            header,
             textvariable=self.colormap_var,
             state="readonly",
             justify=self._text_justify,
         )
-        if control_width is not None:
-            self.cmap_combobox.configure(width=control_width)
-        self.cmap_combobox.pack(side=tk.TOP, anchor=self._pack_anchor, fill="x")
+        self.cmap_combobox.pack(side=tk.TOP, anchor=self._pack_anchor, padx=0)
         self.cmap_combobox.bind("<<ComboboxSelected>>", self._on_cmap_selected)
 
         fill_mode: Literal["x", "y"] = "y" if is_horizontal else "x"
@@ -184,10 +169,8 @@ class CmapSelector(BHoMBaseWidget):
         else:
             current_colormaps = self._preset_colormaps(self.cmap_set_var.get())
 
-        self._allow_custom = allow_custom
-
         # Prepend user-saved custom colormaps when requested.
-        if allow_custom:
+        if load_custom:
             try:
                 for _name, _cmap, _bounds in load_custom_cmaps():
                     _label = self._unique_label(_name, current_colormaps)
@@ -201,48 +184,6 @@ class CmapSelector(BHoMBaseWidget):
         # Resolve default_cmap: may itself be a Colormap object or colour list
         self._default_label = self._resolve_default_label(default_cmap, current_colormaps)
         self._select_default_cmap(current_colormaps)
-
-        # "Add Custom" button — shown below the dropdown when allow_custom=True.
-        if allow_custom:
-            _btn_width = control_width if control_width is not None else self.cmap_combobox.cget("width")
-            Button(
-                self._header,
-                text="+ Add Custom",
-                command=self._open_cmap_builder,
-                width=_btn_width,
-            ).pack(side=tk.TOP, anchor=self._pack_anchor, pady=(4, 0))
-
-    # ------------------------------------------------------------------
-    # Custom cmap builder integration
-    # ------------------------------------------------------------------
-
-    def _open_cmap_builder(self) -> None:
-        """Open the CmapBuilder popup. The widget itself is not displayed."""
-        from python_toolkit.bhom_tkinter.widgets.custom_cmap_builder import CmapBuilder
-        builder = CmapBuilder(self, command=self._on_custom_cmap_applied)
-        builder._open_builder()
-
-    def _on_custom_cmap_applied(self, cmap: Colormap, bounds: tuple) -> None:
-        """Called when the user saves a new cmap via the builder popup."""
-        self._reload_custom_cmaps()
-
-    def _reload_custom_cmaps(self) -> None:
-        """Re-read saved colormaps from file and add any new ones to the combobox."""
-        current = list(self.cmap_combobox["values"])
-        added = False
-        try:
-            for _name, _cmap, _bounds in load_custom_cmaps():
-                if _name not in self._custom_cmaps and _name not in current:
-                    label = self._unique_label(_name, current)
-                    self._custom_cmaps[label] = _cmap
-                    current.insert(0, label)
-                    added = True
-        except Exception:
-            pass
-        if added:
-            self._populate_cmap_list(current)
-            self.colormap_var.set(current[0])
-            self._update_cmap_sample()
 
     def _get_all_colormaps(self) -> List[str]:
         """Return all registered colormap names, including reversed variants.
@@ -604,10 +545,8 @@ if __name__ == "__main__":
         helper_text="Standard matplotlib colormap names.",
         build_options=PackingOptions(fill="both", expand=True),
         cmap_bins=64,
-        allow_custom=True,
+        load_custom=True,
         plot_size=(400, 40),
-        control_width = 20,
-        control_spacing= 55
     )
     selector_strings.build()
 
