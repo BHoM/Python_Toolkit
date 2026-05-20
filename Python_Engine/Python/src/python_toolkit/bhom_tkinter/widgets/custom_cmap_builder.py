@@ -13,6 +13,7 @@ from python_toolkit.bhom_tkinter import BHoMBasePopup, BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.slider import Slider
 from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom.custom_cmaps import save_custom_cmap, delete_custom_cmap, clear_custom_cmaps, list_custom_cmap_names
+from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 
 _DEFAULT_COLOURS = [
 	"#FF0000", "#FFD000", "#09FF00", "#00A2FF",
@@ -163,7 +164,7 @@ class CmapBuilder(BHoMBaseWidget):
 
 	def _open_builder(self) -> None:
 		"""Open the cmap builder popup."""
-		if self._cmap_builder_window and self._cmap_builder_window.winfo_exists():
+		if self._cmap_builder_window is not None and self._cmap_builder_window.winfo_exists():
 			self._cmap_builder_window.focus_force()
 			return
 
@@ -242,7 +243,7 @@ class CmapBuilder(BHoMBaseWidget):
 		)
 		self._stops_canvas.configure(yscrollcommand=self._stops_scrollbar.set)
 		self._stops_scrollbar.pack(side="right", fill="y")
-		self._stops_canvas.pack(side="left", fill="x")  # NO expand, NO fill="both"
+		self._stops_canvas.pack(side="left", fill="x", expand=True)  # expand claims full cavity width
 
 		self._colour_rows_frame = ttk.Frame(self._stops_canvas)
 		self._canvas_window = self._stops_canvas.create_window(
@@ -538,13 +539,13 @@ class CmapBuilder(BHoMBaseWidget):
 				lower_bounds[0] = vmin
 				save_custom_cmap(name, "bins", colours, lower_bounds, vmin, vmax)
 		except Exception:
-			pass
+			CONSOLE_LOGGER.warning("Failed to persist colormap to file.", exc_info=True)
 
-		if self.command:
+		if self.command is not None:
 			self.command(cmap, (vmin, vmax))
 		self._fire_on_change(cmap)
 
-		if self._cmap_builder_window:
+		if self._cmap_builder_window is not None:
 			self._cmap_builder_window.close()
 
 	def _close_builder(self) -> None:

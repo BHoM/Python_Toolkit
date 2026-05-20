@@ -101,18 +101,18 @@ class CmapSelector(BHoMBaseWidget):
             plot_size: `(width, height)` in pixels for the preview swatch.
             dropdown_position: Where the dropdown (and "Add Custom" button) sits
                 relative to the preview swatch. Accepts cardinal directions
-                (``"n"``, ``"e"``, ``"s"``, ``"w"``) or full words
-                (``"top"``, ``"right"``, ``"bottom"``, ``"left"``).
-                Default ``"w"`` places the controls on the left with the
+                ("n", "e", "s", "w") or full words
+                ("top", "right", "bottom", "left").
+                Default "w" places the controls on the left with the
                 preview swatch to the right.
-            allow_custom: When ``True``, user-saved colormaps from
-                ``~/.bhom/custom_cmaps.json`` are prepended to the list and
+            allow_custom: When True, user-saved colormaps from
+                ~/.bhom/custom_cmaps.json are prepended to the list and
                 an "Add Custom" button is shown below the dropdown.
             control_width: Width of the dropdown and button in characters.
-                Both controls share this width. When ``None`` the combobox
+                Both controls share this width. When None the combobox
                 sizes to its content and the button matches.
             control_spacing: Pixel gap between the controls column and the
-                preview swatch. Default ``4``.
+                preview swatch. Default 4.
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
@@ -194,7 +194,7 @@ class CmapSelector(BHoMBaseWidget):
                     self._custom_cmaps[_label] = _cmap
                     current_colormaps.insert(0, _label)
             except Exception:
-                pass
+                CONSOLE_LOGGER.warning("Failed to load custom colormaps from file.", exc_info=True)
 
         self._populate_cmap_list(current_colormaps)
 
@@ -238,7 +238,7 @@ class CmapSelector(BHoMBaseWidget):
                     current.insert(0, label)
                     added = True
         except Exception:
-            pass
+            CONSOLE_LOGGER.warning("Failed to reload custom colormaps from file.", exc_info=True)
         if added:
             self._populate_cmap_list(current)
             self.colormap_var.set(current[0])
