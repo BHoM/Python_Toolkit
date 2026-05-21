@@ -40,6 +40,12 @@ class FigureContainer(BHoMBaseWidget):
         self.rigid_width = int(rigid_width) if rigid_width is not None else None
         self.rigid_height = int(rigid_height) if rigid_height is not None else None
 
+        if self.rigid_width is not None:
+            self.content_frame.config(width=self.rigid_width)
+
+        if self.rigid_height is not None:
+            self.content_frame.config(height=self.rigid_height)
+
         self.figure: Optional[Figure] = None
         self.image: Optional[Any] = None
         self.image_file: Optional[str] = None
@@ -195,20 +201,17 @@ class FigureContainer(BHoMBaseWidget):
 
         # If only one rigid dimension is provided, derive the other from current figure aspect.
         if (self.rigid_width is not None) != (self.rigid_height is not None):
-            try:
-                dpi = float(self.figure.get_dpi())
-                if dpi <= 0:
-                    dpi = 100.0
-                current_w_in, current_h_in = self.figure.get_size_inches()
-                aspect = (current_w_in / current_h_in) if current_h_in else 1.0
-                if self.rigid_width is not None:
-                    frame_width = self.rigid_width
-                    frame_height = int(round(self.rigid_width / aspect)) if aspect else self.rigid_width
-                else:
-                    frame_height = self.rigid_height or 0
-                    frame_width = int(round(frame_height * aspect))
-            except Exception:
-                pass
+            dpi = float(self.figure.get_dpi())
+            if dpi <= 0:
+                dpi = 100.0
+            current_w_in, current_h_in = self.figure.get_size_inches()
+            aspect = (current_w_in / current_h_in) if current_h_in else 1.0
+            if self.rigid_width is not None:
+                frame_width = self.rigid_width
+                frame_height = int(round(self.rigid_width / aspect)) if aspect else self.rigid_width
+            else:
+                frame_height = self.rigid_height or 0
+                frame_width = int(round(frame_height * aspect))
 
         if frame_width <= 1 or frame_height <= 1:
             if not self.auto_size:
