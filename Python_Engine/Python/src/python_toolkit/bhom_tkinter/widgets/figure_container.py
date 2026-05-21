@@ -50,15 +50,6 @@ class FigureContainer(BHoMBaseWidget):
         self._fit_after_id: Optional[str] = None
         self._fit_attempts: int = 0
 
-        if self.image:
-            self.embed_image(self.image)
-
-        elif self.figure:
-            self.embed_figure(self.figure)
-
-        elif self.image_file:
-            self.embed_image_file(self.image_file)
-
     def _clear_children(self) -> None:
         """Destroy any child widgets hosted by the content frame only."""
         if self._fit_after_id is not None:
@@ -296,6 +287,7 @@ class FigureContainer(BHoMBaseWidget):
         self.image = None
         self.image_label = None
         self._original_pil_image = None
+        self.image_file = None
 
     def get(self):
         """Return the currently embedded figure or image.
