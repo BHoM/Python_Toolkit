@@ -1,4 +1,4 @@
-"""Container widget for embedding matplotlib figures or image content."""
+﻿"""Container widget for embedding matplotlib figures or image content."""
 
 import tkinter as tk
 from tkinter import ttk
@@ -29,7 +29,7 @@ class FigureContainer(BHoMBaseWidget):
 
         Args:
             parent: Parent widget
-            auto_size: If `True`, fit content once to current frame size.
+            auto_size: If ``True``, fit content once to current frame size.
             rigid_width: Optional fixed target width (pixels) for content sizing.
             rigid_height: Optional fixed target height (pixels) for content sizing.
             **kwargs: Additional Frame options
@@ -82,7 +82,6 @@ class FigureContainer(BHoMBaseWidget):
             frame_height = max(self.content_frame.winfo_height(), self.content_frame.winfo_reqheight())
             return frame_width, frame_height
 
-        # No frame-derived sizing by default.
         frame_width = self.rigid_width or 0
         frame_height = self.rigid_height or 0
         return frame_width, frame_height
@@ -97,18 +96,13 @@ class FigureContainer(BHoMBaseWidget):
             self.figure = None
 
     def _resolved_background(self) -> str:
-        """Resolve a background colour suitable for embedded Tk canvas widgets.
-
-        Returns:
-            str: Resolved background colour string.
-        """
+        """Resolve a background colour suitable for embedded Tk canvas widgets."""
         try:
             bg = ttk.Style().lookup("TFrame", "background")
             if bg:
                 return bg
         except Exception:
             pass
-
         try:
             return self.winfo_toplevel().cget("bg")
         except Exception:
@@ -120,17 +114,12 @@ class FigureContainer(BHoMBaseWidget):
         Args:
             figure: Matplotlib Figure object to embed.
         """
-
         self._close_held_figure()
         self._clear_children()
-
         self.figure = figure
         self.canvas = FigureCanvasTkAgg(figure, master=self.content_frame)
-        
-        # Set canvas background to match the frame background for transparency
         bg_color = self._resolved_background()
         self.canvas.get_tk_widget().configure(bg=bg_color, highlightthickness=0)
-
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         if self.auto_size or self.rigid_width is not None or self.rigid_height is not None:
             self._fit_figure_once()
@@ -138,56 +127,42 @@ class FigureContainer(BHoMBaseWidget):
             self.canvas.draw_idle()
 
     def embed_image(self, image: tk.PhotoImage) -> None:
-        """
-        Embed a Tk image in the figure container.
-        Note: For automatic scaling, use embed_image_file() instead with PIL support.
+        """Embed a Tk image in the figure container.
 
         Args:
             image: Tk PhotoImage object to embed
         """
         self._close_held_figure()
         self._clear_children()
-
         self.image = image
         self._original_pil_image = None
-        
-        # Create label to display the image
         self.image_label = Label(self.content_frame, image=image)
         self.image_label.pack(fill=tk.BOTH, expand=True)
 
     def embed_image_file(self, file_path: str) -> None:
-        """
-        Load and embed an image file, scaled to fit the container.
+        """Load and embed an image file, scaled to fit the container.
 
         Args:
             file_path: Path to image file
         """
         self.image_file = file_path
-        self._close_held_figure()
-        self._clear_children()
-        
         try:
             from PIL import Image, ImageTk
-            
-            # Load with PIL for better scaling
             pil_image = Image.open(file_path)
             self._original_pil_image = pil_image
-            
-            # Create label
+            self._close_held_figure()
+            self._clear_children()
             self.image_label = Label(self.content_frame)
             self.image_label.pack(fill=tk.BOTH, expand=True)
-            
-            # Scale and display
             if self.auto_size or self.rigid_width is not None or self.rigid_height is not None:
                 self._scale_image_to_fit_once()
             else:
-                # Default path: preserve original image dimensions, no frame-based fit.
                 self.image = ImageTk.PhotoImage(self._original_pil_image)
                 self.image_label.set(self.image)
-            
         except ImportError:
-            # Fallback to basic PhotoImage without scaling
             image = tk.PhotoImage(file=file_path)
+            self._close_held_figure()
+            self._clear_children()
             self.image = image
             self.image_label = Label(self.content_frame, image=image)
             self.image_label.pack(fill=tk.BOTH, expand=True)
@@ -199,7 +174,6 @@ class FigureContainer(BHoMBaseWidget):
 
         frame_width, frame_height = self._resolve_target_size()
 
-        # If only one rigid dimension is provided, derive the other from current figure aspect.
         if (self.rigid_width is not None) != (self.rigid_height is not None):
             dpi = float(self.figure.get_dpi())
             if dpi <= 0:
@@ -240,11 +214,9 @@ class FigureContainer(BHoMBaseWidget):
         """Scale the image to fit within the content frame while maintaining aspect ratio."""
         if self._original_pil_image is None:
             return
-        
-        # Get current frame dimensions
+
         frame_width, frame_height = self._resolve_target_size()
-        
-        # Skip if frame not yet sized
+
         if frame_width <= 1 or frame_height <= 1:
             if not self.auto_size:
                 self._fit_after_id = None
@@ -255,33 +227,21 @@ class FigureContainer(BHoMBaseWidget):
                 return
             self._fit_after_id = self.after(20, self._scale_image_to_fit_once)
             return
-        
+
         try:
             from PIL import Image, ImageTk
-            
-            # Calculate scaling factor to fit
             img_width, img_height = self._original_pil_image.size
-            scale_width = frame_width / img_width
-            scale_height = frame_height / img_height
-            scale = min(scale_width, scale_height)
-            
-            # Calculate new dimensions
+            scale = min(frame_width / img_width, frame_height / img_height)
             new_width = int(img_width * scale)
             new_height = int(img_height * scale)
-            
-            # Resize image
             resized = self._original_pil_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            
-            # Convert to PhotoImage and update label
             self.image = ImageTk.PhotoImage(resized)
             if self.image_label:
-                # `image_label` is a BHoM Label wrapper; use wrapper API so
-                # the inner ttk.Label gets updated and image references persist.
                 self.image_label.set(self.image)
             self._fit_after_id = None
             self._fit_attempts = 0
         except Exception:
-            pass  # Silently handle scaling errors
+            pass
 
     def clear(self) -> None:
         """Clear the figure container."""
@@ -293,23 +253,18 @@ class FigureContainer(BHoMBaseWidget):
         self.image_file = None
 
     def get(self):
-        """Return the currently embedded figure or image.
-
-        Returns:
-            Optional[Any]: Embedded figure/image, or `None` when empty.
-        """
+        """Return the currently embedded figure or image."""
         if self.figure is not None:
             return self.figure
         elif self.image is not None:
             return self.image
-        else:
-            return None
-        
+        return None
+
     def set(self, value):
         """Set the content of the figure container.
 
         Args:
-            value: `Figure`, `PhotoImage`, or image file path string.
+            value: ``Figure``, ``PhotoImage``, or image file path string.
         """
         if isinstance(value, Figure):
             self.embed_figure(value)
@@ -321,53 +276,60 @@ class FigureContainer(BHoMBaseWidget):
             raise ValueError("Unsupported value type for FigureContainer. Must be Figure, PhotoImage, or file path string.")
 
     def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-        """Validate the current content of the figure container.
-
-        Returns:
-            tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-                `(is_valid, message, severity)` where severity is `None` when
-                valid, or `"error"` for invalid content.
-        """
+        """Validate the current content of the figure container."""
         if self.figure is not None:
             return self.apply_validation((True, None, None))
         if self.image is not None:
             return self.apply_validation((True, None, None))
         return self.apply_validation((False, "FigureContainer is empty. Please embed a figure or image.", "error"))
 
+
 if __name__ == "__main__":
-
+    import numpy as np
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
-    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-    
-    root = BHoMBaseWindow()
-    parent_container = root.content_frame
+    from python_toolkit.bhom_tkinter.widgets.validated_entry_box import ValidatedEntryBox
+    from python_toolkit.bhom_tkinter.widgets._grid_options import GridOptions
 
-    # Create figure container
-    figure_container = FigureContainer(
-        parent=parent_container, 
-        item_title="Figure Container", 
-        helper_text="This widget can embed matplotlib figures or images.",
-        build_options=PackingOptions(padx=10, pady=10, fill='both', expand=True)
+    def make_plot(freq: float) -> Figure:
+        x = np.linspace(0, 2 * np.pi, 300)
+        fig, ax = plt.subplots(figsize=(4, 2.5))
+        ax.plot(x, np.sin(freq * x))
+        ax.set_title(f"sin({freq:.1f}x)")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        fig.tight_layout()
+        return fig
+
+    root = BHoMBaseWindow(title="FigureContainer Demo", grid_dimensions=(2, 1))
+
+    figure_widget = FigureContainer(
+        root.content_frame,
+        item_title="Plot Preview",
+        rigid_width=400,
+        rigid_height=250,
+        build_options=GridOptions(row=1, column=0, sticky="nsew", padx=10, pady=(4, 10)),
     )
-    figure_container.build()
-    
-    style = "python_toolkit.bhom_dark"
+    figure_widget.build()
+    figure_widget.embed_figure(make_plot(2.0))
 
-    # Create and embed the initial matplotlib figure
-    with plt.style.context(style):
-        fig_initial, ax_initial = plt.subplots(figsize=(5, 4), dpi=80)
-        ax_initial.plot([1, 2, 3, 4], [1, 4, 2, 3], marker='o')
-        ax_initial.set_title("Initial Plot")
-        ax_initial.set_xlabel("X")
-        ax_initial.set_ylabel("Y")
-    figure_container.embed_figure(fig_initial)
+    def on_freq_change(value):
+        try:
+            freq = float(value)
+        except (ValueError, TypeError):
+            return
+        figure_widget.embed_figure(make_plot(freq))
 
-    def push_new_plot() -> None:
-        """Replace the existing plot with a new one after a delay."""
-        image_path = r"C:\GitHub_Files\Python_Toolkit\Python_Engine\Python\src\python_toolkit\bhom\assets\BHoM_Logo.png"
-        figure_container.embed_image_file(image_path)
+    freq_input = ValidatedEntryBox(
+        root.content_frame,
+        item_title="Frequency",
+        helper_text="Change the frequency to update the plot.",
+        on_change=on_freq_change,
+        build_options=GridOptions(row=0, column=0, sticky="ew", padx=10, pady=(10, 4)),
+    )
+    freq_input.set("2")
+    freq_input.build()
 
-    # Push a new plot after 10 seconds
-    root.after(4_000, push_new_plot)
+    root.content_frame.columnconfigure(0, weight=1)
+    root.content_frame.rowconfigure(1, weight=1)
 
     root.mainloop()
