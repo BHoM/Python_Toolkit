@@ -40,15 +40,20 @@ class ScrollableListBox(BHoMBaseWidget):
         if height is None:
             height = len(self.items) if self.items else 5
 
-        # Create scrollbar
-        self.scrollbar = ttk.Scrollbar(self.content_frame)
-
-        self.content_frame.columnconfigure(0, weight=1) 
+        self.content_frame.columnconfigure(0, weight=1)
         self.content_frame.columnconfigure(1, weight=1)
         self.content_frame.rowconfigure(0, weight=1)
         self.content_frame.rowconfigure(1, weight=1)
-        
-        # Create listbox
+
+        # Container frame for listbox + scrollbar using pack
+        self._lb_container = tk.Frame(self.content_frame)
+        self._lb_container.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+        # Create scrollbar packed to the right inside the container
+        self.scrollbar = ttk.Scrollbar(self._lb_container)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Create listbox filling the remaining space
         listbox_options = {
             "selectmode": selectmode,
             "height": height,
@@ -57,9 +62,9 @@ class ScrollableListBox(BHoMBaseWidget):
         }
         if width is not None:
             listbox_options["width"] = width
-        
-        self.listbox = tk.Listbox(self.content_frame, **listbox_options)
-        self.listbox.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+        self.listbox = tk.Listbox(self._lb_container, **listbox_options)
+        self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.scrollbar.config(command=self.listbox.yview)
         
         # Populate with items
@@ -85,11 +90,9 @@ class ScrollableListBox(BHoMBaseWidget):
     def _on_configure(self, event=None):
         """Hide scrollbar if all items fit in the visible area."""
         if self.listbox.size() <= int(self.listbox.cget("height")):
-            self.scrollbar.grid_forget()
-            self.listbox.grid_configure(columnspan=2)
+            self.scrollbar.pack_forget()
         else:
-            self.listbox.grid_configure(columnspan=1)
-            self.scrollbar.grid(row=0, column=1, sticky="ns")
+            self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     def _on_selection_change(self, _event=None):
         """Track selection changes so values remain available after teardown."""
