@@ -3,7 +3,7 @@ import re
 from typing import List, Dict
 import json
 from json import JSONEEncoder, JSONDecoder
-from .. import TOOLKIT_NAME
+from .logging import CONSOLE_LOGGER
 
 def convert_pascal_to_camel(s: str):
 	"""Converts a string to camel_case."""
@@ -36,6 +36,7 @@ class BHoMJSONDecoder(JSONDecoder):
 
 	def object_hook(self, d):
 		if "_t" not in d:
+			CONSOLE_LOGGER.debug(f"BHoMJSONDecoder could not convert the following dictionary into a BHoMObject due to a missing '_t' property. Falling back to dictionary: {d}")
 			return d
 
 		#get default BHoMObject properties and replace with defaults if not present
@@ -109,8 +110,10 @@ class BHoMObject:
 	@classmethod
 	def from_json(j: str) -> 'BHoMObject':
 		obj = json.loads(json, decoder=BHoMJSONDecoder)
-		if not isinstance(obj, BHoMObject):
+
+		if not isinstance(obj, BHoMObject): #this only tests that the top level object was deserialised correctly, if there are problems with deep properties, change the CONSOLE_LOGGER log level to debug.
 			raise TypeError("The object provided does not deserialise to a valid BHoM object.")
+
 		return obj
 	
 	def to_json(self) -> str:
