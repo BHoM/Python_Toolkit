@@ -29,7 +29,7 @@ class FigureContainer(BHoMBaseWidget):
 
         Args:
             parent: Parent widget
-            auto_size: If ``True``, fit content once to current frame size.
+            auto_size: If `True`, fit content once to current frame size.
             rigid_width: Optional fixed target width (pixels) for content sizing.
             rigid_height: Optional fixed target height (pixels) for content sizing.
             **kwargs: Additional Frame options
@@ -264,7 +264,7 @@ class FigureContainer(BHoMBaseWidget):
         """Set the content of the figure container.
 
         Args:
-            value: ``Figure``, ``PhotoImage``, or image file path string.
+            value: `Figure`, `PhotoImage`, or image file path string.
         """
         if isinstance(value, Figure):
             self.embed_figure(value)
