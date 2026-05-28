@@ -4,6 +4,7 @@ from typing import List, Dict
 import json
 from json import JSONEncoder, JSONDecoder
 from .logging import CONSOLE_LOGGER
+from . import BHOM_VERSION
 
 def convert_pascal_to_camel(s: str):
     """Converts a string to camel_case."""
@@ -43,6 +44,9 @@ class BHoMJSONDecoder(JSONDecoder):
             "_t": d.pop("_t"),
             "_bhom_version": d.pop("_bhomVersion", None)
         }
+
+        if (props["_bhom_version"] is not None) and (props["_bhom_version"] != ".".join(BHOM_VERSION.split(".")[0:1]))
+            CONSOLE_LOGGER.warning(f"The bhom version specified in the encoded json ({props["_bhom_version"]}) is different from the BHoM version that python_toolkit was installed with ({BHOM_VERSION}). There may be versioning issues with this object. Consider deserialising and then serialising again with the BHoM serialiser to get the correct version, or update BHoM to the correct version.")
 
         if d.get("BHoM_Guid", None) is not None:
             #deserialise as BHoM Object
