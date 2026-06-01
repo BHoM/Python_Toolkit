@@ -6,6 +6,7 @@ from json import JSONEncoder, JSONDecoder
 from .logging import CONSOLE_LOGGER
 from . import BHOM_VERSION
 import pandas as pd
+import copy
 
 BHOM_SHORT_VERSION = ".".join(BHOM_VERSION.split(".")[0:2])
 
@@ -177,6 +178,19 @@ class IObject:
     
     def to_json(self) -> str:
         return json.dumps(self, cls=BHoMJSONEncoder)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'IObject'
+        try:
+            return cls(**d) #should be valid as long as the dictionary has all necessary entries.
+        except ArgumentError as ae:
+            raise ArgumentError("Input dictionary was missing some required arguments, see traceback for more information.") from ae
+
+    def to_dict(self)
+    """Convert this IObject to a dictionary via a json round-trip."""
+        j = self.to_json(default=str)
+        d = json.loads(j)
+        return d
 
 class BHoMObject(IObject):
     name: str
