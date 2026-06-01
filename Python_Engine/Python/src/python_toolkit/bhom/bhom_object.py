@@ -5,6 +5,9 @@ import json
 from json import JSONEncoder, JSONDecoder
 from .logging import CONSOLE_LOGGER
 from . import BHOM_VERSION
+import pandas as pd
+
+BHOM_SHORT_VERSION = ".".join(BHOM_VERSION.split(".")[0:2])
 
 def convert_pascal_to_camel(s: str):
     """Converts a string to camel_case."""
@@ -42,11 +45,11 @@ class BHoMJSONDecoder(JSONDecoder):
             
         props = {
             "_t": d.pop("_t"),
-            "_bhom_version": d.pop("_bhomVersion", None)
+            "_bhom_version": d.pop("_bhomVersion", BHOM_SHORT_VERSION)
         }
 
-        if (props["_bhom_version"] is not None) and (props["_bhom_version"] != ".".join(BHOM_VERSION.split(".")[0:2])):
-            CONSOLE_LOGGER.warning(f"The bhom version specified in the encoded json ({props["_bhom_version"]}) is different from the BHoM version that python_toolkit was installed with ({BHOM_VERSION}). There may be versioning issues with this object. Consider deserialising and then serialising again with the BHoM serialiser to get the correct version, or update BHoM to the correct version.")
+        if (props["_bhom_version"] is not None) and (props["_bhom_version"] != BHOM_SHORT_VERSION):
+            CONSOLE_LOGGER.warning(f"The bhom version specified in the encoded json ({props['_bhom_version']}) is different from the BHoM version that python_toolkit was installed with ({BHOM_SHORT_VERSION}). There may be versioning issues with this object. Consider deserialising and then serialising again with the BHoM serialiser to get the correct version, or update BHoM to the correct version.")
 
         if d.get("BHoM_Guid", None) is not None:
             #deserialise as BHoM Object
@@ -64,6 +67,9 @@ class BHoMJSONDecoder(JSONDecoder):
 
             return BHoMObject(**props)
         else:
+            if props["_t"].startswith("System.Collections.Generic.List"): #this handles when the BHoM serialiser makes generic lists from CustomObject list properties, which get converted to a dictionary. The BHoM serialiser does recognise lists if it can find the object definition via reflection.
+                return d["_v"]
+
             #deserialise as IObject
             for prop_name in d:
                 props[convert_pascal_to_camel(prop_name)] = d[prop_name]
@@ -118,7 +124,9 @@ class BHoMJSONEncoder(JSONEncoder):
             return props
         elif isinstance(o, uuid.UUID): #UUID object is not json serialisable by default
             return str(o)
-        
+        elif isinstance(o, pd.DatetimeIndex):
+            return [date.isoformat() for date in o]
+
         return super(type(self), self).default(o) #fallback to default json decoder if object is not a BHoMObject (don't convert property case).
     
 class IObject:
@@ -140,7 +148,7 @@ class IObject:
             setattr(self, kwarg, kwargs[kwarg])
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__} of type {self._t}, version: '{getattr(self, "_bhom_version", "Unknown")}'"
+        return f"{type(self).__name__} of type {self._t}, version: '{getattr(self, '_bhom_version', 'Unknown')}'"
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, IObject):
@@ -201,7 +209,7 @@ class BHoMObject(IObject):
             setattr(self, kwarg, kwargs[kwarg])
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__} of type {self._t}, name: '{self.name}', version: '{getattr(self, "_bhom_version", "Unknown")}', id: '{self.bhom_guid}'"
+        return f"{type(self).__name__} of type {self._t}, name: '{self.name}', version: '{getattr(self, '_bhom_version', 'Unknown')}', id: '{self.bhom_guid}'"
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, BHoMObject):
@@ -223,6 +231,10 @@ class BHoMObject(IObject):
     def from_json(cls, j: str):
         obj = json.loads(j, cls=BHoMJSONDecoder)
 
+        if isinstance(obj, list):
+            CONSOLE_LOGGER.warning("The root element of the JSON provided was a list, assuming that the first item is the desired object. If you intended to deserialise a list, please use the `<cls>.from_json_array(j)` method instead.")
+            obj = obj[0]
+
         if issubclass(cls, BHoMObject) and cls != BHoMObject:
             obj = cls._from_bhom_object(obj)
 
@@ -231,6 +243,22 @@ class BHoMObject(IObject):
 
         return obj
     
+    @classmethod
+    def from_json_array(cls, j: str):
+        objs = json.loads(j, cls=BHoMJSONDecoder)
+
+        if not isinstance(objs, list):
+            raise TypeError("The root element of the JSON provided was not a JSON array. Perhaps you intended to use `<cls>.from_json(j)` instead?")
+
+        out = []
+        for obj in objs:
+            if issubclass(cls, BHoMObject) and cls != BHoMObject:
+                out.append(cls._from_bhom_object(obj))
+                continue
+            out.append(obj)
+
+        return out
+
     @classmethod
     def _from_bhom_object(cls, o: 'BHoMObject'):
         return cls(**vars(o).copy()) #assuming that the sub class is correctly set up, then this should work
