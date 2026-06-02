@@ -127,6 +127,8 @@ class BHoMJSONEncoder(JSONEncoder):
             return str(o)
         elif isinstance(o, pd.DatetimeIndex):
             return [date.isoformat() for date in o]
+        elif hasattr(o, "to_json") and callable(getattr(o, "to_json")): #custom handle classes that might have their own json converters
+            return o.to_json()
 
         return super(type(self), self).default(o) #fallback to default json decoder if object is not a BHoMObject (don't convert property case).
     
@@ -180,14 +182,14 @@ class IObject:
         return json.dumps(self, cls=BHoMJSONEncoder)
 
     @classmethod
-    def from_dict(cls, d: dict) -> 'IObject'
+    def from_dict(cls, d: dict) -> 'IObject':
         try:
             return cls(**d) #should be valid as long as the dictionary has all necessary entries.
         except ArgumentError as ae:
             raise ArgumentError("Input dictionary was missing some required arguments, see traceback for more information.") from ae
 
-    def to_dict(self)
-    """Convert this IObject to a dictionary via a json round-trip."""
+    def to_dict(self) -> dict:
+        """Convert this IObject to a dictionary via a json round-trip."""
         j = self.to_json(default=str)
         d = json.loads(j)
         return d
