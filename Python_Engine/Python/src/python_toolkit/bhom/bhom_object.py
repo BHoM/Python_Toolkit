@@ -1,3 +1,5 @@
+from ctypes import ArgumentError
+from pathlib import Path
 import uuid
 import re
 from typing import List, Dict
@@ -6,7 +8,7 @@ from json import JSONEncoder, JSONDecoder
 from .logging import CONSOLE_LOGGER
 from . import BHOM_VERSION
 import pandas as pd
-import copy
+import numpy as np
 
 BHOM_SHORT_VERSION = ".".join(BHOM_VERSION.split(".")[0:2])
 
@@ -101,7 +103,7 @@ class BHoMJSONEncoder(JSONEncoder):
                 props["_bhomVersion"] = o._bhom_version
 
             #get property names with reflection and convert all properties to PascalCase as the BHoM serialiser expects
-            for prop_name, value in vars(o).items():
+            for prop_name, value in vars(o).copy().items():
                 if prop_name in ["name", "bhom_guid", "tags", "fragments", "custom_data", "_t", "_bhom_version"]:
                     continue
 
@@ -116,21 +118,32 @@ class BHoMJSONEncoder(JSONEncoder):
             if o._bhom_version is not None:
                 props["_bhomVersion"] = o._bhom_version
 
-            for prop_name, value in vars(o).items():
+            for prop_name, value in vars(o).copy().items():
                 if prop_name in ["_t", "_bhom_version"]:
                     continue
 
                 props[convert_camel_to_pascal(prop_name)] = value
 
             return props
+        #handle common non-serialisable types
         elif isinstance(o, uuid.UUID): #UUID object is not json serialisable by default
             return str(o)
         elif isinstance(o, pd.DatetimeIndex):
             return [date.isoformat() for date in o]
-        elif hasattr(o, "to_json") and callable(getattr(o, "to_json")): #custom handle classes that might have their own json converters
-            return o.to_json()
+        elif isinstance(o, np.ndarray):
+            return o.tolist()
+        elif isinstance(o, pd.Timestamp):
+            return o.isoformat()
+        elif isinstance(o, pd.Series):
+            return dict(zip(o.index.astype(str), o))
+        elif isinstance(o, Path):
+            return str(o)
+        elif hasattr(o, "to_dict") and callable(getattr(o, "to_dict")): #custom handle classes that have their own dict converters
+            return o.to_dict()
+        elif hasattr(o, "__dict__"):
+            return vars(o).copy()
 
-        return super(type(self), self).default(o) #fallback to default json decoder if object is not a BHoMObject (don't convert property case).
+        return super(type(self), self).default(o) #fallback to default json decoder (ValueError) if object is not a BHoMObject or common serialisable type.
     
 class IObject:
     """More generic version of BHoMObject, for non-native objects serialised by the BHoM serialiser, but do not inherit from BHoMObject."""
