@@ -1,8 +1,11 @@
+from base64 import decode
+import copy
 from ctypes import ArgumentError
+from json import encoder
 from pathlib import Path
 import uuid
 import re
-from typing import List, Dict
+from typing import Any, List, Dict, Union
 import json
 from json import JSONEncoder, JSONDecoder
 from .logging import CONSOLE_LOGGER
@@ -44,7 +47,7 @@ class BHoMJSONDecoder(JSONDecoder):
     def object_hook(self, d):
         if "_t" not in d:
             CONSOLE_LOGGER.debug(f"BHoMJSONDecoder could not convert the following dictionary into a BHoMObject due to a missing '_t' property. Falling back to dictionary: {d}")
-            return d
+            return self.deserialise_unknown(d)
             
         props = {
             "_t": d.pop("_t"),
@@ -68,7 +71,7 @@ class BHoMJSONDecoder(JSONDecoder):
             for prop_name in d:
                 props[convert_pascal_to_camel(prop_name)] = d[prop_name]
 
-            return BHoMObject(**props)
+            return self.deserialise_unknown(BHoMObject(**props))
         else:
             if props["_t"].startswith("System.Collections.Generic.List"): #this handles when the BHoM serialiser makes generic lists from CustomObject list properties, which get converted to a dictionary. The BHoM serialiser does recognise lists if it can find the object definition via reflection.
                 return d["_v"]
@@ -77,7 +80,12 @@ class BHoMJSONDecoder(JSONDecoder):
             for prop_name in d:
                 props[convert_pascal_to_camel(prop_name)] = d[prop_name]
 
-            return IObject(**props)
+            return self.deserialise_unknown(IObject(**props))
+
+    def deserialise_unknown(self, obj: Union['IObject', 'BHoMObject', dict]):
+        """Override this method in a subclass to add extra object hook on top of the existing method. If the object is an object serialised by the BHoM serialiser, the output object will be a BHoMObject or IObject, so use isinstance() to select."""
+        return obj
+
 
 class BHoMJSONEncoder(JSONEncoder):
     def default(self, o):
@@ -137,13 +145,19 @@ class BHoMJSONEncoder(JSONEncoder):
         elif isinstance(o, pd.Series):
             return dict(zip(o.index.astype(str), o))
         elif isinstance(o, Path):
-            return str(o)
-        elif hasattr(o, "to_dict") and callable(getattr(o, "to_dict")): #custom handle classes that have their own dict converters
-            return o.to_dict()
-        elif hasattr(o, "__dict__"):
-            return vars(o).copy()
+            return { "FileName": str(o.name), "Directory": str(o.parent), "_t": "BH.oM.Adapter.FileSettings", "BHoM_Guid": str(uuid.uuid4()) }
 
-        return super(type(self), self).default(o) #fallback to default json decoder (ValueError) if object is not a BHoMObject or common serialisable type.
+        return self.serialise_unknown(o) #if the object is unknown at this point, call serialise_unknown to allow subclasses to add their own serialisation logic.
+
+    def serialise_unknown(self, obj: Any) -> Union[Dict[str, str], str, List[str], Any]:
+        """
+        This is called by the BHoMJSONEncoder to serialise unknown objects so that the BHoM can handle them if they exist as BHoM Objects in c# but not in python (i.e. an object from an external library).
+
+        Override this method in a sub class with its own logic, and call super().serialise_unknown(obj) for objects that are unknown, or do not wish to serialise.
+        The following objects won't be passed to this method: BHoMObject, IObject, uuid.UUID, pandas.DatetimeIndex, numpy.ndarray, pandas.Timestamp, pandas.Series, pathlib.Path
+        """
+        return super(type(self), self).default(obj) #fallback to default json decoder (ValueError) if object is not a BHoMObject or common serialisable type.
+
     
 class IObject:
     """More generic version of BHoMObject, for non-native objects serialised by the BHoM serialiser, but do not inherit from BHoMObject."""
@@ -183,16 +197,16 @@ class IObject:
         return vself == vother
 
     @classmethod
-    def from_json(cls, j: str) -> 'IObject':
-        obj = json.loads(j, cls=BHoMJSONDecoder)
+    def from_json(cls, j: str, decoder_class: type = BHoMJSONDecoder) -> 'IObject':
+        obj = json.loads(j, cls=decoder_class)
 
         if not isinstance(obj, cls): #this only tests that the top level object was deserialised correctly, if there are problems with deep properties, change the CONSOLE_LOGGER log level to debug.
             raise TypeError("The object provided does not deserialise to a valid BHoM object.")
 
         return obj
     
-    def to_json(self) -> str:
-        return json.dumps(self, cls=BHoMJSONEncoder)
+    def to_json(self, encoder_class: type = BHoMJSONEncoder) -> str:
+        return json.dumps(self, cls=encoder_class)
 
     @classmethod
     def from_dict(cls, d: dict) -> 'IObject':
@@ -201,11 +215,9 @@ class IObject:
         except ArgumentError as ae:
             raise ArgumentError("Input dictionary was missing some required arguments, see traceback for more information.") from ae
 
-    def to_dict(self) -> dict:
-        """Convert this IObject to a dictionary via a json round-trip."""
-        j = self.to_json(default=str)
-        d = json.loads(j)
-        return d
+    def to_dict(self, encoder_class: type = BHoMJSONEncoder) -> dict:
+        """Convert this IObject to a dictionary via deep copying vars(self)."""
+        return copy.deepcopy(vars(self))
 
 class BHoMObject(IObject):
     name: str
@@ -257,8 +269,8 @@ class BHoMObject(IObject):
         return vself == vother
 
     @classmethod
-    def from_json(cls, j: str):
-        obj = json.loads(j, cls=BHoMJSONDecoder)
+    def from_json(cls, j: str, decoder_class: type = BHoMJSONDecoder):
+        obj = json.loads(j, cls=decoder_class)
 
         if isinstance(obj, list):
             CONSOLE_LOGGER.warning("The root element of the JSON provided was a list, assuming that the first item is the desired object. If you intended to deserialise a list, please use the `<cls>.from_json_array(j)` method instead.")
@@ -273,8 +285,8 @@ class BHoMObject(IObject):
         return obj
     
     @classmethod
-    def from_json_array(cls, j: str):
-        objs = json.loads(j, cls=BHoMJSONDecoder)
+    def from_json_array(cls, j: str, decoder_class: type = BHoMJSONDecoder):
+        objs = json.loads(j, cls=decoder_class)
 
         if not isinstance(objs, list):
             raise TypeError("The root element of the JSON provided was not a JSON array. Perhaps you intended to use `<cls>.from_json(j)` instead?")
