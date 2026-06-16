@@ -86,7 +86,6 @@ class BHoMJSONDecoder(JSONDecoder):
         """Override this method in a subclass to add extra object hook on top of the existing method. If the object is an object serialised by the BHoM serialiser, the output object will be a BHoMObject or IObject, so use isinstance() to select."""
         return obj
 
-
 class BHoMJSONEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, BHoMObject):
@@ -158,7 +157,6 @@ class BHoMJSONEncoder(JSONEncoder):
         """
         return super(type(self), self).default(obj) #fallback to default json decoder (ValueError) if object is not a BHoMObject or common serialisable type.
 
-    
 class IObject:
     """More generic version of BHoMObject, for non-native objects serialised by the BHoM serialiser, but do not inherit from BHoMObject."""
     _t: str
