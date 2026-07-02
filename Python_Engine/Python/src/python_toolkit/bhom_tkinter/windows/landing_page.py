@@ -120,6 +120,6 @@ if __name__ == "__main__":
         show_close=True,
         show_submit=False,
     )
-    landing_page.add_custom_button(text="Click Me", command=on_button_click)
+    landing_page.add_custom_button(text="Click Me", command=on_button_click, width=100)
     landing_page.add_custom_button(text="Click Me 2", command=on_button_click_2)
     landing_page.mainloop()

@@ -51,7 +51,7 @@ class BHoMBaseWindow(tk.Tk):
         on_close_window: Optional[Callable] = None,
         theme_mode:str = "auto",
         widgets: Optional[List[BHoMBaseWidget]] = None,
-        top_most: bool = True,
+        top_most: bool = False,
         fullscreen: bool = False,
         buttons_side: Literal["left", "right"] = "right",
         grid_dimensions: Optional[tuple[int, int]] = None,
@@ -91,8 +91,9 @@ class BHoMBaseWindow(tk.Tk):
         self.resizable(resizable, resizable)
 
         self.top_most = top_most
-        if self.top_most:
-            self.attributes("-topmost", True)
+        self.attributes("-topmost", True)
+        if not self.top_most:
+            self.after(0, lambda: self.attributes("-topmost", False))
 
         self.fullscreen = fullscreen
 
@@ -554,6 +555,10 @@ class BHoMBaseWindow(tk.Tk):
     def refresh_sizing(self) -> None:
         """Recalculate and apply window sizing (useful after adding widgets)."""
         self._apply_sizing()
+
+    def close(self) -> None:
+        """Close and destroy the window. Override in subclasses for custom close behaviour."""
+        self.destroy_root()
 
     def destroy_root(self) -> None:
         """Safely terminate and destroy the Tk root window."""

@@ -5,7 +5,6 @@ from tkinter import ttk
 from typing import Optional, List, Callable, Tuple, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
-from python_toolkit.bhom_tkinter.widgets.button import Button
 
 class CheckboxSelection(BHoMBaseWidget):
 	"""A reusable checkbox selection widget built from a list of fields, allowing multiple selections."""
@@ -51,7 +50,7 @@ class CheckboxSelection(BHoMBaseWidget):
 
 		# Sub-frame for checkbox controls
 		self.buttons_frame = ttk.Frame(self.content_frame)
-		self.buttons_frame.pack(side="top", fill="x", expand=True)
+		self.buttons_frame.pack(side="top", anchor=self._pack_anchor)
 
 		self._build_buttons()
 
@@ -98,6 +97,7 @@ class CheckboxSelection(BHoMBaseWidget):
 		"""Handle checkbox selection change."""
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def get(self) -> List[str]:
 		"""Return a list of currently selected values.
@@ -123,6 +123,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(True)
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def deselect_all(self):
 		"""Deselect all checkboxes."""
@@ -130,6 +131,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(False)
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def toggle_all(self):
 		"""Toggle all checkbox states."""
@@ -137,6 +139,7 @@ class CheckboxSelection(BHoMBaseWidget):
 			var.set(not var.get())
 		if self.command:
 			self.command(self.get())
+		self._fire_on_change(self.get())
 
 	def set_fields(self, fields: List[str], defaults: Optional[List[str]] = None):
 		"""Replace the available fields and rebuild the widget.
@@ -150,14 +153,6 @@ class CheckboxSelection(BHoMBaseWidget):
 
 		if defaults:
 			self.set(defaults)
-
-	def pack(self, **kwargs):
-		"""Pack the widget with the given options.
-
-		Args:
-			**kwargs: Pack geometry manager options.
-		"""
-		super().pack(**kwargs)
 
 	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
 		"""Validate the current selection against min/max constraints.
