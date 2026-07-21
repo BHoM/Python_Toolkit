@@ -71,7 +71,7 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
 
     usage_log_entries.sort(key=lambda x: x.ProjectID)
 
-    short_bhom_version = ".".join(BHOM_VERSION.split(".", 2)[0:1])
+    short_bhom_version = ".".join(BHOM_VERSION.split(".", 2)[0:2])
 
     for file_id, filegroup in groupby(usage_log_entries, lambda x: x.FileId):
         filegroup = list(filegroup)
