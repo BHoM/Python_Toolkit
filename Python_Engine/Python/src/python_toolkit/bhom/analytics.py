@@ -71,6 +71,8 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
 
     usage_log_entries.sort(key=lambda x: x.ProjectID)
 
+    short_bhom_version = ".".join(BHOM_VERSION.split(".", 2)[0:2])
+
     for file_id, filegroup in groupby(usage_log_entries, lambda x: x.FileId):
         filegroup = list(filegroup)
         project_id = filegroup[0].ProjectID
@@ -89,15 +91,17 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
                 "CallerName": first_entry.CallerName,
                 "SelectedItem": first_entry.SelectedItem,
                 "Computer": socket.gethostname(),
-                "UserName": os.environ.get("USERNAME"),
-                "BHoMVersion": BHOM_VERSION,
+                "Username": os.environ.get("USERNAME"),
+                "BHoMVersion": short_bhom_version,
                 "FileId": file_id,
                 "FileName": filename,
                 "ProjectID": project_id,
                 "NbCallingComponents": len(set([a.ComponentId for a in methodgroup])),
-                "TotalNbCals": len(methodgroup),
+                "TotalNbCalls": len(methodgroup),
                 "Errors": list(itertools.chain.from_iterable([x.Errors for x in methodgroup])),
-                "_t": "BH.oM.BHoMAnalytics.UsageEntry"
+                "_t": "BH.oM.BHoMAnalytics.UsageEntry",
+                "__Time__": datetime.now(),
+                "_bhomVersion": short_bhom_version
             })
 
     return db_entries
