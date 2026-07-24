@@ -3,14 +3,6 @@
 class SpeedUnit(Enum):
     """Each unit value is a tuple in the format:
         (display name, lambda to metres per secomd, lambda from metres per second)
-        
-        Usage: 
-            value_in_km_h = 1
-            value_in_m_s = SpeedUnit.km_h.convert(value_in_km_h, SpeedUnit.m_s)
-            print(value_in_m_s)
-
-            >>> 
-
     """
     m_s = ("Metres Per Second", lambda m_s: m_s, lambda m_s: m_s)
     km_h = ("Kilometres Per Hour", lambda km_h: (km_h * 1e3) / 3.6e3, lambda m_s: (m_s / 1e3) * 3.6e3)
