@@ -20,6 +20,8 @@ def diurnal(
     series: pd.Series,
     ax: plt.Axes = None,
     period: str = "daily",
+    median: bool = True,
+    mean: bool = True,
     **kwargs,
 ) -> plt.Axes:
     """Plot a profile aggregated across days in the specified timeframe.
@@ -31,6 +33,10 @@ def diurnal(
             A matplotlib Axes object. Defaults to None.
         period (str, optional):
             The period to aggregate over. Must be one of "dailyy", "weekly", or "monthly". Defaults to "daily".
+        median (bool, optional):
+            Whether to plot the median line. Default `True`.
+        mean (bool, optional):
+            Whether to plot the mean line. Default `True`.
         **kwargs (Dict[str, Any], optional):
             Additional keyword arguments to pass to the matplotlib plotting function.
             legend (bool, optional):
@@ -42,7 +48,6 @@ def diurnal(
         plt.Axes:
             A matplotlib Axes object.
     """
-
 
     if not isinstance(series.index, pd.DatetimeIndex):
         raise ValueError("Series passed is not datetime indexed.")
@@ -183,24 +188,26 @@ def diurnal(
                 label="_nolegend_",
             )
             # mean/median
-            ax.plot(
-                range(len(df) + 1)[i : i + 25],
-                (df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24]
-                + [(df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24][0]],
-                c=color,
-                ls="-",
-                lw=1,
-                label="Average" if n == 0 else "_nolegend_",
-            )
-            ax.plot(
-                range(len(df) + 1)[i : i + 25],
-                (df["median"].tolist() + [df["median"].values[0]])[i : i + 24]
-                + [(df["median"].tolist() + [df["median"].values[0]])[i : i + 24][0]],
-                c=color,
-                ls="--",
-                lw=1,
-                label="Median" if n == 0 else "_nolegend_",
-            )
+            if mean:
+                ax.plot(
+                    range(len(df) + 1)[i : i + 25],
+                    (df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24]
+                    + [(df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24][0]],
+                    c=color,
+                    ls="-",
+                    lw=1,
+                    label="Average" if n == 0 else "_nolegend_",
+                )
+            if median:
+                ax.plot(
+                    range(len(df) + 1)[i : i + 25],
+                    (df["median"].tolist() + [df["median"].values[0]])[i : i + 24]
+                    + [(df["median"].tolist() + [df["median"].values[0]])[i : i + 24][0]],
+                    c=color,
+                    ls="--",
+                    lw=1,
+                    label="Median" if n == 0 else "_nolegend_",
+                )
 
         # format axes
         ax.set_xlim(0, len(df))
