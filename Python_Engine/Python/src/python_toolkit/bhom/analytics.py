@@ -126,6 +126,25 @@ def get_project_number() -> Union[str, None]:
     CONSOLE_LOGGER.debug(f"Retrieving project number: {PROJECT_NUMBER}")
     return PROJECT_NUMBER
 
+def try_get_module_name_with_toolkit(function: Callable):
+    """
+    Attempts to get the module name from the given function, by reading the file name of the function and 
+    returning `{toolkit_name}.{function.__module__}` if the toolkit name can be found in the file
+
+    otherwise returns `function.__module__`
+    """
+    filepath = inspect.getfile(function)
+    absolute = os.path.abspath(filepath)
+    matches = [part for part in Path(absolute).parts if part.endswith("_toolkit")]
+
+    if len(matches) > 0:
+        if (function.__module__).startswith(matches[0]):
+            return function.__module__
+
+        return f"{matches[0]}.{function.__module__}"
+
+    return function.__module__
+
 def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISABLE_ANALYTICS) -> Callable:
     """Decorator for capturing usage data.
 
@@ -189,7 +208,7 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
                 "SelectedItem": {
                     "MethodName": function.__name__,
                     "Parameters": _args,
-                    "TypeName": f"{function.__module__}.{function.__qualname__}"
+                    "TypeName": f"{try_get_module_name_with_toolkit(function)}.{function.__qualname__}"
                 },
                 "Time": {
                     "$date": bson_unix_ticks(short=True),
