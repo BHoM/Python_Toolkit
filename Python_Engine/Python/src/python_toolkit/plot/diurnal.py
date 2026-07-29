@@ -2,6 +2,7 @@
 
 import calendar
 import textwrap
+from typing import Tuple
 
 import matplotlib.collections as mcollections
 import matplotlib.lines as mlines
@@ -20,6 +21,7 @@ def diurnal(
     series: pd.Series,
     ax: plt.Axes = None,
     period: str = "daily",
+    quantile_range: Tuple[float, float] = (0.05, 0.95),
     median: bool = True,
     mean: bool = True,
     **kwargs,
@@ -33,6 +35,8 @@ def diurnal(
             A matplotlib Axes object. Defaults to None.
         period (str, optional):
             The period to aggregate over. Must be one of "dailyy", "weekly", or "monthly". Defaults to "daily".
+        quantile_range (Tuple[float, float]):
+            The quantile range to display in a lighter (30% alpha) colour on the plot. Defaults to (0.05, 0.95).
         median (bool, optional):
             Whether to plot the median line. Default `True`.
         mean (bool, optional):
@@ -66,7 +70,6 @@ def diurnal(
             raise ValueError("minmax_range must be increasing.")
         minmax_alpha = kwargs.pop("minmax_alpha", 0.1)
 
-        quantile_range = kwargs.pop("quantile_range", [0.05, 0.95])
         if quantile_range[0] > quantile_range[1]:
             raise ValueError("quantile_range must be increasing.")
         if quantile_range[0] < minmax_range[0] or quantile_range[1] > minmax_range[1]:
