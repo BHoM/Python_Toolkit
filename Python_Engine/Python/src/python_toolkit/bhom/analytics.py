@@ -135,7 +135,7 @@ def try_get_module_name_with_toolkit(function: Callable):
     """
     filepath = inspect.getfile(function)
     absolute = os.path.abspath(filepath)
-    matches = [part for part in Path(absolute).parts if part.endswith("_toolkit")]
+    matches = [part.lower() for part in reversed(Path(absolute).parts) if part.lower().endswith("_toolkit")]
 
     if len(matches) > 0:
         if (function.__module__).startswith(matches[0]):
