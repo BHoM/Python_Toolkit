@@ -6,10 +6,14 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Colormap, to_rgba
 
-from python_toolkit.bhom_tkinter.widgets import (
-	Button, ColourPicker, Spinbox, FigureContainer, RadioSelection, PackingOptions,
-)
-from python_toolkit.bhom_tkinter import BHoMBasePopup, BHoMBaseWidget
+from python_toolkit.bhom_tkinter.widgets.button import Button
+from python_toolkit.bhom_tkinter.widgets.colour_picker import ColourPicker
+from python_toolkit.bhom_tkinter.widgets.spinbox import Spinbox
+from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
+from python_toolkit.bhom_tkinter.widgets.radio_selection import RadioSelection
+from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.bhom_base_popup import BHoMBasePopup
 from python_toolkit.bhom_tkinter.widgets.slider import Slider
 from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom.custom_cmaps import save_custom_cmap, delete_custom_cmap, clear_custom_cmaps, list_custom_cmap_names
@@ -19,7 +23,6 @@ _DEFAULT_COLOURS = [
 	"#FF0000", "#FFD000", "#09FF00", "#00A2FF",
 	"#9400FF", "#FF69B4", "#00FFFF", "#FF8C00",
 ]
-
 
 class CmapBuilder(BHoMBaseWidget):
 	"""A cmap builder popup. Builds and previews custom linear or binned colormaps."""
@@ -59,14 +62,19 @@ class CmapBuilder(BHoMBaseWidget):
 	# ------------------------------------------------------------------
 
 	def _validate_name(self, value: str) -> tuple[bool, str]:
-		if not value.strip():
+		"""Validate a name for the custom colormap, checking for emptiness, invalid characters, and duplicates."""
+
+		if value.strip() is None or value.strip() == "":
 			return False, "Name cannot be empty."
+		
 		invalid_chars = set(r'\/:*?"<>|')
 		if any(c in invalid_chars for c in value):
 			return False, "Name contains invalid characters."
+		
 		# Block clashes with matplotlib's registered colormaps.
 		if value in matplotlib.colormaps:
 			return False, f"'{value}' is already a matplotlib colormap name."
+		
 		# Block duplicate saved names.
 		if value in list_custom_cmap_names():
 			return False, f"'{value}' already exists in saved collections. Delete it first."
@@ -498,16 +506,13 @@ class CmapBuilder(BHoMBaseWidget):
 		"""Regenerate the preview figure from the current row state."""
 		if not hasattr(self, "_preview_container"):
 			return
-		try:
-			cmap = self._build_current_cmap()
-			if cmap is None:
-				return
-			vmin, vmax = self._get_range()
-			fig = cmap_sample_plot(cmap, bounds=(vmin, vmax), figsize=(6, 0.5), bins=256)
-			self._preview_container.embed_figure(fig)
-			plt.close(fig)
-		except Exception:
-			pass
+		cmap = self._build_current_cmap()
+		if cmap is None:
+			return
+		vmin, vmax = self._get_range()
+		fig = cmap_sample_plot(cmap, bounds=(vmin, vmax), figsize=(6, 0.5), bins=256)
+		self._preview_container.embed_figure(fig)
+		plt.close(fig)
 
 	def _apply_cmap(self) -> None:
 		"""Validate, build the colormap, fire the command, and close the popup."""
@@ -526,20 +531,17 @@ class CmapBuilder(BHoMBaseWidget):
 		self._last_cmap = cmap
 		self._last_bounds = (vmin, vmax)
 
-		# Persist the colormap definition to the user file.
-		try:
-			colours = [r["colour_picker"].get() for r in self._colour_rows]
-			if self._is_interpolation():
-				positions = [r["pos_var"].get() for r in self._colour_rows]
-				positions[0] = vmin
-				positions[-1] = vmax
-				save_custom_cmap(name, "interpolation", colours, positions, vmin, vmax)
-			else:
-				lower_bounds = [r["pos_var"].get() for r in self._colour_rows]
-				lower_bounds[0] = vmin
-				save_custom_cmap(name, "bins", colours, lower_bounds, vmin, vmax)
-		except Exception:
-			CONSOLE_LOGGER.warning("Failed to persist colormap to file.", exc_info=True)
+		colours = [r["colour_picker"].get() for r in self._colour_rows]
+		if self._is_interpolation():
+			positions = [r["pos_var"].get() for r in self._colour_rows]
+			positions[0] = vmin
+			positions[-1] = vmax
+			save_custom_cmap(name, "interpolation", colours, positions, vmin, vmax)
+		else:
+			lower_bounds = [r["pos_var"].get() for r in self._colour_rows]
+			lower_bounds[0] = vmin
+			save_custom_cmap(name, "bins", colours, lower_bounds, vmin, vmax)
+				
 
 		if self.command is not None:
 			self.command(cmap, (vmin, vmax))

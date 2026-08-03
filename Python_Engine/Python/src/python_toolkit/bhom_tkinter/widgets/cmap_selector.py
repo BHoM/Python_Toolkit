@@ -9,6 +9,7 @@ from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+from python_toolkit.bhom_tkinter.widgets.custom_cmap_builder import CmapBuilder
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 from python_toolkit.bhom.custom_cmaps import load_custom_cmaps
@@ -218,7 +219,6 @@ class CmapSelector(BHoMBaseWidget):
 
     def _open_cmap_builder(self) -> None:
         """Open the CmapBuilder popup. The widget itself is not displayed."""
-        from python_toolkit.bhom_tkinter.widgets.custom_cmap_builder import CmapBuilder
         builder = CmapBuilder(self, command=self._on_custom_cmap_applied)
         builder._open_builder()
 

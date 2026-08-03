@@ -8,7 +8,12 @@ import importlib.metadata
 
 BHOM_LOG_FOLDER = Path(path.expandvars("%PROGRAMDATA%/BHoM/Logs"))
 TOOLKIT_NAME = "Python_Toolkit"
-BHOM_VERSION = importlib.metadata.version("python_toolkit")
+
+# Try to get package version, fallback to unknown if not installed
+try:
+    BHOM_VERSION = importlib.metadata.version("python_toolkit")
+except importlib.metadata.PackageNotFoundError:
+    BHOM_VERSION = "unknown"
 
 #Environment variable that if set disables BHoM analytics logging.
 DISABLE_ANALYTICS = os.environ.get("DISABLE_BHOM_ANALYTICS", None)
