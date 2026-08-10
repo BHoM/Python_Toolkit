@@ -134,14 +134,14 @@ def diurnal(
         # Get values to plot
         minima = group.min()
         lower = group.quantile(quantile_range[0])
-        median = group.median()
-        mean = group.mean()
+        median_series = group.median()
+        mean_series = group.mean()
         upper = group.quantile(quantile_range[1])
         maxima = group.max()
 
         # create df for re-indexing
         df = pd.concat(
-            [minima, lower, median, mean, upper, maxima],
+            [minima, lower, median_series, mean_series, upper, maxima],
             axis=1,
             keys=["minima", "lower", "median", "mean", "upper", "maxima"],
         ).reindex(target_idx)
