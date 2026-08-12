@@ -2,6 +2,7 @@
 
 import calendar
 import textwrap
+from typing import Tuple
 
 import matplotlib.collections as mcollections
 import matplotlib.lines as mlines
@@ -20,6 +21,9 @@ def diurnal(
     series: pd.Series,
     ax: plt.Axes = None,
     period: str = "daily",
+    quantile_range: Tuple[float, float] = (0.05, 0.95),
+    median: bool = True,
+    mean: bool = True,
     **kwargs,
 ) -> plt.Axes:
     """Plot a profile aggregated across days in the specified timeframe.
@@ -31,6 +35,12 @@ def diurnal(
             A matplotlib Axes object. Defaults to None.
         period (str, optional):
             The period to aggregate over. Must be one of "dailyy", "weekly", or "monthly". Defaults to "daily".
+        quantile_range (Tuple[float, float]):
+            The quantile range to display in a lighter (30% alpha) colour on the plot. Defaults to (0.05, 0.95).
+        median (bool, optional):
+            Whether to plot the median line. Default `True`.
+        mean (bool, optional):
+            Whether to plot the mean line. Default `True`.
         **kwargs (Dict[str, Any], optional):
             Additional keyword arguments to pass to the matplotlib plotting function.
             legend (bool, optional):
@@ -42,7 +52,6 @@ def diurnal(
         plt.Axes:
             A matplotlib Axes object.
     """
-
 
     if not isinstance(series.index, pd.DatetimeIndex):
         raise ValueError("Series passed is not datetime indexed.")
@@ -61,7 +70,6 @@ def diurnal(
             raise ValueError("minmax_range must be increasing.")
         minmax_alpha = kwargs.pop("minmax_alpha", 0.1)
 
-        quantile_range = kwargs.pop("quantile_range", [0.05, 0.95])
         if quantile_range[0] > quantile_range[1]:
             raise ValueError("quantile_range must be increasing.")
         if quantile_range[0] < minmax_range[0] or quantile_range[1] > minmax_range[1]:
@@ -126,14 +134,14 @@ def diurnal(
         # Get values to plot
         minima = group.min()
         lower = group.quantile(quantile_range[0])
-        median = group.median()
-        mean = group.mean()
+        median_series = group.median()
+        mean_series = group.mean()
         upper = group.quantile(quantile_range[1])
         maxima = group.max()
 
         # create df for re-indexing
         df = pd.concat(
-            [minima, lower, median, mean, upper, maxima],
+            [minima, lower, median_series, mean_series, upper, maxima],
             axis=1,
             keys=["minima", "lower", "median", "mean", "upper", "maxima"],
         ).reindex(target_idx)
@@ -183,24 +191,26 @@ def diurnal(
                 label="_nolegend_",
             )
             # mean/median
-            ax.plot(
-                range(len(df) + 1)[i : i + 25],
-                (df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24]
-                + [(df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24][0]],
-                c=color,
-                ls="-",
-                lw=1,
-                label="Average" if n == 0 else "_nolegend_",
-            )
-            ax.plot(
-                range(len(df) + 1)[i : i + 25],
-                (df["median"].tolist() + [df["median"].values[0]])[i : i + 24]
-                + [(df["median"].tolist() + [df["median"].values[0]])[i : i + 24][0]],
-                c=color,
-                ls="--",
-                lw=1,
-                label="Median" if n == 0 else "_nolegend_",
-            )
+            if mean:
+                ax.plot(
+                    range(len(df) + 1)[i : i + 25],
+                    (df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24]
+                    + [(df["mean"].tolist() + [df["mean"].values[0]])[i : i + 24][0]],
+                    c=color,
+                    ls="-",
+                    lw=1,
+                    label="Average" if n == 0 else "_nolegend_",
+                )
+            if median:
+                ax.plot(
+                    range(len(df) + 1)[i : i + 25],
+                    (df["median"].tolist() + [df["median"].values[0]])[i : i + 24]
+                    + [(df["median"].tolist() + [df["median"].values[0]])[i : i + 24][0]],
+                    c=color,
+                    ls="--",
+                    lw=1,
+                    label="Median" if n == 0 else "_nolegend_",
+                )
 
         # format axes
         ax.set_xlim(0, len(df))
