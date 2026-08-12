@@ -40,7 +40,9 @@ class _BHoMWrapper:
                             input_json = f.read()
 
                     try:
-                        json_kwargs: dict = json.loads(input_json, cls=decoder_cls)
+                        json_kwargs: Union[dict, IObject] = json.loads(input_json, cls=decoder_cls)
+                        if isinstance(json_kwargs, IObject):
+                            json_kwargs = json_kwargs.to_dict()
                     except:
                         CONSOLE_LOGGER.error("Could not load JSON from file or string due to invalid JSON. Attempting to run with given args and kwargs.", exc_info=1)
 
