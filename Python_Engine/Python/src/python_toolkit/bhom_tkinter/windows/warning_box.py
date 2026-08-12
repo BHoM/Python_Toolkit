@@ -1,11 +1,11 @@
 """Standardized warning dialog window for errors, warnings, and info messages."""
 
 from python_toolkit.bhom_tkinter.widgets.label import Label
-from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 
-class WarningBox(BHoMBaseWindow):
+class WarningBox(BHoMBaseChildWindow):
     """Show categorized messages using the shared BHoM window styling."""
 
     def __init__(
