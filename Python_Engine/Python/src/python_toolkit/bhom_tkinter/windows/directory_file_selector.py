@@ -8,9 +8,9 @@ from typing import Iterable, List, Optional
 
 from python_toolkit.bhom_tkinter.widgets.list_box import ScrollableListBox
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
 
-class DirectoryFileSelector(BHoMBaseWindow):
+class DirectoryFileSelector(BHoMBaseChildWindow):
     """Display matching files and return the user's multi-selection."""
 
     def __init__(
