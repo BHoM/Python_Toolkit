@@ -1,6 +1,7 @@
 from base64 import decode
 import copy
 from ctypes import ArgumentError
+from datetime import datetime
 from json import encoder
 from pathlib import Path
 import uuid
@@ -10,6 +11,7 @@ import json
 from json import JSONEncoder, JSONDecoder
 from .logging import CONSOLE_LOGGER
 from . import BHOM_VERSION
+from .util import bson_unix_ticks, bson_unix_ticks_to_datetime
 import pandas as pd
 import numpy as np
 
@@ -45,6 +47,10 @@ class BHoMJSONDecoder(JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
     def object_hook(self, d):
+        if "$date" in d:
+            CONSOLE_LOGGER.debug(f"deserialising timestamp {d}")
+            return bson_unix_ticks_to_datetime(d["$date"])
+
         if "_t" not in d:
             CONSOLE_LOGGER.debug(f"BHoMJSONDecoder could not convert the following dictionary into a BHoMObject due to a missing '_t' property. Falling back to dictionary: {d}")
             return self.deserialise_unknown(d)
@@ -140,7 +146,9 @@ class BHoMJSONEncoder(JSONEncoder):
         elif isinstance(o, np.ndarray):
             return o.tolist()
         elif isinstance(o, pd.Timestamp):
-            return o.isoformat()
+            return {"$date": bson_unix_ticks(o.to_pydatetime(), True)}
+        elif isinstance(o, datetime):
+            return {"$date": bson_unix_ticks(o, True)}
         elif isinstance(o, pd.Series):
             return dict(zip(o.index.astype(str), o))
         elif isinstance(o, Path):

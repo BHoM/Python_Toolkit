@@ -1,7 +1,7 @@
 ﻿import json
 from typing import Any, Callable, Union, Dict
 from functools import wraps
-from ..bhom_object import CONSOLE_LOGGER, BHoMJSONDecoder, BHoMJSONEncoder, BHoMObject
+from ..bhom_object import CONSOLE_LOGGER, BHoMJSONDecoder, BHoMJSONEncoder, BHoMObject, IObject
 
 class _BHoMWrapper:
     _registered_methods: Dict[str, Callable] = {}
