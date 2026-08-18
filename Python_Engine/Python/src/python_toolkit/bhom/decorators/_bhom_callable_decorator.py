@@ -76,7 +76,7 @@ class _BHoMWrapper:
         method = self._registered_methods.get(method_identifier, None)
 
         if method is None:
-            CONSOLE_LOGGER.error("The requested method could not be found.")
+            raise NotImplementedError(f"The requested method {method_identifier} is not implemented or could not be found.")
 
         return method
 
