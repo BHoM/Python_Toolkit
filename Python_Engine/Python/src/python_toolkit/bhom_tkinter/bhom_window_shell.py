@@ -236,16 +236,16 @@ class BHoMWindowShell:
     def _ensure_typography_styles(self, style: ttk.Style) -> None:
         """Ensure key typography styles exist and remain visually distinct."""
         defaults = {
-            "TLabel": ("Segoe UI", 10, "bold"),
+            "TLabel": ("Segoe UI", 10),
             "Body.TLabel": ("Segoe UI", 10),
             "Caption.TLabel": ("Segoe UI", 9),
             "Small.TLabel": ("Segoe UI", 8),
             "Heading.TLabel": ("Segoe UI", 12, "bold"),
-            "Subtitle.TLabel": ("Segoe UI", 14, "bold"),
-            "Headline.TLabel": ("Segoe UI", 16, "bold"),
-            "Title.TLabel": ("Segoe UI", 24, "bold"),
-            "LargeTitle.TLabel": ("Segoe UI", 24, "bold"),
-            "Display.TLabel": ("Segoe UI", 28, "bold"),
+            "Subtitle.TLabel": ("Segoe UI", 12, "bold"),
+            "Headline.TLabel": ("Segoe UI", 14, "bold"),
+            "Title.TLabel": ("Segoe UI", 18, "bold"),
+            "LargeTitle.TLabel": ("Segoe UI", 18, "bold"),
+            "Display.TLabel": ("Segoe UI", 20, "bold"),
         }
 
         def _lookup_font(style_name: str) -> str:
