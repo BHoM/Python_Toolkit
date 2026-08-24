@@ -37,6 +37,7 @@ def convert_camel_to_pascal(s: str):
             continue
         elif sec.startswith("_"):
             parts.append(sec)
+            continue
 
         parts.append(sec.capitalize())
 

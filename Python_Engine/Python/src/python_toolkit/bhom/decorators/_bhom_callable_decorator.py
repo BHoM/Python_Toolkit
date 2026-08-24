@@ -61,6 +61,10 @@ class _BHoMWrapper:
                 rtn = function(*args, **kwargs)
 
                 if do_wrap:
+                    #don't bother serialising if the method already returns a string.
+                    if isinstance(rtn, str):
+                        return rtn
+
                     json_rtn = json.dumps(rtn, cls=encoder_cls)
 
                     return json_rtn
