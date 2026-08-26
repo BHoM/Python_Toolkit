@@ -6,7 +6,10 @@ from os import path
 import tempfile
 import importlib.metadata
 
-from .installer_info import INSTALLER_INFO
+if os.name == 'nt':
+    from .installer_info import INSTALLER_INFO
+else:
+    INSTALLER_INFO = {"Version": importlib.metadata.version("python_toolkit")}
 
 BHOM_LOG_FOLDER = Path(path.expandvars("%PROGRAMDATA%/BHoM/Logs"))
 TEMP_LOG_FOLDER = Path(tempfile.gettempdir()) / "BHoM" / "Logs"
