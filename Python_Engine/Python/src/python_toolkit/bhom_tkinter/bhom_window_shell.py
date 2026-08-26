@@ -12,6 +12,8 @@ from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 from python_toolkit.bhom_tkinter.theming.theme import ThemeManager
 
+from python_toolkit.bhom import BHOM_VERSION
+
 
 class BHoMWindowShell:
     """Shared themed window chrome for BHoM Tk root and Toplevel windows."""
@@ -323,7 +325,7 @@ class BHoMWindowShell:
         # Subtitle
         subtitle_label = Label(
             text_container,
-            text="powered by BHoM",
+            text=f"powered by BHoM (v{BHOM_VERSION})",
             style="Caption.TLabel"
         )
         subtitle_label.pack(anchor="w")
