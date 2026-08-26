@@ -1,11 +1,13 @@
-import clr
+import os
 import sys
 import json
 
-#append assemblies dir
-sys.path.append("C:\\ProgramData\\BHoM\\Assemblies")
+import clr
 
-#add reference to the BHoM_UI assembly
+#append assemblies dir
+sys.path.append(os.path.expandvars("%ProgramData%\\BHoM\\Assemblies"))
+
+#add required CLR references (dotnet dlls)
 clr.AddReference("UI_Engine")
 clr.AddReference("Serialiser_Engine")
 
