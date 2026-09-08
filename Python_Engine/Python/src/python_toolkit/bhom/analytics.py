@@ -154,7 +154,7 @@ def bhom_analytics(project_id:Callable = get_project_number, disable:bool = DISA
         @wraps(function)
         def wrapper(*args, **kwargs) -> Any:
             """A wrapper around the function that captures usage analytics."""
-
+                
             if disable:
                 CONSOLE_LOGGER.debug("bhom_analytics is curently disabled.")
                 return function(*args, **kwargs)
