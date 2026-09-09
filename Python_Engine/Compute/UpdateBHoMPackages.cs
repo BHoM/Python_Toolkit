@@ -1,4 +1,5 @@
-﻿using BH.oM.Python;
+﻿using BH.oM.Base.Attributes;
+using BH.oM.Python;
 using BH.oM.Python.Enums;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,9 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [Description("Using the environment name (and version if the environment name is the base python environment), directly install/update missing BHoM packages.")]
+        [Input("environmentName", "The name of the environment to update.")]
+        [Input("version", "If the environment name is the name of the base python environment, the version that needs updating.")]
         public static void UpdateBHoMPackages(this string environmentName, PythonVersion version = PythonVersion.Undefined)
         {
             //construct the expected PythonEnvironment and pass to UpdateBHoMPackages
@@ -35,7 +39,10 @@ namespace BH.Engine.Python
             UpdateBHoMPackages(env);
         }
 
-        [Description("Direct method to update BHoM Python editable packages using the PythonEnvironment directly.")]
+        /***************************************************/
+
+        [Description("Using a PythonEnvironment, directly install/update missing BHoM packages.")]
+        [Input("environment", "The python environment to update.")]
         public static void UpdateBHoMPackages(this PythonEnvironment environment)
         {
             if (!Query.VirtualEnvironmentExists(environment.Name))
@@ -54,6 +61,8 @@ namespace BH.Engine.Python
 
             InstallPackageLocal(environment, localPackageDirectory);
         }
+
+        /***************************************************/
 
         private static string ResolvePackageDirectory(PythonEnvironment environment)
         {
