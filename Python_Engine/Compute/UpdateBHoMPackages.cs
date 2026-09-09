@@ -67,9 +67,9 @@ namespace BH.Engine.Python
         [Input("environment", "The python environment to update.")]
         public static void UpdateBHoMPackages(this PythonEnvironment environment)
         {
-            if (!Query.VirtualEnvironmentExists(environment.Name))
+            if (!File.Exists(environment.Executable))
             {
-                BH.Engine.Base.Compute.RecordError("Given environment does not exist.");
+                BH.Engine.Base.Compute.RecordError($"Given environment or base install {environment.Executable} does not exist.");
                 return;
             }
 
