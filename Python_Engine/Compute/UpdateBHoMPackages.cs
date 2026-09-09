@@ -20,13 +20,16 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Base;
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
 using BH.oM.Python.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace BH.Engine.Python
@@ -73,24 +76,33 @@ namespace BH.Engine.Python
                 return;
             }
 
-            string localPackageDirectory = ResolvePackageDirectory(environment);
-
-            if (!Directory.Exists(localPackageDirectory))
+            //`python -m pip list -e --format json` lists all environment packages that are editable installs.
+            //As all BHoM packages are editable installs, this handily lists all the packages that should be updated if necessary.
+            //side effect of updating other editable installs if they have changed, but I suspect this won't be a problem as anyone who has these would update packages manually instead.
+            System.Diagnostics.Process process = new System.Diagnostics.Process()
             {
-                BH.Engine.Base.Compute.RecordError($"There is no local package directory for {environment.Name} (searched at \"{localPackageDirectory}\"). No packages were updated.");
-                return;
+                StartInfo = new System.Diagnostics.ProcessStartInfo()
+                {
+                    FileName = environment.Executable,
+                    Arguments = $"-m pip list -e --format json",
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                }
+            };
+
+            process.StartInfo.Environment["PYTHONHOME"] = "";
+            string stdOut;
+
+            using (Process p = Process.Start(process.StartInfo))
+            {
+                stdOut = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
             }
 
-            InstallPackageLocal(environment, localPackageDirectory);
-        }
+            IEnumerable<CustomObject> objs = Serialiser.Convert.FromJsonArray(stdOut).OfType<CustomObject>();
 
-        /***************************************************/
-
-        private static string ResolvePackageDirectory(PythonEnvironment environment)
-        {
-            string packageName = environment.Name;
-            string codeDirectory = Query.DirectoryCode();
-            return Path.Combine(codeDirectory, packageName);
+            foreach (CustomObject obj in objs)
+                InstallPackageLocal(environment, (string)obj.CustomData["editable_project_location"]);
         }
     }
 }
