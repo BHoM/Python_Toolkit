@@ -99,6 +99,8 @@ namespace BH.Engine.Python
                 p.WaitForExit();
             }
 
+            stdOut = stdOut.TrimEnd('\r', '\n');
+
             IEnumerable<CustomObject> objs = Serialiser.Convert.FromJsonArray(stdOut).OfType<CustomObject>();
 
             foreach (CustomObject obj in objs)
