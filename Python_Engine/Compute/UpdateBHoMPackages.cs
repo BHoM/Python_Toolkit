@@ -86,7 +86,7 @@ namespace BH.Engine.Python
                     FileName = environment.Executable,
                     Arguments = $"-m pip list -e --format json",
                     UseShellExecute = false,
-                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
                 }
             };
 

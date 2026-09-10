@@ -60,7 +60,11 @@ namespace BH.Engine.Python
             bool exists = Query.VirtualEnvironmentExists(name);
 
             if (exists && reload)
-                return new PythonEnvironment() { Name = name, Executable = targetExecutable };
+            {
+                PythonEnvironment env = new PythonEnvironment() { Name = name, Executable = targetExecutable };
+                UpdateBHoMPackages(env);
+                return env;
+            }
 
             if (exists && !reload)
             {
