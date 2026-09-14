@@ -60,7 +60,11 @@ namespace BH.Engine.Python
             bool exists = File.Exists(targetExecutable);
 
             if (exists && reload)
-                return new PythonEnvironment() { Name = Query.ToolkitName(), Executable = targetExecutable };
+            {
+                PythonEnvironment env = new PythonEnvironment() { Name = Query.ToolkitName(), Executable = targetExecutable };
+                UpdateBHoMPackages(env);
+                return env;
+            }
 
             if (exists && !reload)
                 // remove all existing environments and kernels
