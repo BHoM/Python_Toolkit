@@ -9,6 +9,15 @@ from ..bhom.analytics import bhom_analytics
 from ..helpers.timeseries import validate_timeseries
 
 
+def _bin_edges(coords, default_width: float):
+    """Edges so each centre keeps a flat pcolormesh cell."""
+    coords = np.asarray(coords, dtype=float)
+    if coords.size == 0:
+        return coords
+    width = default_width if coords.size == 1 else np.diff(coords)[-1]
+    return np.concatenate([coords, coords[-1:] + width])
+
+
 @bhom_analytics()
 def heatmap(
     series: pd.Series,
@@ -71,10 +80,12 @@ def heatmap(
         if ax is None:
             ax = plt.gca()
 
+        kwargs.pop("shading", None)
         pcm = ax.pcolormesh(
-            x,
-            y,
-            z[:-1, :-1],
+            _bin_edges(x, 1.0),
+            _bin_edges(y, 1.0 / 24.0),
+            z,
+            shading="flat",
             **kwargs,
         )
 

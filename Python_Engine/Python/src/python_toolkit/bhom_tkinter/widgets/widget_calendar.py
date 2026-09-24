@@ -27,12 +27,16 @@ class CalendarWidget(BHoMBaseWidget):
             day_button_padx: int = 1,
             day_button_pady: int = 1,
             day_button_text_alignment: Literal["left", "center", "right"] = "center",
+            fixed_week_rows: int | None = None,
+            selector_position: Literal["top", "bottom"] = "bottom",
+            selection_label_format: Literal["short", "long"] = "short",
             **kwargs):
         
         super().__init__(parent, **kwargs)
 
         self.year = def_year
         self.month = def_month
+        self.day = def_day
         self.show_year_selector = show_year_selector
         self.year_min = year_min
         self.year_max = year_max
@@ -44,6 +48,17 @@ class CalendarWidget(BHoMBaseWidget):
             alignment_candidate = "center"
         self.day_button_text_alignment = alignment_candidate
         self.day_button_style = f"CalendarDay.{id(self)}.TButton"
+        self.fixed_week_rows = (
+            max(1, int(fixed_week_rows)) if fixed_week_rows is not None else None
+        )
+        selector_candidate = str(selector_position).strip().lower()
+        self.selector_position = (
+            selector_candidate if selector_candidate in {"top", "bottom"} else "bottom"
+        )
+        label_format = str(selection_label_format).strip().lower()
+        self.selection_label_format = (
+            label_format if label_format in {"short", "long"} else "short"
+        )
 
         anchor_map = {
             "left": "w",
@@ -53,20 +68,17 @@ class CalendarWidget(BHoMBaseWidget):
         ttk.Style(self).configure(self.day_button_style, anchor=anchor_map[self.day_button_text_alignment])
 
         self.cal_frame = ttk.Frame(self.content_frame)
-        self.cal_frame.pack(side="top", fill="x")
-
         self.month_frame = ttk.Frame(self.content_frame)
-        self.month_frame.pack(side="top", anchor=self._pack_anchor)
-
         self.date_frame = ttk.Frame(self.content_frame)
-        self.date_frame.pack(side="top", fill="x")
 
         if self.show_year_selector:
             self.year_selector()
         self.month_selector()
+        self._pack_sections()
         self._initialized = False
-        self.set_day(def_day)
+        self._clamp_day()
         self.redraw()
+        self._refresh_selection_label()
         self._initialized = True
 
     def year_selector(self):
@@ -93,6 +105,44 @@ class CalendarWidget(BHoMBaseWidget):
         )
         self.month_dropdown.pack(side="left", padx=4, pady=4)
 
+    def _pack_sections(self) -> None:
+        """Pack month selectors and calendar sections in the configured order."""
+        for frame in (self.cal_frame, self.month_frame, self.date_frame):
+            frame.pack_forget()
+
+        if self.selector_position == "top":
+            section_order = (self.month_frame, self.cal_frame, self.date_frame)
+        else:
+            section_order = (self.cal_frame, self.month_frame, self.date_frame)
+
+        for frame in section_order:
+            if frame is self.month_frame:
+                frame.pack(side="top", anchor=self._pack_anchor, fill="x")
+            else:
+                frame.pack(side="top", fill="x")
+
+    def _clamp_day(self) -> None:
+        last_day = calendar.monthrange(self.year, self.month)[1]
+        if self.day > last_day:
+            self.day = last_day
+
+    def _refresh_selection_label(self) -> None:
+        for child in self.date_frame.winfo_children():
+            child.destroy()
+
+        try:
+            selected = datetime.date(self.year, self.month, self.day)
+            if self.selection_label_format == "long":
+                text = f"Selected: {selected.strftime('%A %d %B %Y')}"
+            else:
+                text = f"Selected Date: {self.months[self.month - 1]} {self.day}"
+        except ValueError as error:
+            text = f"Selected: invalid date ({error})"
+
+        label = Label(self.date_frame, text=text)
+        self.align_child_text(label)
+        label.pack(anchor=self._pack_anchor, padx=4, pady=4)
+
     def set_year(self, value):
         """Update the selected year and redraw the calendar.
 
@@ -100,7 +150,9 @@ class CalendarWidget(BHoMBaseWidget):
             value: The selected year as a string.
         """
         self.year = int(value)
+        self._clamp_day()
         self.redraw()
+        self._refresh_selection_label()
 
     def set_month(self, value):
         """Update the selected month and redraw the calendar.
@@ -109,7 +161,9 @@ class CalendarWidget(BHoMBaseWidget):
             value: The selected month name as a string.
         """
         self.month = self.months.index(value) + 1
+        self._clamp_day()
         self.redraw()
+        self._refresh_selection_label()
 
     def redraw(self):
         """Rebuild the month grid buttons for the current month and year."""
@@ -124,9 +178,13 @@ class CalendarWidget(BHoMBaseWidget):
             self.align_child_text(label)
             label.grid(row=0, column=col, sticky="nsew")
 
-        cal = calendar.monthcalendar(self.year, self.month)
+        weeks = calendar.monthcalendar(self.year, self.month)
+        if self.fixed_week_rows is not None:
+            while len(weeks) < self.fixed_week_rows:
+                weeks.append([0, 0, 0, 0, 0, 0, 0])
+            weeks = weeks[: self.fixed_week_rows]
         
-        for row, week in enumerate(cal):
+        for row, week in enumerate(weeks):
             for col, day in enumerate(week):
                 text = "" if day == 0 else day
                 state = "normal" if day > 0 else "disabled"
@@ -154,14 +212,7 @@ class CalendarWidget(BHoMBaseWidget):
         if not num or num <= 0:
             return
         self.day = num
-
-        for child in self.date_frame.winfo_children():
-            child.destroy()
-
-        date = self.months[self.month-1] + " " + str(self.day)
-        label = Label(self.date_frame, text=f"Selected Date: {date}")
-        self.align_child_text(label)
-        label.pack(anchor=self._pack_anchor, padx=4, pady=4)
+        self._refresh_selection_label()
 
         if self._initialized:
             self._fire_on_change(self.get())
@@ -195,8 +246,9 @@ class CalendarWidget(BHoMBaseWidget):
             self.year_dropdown.set(str(self.year))
         if hasattr(self, 'month_dropdown'):
             self.month_dropdown.set(self.months[self.month - 1])
-        self.set_day(self.day)
+        self._clamp_day()
         self.redraw()
+        self._refresh_selection_label()
 
     def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
         """Validate the currently selected date.
