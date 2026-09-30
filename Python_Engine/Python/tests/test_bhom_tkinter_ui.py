@@ -21,6 +21,7 @@ from python_toolkit.bhom_tkinter.widgets import (
 	PathSelector,
 	RadioSelection,
 	ScrollableListBox,
+	SearchableListBox,
 	ValidatedEntryBox,
 )
 from python_toolkit.bhom_tkinter.windows import (
@@ -136,6 +137,17 @@ def run_widget_gallery(auto_close_ms: int | None = None) -> None:
 		height=5,
 		show_selection_controls=True,
 		alignment=alignments[1],
+		build_options=PackingOptions(fill="x", pady=6),
+	).build()
+
+	SearchableListBox(
+		parent,
+		item_title="SearchableListBox",
+		helper_text="Type to filter; selections are kept while filtering",
+		items=[f"{city}_TRY.epw" for city in ["London", "Birmingham", "Manchester", "Glasgow", "Belfast", "Cardiff"]],
+		height=4,
+		show_selection_controls=True,
+		alignment=alignments[2],
 		build_options=PackingOptions(fill="x", pady=6),
 	).build()
 
@@ -348,3 +360,101 @@ def test_modal_window_is_themed_toplevel():
 	modal.close()
 	host.destroy_root()
 
+
+def test_searchable_list_box():
+	"""Selections survive filtering; select/deselect all act on visible items; single mode keeps one item."""
+	root = BHoMBaseWindow(title="SearchableListBox test")
+	changes = []
+	items = ["London_TRY.epw", "London_DSY1.epw", "Gibraltar_TRY.epw", "Belfast_TRY.epw"]
+
+	box = SearchableListBox(root.content_frame, items=items, show_selection_controls=True,
+							on_change=lambda value: changes.append(list(value)))
+	box.build()
+
+	# Build a selection across two searches
+	box.set_filter("gib")
+	assert box.get_visible() == ["Gibraltar_TRY.epw"]
+	box.list_box.set_selections(["Gibraltar_TRY.epw"])
+	box._on_list_change()
+	box.set_filter("belfast")
+	box.list_box.set_selections(["Belfast_TRY.epw"])
+	box._on_list_change()
+	assert box.get() == ["Gibraltar_TRY.epw", "Belfast_TRY.epw"]
+	assert changes[-1] == ["Gibraltar_TRY.epw", "Belfast_TRY.epw"]
+
+	# Clearing the filter shows the hidden selections as selected
+	box.clear_filter()
+	assert box.get_visible() == items
+	assert box.list_box.get_selection() == ["Gibraltar_TRY.epw", "Belfast_TRY.epw"]
+
+	# Select/deselect all only affect visible items
+	box.set_filter("london")
+	box.select_all()
+	assert box.get() == items
+	box.deselect_all()
+	assert box.get() == ["Gibraltar_TRY.epw", "Belfast_TRY.epw"]
+
+	# set / clear / set_options
+	box.set(["London_TRY.epw"])
+	assert box.get() == ["London_TRY.epw"]
+	box.clear()
+	assert box.get() == []
+	box.set(items)
+	box.set_options(["London_TRY.epw", "Cardiff_TRY.epw"])
+	assert box.get() == ["London_TRY.epw"]
+
+	# keep_hidden_selection=False drops selections the filter hides
+	strict = SearchableListBox(root.content_frame, items=items, keep_hidden_selection=False)
+	strict.build()
+	strict.set(["London_TRY.epw", "Belfast_TRY.epw"])
+	strict.set_filter("london")
+	assert strict.get() == ["London_TRY.epw"]
+
+	# Single select keeps at most one item, and a hidden choice survives filtering
+	single = SearchableListBox(root.content_frame, items=items, selectmode=tk.SINGLE)
+	single.build()
+	single.set(items)
+	assert single.get() == ["London_TRY.epw"]
+	single.set_filter("gib")
+	assert single.get() == ["London_TRY.epw"]
+	single.list_box.set_selections(["Gibraltar_TRY.epw"])
+	single._on_list_change()
+	assert single.get() == ["Gibraltar_TRY.epw"]
+
+	root.destroy_root()
+
+
+def test_searchable_list_box_fuzzy_matching():
+	"""Fuzzy mode: substrings, close letter sequences and typos match, best first; contains mode is plain."""
+	from python_toolkit.bhom_tkinter.widgets.searchable_list_box import fuzzy_score
+
+	assert fuzzy_score("", "anything") == 0.0
+	assert fuzzy_score("lon", "London_TRY.epw") is not None
+	assert fuzzy_score("ldn try", "London_TRY.epw") is not None      # letters in order, per word
+	assert fuzzy_score("birmigham", "Birmingham_TRY.epw") is not None  # typo
+	assert fuzzy_score("xyzq", "London_TRY.epw") is None
+	assert fuzzy_score("try", "NZL_Taranaki_New_Plymouth.epw") is None  # letters too far apart
+	assert fuzzy_score("london", "LOS-ANGELES-DOWNTOWN.epw") is None    # not a close misspelling
+	# Whole-word start beats a match inside a word
+	assert fuzzy_score("try", "London_TRY.epw") > fuzzy_score("try", "Country.epw")
+
+	root = BHoMBaseWindow(title="SearchableListBox fuzzy test")
+	items = ["Country_Club.epw", "London_TRY.epw", "Birmingham_TRY.epw", "Gibraltar_TRY.epw"]
+
+	fuzzy = SearchableListBox(root.content_frame, items=items)
+	fuzzy.build()
+	fuzzy.set_filter("birmigham")
+	assert fuzzy.get_visible() == ["Birmingham_TRY.epw"]
+	fuzzy.set_filter("try")
+	# Word-start matches rank above the match inside "Country" (earlier matches rank slightly higher)
+	assert set(fuzzy.get_visible()[:3]) == {"London_TRY.epw", "Birmingham_TRY.epw", "Gibraltar_TRY.epw"}
+	assert fuzzy.get_visible()[-1] == "Country_Club.epw"
+
+	contains = SearchableListBox(root.content_frame, items=items, match_mode="contains")
+	contains.build()
+	contains.set_filter("birmigham")
+	assert contains.get_visible() == []
+	contains.set_filter("try")
+	assert contains.get_visible() == items  # "Country" contains "try"; original order kept
+
+	root.destroy_root()

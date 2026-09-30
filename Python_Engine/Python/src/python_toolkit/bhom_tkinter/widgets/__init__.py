@@ -8,6 +8,7 @@ from .colour_picker import ColourPicker
 from .drop_down_selection import DropDownSelection
 from .figure_container import FigureContainer
 from .list_box import ScrollableListBox
+from .searchable_list_box import SearchableListBox
 from .check_box_selection import CheckboxSelection as MultiBoxSelection
 from .path_selector import PathSelector
 from .radio_selection import RadioSelection
@@ -28,6 +29,7 @@ __all__ = [
 	"DropDownSelection",
 	"FigureContainer",
 	"ScrollableListBox",
+	"SearchableListBox",
 	"PathSelector",
 	"RadioSelection",
 	"ValidatedEntryBox",
