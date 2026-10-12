@@ -1,54 +1,48 @@
 [project]
 name = "python_toolkit"
+version = "0.1.0"
+description = "The core BHoM Python toolkit environment, containing essential tools and utilities."
 readme = "README.md"
-dynamic = ["version", "description"]
+requires-python = ">=3.10,<3.11"
 authors = [
     { name = "BHoM", email = "bhombot@burohappold.com" }
 ]
 dependencies = [
-    "case-converter",
-    "jupyterlab",
     "matplotlib",
-    "numpy",
+    "numpy", 
     "pandas",
     "plotly",
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
-    "pytest-order",
-    "virtualenv",
     "pythonnet",
+    "pytz", 
+    "pywin32; sys_platform == 'win32'",
 ]
 
-[urls]
-source = "https://github.com/BHoM/Python_Toolkit"
-
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 
 [dependency-groups]
 dev = [
-    "black",
-    "ipykernel>=6.29.5",
-    "pylint>=3.3.5",
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
-    "pytest-order",
-    "sphinx>=8.1.3",
-    "sphinx-bootstrap-theme>=0.8.1",
-    "sphinxcontrib-fulltoc>=1.2.0",
-    "sphinxcontrib-napoleon>=0.7",
+    "flask",
+    "furo",
+    "interrogate",
+    "ipykernel",
+    "line-profiler",
+    "memory-profiler",
+    "mypy",
+    "pydata-sphinx-theme",
+    "pydocstyle",
+    "pylint",
+    "pytest-benchmark",
+    "pytest-cov",
+    "pytest-dependency",
+    "pytest-xdist",
+    "pytest",
+    "ruff",
+    "sphinx-bootstrap-theme",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinxcontrib-fulltoc",
+    "sphinxcontrib-napoleon"
 ]
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["tests"]
-
-[tool.setuptools.package-data]
-"*" = ["*.mplstyle"]
-
-[tool.pytest.ini_options]
-pythonpath = "src"
