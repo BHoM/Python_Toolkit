@@ -1,4 +1,4 @@
-﻿"""Methods for plotting spatial heatmaps."""
+"""Methods for plotting spatial heatmaps."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,7 +28,7 @@ def spatial_heatmap(
     highlight_pts: dict[str, tuple[int]] = None,
     show_legend_title: bool = True,
     clabels: bool = False,
-    style_context:str = "python_toolkit.bhom",
+    style_context: str = "python_toolkit.bhom",
 ) -> Figure:
     """Plot a spatial map of a variable using a triangulation and associated values.
 
@@ -96,7 +96,7 @@ def spatial_heatmap(
             min(i.y.min() for i in triangulations),
             max(i.y.max() for i in triangulations),
         ]
-        
+
     with plt.style.context(style_context):
         fig, ax = plt.subplots(1, 1, figsize=(8, 8))
 
@@ -131,7 +131,9 @@ def spatial_heatmap(
                         linewidths=contour_widths,
                     )
                     if clabels:
-                        ax.clabel(tcl, inline=1, fontsize="small", colors=contour_colors)
+                        ax.clabel(
+                            tcl, inline=1, fontsize="small", colors=contour_colors
+                        )
                     tcls.append(tcl)
 
         if highlight_pts is not None:
@@ -158,7 +160,8 @@ def spatial_heatmap(
             cax = divider.append_axes("right", size="5%", pad=0.1, aspect=20)
 
             cbar = plt.colorbar(
-                tcf, cax=cax  # , format=mticker.StrMethodFormatter("{x:04.1f}")
+                tcf,
+                cax=cax,  # , format=mticker.StrMethodFormatter("{x:04.1f}")
             )
             cbar.outline.set_visible(False)
             cbar.set_label(colorbar_label)

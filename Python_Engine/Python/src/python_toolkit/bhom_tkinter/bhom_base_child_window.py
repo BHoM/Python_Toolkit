@@ -52,7 +52,9 @@ class BHoMBaseChildWindow(tk.Toplevel, BHoMWindowShell):
             self._standalone_root.withdraw()
             parent = self._standalone_root
         elif theme_mode is None and hasattr(parent, "theme"):
-            theme_mode = "dark" if getattr(parent.theme, "dark_theme", False) else "light"
+            theme_mode = (
+                "dark" if getattr(parent.theme, "dark_theme", False) else "light"
+            )
 
         if theme_mode is None:
             theme_mode = "auto"

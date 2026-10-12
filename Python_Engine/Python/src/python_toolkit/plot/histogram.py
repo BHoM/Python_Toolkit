@@ -1,4 +1,4 @@
-﻿"""Methods for plotting binned data"""
+"""Methods for plotting binned data"""
 
 import calendar
 import pandas as pd
@@ -10,13 +10,14 @@ from ..bhom.analytics import bhom_analytics
 from ..helpers.timeseries import validate_timeseries, timeseries_summary_monthly
 from .utilities import contrasting_colour
 
+
 @bhom_analytics()
 def histogram(
     series: pd.Series,
     ax: plt.Axes = None,
     bins: list[float] | list[int] = None,
     **kwargs,
-    ) -> plt.Axes:
+) -> plt.Axes:
     """Create a histogram of a pandas series
 
     Args:
@@ -41,7 +42,7 @@ def histogram(
         bins = np.linspace(series.values.min(), series.values.max(), 31)
     elif len(bins) <= 1:
         bins = np.linspace(series.values.min(), series.values.max(), 31)
-        
+
     style_context = kwargs.pop("style_context", "python_toolkit.bhom")
 
     with plt.style.context(style_context):
@@ -50,12 +51,13 @@ def histogram(
 
         show_legend = kwargs.pop("show_legend", True)
 
-        ax.hist(series.values, bins=bins, label = series.name, density=False, **kwargs)
+        ax.hist(series.values, bins=bins, label=series.name, density=False, **kwargs)
 
         if show_legend:
             ax.legend()
 
     return ax
+
 
 @bhom_analytics()
 def monthly_proportional_histogram(
@@ -96,28 +98,29 @@ def monthly_proportional_histogram(
     """
 
     validate_timeseries(series)
-    
+
     style_context = kwargs.pop("style_context", "python_toolkit.bhom")
 
     with plt.style.context(style_context):
         if ax is None:
             ax = plt.gca()
-    
+
         counts = timeseries_summary_monthly(series, bins, labels, density=True)
 
         if show_year_in_label:
             counts.columns = [
-                f"{year}\n{calendar.month_abbr[month]}" for year, month in counts.columns.values
+                f"{year}\n{calendar.month_abbr[month]}"
+                for year, month in counts.columns.values
             ]
 
         counts.plot(
-            ax = ax,
-            kind = "bar",
-            stacked = True,
-            width = kwargs.pop("width", 1),
-            legend = False,
-            **kwargs
-            )
+            ax=ax,
+            kind="bar",
+            stacked=True,
+            width=kwargs.pop("width", 1),
+            legend=False,
+            **kwargs,
+        )
 
         ax.set_xlim(-0.5, len(counts) - 0.5)
         ax.set_ylim(0, 1)
@@ -127,7 +130,7 @@ def monthly_proportional_histogram(
             ha="center",
             rotation=0,
         )
-    
+
         for spine in ["top", "right", "left", "bottom"]:
             ax.spines[spine].set_visible(False)
         ax.yaxis.set_major_formatter(mticker.PercentFormatter(1))
@@ -142,7 +145,9 @@ def monthly_proportional_histogram(
 
         if show_labels:
             for i, c in enumerate(ax.containers):
-                label_colors = [contrasting_colour(i.get_facecolor()) for i in c.patches]
+                label_colors = [
+                    contrasting_colour(i.get_facecolor()) for i in c.patches
+                ]
                 labels = [
                     f"{v.get_height():0.1%}" if v.get_height() > 0.15 else "" for v in c
                 ]

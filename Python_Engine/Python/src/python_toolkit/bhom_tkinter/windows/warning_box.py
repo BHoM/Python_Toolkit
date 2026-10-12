@@ -9,13 +9,13 @@ class WarningBox(BHoMBaseChildWindow):
     """Show categorized messages using the shared BHoM window styling."""
 
     def __init__(
-            self, 
-            title: str= 'Warning', 
-            warnings: list[str] | str | None = None,
-            errors: list[str] | str | None = None,
-            infos: list[str] | str | None = None,
-            **kwargs
-            ):
+        self,
+        title: str = "Warning",
+        warnings: list[str] | str | None = None,
+        errors: list[str] | str | None = None,
+        infos: list[str] | str | None = None,
+        **kwargs,
+    ):
 
         self.warnings = self._normalise_messages(warnings)
         self.errors = self._normalise_messages(errors)
@@ -26,8 +26,8 @@ class WarningBox(BHoMBaseChildWindow):
             show_submit=False,
             close_text="Continue",
             min_width=250,
-            min_height=150,  
-            **kwargs
+            min_height=150,
+            **kwargs,
         )
 
     def build(self):
@@ -114,9 +114,15 @@ class WarningBox(BHoMBaseChildWindow):
 
 
 if __name__ == "__main__":
-    root = WarningBox(title="Validation Error", warnings="This is a warning message to alert the user about something important.")
+    root = WarningBox(
+        title="Validation Error",
+        warnings="This is a warning message to alert the user about something important.",
+    )
 
-    for message in ["This is the first error message.", "This is the second error message."]:
+    for message in [
+        "This is the first error message.",
+        "This is the second error message.",
+    ]:
         root.add_error_message(message)
 
     root.add_info_message("This is some additional information for the user.")

@@ -1,6 +1,7 @@
-﻿import numpy as np
+import numpy as np
 
 from ..bhom.analytics import bhom_analytics
+
 
 @bhom_analytics()
 def cardinality(direction_angle: float, directions: int = 16):
@@ -91,6 +92,7 @@ def cardinality(direction_angle: float, directions: int = 16):
 
     return arr[(val % directions)]
 
+
 @bhom_analytics()
 def angle_from_cardinal(cardinal_direction: str) -> float:
     """
@@ -145,6 +147,7 @@ def angle_from_cardinal(cardinal_direction: str) -> float:
 
     return lookup[cardinal_direction]
 
+
 def angle_from_north(vector: list[float]) -> float:
     """For an X, Y vector, determine the clockwise angle to north at [0, 1].
 
@@ -160,6 +163,7 @@ def angle_from_north(vector: list[float]) -> float:
     angle1 = np.arctan2(*north[::-1])
     angle2 = np.arctan2(*vector[::-1])
     return np.rad2deg((angle1 - angle2) % (2 * np.pi))
+
 
 def angle_to_vector(clockwise_angle_from_north: float) -> list[float]:
     """Return the X, Y vector from of an angle from north at 0-degrees.

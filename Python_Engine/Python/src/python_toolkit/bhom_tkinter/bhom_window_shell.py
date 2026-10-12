@@ -87,7 +87,9 @@ class BHoMWindowShell:
         self.grid_dimensions = grid_dimensions
         self._cached_widget_values: dict[str, object] = {}
 
-        self.protocol("WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window))
+        self.protocol(
+            "WM_DELETE_WINDOW", lambda: self._on_close_window(on_close_window)
+        )
 
         self.main_container = ttk.Frame(self)
         self.main_container.pack(fill=tk.BOTH, expand=True)
@@ -122,13 +124,15 @@ class BHoMWindowShell:
             self.content_frame.rowconfigure(r, weight=1)
         for c in range(x_count):
             self.content_frame.columnconfigure(c, weight=1)
-        
+
     def build(self):
         """Call build on all child widgets that have it (for deferred widget construction)."""
 
         if any(not isinstance(w, BHoMBaseWidget) for w in self.widgets):
-            raise TypeError("All items in widgets list must be instances of BHoMBaseWidget.")
-        
+            raise TypeError(
+                "All items in widgets list must be instances of BHoMBaseWidget."
+            )
+
         for widget in self.widgets:
             widget.build()
 
@@ -171,18 +175,22 @@ class BHoMWindowShell:
             None
         """
         try:
-           
             use_dark = 1 if self.theme.dark_theme else 0
 
-            if platform.system() == "Windows" and ctypes is not None and self.winfo_exists():
+            if (
+                platform.system() == "Windows"
+                and ctypes is not None
+                and self.winfo_exists()
+            ):
                 hwnd = self.winfo_id()
                 hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
                 if hwnd:
                     DWMWA_USE_IMMERSIVE_DARK_MODE = 20
                     ctypes.windll.dwmapi.DwmSetWindowAttribute(
-                        hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                        hwnd,
+                        DWMWA_USE_IMMERSIVE_DARK_MODE,
                         ctypes.byref(ctypes.c_int(use_dark)),
-                        ctypes.sizeof(ctypes.c_int)
+                        ctypes.sizeof(ctypes.c_int),
                     )
 
         except Exception:
@@ -191,9 +199,9 @@ class BHoMWindowShell:
     def _load_theme(self) -> str:
         """
         Load a custom theme from a TCL file.
-        
+
         Args:
-            custom_theme_path (Path, optional): Path to custom TCL theme file. 
+            custom_theme_path (Path, optional): Path to custom TCL theme file.
                                                 If None, uses default style.tcl in same directory.
             theme_name (str): Name of the theme to apply from the TCL file.
 
@@ -204,28 +212,32 @@ class BHoMWindowShell:
 
         try:
             current_themes = set(style.theme_names())
-            
+
             expected_theme = self.theme.path.stem.replace("_theme", "")
             # Load the TCL theme file
             try:
-                self.tk.call('source', str(self.theme.path))
+                self.tk.call("source", str(self.theme.path))
             except tk.TclError as source_error:
                 if "already exists" not in str(source_error).lower():
                     raise
 
             available_theme_names = style.theme_names()
-            newly_added = [name for name in available_theme_names if name not in current_themes]
+            newly_added = [
+                name for name in available_theme_names if name not in current_themes
+            ]
             if expected_theme in available_theme_names:
                 selected_theme = expected_theme
             elif newly_added:
                 selected_theme = newly_added[-1]
             else:
-                selected_theme = style.theme_use() if available_theme_names else "default"
+                selected_theme = (
+                    style.theme_use() if available_theme_names else "default"
+                )
 
             style.theme_use(selected_theme)
             self._ensure_typography_styles(style)
             return selected_theme
-            
+
         except Exception as e:
             print(f"Warning: Could not load custom theme: {e}")
             try:
@@ -277,7 +289,9 @@ class BHoMWindowShell:
                 except Exception:
                     pass
 
-    def _build_banner(self, parent: ttk.Frame, title: str, logo_path: Optional[Path]) -> None:
+    def _build_banner(
+        self, parent: ttk.Frame, title: str, logo_path: Optional[Path]
+    ) -> None:
         """Build the branded banner section.
 
         Args:
@@ -302,6 +316,7 @@ class BHoMWindowShell:
         if logo_path and logo_path.exists():
             try:
                 from PIL import Image, ImageTk
+
                 img = Image.open(logo_path)
                 img.thumbnail((80, 80), Image.Resampling.LANCZOS)
                 # Bind image to this root explicitly to avoid stale image handles
@@ -315,18 +330,14 @@ class BHoMWindowShell:
                 pass  # PIL not available, skip logo
 
         # Title
-        title_label = Label(
-            text_container,
-            text=title,
-            style="LargeTitle.TLabel"
-        )
+        title_label = Label(text_container, text=title, style="LargeTitle.TLabel")
         title_label.pack(anchor="w")
 
         # Subtitle
         subtitle_label = Label(
             text_container,
             text=f"powered by BHoM (v{BHOM_VERSION})",
-            style="Caption.TLabel"
+            style="Caption.TLabel",
         )
         subtitle_label.pack(anchor="w")
 
@@ -337,7 +348,7 @@ class BHoMWindowShell:
         submit_text: str,
         show_close: bool,
         close_text: str,
-        buttons_side: Literal["left", "right"] = "right"
+        buttons_side: Literal["left", "right"] = "right",
     ) -> None:
         """Build the bottom button bar.
 
@@ -369,9 +380,9 @@ class BHoMWindowShell:
 
         if show_close:
             close_widget = Button(
-                button_container, 
-                text=close_text, 
-                command=self._on_close, 
+                button_container,
+                text=close_text,
+                command=self._on_close,
                 width=12,
                 alignment="center",
             )
@@ -414,10 +425,16 @@ class BHoMWindowShell:
 
         if hasattr(self, "main_container"):
             required_width = max(required_width, self.main_container.winfo_reqwidth())
-            required_height = max(required_height, self.main_container.winfo_reqheight())
+            required_height = max(
+                required_height, self.main_container.winfo_reqheight()
+            )
 
         if self.button_bar is not None and self.button_bar.winfo_manager():
-            required_height = max(required_height, self.button_bar.winfo_reqheight() + self.content_frame.winfo_reqheight())
+            required_height = max(
+                required_height,
+                self.button_bar.winfo_reqheight()
+                + self.content_frame.winfo_reqheight(),
+            )
 
         # Determine final dimensions: auto-size unless a rigid dimension is explicitly provided.
         if self._rigid_width:
@@ -477,10 +494,16 @@ class BHoMWindowShell:
 
         if hasattr(self, "main_container"):
             required_width = max(required_width, self.main_container.winfo_reqwidth())
-            required_height = max(required_height, self.main_container.winfo_reqheight())
+            required_height = max(
+                required_height, self.main_container.winfo_reqheight()
+            )
 
         if self.button_bar is not None and self.button_bar.winfo_manager():
-            required_height = max(required_height, self.button_bar.winfo_reqheight() + self.content_frame.winfo_reqheight())
+            required_height = max(
+                required_height,
+                self.button_bar.winfo_reqheight()
+                + self.content_frame.winfo_reqheight(),
+            )
 
         current_width = self.winfo_width()
         current_height = self.winfo_height()
@@ -508,11 +531,13 @@ class BHoMWindowShell:
     def _show_window_with_styling(self) -> None:
         """Apply titlebar styling and show the window."""
         self._set_titlebar_theme()
-        
+
         # Show window after styling
         self.deiconify()
         self._has_been_shown = True
-        if not self._post_show_size_applied and (self._auto_fit_width or self._auto_fit_height):
+        if not self._post_show_size_applied and (
+            self._auto_fit_width or self._auto_fit_height
+        ):
             self.after_idle(self._apply_post_show_sizing)
 
     def refresh_sizing(self) -> None:
@@ -564,7 +589,7 @@ class BHoMWindowShell:
         if self.close_on_submit:
             self._exit("submit", self.submit_command)
             return
-        
+
         self.result = "submit"
         try:
             if self.submit_command:
@@ -577,7 +602,6 @@ class BHoMWindowShell:
             print(f"Warning: Exit callback raised an exception: {ex}")
         finally:
             self._cached_widget_values = self._collect_widget_values()
-
 
     def _on_close(self) -> None:
         """Handle close button click."""
@@ -603,12 +627,9 @@ class BHoMWindowShell:
         widget_values: dict[str, object] = {}
 
         for widget in self.widgets:
-            
             if hasattr(widget, "get"):
                 try:
                     widget_values[widget.id] = widget.get()
                 except Exception as ex:
                     print(f"Warning: Failed to get value from widget {widget}: {ex}")
         return widget_values
-
-

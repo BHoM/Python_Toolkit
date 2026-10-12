@@ -1,4 +1,4 @@
-﻿"""Methods for plotting heatmaps from time-indexed data."""
+"""Methods for plotting heatmaps from time-indexed data."""
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -46,12 +46,13 @@ def heatmap(
             The populated plt.Axes object.
     """
     validate_timeseries(series)
-    
-    
+
     day_time_matrix = (
         series.dropna()
         .to_frame()
-        .pivot_table(columns=series.dropna().index.date, index=series.dropna().index.time)
+        .pivot_table(
+            columns=series.dropna().index.date, index=series.dropna().index.time
+        )
     )
     x = mdates.date2num(day_time_matrix.columns.get_level_values(1))
     y = mdates.date2num(
@@ -61,12 +62,18 @@ def heatmap(
 
     if "mask" in kwargs:
         if not isinstance(kwargs["mask"], (list, np.ndarray, pd.Series)):
-            raise TypeError("The type of 'mask' must be a list, numpy ndarray or pandas Series")
+            raise TypeError(
+                "The type of 'mask' must be a list, numpy ndarray or pandas Series"
+            )
         if len(kwargs["mask"]) != len(series):
             raise ValueError(
                 f"Length of mask ({len(kwargs['mask'])}) must match length of data ({len(series)})."
             )
-        mask_flip = pd.Series(kwargs.pop("mask")).to_frame().pivot_table(columns=series.index.date, index=series.index.time)
+        mask_flip = (
+            pd.Series(kwargs.pop("mask"))
+            .to_frame()
+            .pivot_table(columns=series.index.date, index=series.index.time)
+        )
         z = np.ma.masked_array(z, mask=mask_flip)
 
     # handle non-standard kwargs

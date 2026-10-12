@@ -9,17 +9,18 @@ from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
 _TkVar = Union[tk.StringVar, tk.IntVar, tk.DoubleVar, tk.BooleanVar]
 
+
 class ValidatedEntryBox(BHoMBaseWidget):
     """
     A reusable entry box component with built-in validation for different data types.
-    
+
     Supports validation for:
     - String (required/optional, min/max length)
     - Integer (min/max value)
     - Float (min/max value)
     - Custom validation via callback
     """
-    
+
     def __init__(
         self,
         parent,
@@ -34,11 +35,11 @@ class ValidatedEntryBox(BHoMBaseWidget):
         required: bool = True,
         custom_validator: Optional[Callable[[Any], tuple[bool, str]]] = None,
         on_validate: Optional[Callable[[bool], None]] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Initialize the ValidatedEntryBox.
-        
+
         Args:
             parent: Parent
             item_title: Optional header text shown at the top of the widget frame
@@ -97,7 +98,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         # Create frame for entry and success indicator
         self.entry_frame = ttk.Frame(self.content_frame)
         self.entry_frame.pack(side="top", fill="x", anchor=self._pack_anchor)
-        
+
         # Create entry widget
         self.entry = ttk.Entry(
             self.entry_frame,
@@ -106,7 +107,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
             justify=self._text_justify,
         )
         self.entry.pack(side="left", fill="x", expand=True)
-        
+
         # Create success indicator label at end of entry
         self.success_label = Label(
             self.entry_frame,
@@ -116,7 +117,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
             alignment=self.alignment,
         )
         self.success_label.pack(side="left", padx=(5, 0))
-        
+
         # Create error label below entry with fixed height to prevent layout shifts
         self.error_label = Label(
             self.content_frame,
@@ -125,7 +126,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
             alignment=self.alignment,
         )
         self.error_label.pack(side="top", fill="x", anchor=self._pack_anchor)
-        
+
         # Bind validation events
         self.entry.bind("<FocusOut>", lambda _: self.validate())
         self.entry.bind("<Return>", lambda _: self.validate())
@@ -155,7 +156,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
                 self._external_var.set(raw.lower() in ("1", "true", "yes"))
         except (ValueError, TypeError):
             pass  # Ignore mid-edit invalid states
-        
+
     def get(self) -> str:
         """Get the current value as a string.
 
@@ -163,7 +164,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
             str: Trimmed entry value.
         """
         return self.variable.get().strip()
-    
+
     def get_value(self) -> Optional[Union[str, int, float, bool]]:
         """Get the current value converted to the specified type.
 
@@ -173,7 +174,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         value_str = self.get()
         if not value_str:
             return None
-            
+
         try:
             if self.value_type == int:
                 return int(value_str)
@@ -185,7 +186,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
                 return value_str
         except (ValueError, TypeError):
             return None
-    
+
     def set(self, value: Union[str, int, float, bool]) -> None:
         """Set the entry value.
 
@@ -193,11 +194,13 @@ class ValidatedEntryBox(BHoMBaseWidget):
             value: Value to display in the entry.
         """
         self.variable.set(str(value))
-        
-    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """
         Validate the current entry value.
-        
+
         Returns:
             tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
                 `(is_valid, message, severity)` where severity is `None` when
@@ -209,22 +212,24 @@ class ValidatedEntryBox(BHoMBaseWidget):
             return self.apply_validation((True, None, None))
 
         value_str = self.get()
-        base_result: tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]
-        
+        base_result: tuple[
+            bool, Optional[str], Optional[Literal["info", "warning", "error"]]
+        ]
+
         # Check if required
         if self.required and not value_str:
             self._show_error("Required")
             self._call_validate_callback(False)
             base_result = (False, "Required", "error")
             return self.apply_validation(base_result)
-        
+
         # If not required and empty, it's valid
         if not self.required and not value_str:
             self._show_success()
             self._call_validate_callback(True)
             base_result = (True, None, None)
             return self.apply_validation(base_result)
-        
+
         # Type-specific validation
         if self.value_type == str:
             is_valid = self._validate_string(value_str)
@@ -260,7 +265,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
             self._call_validate_callback(False)
 
         return final_result
-    
+
     def _validate_string(self, value: str) -> bool:
         """Validate string value.
 
@@ -274,20 +279,20 @@ class ValidatedEntryBox(BHoMBaseWidget):
         if self.min_length is not None and len(value) < self.min_length:
             self._show_error(f"Minimum length: {self.min_length}")
             return False
-        
+
         if self.max_length is not None and len(value) > self.max_length:
             self._show_error(f"Maximum length: {self.max_length}")
             return False
-        
+
         # Custom validation
         if self.custom_validator:
             is_valid, error_msg = self.custom_validator(value)
             if not is_valid:
                 self._show_error(error_msg)
                 return False
-        
+
         return True
-    
+
     def _validate_int(self, value_str: str) -> bool:
         """Validate integer value.
 
@@ -302,25 +307,25 @@ class ValidatedEntryBox(BHoMBaseWidget):
         except ValueError:
             self._show_error("Must be a valid integer")
             return False
-        
+
         # Check range constraints
         if self.min_value is not None and value < self.min_value:
             self._show_error(f"Must be >= {self.min_value}")
             return False
-        
+
         if self.max_value is not None and value > self.max_value:
             self._show_error(f"Must be <= {self.max_value}")
             return False
-        
+
         # Custom validation
         if self.custom_validator:
             is_valid, error_msg = self.custom_validator(value)
             if not is_valid:
                 self._show_error(error_msg)
                 return False
-        
+
         return True
-    
+
     def _validate_float(self, value_str: str) -> bool:
         """Validate float value.
 
@@ -335,31 +340,35 @@ class ValidatedEntryBox(BHoMBaseWidget):
         except ValueError:
             self._show_error("Must be a valid number")
             return False
-        
+
         # Check range constraints
         if self.min_value is not None and value < self.min_value:
             if self.max_value is not None:
-                self._show_error(f"Must be between {self.min_value} and {self.max_value}")
+                self._show_error(
+                    f"Must be between {self.min_value} and {self.max_value}"
+                )
             else:
                 self._show_error(f"Must be >= {self.min_value}")
             return False
-        
+
         if self.max_value is not None and value > self.max_value:
             if self.min_value is not None:
-                self._show_error(f"Must be between {self.min_value} and {self.max_value}")
+                self._show_error(
+                    f"Must be between {self.min_value} and {self.max_value}"
+                )
             else:
                 self._show_error(f"Must be <= {self.max_value}")
             return False
-        
+
         # Custom validation
         if self.custom_validator:
             is_valid, error_msg = self.custom_validator(value)
             if not is_valid:
                 self._show_error(error_msg)
                 return False
-        
+
         return True
-    
+
     def _validate_bool(self, value_str: str) -> bool:
         """Validate boolean value (accepts 1/0, true/false, yes/no).
 
@@ -387,23 +396,23 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self.error_label.set(message)
         self.error_label.label.configure(foreground="#ff4444")
         self.success_label.set(" ")
-    
+
     def _show_success(self) -> None:
         """Display success indicator."""
         self.error_label.set(" ")
         self.success_label.set("✓")
-    
+
     def clear_error(self) -> None:
         """Clear the error message."""
         self.error_label.set(" ")
         self.success_label.set(" ")
-    
+
     def _call_validate_callback(self, is_valid: bool) -> None:
         """Call the validation callback if provided."""
         if self.on_validate:
             self.on_validate(is_valid)
 
-    def set_alignment(self, alignment: Literal['left', 'center', 'right']) -> None:
+    def set_alignment(self, alignment: Literal["left", "center", "right"]) -> None:
         """Set widget alignment and refresh entry + labels accordingly."""
         super().set_alignment(alignment)
         self.entry.configure(justify=self._text_justify)
@@ -413,20 +422,19 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self.success_label.set_alignment(self.alignment)
 
 
-
 if __name__ == "__main__":
     # Test the ValidatedEntryBox
 
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-    
+
     root = BHoMBaseWindow(title="Validated Entry Box Test")
     parent_container = getattr(root, "content_frame", root)
 
     def on_validate(is_valid):
         """Print validation state in the standalone example."""
         print(f"Validation result: {is_valid}")
-    
+
     entry_box = ValidatedEntryBox(
         parent_container,
         item_title="Integer Field",
@@ -435,8 +443,8 @@ if __name__ == "__main__":
         min_value=0,
         max_value=100,
         on_validate=on_validate,
-        build_options=PackingOptions(padx=20, pady=20)
+        build_options=PackingOptions(padx=20, pady=20),
     )
     entry_box.build()
-    
+
     root.mainloop()

@@ -1,7 +1,8 @@
-﻿from typing import Any
+from typing import Any
 import pandas as pd
 
 from ..bhom.analytics import bhom_analytics
+
 
 @bhom_analytics()
 def validate_timeseries(
@@ -47,7 +48,12 @@ def validate_timeseries(
 
 
 @bhom_analytics()
-def timeseries_summary_monthly(series: pd.Series, bins: list[float], bin_names: list[str] = None, density: bool = False):
+def timeseries_summary_monthly(
+    series: pd.Series,
+    bins: list[float],
+    bin_names: list[str] = None,
+    density: bool = False,
+):
     if not isinstance(series, pd.Series):
         raise ValueError("The series must be a pandas series.")
 
@@ -60,7 +66,7 @@ def timeseries_summary_monthly(series: pd.Series, bins: list[float], bin_names: 
         raise ValueError(
             f"The input value/s are outside the range of the given bins ({bins[0]} <= x <= {bins[-1]})."
         )
-    
+
     counts = df.groupby(series.index.month).value_counts().unstack().sort_index(axis=0)
     counts.columns.name = None
     counts.index.name = "Month"

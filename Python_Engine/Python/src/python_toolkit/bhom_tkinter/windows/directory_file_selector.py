@@ -10,6 +10,7 @@ from python_toolkit.bhom_tkinter.widgets.list_box import ScrollableListBox
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
 
+
 class DirectoryFileSelector(BHoMBaseChildWindow):
     """Display matching files and return the user's multi-selection."""
 
@@ -60,7 +61,7 @@ class DirectoryFileSelector(BHoMBaseChildWindow):
                 selectmode=tk.MULTIPLE,
                 height=12,
                 show_selection_controls=True,
-                build_options=PackingOptions(fill='both', expand=True),
+                build_options=PackingOptions(fill="both", expand=True),
             )
             self.widgets.append(self.file_selector_listbox)
 
@@ -95,8 +96,14 @@ class DirectoryFileSelector(BHoMBaseChildWindow):
 
     def _on_submit(self):
         """Handle OK button - capture selection before window closes."""
-        selected = self.file_selector_listbox.get_selection() if self.file_selector_listbox else []
-        self.selected_files = [self.file_lookup[item] for item in selected if item in self.file_lookup]
+        selected = (
+            self.file_selector_listbox.get_selection()
+            if self.file_selector_listbox
+            else []
+        )
+        self.selected_files = [
+            self.file_lookup[item] for item in selected if item in self.file_lookup
+        ]
         self.destroy_root()
 
     def _on_cancel(self):
@@ -104,8 +111,8 @@ class DirectoryFileSelector(BHoMBaseChildWindow):
         self._cancelled = True
         self.destroy_root()
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     print(Path(__file__).resolve().parent, flush=True)
     # Example usage
     selector = DirectoryFileSelector(

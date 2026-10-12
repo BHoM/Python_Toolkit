@@ -1,9 +1,11 @@
-﻿from enum import Enum
+from enum import Enum
+
 
 class LengthUnit(Enum):
     """Each unit value is a tuple in the format:
-        (display name, lambda to metres, lambda from metres)
+    (display name, lambda to metres, lambda from metres)
     """
+
     cm = ("Centimetre", lambda cm: cm * 1e-2, lambda m: m / 1e-2)
     ft = ("Foot", lambda ft: ft * 3.048e-1, lambda m: m / 3.048e-1)
     In = ("Inch", lambda In: In * 2.54e-2, lambda m: m / 2.54e-2)

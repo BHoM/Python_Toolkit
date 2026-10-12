@@ -10,8 +10,8 @@ be used both as a visual reference and as a quick regression check.
 from __future__ import annotations
 
 import os
-from tkinter import ttk
 from tkinter import font as tkfont
+from tkinter import ttk
 
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 from python_toolkit.bhom_tkinter.widgets.label import Label as BHoMLabel
@@ -86,14 +86,20 @@ def run_styling_guide(
         print("theme", style.theme_use())
         print("--- typography styles ---")
         for style_name, sample in guide_rows:
-            font_lookup = style.lookup(style_name, "font") or style.lookup("TLabel", "font")
+            font_lookup = style.lookup(style_name, "font") or style.lookup(
+                "TLabel", "font"
+            )
             parsed = tkfont.Font(root=window, font=font_lookup)
             print(
                 style_name,
-                "lookup=", font_lookup,
-                "actual-size=", parsed.actual("size"),
-                "linespace=", parsed.metrics("linespace"),
-                "rendered-height=", sample.label.winfo_reqheight(),
+                "lookup=",
+                font_lookup,
+                "actual-size=",
+                parsed.actual("size"),
+                "linespace=",
+                parsed.metrics("linespace"),
+                "rendered-height=",
+                sample.label.winfo_reqheight(),
             )
 
     if auto_close_ms is not None and auto_close_ms > 0:

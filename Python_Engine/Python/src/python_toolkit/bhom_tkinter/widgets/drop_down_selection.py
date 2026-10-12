@@ -6,152 +6,162 @@ from typing import Optional, Callable, List, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
+
 class DropDownSelection(BHoMBaseWidget):
-	"""A reusable dropdown selection widget built from a list of options."""
+    """A reusable dropdown selection widget built from a list of options."""
 
-	def __init__(
-			self, 
-			parent, 
-			options: Optional[List[str]] = None,
-			command: Optional[Callable[[str], None]] = None,
-			default: Optional[str] = None,
-			width: int = 20,
-			state: str = "normal",
-			value_var: Optional[tk.StringVar] = None,
-			**kwargs):
-		"""
-		Args:
-			parent (tk.Widget): The parent widget.
-			options (list, optional): List of selectable options.
-			command (callable, optional): Called with selected value when changed.
-			default (str, optional): Default selected value.
-			width (int): Width of the dropdown widget in characters.
-			state (str): Combobox state ("normal", "readonly", or "disabled").
-			item_title (str, optional): Optional header text shown at the top of the widget frame.
-			helper_text (str, optional): Optional helper text shown above the dropdown.
-			**kwargs: Additional Frame options.
-		"""
-		super().__init__(parent, **kwargs)
+    def __init__(
+        self,
+        parent,
+        options: Optional[List[str]] = None,
+        command: Optional[Callable[[str], None]] = None,
+        default: Optional[str] = None,
+        width: int = 20,
+        state: str = "normal",
+        value_var: Optional[tk.StringVar] = None,
+        **kwargs,
+    ):
+        """
+        Args:
+                parent (tk.Widget): The parent widget.
+                options (list, optional): List of selectable options.
+                command (callable, optional): Called with selected value when changed.
+                default (str, optional): Default selected value.
+                width (int): Width of the dropdown widget in characters.
+                state (str): Combobox state ("normal", "readonly", or "disabled").
+                item_title (str, optional): Optional header text shown at the top of the widget frame.
+                helper_text (str, optional): Optional helper text shown above the dropdown.
+                **kwargs: Additional Frame options.
+        """
+        super().__init__(parent, **kwargs)
 
-		self.options = [str(option) for option in (options or [])]
-		self.command = command
-		self.value_var = value_var or tk.StringVar()
+        self.options = [str(option) for option in (options or [])]
+        self.command = command
+        self.value_var = value_var or tk.StringVar()
 
-		# Create the combobox in the content frame
-		self.combobox = ttk.Combobox(
-			self.content_frame,
-			textvariable=self.value_var,
-			values=self.options,
-			width=width,
-			state=state,
-			justify=self._text_justify,
-		)
-		self.combobox.pack(side="top", fill="x")
+        # Create the combobox in the content frame
+        self.combobox = ttk.Combobox(
+            self.content_frame,
+            textvariable=self.value_var,
+            values=self.options,
+            width=width,
+            state=state,
+            justify=self._text_justify,
+        )
+        self.combobox.pack(side="top", fill="x")
 
-		# Bind selection event
-		self.combobox.bind("<<ComboboxSelected>>", self._on_select)
+        # Bind selection event
+        self.combobox.bind("<<ComboboxSelected>>", self._on_select)
 
-		# Set default value
-		if default is not None and default in self.options:
-			self.set(default)
-		elif self.options:
-			self.value_var.set(self.options[0])
+        # Set default value
+        if default is not None and default in self.options:
+            self.set(default)
+        elif self.options:
+            self.value_var.set(self.options[0])
 
-	def _on_select(self, event=None):
-		"""Handle selection change event.
+    def _on_select(self, event=None):
+        """Handle selection change event.
 
-		Args:
-			event: Tkinter event (optional).
-		"""
-		if self.command:
-			self.command(self.get())
-		self._fire_on_change(self.get())
+        Args:
+                event: Tkinter event (optional).
+        """
+        if self.command:
+            self.command(self.get())
+        self._fire_on_change(self.get())
 
-	def get(self) -> str:
-		"""Return the currently selected value.
+    def get(self) -> str:
+        """Return the currently selected value.
 
-		Returns:
-			str: Selected option value.
-		"""
-		return self.value_var.get()
+        Returns:
+                str: Selected option value.
+        """
+        return self.value_var.get()
 
-	def set(self, value: str):
-		"""Set the selected value.
+    def set(self, value: str):
+        """Set the selected value.
 
-		Args:
-			value: Option value to select.
-		"""
-		if value in self.options:
-			self.value_var.set(value)
-		else:
-			CONSOLE_LOGGER.warning("Selected value was not in the given options, and so was not set.")
+        Args:
+                value: Option value to select.
+        """
+        if value in self.options:
+            self.value_var.set(value)
+        else:
+            CONSOLE_LOGGER.warning(
+                "Selected value was not in the given options, and so was not set."
+            )
 
-	def set_options(self, options: List[str], default: Optional[str] = None):
-		"""Replace the available options and optionally set a new default.
+    def set_options(self, options: List[str], default: Optional[str] = None):
+        """Replace the available options and optionally set a new default.
 
-		Args:
-			options: New list of selectable options.
-			default: Optional value to select after updating options.
-		"""
-		self.options = [str(option) for option in (options or [])]
-		self.combobox['values'] = self.options
+        Args:
+                options: New list of selectable options.
+                default: Optional value to select after updating options.
+        """
+        self.options = [str(option) for option in (options or [])]
+        self.combobox["values"] = self.options
 
-		if default is not None and default in self.options:
-			self.set(default)
-		elif self.options:
-			self.value_var.set(self.options[0])
-		else:
-			self.value_var.set("")
+        if default is not None and default in self.options:
+            self.set(default)
+        elif self.options:
+            self.value_var.set(self.options[0])
+        else:
+            self.value_var.set("")
 
-	def get_selected_index(self) -> int:
-		"""Return the index of the currently selected option.
+    def get_selected_index(self) -> int:
+        """Return the index of the currently selected option.
 
-		Returns:
-			int: Index of selected option, or -1 if not found.
-		"""
-		try:
-			return self.options.index(self.get())
-		except ValueError:
-			return -1
-		
-	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-		"""Validate the current selection.
+        Returns:
+                int: Index of selected option, or -1 if not found.
+        """
+        try:
+            return self.options.index(self.get())
+        except ValueError:
+            return -1
 
-		Returns:
-			tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-				`(is_valid, message, severity)` where severity is `None` when
-				valid, or `"error"` for an invalid selection.
-		"""
-		selected = self.get()
-		if not selected:
-			return getattr(self, "apply_validation")((False, "No option selected.", "error"))
-		if selected not in self.options:
-			return getattr(self, "apply_validation")((False, f"Selected option '{selected}' is not available.", "error"))
-		return getattr(self, "apply_validation")((True, None, None))
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
+        """Validate the current selection.
+
+        Returns:
+                tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+                        `(is_valid, message, severity)` where severity is `None` when
+                        valid, or `"error"` for an invalid selection.
+        """
+        selected = self.get()
+        if not selected:
+            return getattr(self, "apply_validation")(
+                (False, "No option selected.", "error")
+            )
+        if selected not in self.options:
+            return getattr(self, "apply_validation")(
+                (False, f"Selected option '{selected}' is not available.", "error")
+            )
+        return getattr(self, "apply_validation")((True, None, None))
+
 
 if __name__ == "__main__":
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
-	from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
-	from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+    def on_selection(value):
+        """Print selected value in the standalone example."""
+        print(f"Selected: {value}")
 
-	def on_selection(value):
-		"""Print selected value in the standalone example."""
-		print(f"Selected: {value}")
+    root = BHoMBaseWindow(theme_mode="light")
+    parent_frame = root.content_frame
 
-	root = BHoMBaseWindow(theme_mode="light")
-	parent_frame = root.content_frame
+    widget = DropDownSelection(
+        parent_frame,
+        options=["Option A", "Option B", "Option C", "Option D", "Option E"],
+        command=on_selection,
+        default="Option C",
+        width=30,
+        item_title="Choose an Option",
+        helper_text="Select one option from the dropdown list.",
+        alignment="center",
+        build_options=PackingOptions(padx=20, pady=20),
+    )
+    widget.build()
 
-	widget = DropDownSelection(
-		parent_frame,
-		options=["Option A", "Option B", "Option C", "Option D", "Option E"],
-		command=on_selection,
-		default="Option C",
-		width=30,
-		item_title="Choose an Option",
-		helper_text="Select one option from the dropdown list.",
-		alignment="center",
-		build_options=PackingOptions(padx=20, pady=20)
-	)
-	widget.build()
-
-	root.mainloop()
+    root.mainloop()

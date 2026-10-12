@@ -1,4 +1,4 @@
-﻿"""Text and colour utility methods for plotting"""
+"""Text and colour utility methods for plotting"""
 
 import base64
 import colorsys
@@ -24,6 +24,7 @@ import matplotlib.ticker as mticker
 from matplotlib.tri import Triangulation
 from PIL import Image
 from ..bhom.analytics import bhom_analytics
+
 
 @bhom_analytics()
 def average_color(colors: Any, keep_alpha: bool = False) -> str:
@@ -53,6 +54,7 @@ def average_color(colors: Any, keep_alpha: bool = False) -> str:
         return colors[0]
 
     return rgb2hex(to_rgba_array(colors).mean(axis=0), keep_alpha=keep_alpha)
+
 
 @bhom_analytics()
 def animation(
@@ -107,6 +109,7 @@ def animation(
 
     return output_gif
 
+
 def create_title(text: str, plot_type: str) -> str:
     """Create a title for a plot.
 
@@ -131,6 +134,7 @@ def create_title(text: str, plot_type: str) -> str:
         ]
     )
 
+
 def contrasting_colour(color: Any):
     """Calculate the contrasting color for a given color.
 
@@ -144,6 +148,7 @@ def contrasting_colour(color: Any):
             String code of the contrasting color.
     """
     return ".15" if relative_luminance(color) > 0.408 else "w"
+
 
 def relative_luminance(color: Any):
     """Calculate the relative luminance of a color according to W3C standards
@@ -164,6 +169,7 @@ def relative_luminance(color: Any):
         return lum.item()
     except ValueError:
         return lum
+
 
 def colormap_sequential(
     *colors: str | float | int | tuple, N: int = 256
@@ -205,6 +211,7 @@ def colormap_sequential(
         colors=fixed_colors,
         N=N,
     )
+
 
 def annotate_imshow(
     im: mimage.AxesImage,
@@ -273,6 +280,7 @@ def annotate_imshow(
 
     return texts
 
+
 def lighten_color(color: str | tuple, amount: float = 0.5) -> tuple[float]:
     """
     Lightens the given color by multiplying (1-luminosity) by the given amount.
@@ -320,9 +328,10 @@ def base64_to_image(base64_string: str, image_path: Path) -> Path:
         base64_string = base64_string.split(";")[-1]
 
     with open(Path(image_path), "wb") as fp:
-        fp.write(base64.decodebytes(base64_string.encode('utf-8')))
+        fp.write(base64.decodebytes(base64_string.encode("utf-8")))
 
     return image_path
+
 
 @bhom_analytics()
 def image_to_base64(image_path: Path, html: bool = False) -> str:
@@ -360,8 +369,11 @@ def image_to_base64(image_path: Path, html: bool = False) -> str:
 
     return base64_string
 
+
 @bhom_analytics()
-def figure_to_base64(figure: plt.Figure, html: bool = False, transparent: bool = True) -> str:
+def figure_to_base64(
+    figure: plt.Figure, html: bool = False, transparent: bool = True
+) -> str:
     """Convert a matplotlib figure object into a base64 string.
 
     Arguments:
@@ -387,6 +399,7 @@ def figure_to_base64(figure: plt.Figure, html: bool = False, transparent: bool =
 
     return base64_string
 
+
 @bhom_analytics()
 def figure_to_image(fig: plt.Figure) -> Image:
     """Convert a matplotlib Figure object into a PIL Image.
@@ -410,6 +423,7 @@ def figure_to_image(fig: plt.Figure) -> Image:
     buf = np.roll(buf, 3, axis=2)
 
     return Image.fromarray(buf)
+
 
 @bhom_analytics()
 def tile_images(
@@ -455,6 +469,7 @@ def tile_images(
 
     return grid
 
+
 @bhom_analytics()
 def triangulation_area(triang: Triangulation) -> float:
     """Calculate the area of a matplotlib Triangulation.
@@ -485,6 +500,7 @@ def triangulation_area(triang: Triangulation) -> float:
     )
 
     return area
+
 
 @bhom_analytics()
 def create_triangulation(
@@ -555,6 +571,7 @@ def create_triangulation(
     plt.close(fig)
     triang.set_mask(maxi > alpha)
     return triang
+
 
 @bhom_analytics()
 def format_polar_plot(ax: plt.Axes, yticklabels: bool = True) -> plt.Axes:

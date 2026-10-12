@@ -1,4 +1,4 @@
-﻿from .area import AreaUnit
+from .area import AreaUnit
 from .energy import EnergyUnit
 from .length import LengthUnit
 from .power import PowerUnit
@@ -11,5 +11,5 @@ __all__ = [
     "LengthUnit",
     "PowerUnit",
     "SpeedUnit",
-    "TemperatureUnit"
+    "TemperatureUnit",
 ]

@@ -15,6 +15,7 @@ from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 # Accepted colormap input types for colormaps parameter and set()/add_cmap()
 CmapInput = Union[str, Colormap, List[str]]
 
+
 class CmapSelector(BHoMBaseWidget):
     """A widget for selecting and previewing a matplotlib colormap.
 
@@ -77,7 +78,7 @@ class CmapSelector(BHoMBaseWidget):
         default_cmap: Optional[CmapInput] = None,
         plot_size: tuple[int, int] = (400, 50),
         dropdown_position: Literal["n", "e", "s", "w"] = "n",
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Initialize the CmapSelector widget.
@@ -109,7 +110,9 @@ class CmapSelector(BHoMBaseWidget):
 
         # Create frame for cmap selection content
         self.cmap_frame = ttk.Frame(self.content_frame)
-        self.cmap_frame.pack(side="top", fill="both", expand=True, anchor=self._pack_anchor)
+        self.cmap_frame.pack(
+            side="top", fill="both", expand=True, anchor=self._pack_anchor
+        )
 
         self.colormap_var = tk.StringVar(value="viridis")
         self._all_colormaps = self._get_all_colormaps()
@@ -131,14 +134,21 @@ class CmapSelector(BHoMBaseWidget):
 
         pos = dropdown_position.lower()
         is_horizontal = pos in ("w", "e")
-        pack_side_combo = {"n": tk.TOP, "s": tk.BOTTOM, "w": tk.LEFT, "e": tk.RIGHT}[pos]  # type: ignore[assignment]
+        pack_side_combo = {"n": tk.TOP, "s": tk.BOTTOM, "w": tk.LEFT, "e": tk.RIGHT}[
+            pos
+        ]  # type: ignore[assignment]
         pack_side_figure = {"n": tk.TOP, "s": tk.TOP, "w": tk.LEFT, "e": tk.LEFT}[pos]  # type: ignore[assignment]
 
         combo_padx = (0, 4) if is_horizontal else 0
         combo_pady = (8, 4) if not is_horizontal else 0
 
         header = ttk.Frame(content)
-        header.pack(side=pack_side_combo, anchor=self._pack_anchor, padx=combo_padx, pady=combo_pady)
+        header.pack(
+            side=pack_side_combo,
+            anchor=self._pack_anchor,
+            padx=combo_padx,
+            pady=combo_pady,
+        )
 
         self.cmap_combobox = ttk.Combobox(
             header,
@@ -154,7 +164,13 @@ class CmapSelector(BHoMBaseWidget):
             content,
             width=plot_size[0],
             height=plot_size[1],
-            build_options=PackingOptions(side=pack_side_figure, anchor=self._pack_anchor, fill=fill_mode, padx=0, pady=(0, 8)),
+            build_options=PackingOptions(
+                side=pack_side_figure,
+                anchor=self._pack_anchor,
+                fill=fill_mode,
+                padx=0,
+                pady=(0, 8),
+            ),
         )
         self.figure_widget.build()
 
@@ -168,7 +184,9 @@ class CmapSelector(BHoMBaseWidget):
         self._populate_cmap_list(current_colormaps)
 
         # Resolve default_cmap: may itself be a Colormap object or colour list
-        self._default_label = self._resolve_default_label(default_cmap, current_colormaps)
+        self._default_label = self._resolve_default_label(
+            default_cmap, current_colormaps
+        )
         self._select_default_cmap(current_colormaps)
 
     def _get_all_colormaps(self) -> List[str]:
@@ -232,7 +250,9 @@ class CmapSelector(BHoMBaseWidget):
         key = (cmap_set or "all").lower()
         return self._with_reversed(self._preset_map.get(key, self._preset_map["all"]))
 
-    def _resolve_colormaps(self, colormaps: List[CmapInput]) -> tuple[List[str], Dict[str, Colormap]]:
+    def _resolve_colormaps(
+        self, colormaps: List[CmapInput]
+    ) -> tuple[List[str], Dict[str, Colormap]]:
         """Normalise a mixed list of colormap inputs into display labels and a custom-cmap registry.
 
         Each item is handled as follows:
@@ -267,7 +287,10 @@ class CmapSelector(BHoMBaseWidget):
                     display_names.append(label)
                     custom_cmaps[label] = cmap
                 except Exception:
-                    CONSOLE_LOGGER.warning(f"An error occurred when trying to convert a list of colours ({item}) to a `ListedColormap`. This cmap will not be available to select in UI.", exc_info=1)
+                    CONSOLE_LOGGER.warning(
+                        f"An error occurred when trying to convert a list of colours ({item}) to a `ListedColormap`. This cmap will not be available to select in UI.",
+                        exc_info=1,
+                    )
                     pass
 
         return display_names, custom_cmaps
@@ -290,7 +313,9 @@ class CmapSelector(BHoMBaseWidget):
             counter += 1
         return label
 
-    def _resolve_default_label(self, default: Optional[CmapInput], available: List[str]) -> Optional[str]:
+    def _resolve_default_label(
+        self, default: Optional[CmapInput], available: List[str]
+    ) -> Optional[str]:
         """Resolve a `default_cmap` value of any input type to a display label.
 
         Args:
@@ -327,7 +352,9 @@ class CmapSelector(BHoMBaseWidget):
             self.colormap_var.set("")
             return
 
-        label = self._default_label if self._default_label in colormaps else colormaps[0]
+        label = (
+            self._default_label if self._default_label in colormaps else colormaps[0]
+        )
         self.colormap_var.set(label)
         self._update_cmap_sample()
 
@@ -354,7 +381,11 @@ class CmapSelector(BHoMBaseWidget):
         # Use the stored Colormap object for custom entries; fall back to the
         # name string for standard matplotlib colormaps.
         cmap: Union[str, Colormap] = self._custom_cmaps.get(name, name)
-        fig = cmap_sample_plot(cmap, figsize=(self.plot_size[0] / 100, self.plot_size[1] / 100), bins=self.cmap_bins)
+        fig = cmap_sample_plot(
+            cmap,
+            figsize=(self.plot_size[0] / 100, self.plot_size[1] / 100),
+            bins=self.cmap_bins,
+        )
         self.figure_widget.embed_figure(fig)
 
     def get_selected_cmap(self) -> Optional[Union[str, Colormap]]:
@@ -434,11 +465,16 @@ class CmapSelector(BHoMBaseWidget):
             base = label or "custom"
             try:
                 cmap = ListedColormap(cmap, name=base)
-            except Exception: #currently these are warnings, but maybe they should be replaced with raised exceptions? ValueError here and TypeError for the fallback.
-                CONSOLE_LOGGER.warning(f"List-like cmap ({cmap}) could not be added due to an error when converting to a `ListedColormap`.", exc_info=1)
+            except Exception:  # currently these are warnings, but maybe they should be replaced with raised exceptions? ValueError here and TypeError for the fallback.
+                CONSOLE_LOGGER.warning(
+                    f"List-like cmap ({cmap}) could not be added due to an error when converting to a `ListedColormap`.",
+                    exc_info=1,
+                )
                 return None
         else:
-            CONSOLE_LOGGER.warning(f"Input of type {type(cmap)} was not a valid type for cmap. Expected a str, list or matplotlib Colormap")
+            CONSOLE_LOGGER.warning(
+                f"Input of type {type(cmap)} was not a valid type for cmap. Expected a str, list or matplotlib Colormap"
+            )
             return None
 
         final_label = self._unique_label(base, existing)
@@ -495,12 +531,17 @@ class CmapSelector(BHoMBaseWidget):
                             self._update_cmap_sample()
                             return
                     except Exception:
-                        CONSOLE_LOGGER.debug("exception thrown when updating cmap sample from list value. visual cmap sample may be in invalid state?", exc_info=1)
+                        CONSOLE_LOGGER.debug(
+                            "exception thrown when updating cmap sample from list value. visual cmap sample may be in invalid state?",
+                            exc_info=1,
+                        )
                         pass
             self.figure_widget.clear()
             self.colormap_var.set("")
 
-    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Validate the current colormap selection.
 
         Returns:
@@ -512,9 +553,12 @@ class CmapSelector(BHoMBaseWidget):
         if not name:
             return self.apply_validation((False, "No colormap selected.", "error"))
         if name not in self.cmap_combobox["values"]:
-            return self.apply_validation((False, f"Selected colormap '{name}' is not available.", "error"))
+            return self.apply_validation(
+                (False, f"Selected colormap '{name}' is not available.", "error")
+            )
         return self.apply_validation((True, None, None))
-            
+
+
 if __name__ == "__main__":
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from matplotlib.colors import LinearSegmentedColormap
@@ -540,9 +584,9 @@ if __name__ == "__main__":
     selector_colours = CmapSelector(
         parent_container,
         colormaps=[
-            bhom_blues,                              # list of hex strings
-            ["red", "orange", "yellow", "green"],   # list of named colours
-            "tab10",                                 # mixed with a named cmap
+            bhom_blues,  # list of hex strings
+            ["red", "orange", "yellow", "green"],  # list of named colours
+            "tab10",  # mixed with a named cmap
         ],
         default_cmap=bhom_blues,
         item_title="2. Colour lists",
@@ -554,14 +598,18 @@ if __name__ == "__main__":
     selector_colours.build()
 
     # Example 3 — Colormap objects (ListedColormap / LinearSegmentedColormap)
-    custom_listed = ListedColormap(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"], name="bhom_cat4")
-    custom_linear = LinearSegmentedColormap.from_list("warm_to_cool", ["#d73027", "#f46d43", "#abd9e9", "#4575b4"])
+    custom_listed = ListedColormap(
+        ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"], name="bhom_cat4"
+    )
+    custom_linear = LinearSegmentedColormap.from_list(
+        "warm_to_cool", ["#d73027", "#f46d43", "#abd9e9", "#4575b4"]
+    )
     selector_objects = CmapSelector(
         parent_container,
         colormaps=[
-            custom_listed,   # ListedColormap object
-            custom_linear,   # LinearSegmentedColormap object
-            "coolwarm",      # standard cmap alongside custom ones
+            custom_listed,  # ListedColormap object
+            custom_linear,  # LinearSegmentedColormap object
+            "coolwarm",  # standard cmap alongside custom ones
         ],
         default_cmap=custom_linear,
         item_title="3. Colormap objects",
@@ -601,8 +649,8 @@ if __name__ == "__main__":
     root.mainloop()
 
     # After mainloop — demonstrate get() vs get_cmap() return types
-    print("selector_strings.get()   :", selector_strings.get())       # str
-    print("selector_colours.get()   :", selector_colours.get())       # Colormap object
-    print("selector_objects.get()   :", selector_objects.get())       # Colormap object
-    print("selector_preset.get()    :", selector_preset.get())        # str
-    print("selector_preset.get_cmap():", selector_preset.get_cmap()) # Colormap object
+    print("selector_strings.get()   :", selector_strings.get())  # str
+    print("selector_colours.get()   :", selector_colours.get())  # Colormap object
+    print("selector_objects.get()   :", selector_objects.get())  # Colormap object
+    print("selector_preset.get()    :", selector_preset.get())  # str
+    print("selector_preset.get_cmap():", selector_preset.get_cmap())  # Colormap object

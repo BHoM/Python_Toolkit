@@ -1,4 +1,4 @@
-﻿import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,12 +10,11 @@ from python_toolkit.plot.utilities import (
     contrasting_colour,
     create_triangulation,
     lighten_color,
-    relative_luminance
+    relative_luminance,
 )
-from matplotlib.figure import Figure
 
-from pathlib import Path
 from . import TIMESERIES_COLLECTION
+
 
 def test_create_triangulation():
     """_"""
@@ -34,6 +33,7 @@ def test_create_triangulation():
     x, y = np.meshgrid(range(0, 100, 10), range(0, 100, 10))
     with pytest.raises(ValueError):
         create_triangulation(x, y, alpha=0.00001)
+
 
 def test_relative_luminance():
     """_"""
@@ -81,7 +81,10 @@ def test_lighten_color():
 
 def test_colormap_sequential():
     """_"""
-    assert sum(colormap_sequential("red", "green", "blue")(0.25)) == pytest.approx(1.750003844675125, rel=0.01)
+    assert sum(colormap_sequential("red", "green", "blue")(0.25)) == pytest.approx(
+        1.750003844675125, rel=0.01
+    )
+
 
 def test_spatial_heatmap():
     """_"""
@@ -93,7 +96,8 @@ def test_spatial_heatmap():
     assert isinstance(spatial_heatmap([tri], [zz], contours=[0]), plt.Figure)
     plt.close("all")
 
-#TODO: use a preset collection, or generate one from a year and random values
+
+# TODO: use a preset collection, or generate one from a year and random values
 def test_timeseries_diurnal():
     """_"""
     assert isinstance(diurnal(TIMESERIES_COLLECTION), plt.Axes)
@@ -136,6 +140,7 @@ def test_timeseries_diurnal():
         ),
         plt.Figure,
     )
+
 
 def test_heatmap():
     """_"""

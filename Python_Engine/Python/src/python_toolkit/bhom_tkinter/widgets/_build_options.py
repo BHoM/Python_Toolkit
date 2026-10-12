@@ -3,9 +3,9 @@
 from dataclasses import dataclass, asdict
 from typing import Any, Literal
 
+
 @dataclass
 class BuildOptions:
-
     """Container for widget build options with type hints."""
 
     def to_dict(self) -> dict:

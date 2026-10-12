@@ -11,27 +11,29 @@ from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 from python_toolkit.bhom_tkinter.widgets.drop_down_selection import DropDownSelection
 
+
 class CalendarWidget(BHoMBaseWidget):
     """Render a month grid and allow date selection."""
 
     def __init__(
-            self,
-            parent: ttk.Frame, 
-            def_year: int = 2026, 
-            def_month: int = 1,
-            def_day: int = 1,
-            show_year_selector: bool = True,
-            year_min: int = 1900,
-            year_max: int = 2100,
-            day_button_width: int = 4,
-            day_button_padx: int = 1,
-            day_button_pady: int = 1,
-            day_button_text_alignment: Literal["left", "center", "right"] = "center",
-            fixed_week_rows: int | None = None,
-            selector_position: Literal["top", "bottom"] = "bottom",
-            selection_label_format: Literal["short", "long"] = "short",
-            **kwargs):
-        
+        self,
+        parent: ttk.Frame,
+        def_year: int = 2026,
+        def_month: int = 1,
+        def_day: int = 1,
+        show_year_selector: bool = True,
+        year_min: int = 1900,
+        year_max: int = 2100,
+        day_button_width: int = 4,
+        day_button_padx: int = 1,
+        day_button_pady: int = 1,
+        day_button_text_alignment: Literal["left", "center", "right"] = "center",
+        fixed_week_rows: int | None = None,
+        selector_position: Literal["top", "bottom"] = "bottom",
+        selection_label_format: Literal["short", "long"] = "short",
+        **kwargs,
+    ):
+
         super().__init__(parent, **kwargs)
 
         self.year = def_year
@@ -65,7 +67,9 @@ class CalendarWidget(BHoMBaseWidget):
             "center": "center",
             "right": "e",
         }
-        ttk.Style(self).configure(self.day_button_style, anchor=anchor_map[self.day_button_text_alignment])
+        ttk.Style(self).configure(
+            self.day_button_style, anchor=anchor_map[self.day_button_text_alignment]
+        )
 
         self.cal_frame = ttk.Frame(self.content_frame)
         self.month_frame = ttk.Frame(self.content_frame)
@@ -95,7 +99,20 @@ class CalendarWidget(BHoMBaseWidget):
 
     def month_selector(self):
         """Build the month dropdown selector."""
-        self.months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        self.months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ]
         self.month_dropdown = DropDownSelection(
             self.month_frame,
             options=self.months,
@@ -183,7 +200,7 @@ class CalendarWidget(BHoMBaseWidget):
             while len(weeks) < self.fixed_week_rows:
                 weeks.append([0, 0, 0, 0, 0, 0, 0])
             weeks = weeks[: self.fixed_week_rows]
-        
+
         for row, week in enumerate(weeks):
             for col, day in enumerate(week):
                 text = "" if day == 0 else day
@@ -196,13 +213,13 @@ class CalendarWidget(BHoMBaseWidget):
                 )
                 cell_widget.button.configure(style=self.day_button_style, state=state)
                 cell_widget.grid(
-                    row=row+1,
+                    row=row + 1,
                     column=col,
                     sticky="nsew",
                     padx=self.day_button_padx,
                     pady=self.day_button_pady,
                 )
-        
+
     def set_day(self, num):
         """Set the selected day and refresh the date summary label.
 
@@ -216,7 +233,7 @@ class CalendarWidget(BHoMBaseWidget):
 
         if self._initialized:
             self._fire_on_change(self.get())
-    
+
     def get_date(self):
         """Return the selected date as a `datetime.date` instance.
 
@@ -224,7 +241,7 @@ class CalendarWidget(BHoMBaseWidget):
             datetime.date: Currently selected date.
         """
         return datetime.date(self.year, self.month, self.day)
-    
+
     def get(self):
         """Return the selected date value.
 
@@ -232,7 +249,7 @@ class CalendarWidget(BHoMBaseWidget):
             datetime.date: Currently selected date.
         """
         return datetime.date(self.year, self.month, self.day)
-    
+
     def set(self, value: datetime.date):
         """Set the selected date from a `datetime.date` value.
 
@@ -242,15 +259,17 @@ class CalendarWidget(BHoMBaseWidget):
         self.year = value.year
         self.month = value.month
         self.day = value.day
-        if hasattr(self, 'year_dropdown'):
+        if hasattr(self, "year_dropdown"):
             self.year_dropdown.set(str(self.year))
-        if hasattr(self, 'month_dropdown'):
+        if hasattr(self, "month_dropdown"):
             self.month_dropdown.set(self.months[self.month - 1])
         self._clamp_day()
         self.redraw()
         self._refresh_selection_label()
 
-    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Validate the currently selected date.
 
         Returns:
@@ -263,7 +282,7 @@ class CalendarWidget(BHoMBaseWidget):
             return self.apply_validation((True, None, None))
         except ValueError as ex:
             return self.apply_validation((False, f"Invalid date: {ex}", "error"))
-    
+
     def pack(self, **kwargs):
         """Pack the widget and ensure the calendar grid is rendered.
 
@@ -272,9 +291,9 @@ class CalendarWidget(BHoMBaseWidget):
         """
         super().pack(**kwargs)
         self.redraw()
-        
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
@@ -293,7 +312,7 @@ if __name__ == "__main__":
         day_button_text_alignment="center",
         item_title="Select a Date",
         helper_text="Choose a date from the calendar below.",
-        build_options=PackingOptions(padx=20, pady=20)
+        build_options=PackingOptions(padx=20, pady=20),
     )
     cal_widget1.build()
 

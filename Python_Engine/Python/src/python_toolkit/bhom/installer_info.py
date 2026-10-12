@@ -4,10 +4,10 @@ import json
 
 import clr
 
-#append assemblies dir
+# append assemblies dir
 sys.path.append(os.path.expandvars("%ProgramData%\\BHoM\\Assemblies"))
 
-#add required CLR references (dotnet dlls)
+# add required CLR references (dotnet dlls)
 clr.AddReference("UI_Engine")
 clr.AddReference("Serialiser_Engine")
 

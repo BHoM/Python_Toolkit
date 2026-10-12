@@ -7,6 +7,7 @@ import threading
 
 from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
 
+
 class ProcessingWindow(BHoMBaseChildWindow):
     """A simple processing window with animated indicator."""
 
@@ -28,7 +29,7 @@ class ProcessingWindow(BHoMBaseChildWindow):
             show_banner=False,
             top_most=True,
             *args,
-            **kwargs
+            **kwargs,
         )
 
         self.attributes("-topmost", True)
@@ -42,7 +43,7 @@ class ProcessingWindow(BHoMBaseChildWindow):
             text=message,
             style="Title.TLabel",
             justify="center",
-            wraplength=400
+            wraplength=400,
         )
         try:
             title_font = ttk.Style(self).lookup("Title.TLabel", "font")
@@ -56,10 +57,7 @@ class ProcessingWindow(BHoMBaseChildWindow):
         animation_frame.pack(expand=True)
 
         self.animation_label = ttk.Label(
-            animation_frame,
-            text="●",
-            style="Title.TLabel",
-            foreground="#0078d4"
+            animation_frame, text="●", style="Title.TLabel", foreground="#0078d4"
         )
         try:
             title_font = ttk.Style(self).lookup("Title.TLabel", "font")
@@ -75,7 +73,6 @@ class ProcessingWindow(BHoMBaseChildWindow):
 
         self.update_idletasks()
         self.refresh_sizing()
-
 
     def start(self):
         """Start the processing window and animation."""
@@ -152,12 +149,15 @@ class ProcessingWindow(BHoMBaseChildWindow):
 
 
 if __name__ == "__main__":
-    processing = ProcessingWindow(title="Test Processing", message="Running Comfort and Safety Calculation...")
+    processing = ProcessingWindow(
+        title="Test Processing", message="Running Comfort and Safety Calculation..."
+    )
+
     def worker():
         for i in range(50):
             time.sleep(0.1)
             try:
-                processing.after(0, processing.update_message, f"Step {i+1}/50")
+                processing.after(0, processing.update_message, f"Step {i + 1}/50")
             except Exception:
                 pass
 

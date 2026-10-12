@@ -1,4 +1,4 @@
-﻿"""Methods for plotting diurnal profiles from time-indexed data."""
+"""Methods for plotting diurnal profiles from time-indexed data."""
 
 import calendar
 import textwrap
@@ -205,7 +205,11 @@ def diurnal(
                 ax.plot(
                     range(len(df) + 1)[i : i + 25],
                     (df["median"].tolist() + [df["median"].values[0]])[i : i + 24]
-                    + [(df["median"].tolist() + [df["median"].values[0]])[i : i + 24][0]],
+                    + [
+                        (df["median"].tolist() + [df["median"].values[0]])[i : i + 24][
+                            0
+                        ]
+                    ],
                     c=color,
                     ls="--",
                     lw=1,
@@ -259,7 +263,7 @@ def stacked_diurnals(
 
     if len(datasets) <= 1:
         raise ValueError("stacked_diurnals requires at least two datasets.")
-    
+
     style_context = kwargs.pop("style_context", "python_toolkit.bhom")
 
     with plt.style.context(style_context):

@@ -61,7 +61,7 @@ class LandingPage(BHoMBaseWindow):
                 build_options=PackingOptions(side="top", anchor="w", pady=(0, 10)),
             )
             message_label.build()
-        
+
         if self.sub_title:
             sub_title_label = Label(
                 self.content_frame,
@@ -93,7 +93,9 @@ class LandingPage(BHoMBaseWindow):
             self.custom_buttons_frame = ttk.Frame(self.content_frame)
             self.custom_buttons_frame.pack(fill="x", pady=(0, 20))
 
-        button_widget = Button(self.custom_buttons_frame, text=text, command=command, **kwargs)
+        button_widget = Button(
+            self.custom_buttons_frame, text=text, command=command, **kwargs
+        )
         button_widget.pack(pady=5, fill="x")
         # Recalculate window size after adding button
         self.refresh_sizing()
@@ -102,12 +104,11 @@ class LandingPage(BHoMBaseWindow):
 
 
 if __name__ == "__main__":
-
-    #simple example of using the landing page
+    # simple example of using the landing page
     def on_button_click():
         """Handle demo button clicks in the standalone example."""
         print("Button clicked!")
-    
+
     def on_button_click_2():
         """Handle demo button clicks in the standalone example."""
         print("Second button clicked!")

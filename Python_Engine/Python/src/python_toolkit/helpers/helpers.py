@@ -1,11 +1,25 @@
-﻿import re
+import re
 from datetime import timedelta
 from typing import Any
 
 import pandas as pd
-from caseconverter import snakecase
 
 from ..bhom.analytics import bhom_analytics
+
+
+def snakecase(text: str) -> str:
+    # Replace spaces and hyphens with underscores
+    text = re.sub(r"[\s\-]+", "_", text)
+
+    # Handle CamelCase / PascalCase
+    text = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", text)
+    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", text)
+
+    # Collapse duplicate underscores
+    text = re.sub(r"_+", "_", text)
+
+    return text.lower().strip("_")
+
 
 def sanitise_string(string: str) -> str:
     """Sanitise a string so that only path-safe characters remain."""
@@ -13,6 +27,7 @@ def sanitise_string(string: str) -> str:
     keep_characters = r"[^.A-Za-z0-9_-]"
 
     return re.sub(keep_characters, "_", string).replace("__", "_").rstrip()
+
 
 def convert_keys_to_snake_case(d: dict | list | Any):
     """Given a dictionary, convert all keys to snake_case."""
@@ -26,6 +41,7 @@ def convert_keys_to_snake_case(d: dict | list | Any):
         return [convert_keys_to_snake_case(x) for x in d]
 
     return d
+
 
 @bhom_analytics()
 def timedelta_tostring(time_delta: timedelta) -> str:
@@ -42,6 +58,7 @@ def timedelta_tostring(time_delta: timedelta) -> str:
     hours, remainder = divmod(s, 3600)
     minutes, _ = divmod(remainder, 60)
     return f"{hours:02d}:{minutes:02d}"
+
 
 @bhom_analytics()
 def decay_rate_smoother(
@@ -93,6 +110,7 @@ def decay_rate_smoother(
 
     return new_series
 
+
 @bhom_analytics()
 def remove_leap_days(pd_object: pd.DataFrame | pd.Series) -> pd.DataFrame | pd.Series:
     """A removal of all timesteps within a time-indexed pandas
@@ -104,6 +122,7 @@ def remove_leap_days(pd_object: pd.DataFrame | pd.Series) -> pd.DataFrame | pd.S
     mask = (pd_object.index.month == 2) & (pd_object.index.day == 29)
 
     return pd_object[~mask]
+
 
 @bhom_analytics()
 def safe_filename(filename: str) -> str:

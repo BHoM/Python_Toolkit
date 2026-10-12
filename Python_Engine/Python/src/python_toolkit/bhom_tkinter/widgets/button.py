@@ -10,80 +10,84 @@ from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 
 
 class Button(BHoMBaseWidget):
-	"""A minimal button widget that invokes a callback when clicked.
+    """A minimal button widget that invokes a callback when clicked.
 
-	- `get()` returns the number of times the button has been clicked.
-	- `set()` can update the button label when passed a string.
-	"""
+    - `get()` returns the number of times the button has been clicked.
+    - `set()` can update the button label when passed a string.
+    """
 
-	def __init__(
-		self,
-		parent,
-		text: str = "Click",
-		command: Optional[Callable[[], None]] = None,
-		width: int = 25,
-		style: Optional[str] = None,
-		**kwargs,
-	):
-		super().__init__(parent, **kwargs)
+    def __init__(
+        self,
+        parent,
+        text: str = "Click",
+        command: Optional[Callable[[], None]] = None,
+        width: int = 25,
+        style: Optional[str] = None,
+        **kwargs,
+    ):
+        super().__init__(parent, **kwargs)
 
-		self._user_command = command
-		self._click_count = 0
-		self.button = ttk.Button(
-			self.content_frame,
-			text=text,
-			command=self._on_click,
-			width=width,
-			style=style,
-			
-		)
-		self.button.pack(side="top", anchor=self._pack_anchor)
+        self._user_command = command
+        self._click_count = 0
+        self.button = ttk.Button(
+            self.content_frame,
+            text=text,
+            command=self._on_click,
+            width=width,
+            style=style,
+        )
+        self.button.pack(side="top", anchor=self._pack_anchor)
 
-	def _on_click(self):
-		"""Internal click handler increments counter and calls user callback."""
-		self._click_count += 1
-		if self._user_command:
-			try:
-				self._user_command()
-			except Exception as e:
-				CONSOLE_LOGGER.error(f"Unhandled exception when trying to perform custom command: {e}", exc_info=True)
+    def _on_click(self):
+        """Internal click handler increments counter and calls user callback."""
+        self._click_count += 1
+        if self._user_command:
+            try:
+                self._user_command()
+            except Exception as e:
+                CONSOLE_LOGGER.error(
+                    f"Unhandled exception when trying to perform custom command: {e}",
+                    exc_info=True,
+                )
 
-	def get(self):
-		"""Return the number of times the button has been clicked."""
-		return self._click_count
+    def get(self):
+        """Return the number of times the button has been clicked."""
+        return self._click_count
 
-	def set(self, value):
-		"""Update the button label text when passed a string."""
-		if isinstance(value, str):
-			self.button.configure(text=value)
+    def set(self, value):
+        """Update the button label text when passed a string."""
+        if isinstance(value, str):
+            self.button.configure(text=value)
 
-	def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
-		"""Button has no user-editable state, so validation is always valid unless overridden."""
-		return self.apply_validation((True, None, None))
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
+        """Button has no user-editable state, so validation is always valid unless overridden."""
+        return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":
-	from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
-	from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+    from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
+    from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
-	def demo_action():
+    def demo_action():
 
-		#test fail 
+        # test fail
 
-		a = 1 / 0
+        a = 1 / 0
 
-	root = BHoMBaseWindow()
-	parent_frame = root.content_frame
+    root = BHoMBaseWindow()
+    parent_frame = root.content_frame
 
-	widget = Button(
-		parent_frame,
-		text="Press me",
-		command=demo_action,
-		item_title="Demo Button",
-		helper_text="A minimal clickable button.",
-		build_options=PackingOptions(anchor="n", padx=20, pady=20),
-		alignment="center",
-	)
-	widget.build()
+    widget = Button(
+        parent_frame,
+        text="Press me",
+        command=demo_action,
+        item_title="Demo Button",
+        helper_text="A minimal clickable button.",
+        build_options=PackingOptions(anchor="n", padx=20, pady=20),
+        alignment="center",
+    )
+    widget.build()
 
-	root.mainloop()
+    root.mainloop()

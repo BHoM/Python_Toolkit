@@ -1,4 +1,4 @@
-﻿"""Container widget for embedding matplotlib figures or image content."""
+"""Container widget for embedding matplotlib figures or image content."""
 
 import tkinter as tk
 from tkinter import ttk
@@ -22,7 +22,7 @@ class FigureContainer(BHoMBaseWidget):
         auto_size: bool = False,
         rigid_width: Optional[int] = None,
         rigid_height: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Initialize the FigureContainer widget.
@@ -78,8 +78,12 @@ class FigureContainer(BHoMBaseWidget):
         self.update_idletasks()
 
         if self.auto_size:
-            frame_width = max(self.content_frame.winfo_width(), self.content_frame.winfo_reqwidth())
-            frame_height = max(self.content_frame.winfo_height(), self.content_frame.winfo_reqheight())
+            frame_width = max(
+                self.content_frame.winfo_width(), self.content_frame.winfo_reqwidth()
+            )
+            frame_height = max(
+                self.content_frame.winfo_height(), self.content_frame.winfo_reqheight()
+            )
             return frame_width, frame_height
 
         frame_width = self.rigid_width or 0
@@ -121,7 +125,11 @@ class FigureContainer(BHoMBaseWidget):
         bg_color = self._resolved_background()
         self.canvas.get_tk_widget().configure(bg=bg_color, highlightthickness=0)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-        if self.auto_size or self.rigid_width is not None or self.rigid_height is not None:
+        if (
+            self.auto_size
+            or self.rigid_width is not None
+            or self.rigid_height is not None
+        ):
             self._fit_figure_once()
         else:
             self.canvas.draw_idle()
@@ -148,13 +156,18 @@ class FigureContainer(BHoMBaseWidget):
         self.image_file = file_path
         try:
             from PIL import Image, ImageTk
+
             pil_image = Image.open(file_path)
             self._original_pil_image = pil_image
             self._close_held_figure()
             self._clear_children()
             self.image_label = Label(self.content_frame)
             self.image_label.pack(fill=tk.BOTH, expand=True)
-            if self.auto_size or self.rigid_width is not None or self.rigid_height is not None:
+            if (
+                self.auto_size
+                or self.rigid_width is not None
+                or self.rigid_height is not None
+            ):
                 self._scale_image_to_fit_once()
             else:
                 self.image = ImageTk.PhotoImage(self._original_pil_image)
@@ -182,7 +195,11 @@ class FigureContainer(BHoMBaseWidget):
             aspect = (current_w_in / current_h_in) if current_h_in else 1.0
             if self.rigid_width is not None:
                 frame_width = self.rigid_width
-                frame_height = int(round(self.rigid_width / aspect)) if aspect else self.rigid_width
+                frame_height = (
+                    int(round(self.rigid_width / aspect))
+                    if aspect
+                    else self.rigid_width
+                )
             else:
                 frame_height = self.rigid_height or 0
                 frame_width = int(round(frame_height * aspect))
@@ -202,7 +219,9 @@ class FigureContainer(BHoMBaseWidget):
             dpi = float(self.figure.get_dpi())
             if dpi <= 0:
                 dpi = 100.0
-            self.figure.set_size_inches(frame_width / dpi, frame_height / dpi, forward=True)
+            self.figure.set_size_inches(
+                frame_width / dpi, frame_height / dpi, forward=True
+            )
             self.canvas.draw_idle()
         except Exception:
             self.canvas.draw_idle()
@@ -230,11 +249,14 @@ class FigureContainer(BHoMBaseWidget):
 
         try:
             from PIL import Image, ImageTk
+
             img_width, img_height = self._original_pil_image.size
             scale = min(frame_width / img_width, frame_height / img_height)
             new_width = int(img_width * scale)
             new_height = int(img_height * scale)
-            resized = self._original_pil_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            resized = self._original_pil_image.resize(
+                (new_width, new_height), Image.Resampling.LANCZOS
+            )
             self.image = ImageTk.PhotoImage(resized)
             if self.image_label:
                 self.image_label.set(self.image)
@@ -273,21 +295,33 @@ class FigureContainer(BHoMBaseWidget):
         elif isinstance(value, str):
             self.embed_image_file(value)
         else:
-            raise ValueError("Unsupported value type for FigureContainer. Must be Figure, PhotoImage, or file path string.")
+            raise ValueError(
+                "Unsupported value type for FigureContainer. Must be Figure, PhotoImage, or file path string."
+            )
 
-    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Validate the current content of the figure container."""
         if self.figure is not None:
             return self.apply_validation((True, None, None))
         if self.image is not None:
             return self.apply_validation((True, None, None))
-        return self.apply_validation((False, "FigureContainer is empty. Please embed a figure or image.", "error"))
+        return self.apply_validation(
+            (
+                False,
+                "FigureContainer is empty. Please embed a figure or image.",
+                "error",
+            )
+        )
 
 
 if __name__ == "__main__":
     import numpy as np
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
-    from python_toolkit.bhom_tkinter.widgets.validated_entry_box import ValidatedEntryBox
+    from python_toolkit.bhom_tkinter.widgets.validated_entry_box import (
+        ValidatedEntryBox,
+    )
     from python_toolkit.bhom_tkinter.widgets._grid_options import GridOptions
 
     def make_plot(freq: float) -> Figure:
@@ -307,7 +341,9 @@ if __name__ == "__main__":
         item_title="Plot Preview",
         rigid_width=400,
         rigid_height=250,
-        build_options=GridOptions(row=1, column=0, sticky="nsew", padx=10, pady=(4, 10)),
+        build_options=GridOptions(
+            row=1, column=0, sticky="nsew", padx=10, pady=(4, 10)
+        ),
     )
     figure_widget.build()
     figure_widget.embed_figure(make_plot(2.0))

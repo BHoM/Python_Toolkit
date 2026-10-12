@@ -13,6 +13,7 @@ from python_toolkit.bhom_tkinter.widgets._grid_options import GridOptions
 
 from uuid import uuid4
 
+
 class BHoMBaseWidget(ttk.Frame, ABC):
     """
     Base class for all widgets in the BHoM Tkinter toolkit.
@@ -20,18 +21,26 @@ class BHoMBaseWidget(ttk.Frame, ABC):
     """
 
     def __init__(
-            self, 
-            parent: ttk.Frame, 
-            id: Optional[str] = None, 
-            item_title: Optional[str] = None, 
-            helper_text: Optional[str] = None, 
-            alignment: Literal['left', 'center', 'right'] = 'left',
-            fill_extents: bool = False,
-            custom_validation: Optional[Callable[[object], Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]]] = None,
-            disable_validation: bool = False,
-            build_options: BuildOptions = PackingOptions(),
-            on_change: Optional[Callable] = None,
-            **kwargs):
+        self,
+        parent: ttk.Frame,
+        id: Optional[str] = None,
+        item_title: Optional[str] = None,
+        helper_text: Optional[str] = None,
+        alignment: Literal["left", "center", "right"] = "left",
+        fill_extents: bool = False,
+        custom_validation: Optional[
+            Callable[
+                [object],
+                Tuple[
+                    bool, Optional[str], Optional[Literal["info", "warning", "error"]]
+                ],
+            ]
+        ] = None,
+        disable_validation: bool = False,
+        build_options: BuildOptions = PackingOptions(),
+        on_change: Optional[Callable] = None,
+        **kwargs,
+    ):
         """
         Initialize the widget base.
 
@@ -58,7 +67,9 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         self.item_title = item_title
         self.helper_text = helper_text
         self.build_options = build_options
-        self.alignment: Literal['left', 'center', 'right'] = self._normalise_alignment(alignment)
+        self.alignment: Literal["left", "center", "right"] = self._normalise_alignment(
+            alignment
+        )
         self.fill_extents = self._normalise_bool(fill_extents)
         self.custom_validation = custom_validation
         self.disable_validation = bool(disable_validation)
@@ -71,7 +82,9 @@ class BHoMBaseWidget(ttk.Frame, ABC):
 
         # Optional header/title label at the top of the widget
         if self.item_title:
-            self.title_label = ttk.Label(self, text=self.item_title, style="Subtitle.TLabel")
+            self.title_label = ttk.Label(
+                self, text=self.item_title, style="Subtitle.TLabel"
+            )
             try:
                 title_font = ttk.Style(self).lookup("Subtitle.TLabel", "font")
                 if title_font:
@@ -86,7 +99,9 @@ class BHoMBaseWidget(ttk.Frame, ABC):
 
         # Optional helper/requirements label above the input
         if self.helper_text:
-            self.helper_label = ttk.Label(self, text=self.helper_text, style="Caption.TLabel")
+            self.helper_label = ttk.Label(
+                self, text=self.helper_text, style="Caption.TLabel"
+            )
             try:
                 helper_font = ttk.Style(self).lookup("Caption.TLabel", "font")
                 if helper_font:
@@ -104,54 +119,65 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         self.content_frame.pack(side="top", fill=tk.BOTH, expand=True)
 
     @property
-    def _pack_anchor(self) -> Literal['w', 'center', 'e']:
+    def _pack_anchor(self) -> Literal["w", "center", "e"]:
         """Return the pack anchor string for the current alignment.
 
         Returns:
             str: Pack anchor token (`w`, `center`, or `e`).
         """
-        return cast(Literal['w', 'center', 'e'], {
-            "left": "w",
-            "center": "center",
-            "right": "e",
-        }[self.alignment])
+        return cast(
+            Literal["w", "center", "e"],
+            {
+                "left": "w",
+                "center": "center",
+                "right": "e",
+            }[self.alignment],
+        )
 
     @property
-    def _text_anchor(self) -> Literal['w', 'center', 'e']:
+    def _text_anchor(self) -> Literal["w", "center", "e"]:
         """Return the text anchor string for the current alignment.
 
         Returns:
             str: Text anchor token (`w`, `center`, or `e`).
         """
-        return cast(Literal['w', 'center', 'e'], {
-            "left": "w",
-            "center": "center",
-            "right": "e",
-        }[self.alignment])
+        return cast(
+            Literal["w", "center", "e"],
+            {
+                "left": "w",
+                "center": "center",
+                "right": "e",
+            }[self.alignment],
+        )
 
     @property
-    def _text_justify(self) -> Literal['left', 'center', 'right']:
+    def _text_justify(self) -> Literal["left", "center", "right"]:
         """Return the Tk justify token for the current alignment.
 
         Returns:
             str: Justification token (`left`, `center`, or `right`).
         """
-        return cast(Literal['left', 'center', 'right'], self.alignment)
+        return cast(Literal["left", "center", "right"], self.alignment)
 
     @property
-    def _grid_sticky(self) -> Literal['w', '', 'e']:
+    def _grid_sticky(self) -> Literal["w", "", "e"]:
         """Return the grid sticky token for the current alignment.
 
         Returns:
             str: Grid sticky token (`w`, empty string for centered, or `e`).
         """
-        return cast(Literal['w', '', 'e'], {
-            "left": "w",
-            "center": "",
-            "right": "e",
-        }[self.alignment])
+        return cast(
+            Literal["w", "", "e"],
+            {
+                "left": "w",
+                "center": "",
+                "right": "e",
+            }[self.alignment],
+        )
 
-    def _normalise_alignment(self, alignment: Optional[str]) -> Literal['left', 'center', 'right']:
+    def _normalise_alignment(
+        self, alignment: Optional[str]
+    ) -> Literal["left", "center", "right"]:
         """Normalise alignment input and fallback safely to `left`.
 
         Args:
@@ -163,7 +189,7 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         candidate = str(alignment or "left").strip().lower()
         if candidate not in {"left", "center", "right"}:
             return "left"
-        return cast(Literal['left', 'center', 'right'], candidate)
+        return cast(Literal["left", "center", "right"], candidate)
 
     def _normalise_bool(self, value: object) -> bool:
         """Normalise bool-like input with safe defaults.
@@ -207,7 +233,11 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             except Exception:
                 pass
 
-    def align_child_text(self, widget: tk.Widget, alignment: Optional[Literal['left', 'center', 'right']] = None) -> None:
+    def align_child_text(
+        self,
+        widget: tk.Widget,
+        alignment: Optional[Literal["left", "center", "right"]] = None,
+    ) -> None:
         """Apply left/center/right text alignment to a child widget.
 
         Args:
@@ -219,11 +249,11 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             self.alignment = self._normalise_alignment(alignment)
 
         self._apply_text_alignment(widget)
-        
+
         if alignment is not None:
             self.alignment = previous_alignment
 
-    def set_alignment(self, alignment: Literal['left', 'center', 'right']) -> None:
+    def set_alignment(self, alignment: Literal["left", "center", "right"]) -> None:
         """Set widget-wide alignment and refresh built-in labels.
 
         Args:
@@ -266,7 +296,9 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             try:
                 self.on_change(value)
             except Exception:
-                CONSOLE_LOGGER.error("An error occurred when handling an `on_change` event.", exc_info=1)
+                CONSOLE_LOGGER.error(
+                    "An error occurred when handling an `on_change` event.", exc_info=1
+                )
                 pass
 
     @abstractmethod
@@ -284,7 +316,9 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         raise NotImplementedError("Subclasses must implement the set() method.")
 
     @abstractmethod
-    def validate(self) -> Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+    def validate(
+        self,
+    ) -> Tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Validate the current widget value.
 
         Returns:
@@ -295,9 +329,11 @@ class BHoMBaseWidget(ttk.Frame, ABC):
         raise NotImplementedError("Subclasses must implement the validate() method.")
 
     def apply_validation(
-            self,
-            base_result: Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]
-        ) -> Tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+        self,
+        base_result: Tuple[
+            bool, Optional[str], Optional[Literal["info", "warning", "error"]]
+        ],
+    ) -> Tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Apply global validation switches and optional custom validation.
 
         Subclasses should call this from their `validate()` implementation,
@@ -327,7 +363,11 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             return False, f"Custom validation failed: {ex}", "error"
 
         if not isinstance(custom_result, tuple) or len(custom_result) != 3:
-            return False, "Custom validation must return (is_valid, message, severity).", "error"
+            return (
+                False,
+                "Custom validation must return (is_valid, message, severity).",
+                "error",
+            )
 
         custom_valid, custom_message, custom_severity = custom_result
         if not custom_valid:
@@ -337,11 +377,8 @@ class BHoMBaseWidget(ttk.Frame, ABC):
             return True, custom_message, custom_severity
 
         return is_valid, message, severity
-    
-    def build(
-            self, 
-            **kwargs
-        ):
+
+    def build(self, **kwargs):
         """Place the widget in its parent container.
 
         Args:
@@ -353,22 +390,22 @@ class BHoMBaseWidget(ttk.Frame, ABC):
 
         elif isinstance(self.build_options, GridOptions):
             self.grid(**self.build_options.to_dict())
-        
-        else:
-            raise NotImplementedError(f"Unsupported build options type: {type(self.build_options)}")
 
+        else:
+            raise NotImplementedError(
+                f"Unsupported build options type: {type(self.build_options)}"
+            )
 
 
 if __name__ == "__main__":
-
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
     from python_toolkit.bhom_tkinter.widgets._grid_options import GridOptions
 
-    from python_toolkit.bhom_tkinter.widgets.button import Button 
-    from python_toolkit.bhom_tkinter.widgets.label import Label    
+    from python_toolkit.bhom_tkinter.widgets.button import Button
+    from python_toolkit.bhom_tkinter.widgets.label import Label
 
-    #gridding test
+    # gridding test
 
     root = BHoMBaseWindow(grid_dimensions=(3, 3))
 
@@ -376,8 +413,12 @@ if __name__ == "__main__":
 
     for i in range(3):
         for j in range(3):
-            sub = grid_options.__class__(**{**grid_options.to_dict(), "row": i, "column": j})
-            label = Label(root.content_frame, text=f"Row {i} - Column {j}", build_options=sub)
+            sub = grid_options.__class__(
+                **{**grid_options.to_dict(), "row": i, "column": j}
+            )
+            label = Label(
+                root.content_frame, text=f"Row {i} - Column {j}", build_options=sub
+            )
 
             root.widgets.append(label)
 

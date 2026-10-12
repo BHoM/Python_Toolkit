@@ -1,4 +1,4 @@
-﻿"""Methods for plotting time-indexed data."""
+"""Methods for plotting time-indexed data."""
 
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -38,7 +38,7 @@ def timeseries(
     """
 
     validate_timeseries(series)
-    
+
     style_context = kwargs.pop("style_context", "python_toolkit.bhom")
 
     with plt.style.context(style_context):

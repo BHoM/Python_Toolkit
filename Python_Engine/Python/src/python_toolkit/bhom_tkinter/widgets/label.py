@@ -15,23 +15,24 @@ class Label(BHoMBaseWidget):
     """
 
     def __init__(
-            self,
-            parent,
-            text: str = "",
-            item_title: Optional[str] = None,
-            helper_text: Optional[str] = None,
-            alignment: Optional[str] = None,
-            image=None,
-            style=None,
-            justify=None,
-            wraplength=None,
-            anchor=None,
-            width=None,
-            compound=None,
-            textvariable=None,
-            foreground=None,
-            font=None,
-            **kwargs):
+        self,
+        parent,
+        text: str = "",
+        item_title: Optional[str] = None,
+        helper_text: Optional[str] = None,
+        alignment: Optional[str] = None,
+        image=None,
+        style=None,
+        justify=None,
+        wraplength=None,
+        anchor=None,
+        width=None,
+        compound=None,
+        textvariable=None,
+        foreground=None,
+        font=None,
+        **kwargs,
+    ):
         def resolve(explicit_value, key: str, default=None):
             fallback = kwargs.pop(key, default)
             return explicit_value if explicit_value is not None else fallback
@@ -55,7 +56,9 @@ class Label(BHoMBaseWidget):
             "foreground": resolve(foreground, "foreground"),
             "font": resolve(font, "font"),
         }
-        label_options = {key: value for key, value in label_options.items() if value is not None}
+        label_options = {
+            key: value for key, value in label_options.items() if value is not None
+        }
 
         # Initialize frame base without label-specific options to avoid passing
         # unknown options like '-image' to ttk.Frame
@@ -85,7 +88,11 @@ class Label(BHoMBaseWidget):
             self.label = ttk.Label(self.content_frame, **label_options)
         except tk.TclError as ex:
             message = str(ex).lower()
-            if "image" in label_options and "image" in message and "doesn't exist" in message:
+            if (
+                "image" in label_options
+                and "image" in message
+                and "doesn't exist" in message
+            ):
                 safe_options = {k: v for k, v in label_options.items() if k != "image"}
                 self.label = ttk.Label(self.content_frame, **safe_options)
             else:
@@ -120,7 +127,6 @@ class Label(BHoMBaseWidget):
             self._image_ref = value
             self.label.configure(image=self._image_ref, text="")
 
-
     def update_text(self, new_text: str):
         """Backward-compatible method name used previously to update label text."""
         self.set(new_text)
@@ -133,7 +139,9 @@ class Label(BHoMBaseWidget):
             return
         self.update_text(new_text)
 
-    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Validate the current content of the label.
 
         Returns:
@@ -142,7 +150,7 @@ class Label(BHoMBaseWidget):
                 valid, or `"error"` for invalid content.
         """
 
-        #always true
+        # always true
         return getattr(self, "apply_validation")((True, None, None))
 
 
@@ -153,10 +161,21 @@ if __name__ == "__main__":
     root = BHoMBaseWindow()
     parent_frame = root.content_frame
 
-    label_widget = Label(parent_frame, text="Hello, World!", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="right")
+    label_widget = Label(
+        parent_frame,
+        text="Hello, World!",
+        build_options=PackingOptions(anchor="n", padx=10, pady=10),
+        alignment="right",
+    )
     label_widget.build()
 
-    label_widget2 = Label(parent_frame, text="Warning: This is a BHoM warning label.", build_options=PackingOptions(anchor="n", padx=10, pady=10), alignment="left", style="Warning.TLabel")
+    label_widget2 = Label(
+        parent_frame,
+        text="Warning: This is a BHoM warning label.",
+        build_options=PackingOptions(anchor="n", padx=10, pady=10),
+        alignment="left",
+        style="Warning.TLabel",
+    )
     label_widget2.build()
 
     root.mainloop()

@@ -1,4 +1,4 @@
-﻿import re
+import re
 from enum import Enum, auto
 
 import numpy as np
@@ -6,12 +6,14 @@ import pandas as pd
 
 from ..bhom.analytics import bhom_analytics
 
+
 class DecayMethod(Enum):
     """An enumeration of decay methods."""
 
     LINEAR = auto()
     PARABOLIC = auto()
     SIGMOID = auto()
+
 
 @bhom_analytics()
 def proximity_decay(
@@ -48,6 +50,7 @@ def proximity_decay(
         return (1 - (0.5 * (np.sin(distance_to_value * np.pi - np.pi / 2) + 1))) * value
 
     raise ValueError(f"Unknown curve type: {decay_method}")
+
 
 @bhom_analytics()
 def decay_rate_smoother(

@@ -5,9 +5,9 @@ from typing import Any, Literal
 
 from python_toolkit.bhom_tkinter.widgets._build_options import BuildOptions
 
+
 @dataclass
 class GridOptions(BuildOptions):
-
     """Container for `grid` geometry keyword arguments with type hints."""
 
     column: int = 0
@@ -19,7 +19,7 @@ class GridOptions(BuildOptions):
     pady: float | str | tuple[float | str, float | str] = 0.0
     row: int = 0
     rowspan: int = 1
-    sticky: Literal['n', 'e', 's', 'w', 'ne', 'nw', 'se', 'sw', ''] = ''
+    sticky: Literal["n", "e", "s", "w", "ne", "nw", "se", "sw", ""] = ""
 
     def to_dict(self) -> dict:
         """Convert the dataclass to a dictionary, excluding `None` values.
@@ -28,4 +28,3 @@ class GridOptions(BuildOptions):
             dict: Gridding options filtered to keys with concrete values.
         """
         return {k: v for k, v in asdict(self).items() if v is not None}
-    

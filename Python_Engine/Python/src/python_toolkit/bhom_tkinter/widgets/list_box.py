@@ -9,18 +9,20 @@ from typing import Optional, Literal
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 
+
 class ScrollableListBox(BHoMBaseWidget):
     """A reusable listbox widget with auto-hiding scrollbar."""
 
     def __init__(
-            self, 
-            parent: ttk.Frame, 
-            items=None, 
-            selectmode=tk.MULTIPLE, 
-            height=None,
-            width=None,
-            show_selection_controls=False,
-            **kwargs):
+        self,
+        parent: ttk.Frame,
+        items=None,
+        selectmode=tk.MULTIPLE,
+        height=None,
+        width=None,
+        show_selection_controls=False,
+        **kwargs,
+    ):
         """
         Args:
             parent (ttk.Frame): The parent widget.
@@ -32,7 +34,7 @@ class ScrollableListBox(BHoMBaseWidget):
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
-        
+
         self.items = items or []
         self._cached_options = [str(item) for item in self.items]
         self._cached_selection: list[str] = []
@@ -66,11 +68,11 @@ class ScrollableListBox(BHoMBaseWidget):
         self.listbox = tk.Listbox(self._lb_container, **listbox_options)
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.scrollbar.config(command=self.listbox.yview)
-        
+
         # Populate with items
         for item in self.items:
             self.listbox.insert(tk.END, item)
-        
+
         # Auto-hide scrollbar when not needed
         self.listbox.bind("<Configure>", self._on_configure)
         self.listbox.bind("<<ListboxSelect>>", self._on_selection_change)
@@ -78,15 +80,18 @@ class ScrollableListBox(BHoMBaseWidget):
         self._on_configure()
 
         if show_selection_controls:
-
-            select_widget = Button(self.content_frame, text="Select All", command=self.select_all)
+            select_widget = Button(
+                self.content_frame, text="Select All", command=self.select_all
+            )
             select_widget.grid(row=1, column=0, sticky="ns", padx=(0, 4), pady=(8, 0))
             self.select_all_button = select_widget.button
 
-            deselect_widget = Button(self.content_frame, text="Deselect All", command=self.deselect_all)
+            deselect_widget = Button(
+                self.content_frame, text="Deselect All", command=self.deselect_all
+            )
             deselect_widget.grid(row=1, column=1, sticky="ns", padx=(4, 0), pady=(8, 0))
             self.deselect_all_button = deselect_widget.button
-    
+
     def _on_configure(self, event=None):
         """Hide scrollbar if all items fit in the visible area."""
         if self.listbox.size() <= int(self.listbox.cget("height")):
@@ -113,7 +118,9 @@ class ScrollableListBox(BHoMBaseWidget):
         self._cached_options = [self.listbox.get(i) for i in range(self.listbox.size())]
         self.items = list(self._cached_options)
         self._cached_selection_indices = tuple(self.listbox.curselection())
-        self._cached_selection = [self.listbox.get(i) for i in self._cached_selection_indices]
+        self._cached_selection = [
+            self.listbox.get(i) for i in self._cached_selection_indices
+        ]
 
     def set_selections(self, items):
         """Set the selection to the specified items.
@@ -126,7 +133,7 @@ class ScrollableListBox(BHoMBaseWidget):
             if item in items:
                 self.listbox.selection_set(index)
         self._sync_cache_from_widget()
-    
+
     def get_selection(self):
         """Return a list of selected items.
 
@@ -137,7 +144,7 @@ class ScrollableListBox(BHoMBaseWidget):
             return list(self._cached_selection)
         selected_indices = self.listbox.curselection()
         return [self.listbox.get(i) for i in selected_indices]
-    
+
     def get_selection_indices(self):
         """Return tuple of selected indices.
 
@@ -157,7 +164,7 @@ class ScrollableListBox(BHoMBaseWidget):
         """Clear all selected items in the listbox."""
         self.listbox.selection_clear(0, tk.END)
         self._sync_cache_from_widget()
-    
+
     def insert(self, index, item):
         """Insert an item at the specified index.
 
@@ -168,7 +175,7 @@ class ScrollableListBox(BHoMBaseWidget):
         self.listbox.insert(index, item)
         self._sync_cache_from_widget()
         self._on_configure()
-    
+
     def delete(self, index):
         """Delete an item at the specified index.
 
@@ -178,7 +185,7 @@ class ScrollableListBox(BHoMBaseWidget):
         self.listbox.delete(index)
         self._sync_cache_from_widget()
         self._on_configure()
-    
+
     def clear(self):
         """Clear all items from the listbox."""
         self.listbox.delete(0, tk.END)
@@ -221,7 +228,7 @@ class ScrollableListBox(BHoMBaseWidget):
             self.listbox.activate(index)
             self.listbox.see(index)
         self._sync_cache_from_widget()
-    
+
     def get(self):
         """Get all currently selected items.
 
@@ -239,8 +246,10 @@ class ScrollableListBox(BHoMBaseWidget):
         if not self._is_listbox_alive():
             return list(self._cached_options)
         return [self.listbox.get(i) for i in range(self.listbox.size())]
-    
-    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Validate the current listbox state.
 
         Returns:
@@ -267,27 +276,28 @@ class ScrollableListBox(BHoMBaseWidget):
         """Synchronize cached items with the listbox contents."""
         self._sync_cache_from_widget()
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
     root = BHoMBaseWindow(theme_mode="light")
     parent_container = root.content_frame
-    
+
     items = [f"Item {i}" for i in range(1, 21)]
-    root.widgets.append(ScrollableListBox(
-        parent_container, 
-        items=items, 
-        height=10, 
-        show_selection_controls=True, 
-        item_title="List Box", 
-        helper_text="Select items from the list.",
-        build_options=PackingOptions(padx=10, pady=10)
-    ))
+    root.widgets.append(
+        ScrollableListBox(
+            parent_container,
+            items=items,
+            height=10,
+            show_selection_controls=True,
+            item_title="List Box",
+            helper_text="Select items from the list.",
+            build_options=PackingOptions(padx=10, pady=10),
+        )
+    )
     root.widgets[-1].build()
 
-    
     root.mainloop()
-    
+
     print("Selected items:", root.widgets[-1].get())

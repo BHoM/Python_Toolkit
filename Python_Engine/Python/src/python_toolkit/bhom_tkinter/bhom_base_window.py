@@ -27,6 +27,7 @@ import python_toolkit
 from python_toolkit.bhom_tkinter.theming.theme import ThemeManager
 from python_toolkit.bhom_tkinter.bhom_window_shell import BHoMWindowShell
 
+
 class BHoMBaseWindow(tk.Tk, BHoMWindowShell):
     """
     A reusable default root window template for tkinter applications.
@@ -50,7 +51,7 @@ class BHoMBaseWindow(tk.Tk, BHoMWindowShell):
         close_text: str = "Close",
         close_command: Optional[Callable] = None,
         on_close_window: Optional[Callable] = None,
-        theme_mode:str = "auto",
+        theme_mode: str = "auto",
         widgets: Optional[List[BHoMBaseWidget]] = None,
         top_most: bool = False,
         fullscreen: bool = False,
@@ -59,7 +60,7 @@ class BHoMBaseWindow(tk.Tk, BHoMWindowShell):
         show_banner: bool = True,
         defer_show: bool = False,
         content_padding: int = 20,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize the default root window.
@@ -121,8 +122,6 @@ class BHoMBaseWindow(tk.Tk, BHoMWindowShell):
 
 
 if __name__ == "__main__":
-
-
     ### TEST SIMPLE
 
     from python_toolkit.bhom_tkinter.widgets import Label, Button
@@ -133,7 +132,15 @@ if __name__ == "__main__":
     )
 
     test.widgets.append(Label(test.content_frame, text="Hello, World!"))
-    test.widgets.append(Button(test.content_frame, text="Click Me", command=lambda: print("Button Clicked!"), helper_text="This is a button.", item_title="Button Widget Title"))
+    test.widgets.append(
+        Button(
+            test.content_frame,
+            text="Click Me",
+            command=lambda: print("Button Clicked!"),
+            helper_text="This is a button.",
+            item_title="Button Widget Title",
+        )
+    )
 
     test.build()
     test.mainloop()

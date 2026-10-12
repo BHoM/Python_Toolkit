@@ -8,20 +8,22 @@ from typing import Optional, Literal
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 
+
 class PathSelector(BHoMBaseWidget):
     """A reusable path/file selector widget with a button and a readonly entry."""
 
     def __init__(
-            self, 
-            parent: ttk.Frame,
-            button_text="Browse...", 
-            filetypes=None, 
-            command=None, 
-            initialdir=None, 
-            entry_width=40,
-            button_width=25,
-            mode="file", 
-            **kwargs):
+        self,
+        parent: ttk.Frame,
+        button_text="Browse...",
+        filetypes=None,
+        command=None,
+        initialdir=None,
+        entry_width=40,
+        button_width=25,
+        mode="file",
+        **kwargs,
+    ):
         """
         Args:
             parent (tk.Widget): The parent widget.
@@ -40,23 +42,27 @@ class PathSelector(BHoMBaseWidget):
         self.mode = mode
         self.initialdir = initialdir
         self.filetypes = filetypes if filetypes is not None else [("All Files", "*.*")]
-        self.entry = ttk.Entry(self.content_frame, textvariable=self.path_var, width=entry_width)
+        self.entry = ttk.Entry(
+            self.content_frame, textvariable=self.path_var, width=entry_width
+        )
         self.entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
 
         # Use Button wrapper but expose inner ttk.Button for backward compatibility
-        button_widget = Button(self.content_frame, text=button_text, command=self._on_click, width=button_width)
+        button_widget = Button(
+            self.content_frame,
+            text=button_text,
+            command=self._on_click,
+            width=button_width,
+        )
         button_widget.pack(side=tk.LEFT)
         self.button = button_widget.button
 
     def _on_click(self):
         if self.mode == "directory":
-            path = filedialog.askdirectory(
-                initialdir=self.initialdir
-            )
+            path = filedialog.askdirectory(initialdir=self.initialdir)
         else:
             path = filedialog.askopenfilename(
-                filetypes=self.filetypes,
-                initialdir=self.initialdir
+                filetypes=self.filetypes, initialdir=self.initialdir
             )
         if path:
             selected_path = Path(path)
@@ -72,7 +78,7 @@ class PathSelector(BHoMBaseWidget):
             str: Selected file or directory path.
         """
         return self.path_var.get()
-    
+
     def set(self, value: Optional[str]):
         """Set the file path in the entry.
 
@@ -85,7 +91,9 @@ class PathSelector(BHoMBaseWidget):
 
         self.path_var.set(str(Path(value)))
 
-    def validate(self) -> tuple[bool, Optional[str], Optional[Literal['info', 'warning', 'error']]]:
+    def validate(
+        self,
+    ) -> tuple[bool, Optional[str], Optional[Literal["info", "warning", "error"]]]:
         """Validate the currently selected path.
 
         Returns:
@@ -100,16 +108,19 @@ class PathSelector(BHoMBaseWidget):
         path = Path(selected_path)
         if self.mode == "directory":
             if not path.is_dir():
-                return self.apply_validation((False, f"Directory does not exist: {selected_path}", "error"))
+                return self.apply_validation(
+                    (False, f"Directory does not exist: {selected_path}", "error")
+                )
         else:
             if not path.is_file():
-                return self.apply_validation((False, f"File does not exist: {selected_path}", "error"))
+                return self.apply_validation(
+                    (False, f"File does not exist: {selected_path}", "error")
+                )
 
         return self.apply_validation((True, None, None))
 
 
 if __name__ == "__main__":
-
     from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
     from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
@@ -121,16 +132,16 @@ if __name__ == "__main__":
         print(f"Selected: {path}")
 
     path_selector = PathSelector(
-        parent_container, 
-        button_text="Select File", 
-        filetypes=[("All Files", "*.*")], 
+        parent_container,
+        button_text="Select File",
+        filetypes=[("All Files", "*.*")],
         command=on_file_selected,
         item_title="Path Selector",
         helper_text="Select a file from your system.",
         build_options=PackingOptions(padx=20, pady=20),
         button_width=15,
         entry_width=50,
-        alignment="center"
+        alignment="center",
     )
     path_selector.build()
 
