@@ -68,8 +68,9 @@ def fuzzy_score(query: str, text: str) -> Optional[float]:
 
 
 class SearchableListBox(BHoMBaseWidget):
-    """A listbox with a filter entry above it, for picking from long lists.
+    """A listbox with a filter entry beneath it, for picking from long lists.
 
+    The filter sits in a row under the list.
     Typing in the filter narrows the list. With match_mode="fuzzy" (default) each typed word may match as
     a substring, as letters in order, or as a close misspelling, and the best matches are listed first
     (see `fuzzy_score`). With match_mode="contains" the list shows items containing the text, in order.
@@ -87,7 +88,7 @@ class SearchableListBox(BHoMBaseWidget):
             show_selection_controls: bool = False,
             keep_hidden_selection: bool = True,
             show_summary: Optional[bool] = None,
-            filter_label: str = "Search",
+            filter_label: str = "Filter",
             match_mode: Literal["fuzzy", "contains"] = "fuzzy",
             **kwargs):
         """
@@ -118,14 +119,7 @@ class SearchableListBox(BHoMBaseWidget):
         self._selected: set[str] = set()
         self._show_summary = self._multi if show_summary is None else bool(show_summary)
 
-        # Filter entry
-        filter_frame = ttk.Frame(self.content_frame)
-        filter_frame.pack(side="top", fill=tk.X)
-        ttk.Label(filter_frame, text=filter_label, style="Caption.TLabel").pack(side="top", anchor=self._pack_anchor)
         self.filter_var = tk.StringVar()
-        self.filter_entry = ttk.Entry(filter_frame, textvariable=self.filter_var)
-        self.filter_entry.pack(side="top", fill=tk.X, pady=(2, 6))
-        self.filter_var.trace_add("write", lambda *_: self._apply_filter())
 
         # List
         self.list_box = ScrollableListBox(
@@ -138,6 +132,14 @@ class SearchableListBox(BHoMBaseWidget):
             build_options=PackingOptions(side="top", fill=tk.BOTH, expand=True),
         )
         self.list_box.build()
+
+        # Filter entry
+        filter_frame = ttk.Frame(self.content_frame)
+        filter_frame.pack(side="top", fill=tk.X, pady=(6, 0))
+        ttk.Label(filter_frame, text=filter_label, style="Caption.TLabel").pack(side="top", anchor=self._pack_anchor)
+        self.filter_entry = ttk.Entry(filter_frame, textvariable=self.filter_var)
+        self.filter_entry.pack(side="top", fill=tk.X, pady=(2, 0))
+        self.filter_var.trace_add("write", lambda *_: self._apply_filter())
 
         if show_selection_controls and self._multi:
             controls = ttk.Frame(self.content_frame)
