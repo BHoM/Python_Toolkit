@@ -5,6 +5,7 @@ from tkinter import ttk
 from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 class RadioSelection(BHoMBaseWidget):
 	"""A reusable radio selection widget built from a list of fields."""
@@ -87,8 +88,8 @@ class RadioSelection(BHoMBaseWidget):
 				button.grid(
 					row=row,
 					column=column,
-					padx=(0, 10),
-					pady=(0, 4),
+					padx=scale_pad((0, 10)),
+					pady=scale_pad((0, 4)),
 					sticky=("ew" if self.options_fill_extents else sticky),
 				)
 				if self.options_fill_extents:
@@ -97,8 +98,8 @@ class RadioSelection(BHoMBaseWidget):
 				button.grid(
 					row=0,
 					column=index,
-					padx=(0, 10),
-					pady=(0, 4),
+					padx=scale_pad((0, 10)),
+					pady=scale_pad((0, 4)),
 					sticky=("ew" if self.options_fill_extents else sticky),
 				)
 				if self.options_fill_extents:
@@ -107,8 +108,8 @@ class RadioSelection(BHoMBaseWidget):
 				button.grid(
 					row=index,
 					column=0,
-					padx=(0, 10),
-					pady=(0, 4),
+					padx=scale_pad((0, 10)),
+					pady=scale_pad((0, 4)),
 					sticky=("ew" if self.options_fill_extents else sticky),
 				)
 				if self.options_fill_extents:

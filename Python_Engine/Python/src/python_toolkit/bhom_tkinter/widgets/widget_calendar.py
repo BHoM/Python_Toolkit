@@ -10,6 +10,7 @@ import datetime
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 from python_toolkit.bhom_tkinter.widgets.drop_down_selection import DropDownSelection
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 class CalendarWidget(BHoMBaseWidget):
     """Render a month grid and allow date selection."""
@@ -91,7 +92,7 @@ class CalendarWidget(BHoMBaseWidget):
             command=lambda val: self.set_year(val),
             state="readonly",
         )
-        self.year_dropdown.pack(side="left", padx=4, pady=4)
+        self.year_dropdown.pack(side="left", padx=scale_pad(4), pady=scale_pad(4))
 
     def month_selector(self):
         """Build the month dropdown selector."""
@@ -103,7 +104,7 @@ class CalendarWidget(BHoMBaseWidget):
             command=lambda val: self.set_month(val),
             state="readonly",
         )
-        self.month_dropdown.pack(side="left", padx=4, pady=4)
+        self.month_dropdown.pack(side="left", padx=scale_pad(4), pady=scale_pad(4))
 
     def _pack_sections(self) -> None:
         """Pack month selectors and calendar sections in the configured order."""
@@ -141,7 +142,7 @@ class CalendarWidget(BHoMBaseWidget):
 
         label = Label(self.date_frame, text=text)
         self.align_child_text(label)
-        label.pack(anchor=self._pack_anchor, padx=4, pady=4)
+        label.pack(anchor=self._pack_anchor, padx=scale_pad(4), pady=scale_pad(4))
 
     def set_year(self, value):
         """Update the selected year and redraw the calendar.

@@ -6,6 +6,7 @@ import time
 import threading
 
 from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
+from python_toolkit.bhom_tkinter.theming.scaling import scale, scale_pad
 
 class ProcessingWindow(BHoMBaseChildWindow):
     """A simple processing window with animated indicator."""
@@ -34,7 +35,7 @@ class ProcessingWindow(BHoMBaseChildWindow):
         self.attributes("-topmost", True)
         self.resizable(False, False)
 
-        container = ttk.Frame(self.content_frame, padding=20)
+        container = ttk.Frame(self.content_frame, padding=scale(20))
         container.pack(fill="both", expand=True)
 
         self.message_label = ttk.Label(
@@ -42,7 +43,7 @@ class ProcessingWindow(BHoMBaseChildWindow):
             text=message,
             style="Title.TLabel",
             justify="center",
-            wraplength=400
+            wraplength=scale(400)
         )
         try:
             title_font = ttk.Style(self).lookup("Title.TLabel", "font")
@@ -50,7 +51,7 @@ class ProcessingWindow(BHoMBaseChildWindow):
                 self.message_label.configure(font=title_font)
         except Exception:
             pass
-        self.message_label.pack(pady=(0, 20))
+        self.message_label.pack(pady=scale_pad((0, 20)))
 
         animation_frame = ttk.Frame(container)
         animation_frame.pack(expand=True)
