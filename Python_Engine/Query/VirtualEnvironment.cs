@@ -20,82 +20,65 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.oM.Python.Enums;
 using BH.oM.Python;
 using BH.oM.Base.Attributes;
 
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System;
-using System.Collections.Generic;
 
 namespace BH.Engine.Python
 {
     public static partial class Query
     {
-        [Description("Check whether a named BHoM Python virtual environment exists.")]
-        [Input("envName", "The name given to the BHoM Python Environment.")]
-        [Input("pythonVersion", "The version to check against.")]
-        [Output("exists", "True if exists, False if not.")]
-        public static bool VirtualEnvironmentExists(string envName, PythonVersion pythonVersion = PythonVersion.Undefined)
-        {
-            string executable = VirtualEnvironmentExecutable(envName);
-            bool directoryExists = Directory.Exists(VirtualEnvironmentDirectory(envName));
-            bool executableExists = File.Exists(executable);
-            bool kernelExists = Directory.Exists(VirtualEnvironmentKernel(envName));
-            bool versionMatches = false;
-
-            if (executableExists)
-                versionMatches = Version(executable) == pythonVersion;
-
-            if (pythonVersion == PythonVersion.Undefined)
-                return directoryExists && executableExists && kernelExists;
-            
-            return directoryExists && executableExists && kernelExists && versionMatches;
-        }
-
-        [Description("Get the path to the named BHoM Python virtual environment kernel.")]
-        [Input("envName", "The name given to the BHoM Python Environment.")]
-        [Output("kernelDirectory", "The path to the kernel directory.")]
-        public static string VirtualEnvironmentKernel(string envName)
-        {
-            return Path.Combine(Query.DirectoryKernels(), envName.ToLower());
-        }
-
-        [Description("Get the path to the named BHoM Python virtual environment executable.")]
-        [Input("envName", "The name given to the BHoM Python Environment.")]
+        [Description("Get the path to the named Python virtual environment executable.")]
+        [Input("name", "The name given to the Python Environment.")]
         [Output("executable", "The path to the executable.")]
-        public static string VirtualEnvironmentExecutable(string envName)
-        {
-            return Path.Combine(Query.DirectoryEnvironments(), envName, "Scripts", "python.exe");
+        public static string VirtualEnvironmentExecutable(string name)
+        {   
+            string exePath = Path.Combine(Query.DirectoryEnvironments(), name, "venv", "Scripts", "python.exe");
+            if (!File.Exists(exePath))
+                Base.Compute.RecordError($"{exePath} was not found.");
+
+            return exePath;
         }
 
-        [Description("Get the path to the named BHoM Python virtual environment.")]
-        [Input("envName", "The name given to the BHoM Python Environment.")]
-        [Output("directory", "The directory where the virtual environment is located.")]
-        public static string VirtualEnvironmentDirectory(string envName)
+        [Description("Check whether a named Python virtual environment exists.")]
+        [Input("name", "The name given to the Python Environment.")]
+        [Output("exists", "True if exists, False if not.")]
+        public static bool VirtualEnvironmentExists(string name)
         {
-            return Path.Combine(Query.DirectoryEnvironments(), envName);
-        }
-
-        [Description("Get the named BHoM Python virtual environment.")]
-        [Input("envName", "The name given to the BHoM Python Environment.")]
-        [Output("environment", "The BHoM Python Environment.")]
-        public static PythonEnvironment VirtualEnvironment(string envName)
-        {
-            if (!VirtualEnvironmentExists(envName))
-                return null;
+            string expectedVenvPath = Path.Combine(Query.DirectoryEnvironments(), name, "venv");
             
+            if (Directory.Exists(expectedVenvPath) & File.Exists(VirtualEnvironmentExecutable(name)))
+                return true;
+                
+            return false;
+        }
+
+        [Description("Get the named Python virtual environment.")]
+        [Input("name", "The name given to the Python Environment.")]
+        [Output("environment", "The Python Environment.")]
+        public static PythonEnvironment VirtualEnvironment(string name)
+        {
+            if (!VirtualEnvironmentExists(name))
+                Base.Compute.RecordError($"{name} was not found in {Query.DirectoryEnvironments()}");
+
             return new PythonEnvironment()
             {
-                Name = envName,
-                Executable = VirtualEnvironmentExecutable(envName),
+                Name = name,
+                Executable = VirtualEnvironmentExecutable(name),
             };
+        }
+
+        [Description("Get a named Python virtual environment.")]
+        [Input("name", "The name given to the Python Environment.")]
+        [Output("directory", "The directory in which the venv resides.")]
+        public static string VirtualEnvironmentDirectory(string name)
+        {
+            if (!VirtualEnvironmentExists(name))
+                Base.Compute.RecordError($"{name} was not found in {Query.DirectoryEnvironments()}");
+
+            return Path.Combine(Query.DirectoryEnvironments(), name);
         }
     }
 }
-
-
-
-

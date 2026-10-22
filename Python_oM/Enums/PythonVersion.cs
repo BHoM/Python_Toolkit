@@ -24,113 +24,25 @@ using System.ComponentModel;
 
 namespace BH.oM.Python.Enums
 {
-    // There are multiple specific versions here that are commented out - When installing, only one specific version (e.g 3.10.x) per minor python version (e.g 3.x) can be installed, and changes between specific versions are usually bug fixes and not breaking. however the specific versions are kept commented for posterity.
     public enum PythonVersion
     {
         [Description("Undefined")]
         Undefined,
-        /*[Description("3.7.0")]
-        v3_7_0,
-        [Description("3.7.1")]
-        v3_7_1,
-        [Description("3.7.2")]
-        v3_7_2,
-        [Description("3.7.3")]
-        v3_7_3,
-        [Description("3.7.4")]
-        v3_7_4,
-        [Description("3.7.5")]
-        v3_7_5,
-        [Description("3.7.6")]
-        v3_7_6,
-        [Description("3.7.7")]
-        v3_7_7,
-        [Description("3.7.8")]
-        v3_7_8,*/
-        [Description("3.7")] //3.7.9
+        [Description("3.7")]
         v3_7,
-        /*[Description("3.8.0")]
-        v3_8_0,
-        [Description("3.8.1")]
-        v3_8_1,
-        [Description("3.8.2")]
-        v3_8_2,
-        [Description("3.8.3")]
-        v3_8_3,
-        [Description("3.8.4")]
-        v3_8_4,
-        [Description("3.8.5")]
-        v3_8_5,
-        [Description("3.8.6")]
-        v3_8_6,
-        [Description("3.8.7")]
-        v3_8_7,
-        [Description("3.8.8")]
-        v3_8_8,*/
-        [Description("3.8")] //3.8.9
+        [Description("3.8")]
         v3_8,
-        //[Description("3.8.10")]
-        //v3_8_10,
-        /*[Description("3.9.0")]
-        v3_9_0,
-        [Description("3.9.1")]
-        v3_9_1,
-        [Description("3.9.2")]
-        v3_9_2,
-        [Description("3.9.3")]
-        v3_9_3,
-        [Description("3.9.4")]
-        v3_9_4,
-        [Description("3.9.5")]
-        v3_9_5,
-        [Description("3.9.6")]
-        v3_9_6,
-        [Description("3.9.7")]
-        v3_9_7,
-        [Description("3.9.8")]
-        v3_9_8,
-        [Description("3.9.9")]
-        v3_9_9,*/
-        [Description("3.9")] //3.9.10
+        [Description("3.9")]
         v3_9,
-        /*[Description("3.10.0")]
-        v3_10_0,
-        [Description("3.10.1")]
-        v3_10_1,
-        [Description("3.10.2")]
-        v3_10_2,
-        [Description("3.10.3")]
-        v3_10_3,
-        [Description("3.10.4")]
-        v3_10_4,
-        [Description("3.10.5")]
-        v3_10_5,
-        [Description("3.10.6")]
-        v3_10_6,
-        [Description("3.10.7")]
-        v3_10_7,
-        [Description("3.10.8")]
-        v3_10_8,
-        [Description("3.10.9")]
-        v3_10_9,
-        [Description("3.10.10")]
-        v3_10_10,*/
-        [Description("3.10")] //3.10.11
+        [Description("3.10")]
         v3_10,
-        /*[Description("3.11.0")]
-        v3_11_0,
-        [Description("3.11.1")]
-        v3_11_1,
-        [Description("3.11.2")]
-        v3_11_2,
-        [Description("3.11.3")]
-        v3_11_3,*/
-        [Description("3.11")] //3.11.4
+        [Description("3.11")]
         v3_11,
         [Description("3.12")]
         v3_12,
+        [Description("3.13")]
+        v3_13,
+        [Description("3.14")]
+        v3_14,
     }
 }
-
-
-
