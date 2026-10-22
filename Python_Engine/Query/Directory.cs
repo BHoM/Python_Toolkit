@@ -36,47 +36,14 @@ namespace BH.Engine.Python
             return Path.Combine(System.IO.Directory.GetParent(BH.Engine.Base.Query.BHoMFolder()).FullName, "Extensions");
         }
 
-        [Description("The location where any BHoM-related Python kernels reside.")]
-        [Output("path", "The location where any BHoM-related Python kernels reside.")]
-        public static string DirectoryKernels()
-        {
-            
-            string dir = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "jupyter", "kernels");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-            return dir;
-        }
-
-        [Description("The location where any BHoM-related Python code resides.")]
-        [Output("path", "The location where any BHoM-related Python code resides.")]
-        public static string DirectoryCode()
-        {
-            string dir = Path.Combine(Query.DirectoryExtensions(), "PythonCode");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-            return dir;
-        }
-
         [Description("The location where any BHoM-related Python environment (or virtualenv) resides.")]
         [Output("path", "The location where any BHoM-related Python environment (or virtualenv) resides.")]
         public static string DirectoryEnvironments()
         {
-            string dir = Path.Combine(Query.DirectoryExtensions(), "PythonEnvironments");
+            string dir = Path.Combine(Query.DirectoryExtensions(), "Python");
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             return dir;
         }
-
-        [Description("The location where the base Python environment exists.")]
-        [Input("version", "The python version to get the base environment for.")]
-        [Output("path", "The location where the base Python environment exists.")]
-        public static string DirectoryBaseEnvironment(this PythonVersion version)
-        {
-            return Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName(), version.ToString());
-        }
     }
 }
-
-
-
-

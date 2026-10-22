@@ -44,8 +44,3 @@ namespace BH.Engine.Python
         }
     }
 }
-
-
-
-
-

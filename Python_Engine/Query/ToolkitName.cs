@@ -32,7 +32,7 @@ namespace BH.Engine.Python
         [Output("name", "The name of this toolkit.")]
         public static string ToolkitName()
         {
-            return "Python_Toolkit";
+            return "python_toolkit";
         }
     }
 }

@@ -22,175 +22,130 @@
 
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Install a list of packages to a given Python executable.")]
-        [Input("executable", "The Python executable to install the packages to.")]
-        [Input("packages", "The packages to install.")]
-        public static void InstallPackages(
-            string executable,
-            List<string> packages
-        )
+        [Description("Install UV, the Python manager used in these tools, and the ruff, jupyterlab and sphinx tools.")]
+        [Input("run", "Set to True to install UV and its core tools.")]
+        public static void InstallUV(bool run = false)
         {
-            if (!File.Exists(executable))
+            if (!run)
+                return;
+
+            try
             {
-                Base.Compute.RecordError("Python executable not found at " + executable);
+                string uvBinPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "bin");
+                if (Directory.Exists(uvBinPath))
+                    Environment.SetEnvironmentVariable("PATH", uvBinPath + Path.PathSeparator + Environment.GetEnvironmentVariable("PATH"));
+
+                int exitCode;
+                string location = RunCommandStdout("where.exe uv.exe", out exitCode);
+                if (exitCode != 0)
+                {
+                    Base.Compute.RecordNote("Installing UV.");
+                    string output = RunCommandStdout(
+                        "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"$ErrorActionPreference = 'Stop'; irm https://astral.sh/uv/install.ps1 | iex\"",
+                        out exitCode);
+                    if (exitCode != 0)
+                    {
+                        Base.Compute.RecordError(exception: new Exception(), message: $"Failed to install UV (exit code {exitCode}).\n{output}");
+                        return;
+                    }
+
+                    // The installer cannot update the environment of this already-running process.
+                    if (Directory.Exists(uvBinPath))
+                        Environment.SetEnvironmentVariable("PATH", uvBinPath + Path.PathSeparator + Environment.GetEnvironmentVariable("PATH"));
+
+                    location = RunCommandStdout("where.exe uv.exe", out exitCode);
+                }
+
+                if (exitCode != 0)
+                {
+                    Base.Compute.RecordError(exception: new Exception(), message: $"Could not locate UV on PATH after installation.\n{location}");
+                    return;
+                }
+
+                string uvExecutable = location.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0];
+
+                foreach (string tool in new[] { "ruff", "jupyterlab", "sphinx" })
+                {
+                    string output = RunCommandStdout($"\"\"{uvExecutable}\" tool install {tool}\"", out exitCode);
+                    if (exitCode != 0)
+                    {
+                        Base.Compute.RecordError(exception: new Exception(), message: $"Failed to install {tool} to UV (exit code {exitCode}).\n{output}");
+                    }
+                }
             }
-
-            if (packages.Count == 0)
+            catch (System.ComponentModel.Win32Exception ex)
             {
-                Base.Compute.RecordError("No packages to install.");
+                Base.Compute.RecordError(exception: new Exception(), message: $"Could not run the UV installation command. {ex.Message}");
             }
-
-            string startDirectory = Directory.GetParent(Directory.GetParent(executable).FullName).FullName;
-
-            string packagesString = string.Join(" ", packages);
-
-            ProcessStartInfo psi = new ProcessStartInfo
+            catch (TimeoutException ex)
             {
-                FileName = "uv",
-                Arguments = $"pip install {packagesString}",
-                WorkingDirectory = startDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            using (Process process = Process.Start(psi))
-            {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
+                Base.Compute.RecordError(exception: new Exception(), message: $"UV installation timed out. {ex.Message}");
+            }
+        }
 
-                process.WaitForExit();
-
-                if (process.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{packagesString}].\n{error}");
-            };
+        [Description("Register a Jupyer kernel for a given venv.")]
+        [Input("venv", "The Python environment to install the packages to.")]
+        public static void InstallJupyterKernel(PythonEnvironment venv)
+        {
+            string cmd = $"{venv.Executable} -m ipykernel insatll --user --name {venv.Name} --display-name {venv.Name}";
+            RunCommandStdout(command: cmd, hideWindows: true);
         }
 
         [Description("Install a list of packages to a given Python executable.")]
-        [Input("environment", "The Python environment to install the packages to.")]
+        [Input("venv", "The Python environment to install the packages to.")]
         [Input("packages", "The packages to install.")]
+        [Input("run", "Run this method.")]
         public static void InstallPackages(
-            this PythonEnvironment environment,
-            List<string> packages
+            this PythonEnvironment venv,
+            List<string> packages,
+            bool run = false
         )
         {
-            InstallPackages(environment.Executable, packages);
-        }
+            string cmd = $"uv add {string.Join(" ", packages)}";
+            string directory = Query.VirtualEnvironmentDirectory(venv.Name);
 
-        [Description("Install packages from a requirements.txt file to a given Python executable.")]
-        [Input("executable", "The Python executable to install the packages to.")]
-        [Input("requirements", "The requirements.txt file to install.")]
-        public static void InstallRequirements(
-            string executable,
-            string requirements
-        )
-        {
-            if (!File.Exists(executable))
-            {
-                Base.Compute.RecordError("Python executable not found at " + executable);
+            if (run)
+            { 
+                string result = RunCommandStdout(cmd, out int exitCode, startDirectory: directory);
             }
-
-            if (!File.Exists(requirements))
+            else
             {
-                Base.Compute.RecordError("requirements.txt not found at " + requirements);
+                Base.Compute.RecordNote($"The following command will be executed from \"{directory}\": {cmd}");
             }
-
-            string startDirectory = Directory.GetParent(Directory.GetParent(executable).FullName).FullName;
-
-            ProcessStartInfo psi = new ProcessStartInfo
-            {
-                FileName = "uv",
-                Arguments = $"pip install -r {requirements}",
-                WorkingDirectory = startDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            using (Process process = Process.Start(psi))
-            {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-
-                process.WaitForExit();
-
-                if (process.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing requirements from \"{requirements}\".\n{error}");
-            };
-        }
-
-        [Description("Install packages from a requirements.txt file to a given Python environment.")]
-        [Input("environment", "The Python environment to install the packages to.")]
-        [Input("requirements", "The requirements.txt file to install.")]
-        public static void InstallRequirements(
-            this PythonEnvironment environment,
-            string requirements
-        )
-        {
-            InstallRequirements(environment.Executable, requirements);
-        }
-
-
-        [Description("Install a local Python package to a given Python executable.")]
-        [Input("executable", "The Python executable to install the package to.")]
-        [Input("packageDirectory", "The package to install.")]
-        public static void InstallPackageLocal(
-            string executable,
-            string packageDirectory
-        )
-        {
-            if (!File.Exists(executable))
-            {
-                Base.Compute.RecordError("Python executable not found at " + executable);
-            }
-
-            if (!Directory.Exists(packageDirectory))
-            {
-                Base.Compute.RecordError("packageDirectory not found at " + packageDirectory);
-            }
-
-            string startDirectory = Directory.GetParent(Directory.GetParent(executable).FullName).FullName;
-
-            ProcessStartInfo psi = new ProcessStartInfo
-            {
-                FileName = "uv",
-                Arguments = $"pip install --no-warn-script-location -e {Modify.AddQuotesIfRequired(packageDirectory)}",
-                WorkingDirectory = startDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            using (Process process = Process.Start(psi))
-            {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-
-                process.WaitForExit();
-
-                if (process.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing package from \"{packageDirectory}\".\n{error}");
-            };
         }
 
         [Description("Install a local Python package to a given Python environment.")]
-        [Input("environment", "The Python environment to install the packages to.")]
+        [Input("venv", "The Python environment to install the packages to.")]
         [Input("packageDirectory", "The package to install.")]
+        [Input("run", "Run this method.")]
         public static void InstallPackageLocal(
-            this PythonEnvironment environment,
-            string packageDirectory
+            this PythonEnvironment venv,
+            string packageDirectory,
+            bool run = false
         )
         {
-            InstallPackageLocal(environment.Executable, packageDirectory);
+            if (!Directory.Exists(packageDirectory))
+                Base.Compute.RecordError($"{packageDirectory} not found.");
+
+            string cmd = $"uv add --editable {packageDirectory}";
+            string directory = Query.VirtualEnvironmentDirectory(venv.Name);
+
+            if (run)
+            {
+                string result = RunCommandStdout(cmd, out int exitCode, startDirectory: directory);
+            }
+            else {
+                Base.Compute.RecordNote($"The following command will be executed from \"{directory}\": {cmd}");
+            }
         }
     }
 }

@@ -84,6 +84,3 @@ namespace BH.Engine.Python
         }
     }
 }
-
-
-

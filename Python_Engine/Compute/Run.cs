@@ -20,22 +20,16 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.oM.Base;
 using BH.oM.Base.Attributes;
-using BH.oM.Python;
-using BH.oM.Python.Enums;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {   
-        [ToBeRemoved("10.0")]
         [Description("Run a command via CMD and return stdout.")]
         [Input("command", "The command to be run.")]
         [Input("hideWindows", "Set to True to hide cmd windows.")]
@@ -43,6 +37,12 @@ namespace BH.Engine.Python
         [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
         [Output("stdout", "The StandardOutput from the command that was run. If the process failed, then StandardError will be returned here instead.")]
         public static string RunCommandStdout(string command, bool hideWindows = true, string startDirectory = null, double timeoutMinutes = 5)
+        {
+            int exitCode;
+            return RunCommandStdout(command, out exitCode, hideWindows, startDirectory, timeoutMinutes);
+        }
+
+        private static string RunCommandStdout(string command, out int exitCode, bool hideWindows = true, string startDirectory = null, double timeoutMinutes = 5)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
 
@@ -53,7 +53,12 @@ namespace BH.Engine.Python
                 process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 commandMode = "/C";
             }
-            process.StartInfo.Environment["PYTHONHOME"] = "";
+
+            // override some commonly used user/system environment variables to avoid some potential weirdness
+            List<string> sysVariables = new List<string>() { "PYTHONHOME", "PYTHONPATH" };
+            foreach (var sysVar in sysVariables)
+                process.StartInfo.Environment[sysVar] = "";
+
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -61,27 +66,31 @@ namespace BH.Engine.Python
             process.StartInfo.Arguments = $"{commandMode} {command}";
             process.Start();
 
-            // To avoid deadlocks, always read the output stream first and then wait.  
-            string stdout = process.StandardOutput.ReadToEnd();
-            string stderr = process.StandardError.ReadToEnd();
+            // Read both streams concurrently so verbose commands cannot block on a full buffer.
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
 
-            int millisecondsToWait = (int)timeoutMinutes * 60 * 1000;
-            process.WaitForExit(millisecondsToWait);
-
-            if (process.ExitCode != 0)
+            int millisecondsToWait = checked((int)(timeoutMinutes * 60 * 1000));
+            if (!process.WaitForExit(millisecondsToWait))
             {
-                return stderr.Trim();
+                process.Kill();
+                process.Dispose();
+                throw new System.TimeoutException($"Command exceeded {timeoutMinutes} minutes.");
             }
 
-            return stdout.Trim();
+            string stdout = stdoutTask.GetAwaiter().GetResult();
+            string stderr = stderrTask.GetAwaiter().GetResult();
+            exitCode = process.ExitCode;
+            process.Dispose();
+
+            return (exitCode != 0 ? stderr : stdout).Trim();
         }
 
-        [ToBeRemoved("10.0")]
         [Description("Run a string containing Python code and return the output. The string passed should end with a \"print\" statement, and other print statements within it should be captured within the script to ensure only a single output string is passed back to this method.")]
         [Input("env", "The Python environment with which to run the Python script.")]
         [Input("pythonString", "The string containing the Python script.")]
         [Output("result", "The stdout data from the executed Python script.")]
-        public static string RunPythonString(this oM.Python.PythonEnvironment env, string pythonString)
+        public static string RunPythonString(this oM.Python.PythonEnvironment venv, string pythonString)
         {
             if (!pythonString.Split('\n').Last().Contains("print"))
             {
@@ -95,12 +104,9 @@ namespace BH.Engine.Python
                 outputFile.WriteLine(pythonString);
             }
 
-            string cmd = $"{Modify.AddQuotesIfRequired(env.Executable)} {scriptFile}";
+            string cmd = $"{Modify.AddQuotesIfRequired(venv.Executable)} {scriptFile}";
 
             return RunCommandStdout(cmd, hideWindows: true);
         }
     }
 }
-
-
-
