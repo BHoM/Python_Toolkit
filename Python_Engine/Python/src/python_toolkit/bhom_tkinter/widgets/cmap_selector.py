@@ -11,6 +11,7 @@ from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 # Accepted colormap input types for colormaps parameter and set()/add_cmap()
 CmapInput = Union[str, Colormap, List[str]]
@@ -124,7 +125,7 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame.rowconfigure(0, weight=1)
 
         content = ttk.Frame(self.cmap_frame, width=plot_size[0], height=plot_size[1])
-        content.grid(row=0, column=0, padx=0, pady=4, sticky=self._grid_sticky)
+        content.grid(row=0, column=0, padx=scale_pad(0), pady=scale_pad(4), sticky=self._grid_sticky)
         content.grid_propagate(False)
 
         self.cmap_set_var = tk.StringVar(value=cmap_set.lower())
@@ -146,7 +147,7 @@ class CmapSelector(BHoMBaseWidget):
             state="readonly",
             justify=self._text_justify,
         )
-        self.cmap_combobox.pack(side=tk.TOP, anchor=self._pack_anchor, padx=0)
+        self.cmap_combobox.pack(side=tk.TOP, anchor=self._pack_anchor, padx=scale_pad(0))
         self.cmap_combobox.bind("<<ComboboxSelected>>", self._on_cmap_selected)
 
         fill_mode: Literal["x", "y"] = "y" if is_horizontal else "x"

@@ -10,7 +10,9 @@ import ctypes
 import python_toolkit
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
+from python_toolkit.bhom_tkinter.widgets._slim_scrollbar import SlimScrollbar, blend
 from python_toolkit.bhom_tkinter.theming.theme import ThemeManager
+from python_toolkit.bhom_tkinter.theming.scaling import init_scaling, scale, get_work_area
 
 from python_toolkit.bhom import BHOM_VERSION
 
@@ -47,6 +49,12 @@ class BHoMWindowShell:
         content_padding: int = 20,
     ) -> None:
         self.defer_show = defer_show
+        # Must run before any widget/theme is created so pixel values use the right factor.
+        init_scaling(self)
+        min_width, min_height = scale(min_width), scale(min_height)
+        width = scale(width) if width is not None else None
+        height = scale(height) if height is not None else None
+        content_padding = scale(content_padding)
         self.title(title)
         self._icon_image = None
         self.minsize(min_width, min_height)
@@ -95,8 +103,7 @@ class BHoMWindowShell:
         if show_banner:
             self._build_banner(self.main_container, title, self.theme.logo_path)
 
-        self.content_frame = ttk.Frame(self.main_container, padding=content_padding)
-        self.content_frame.pack(fill=tk.BOTH, expand=True)
+        self._build_scroll_host(content_padding)
 
         if self.grid_dimensions:
             self.grid_content_frame(*self.grid_dimensions)
@@ -286,16 +293,17 @@ class BHoMWindowShell:
             logo_path: Optional logo image path.
         """
         banner = ttk.Frame(parent, relief=tk.RIDGE, borderwidth=1)
+        self._banner = banner
         banner.pack(fill=tk.BOTH, padx=0, pady=0)
 
-        banner_content = ttk.Frame(banner, padding=10)
+        banner_content = ttk.Frame(banner, padding=scale(10))
         banner_content.pack(fill=tk.BOTH, expand=True)
 
         # Text container
         text_container = ttk.Frame(banner_content)
         text_container.pack(side=tk.LEFT, fill=tk.Y)
 
-        logo_container = ttk.Frame(banner_content, width=80)
+        logo_container = ttk.Frame(banner_content, width=scale(80))
         logo_container.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Logo (if provided)
@@ -303,7 +311,7 @@ class BHoMWindowShell:
             try:
                 from PIL import Image, ImageTk
                 img = Image.open(logo_path)
-                img.thumbnail((80, 80), Image.Resampling.LANCZOS)
+                img.thumbnail((scale(80), scale(80)), Image.Resampling.LANCZOS)
                 # Bind image to this root explicitly to avoid stale image handles
                 # when previous runs failed and tore down a different Tk interpreter.
                 self.logo_image = ImageTk.PhotoImage(img, master=self)
@@ -348,8 +356,8 @@ class BHoMWindowShell:
             show_close: Whether to create close button.
             close_text: Close button label.
         """
-        self.button_bar = ttk.Frame(parent, padding=(20, 10))
-        self.button_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.button_bar = ttk.Frame(parent, padding=(scale(20), scale(10)))
+        self.button_bar.pack(side=tk.BOTTOM, fill=tk.X, before=self._scroll_host)
 
         button_container = ttk.Frame(self.button_bar)
         button_container.pack(anchor=tk.E if buttons_side == "right" else tk.W)
@@ -363,7 +371,7 @@ class BHoMWindowShell:
                 width=12,
                 alignment="center",
             )
-            submit_widget.pack(side=tk.LEFT, padx=5)
+            submit_widget.pack(side=tk.LEFT, padx=scale(5))
             # expose inner ttk.Button for compatibility
             self.submit_button = submit_widget.button
 
@@ -375,7 +383,7 @@ class BHoMWindowShell:
                 width=12,
                 alignment="center",
             )
-            close_widget.pack(side=tk.LEFT, padx=5)
+            close_widget.pack(side=tk.LEFT, padx=scale(5))
             # expose inner ttk.Button for compatibility
             self.close_button = close_widget.button
 
@@ -403,11 +411,147 @@ class BHoMWindowShell:
                 pass
         self._pending_resize_job = self.after(30, self._apply_sizing)
 
+    def _build_scroll_host(self, content_padding: int) -> None:
+        """Create the content area inside a scroll host.
+
+        The content normally sizes the window. If it cannot fit on screen (e.g. at
+        high display scales) the host caps its height and shows a scrollbar, so the
+        button bar below always stays reachable.
+        """
+        self._scroll_host = ttk.Frame(self.main_container)
+        self._scroll_host.pack(fill=tk.BOTH, expand=True)
+
+        background = ttk.Style().lookup("TFrame", "background") or self.cget("background")
+        self._scroll_canvas = tk.Canvas(
+            self._scroll_host, highlightthickness=0, borderwidth=0, background=background
+        )
+        background = ttk.Style().lookup("TFrame", "background") or "#1e1e1e"
+        foreground = ttk.Style().lookup("TLabel", "foreground") or "#cccccc"
+        try:
+            colours = {
+                "track": background,
+                "thumb": blend(background, foreground, 0.30),
+                "active": blend(background, foreground, 0.55),
+            }
+        except Exception:
+            colours = {}
+        bar_options = dict(thickness=scale(12), padding=scale(3), **colours)
+        self._scroll_bar = SlimScrollbar(
+            self._scroll_host, tk.VERTICAL, self._scroll_canvas.yview, **bar_options
+        )
+        self._scroll_hbar = SlimScrollbar(
+            self._scroll_host, tk.HORIZONTAL, self._scroll_canvas.xview, **bar_options
+        )
+        self._scroll_canvas.configure(
+            yscrollcommand=self._scroll_bar.set, xscrollcommand=self._scroll_hbar.set
+        )
+        self._scroll_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self._scroll_bar_visible = False
+        self._scroll_hbar_visible = False
+
+        self.content_frame = ttk.Frame(self._scroll_canvas, padding=content_padding)
+        self._content_window = self._scroll_canvas.create_window(
+            (0, 0), window=self.content_frame, anchor="nw"
+        )
+        self._scroll_canvas.bind("<Configure>", self._on_scroll_canvas_configure)
+        self.content_frame.bind("<Configure>", self._on_content_configure, add="+")
+        self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
+
+    def _on_content_configure(self, _event=None) -> None:
+        self._update_scroll_region()
+
+    def _update_scroll_region(self) -> None:
+        """Scroll region always covers the content or the viewport, whichever is larger."""
+        self._scroll_canvas.configure(
+            scrollregion=(
+                0,
+                0,
+                max(self._scroll_canvas.winfo_width(), self.content_frame.winfo_reqwidth()),
+                max(self._scroll_canvas.winfo_height(), self.content_frame.winfo_reqheight()),
+            )
+        )
+
+    def _on_scroll_canvas_configure(self, event=None) -> None:
+        """Keep the content at least as large as the viewport and toggle the scrollbar."""
+        width = self._scroll_canvas.winfo_width()
+        height = self._scroll_canvas.winfo_height()
+        req_height = self.content_frame.winfo_reqheight()
+        self._scroll_canvas.itemconfigure(
+            self._content_window,
+            width=max(width, self.content_frame.winfo_reqwidth()),
+            height=max(height, req_height),
+        )
+        self._update_scroll_region()
+        self._scroll_host.update_idletasks()
+        req_width = self.content_frame.winfo_reqwidth()
+        # The bars take space from the viewport, so judge against the full host size.
+        host_width = self._scroll_host.winfo_width()
+        host_height = self._scroll_host.winfo_height()
+        need_h = req_width > host_width + 1
+        bar_h = self._scroll_hbar.winfo_reqheight() if need_h else 0
+        need_v = req_height > host_height - bar_h + 1
+        bar_w = self._scroll_bar.winfo_reqwidth() if need_v else 0
+        need_h = req_width > host_width - bar_w + 1
+
+        if need_h != self._scroll_hbar_visible:
+            if need_h:
+                self._scroll_hbar.pack(side=tk.BOTTOM, fill=tk.X, before=self._scroll_canvas)
+            else:
+                self._scroll_hbar.pack_forget()
+                self._scroll_canvas.xview_moveto(0)
+            self._scroll_hbar_visible = need_h
+        if need_v != self._scroll_bar_visible:
+            if need_v:
+                self._scroll_bar.pack(side=tk.RIGHT, fill=tk.Y, before=self._scroll_canvas)
+            else:
+                self._scroll_bar.pack_forget()
+                self._scroll_canvas.yview_moveto(0)
+            self._scroll_bar_visible = need_v
+
+    def _on_mousewheel(self, event) -> None:
+        if not self._scroll_bar_visible:
+            return
+        # Let widgets with their own scrolling (list boxes, text, popdowns) handle it.
+        if isinstance(event.widget, (tk.Listbox, tk.Text)) or "popdown" in str(event.widget):
+            return
+        try:
+            if not str(event.widget).startswith(str(self)):
+                return
+        except Exception:
+            return
+        self._scroll_canvas.yview_scroll(int(-event.delta / 120), "units")
+
+    def _update_scroll_host(self) -> None:
+        """Request a viewport sized to the content, capped to the usable screen height."""
+        self.update_idletasks()
+        content_width = self.content_frame.winfo_reqwidth()
+        content_height = self.content_frame.winfo_reqheight()
+
+        work_width, work_height = get_work_area(self)
+        chrome_height = scale(40)  # title bar + borders
+        for part in (getattr(self, "button_bar", None),):
+            if part is not None and part.winfo_manager():
+                chrome_height += part.winfo_reqheight()
+        banner = getattr(self, "_banner", None)
+        if banner is not None:
+            chrome_height += banner.winfo_reqheight()
+
+        viewport_height = max(scale(120), min(content_height, work_height - chrome_height))
+        viewport_width = min(content_width, work_width - scale(10))
+        # Reserve room for scrollbars that will be needed.
+        if content_width > viewport_width:
+            viewport_height = max(scale(120), viewport_height - self._scroll_hbar.winfo_reqheight())
+        if content_height > viewport_height:
+            viewport_width = min(content_width + self._scroll_bar.winfo_reqwidth(), work_width - scale(10))
+        self._scroll_canvas.configure(width=viewport_width, height=viewport_height)
+        self._update_scroll_region()
+
     def _apply_sizing(self) -> None:
         """Apply window sizing and positioning."""
         self._pending_resize_job = None
         self._is_resizing = True
         self.update_idletasks()
+        self._update_scroll_host()
 
         required_width = self.winfo_reqwidth()
         required_height = self.winfo_reqheight()
@@ -417,7 +561,7 @@ class BHoMWindowShell:
             required_height = max(required_height, self.main_container.winfo_reqheight())
 
         if self.button_bar is not None and self.button_bar.winfo_manager():
-            required_height = max(required_height, self.button_bar.winfo_reqheight() + self.content_frame.winfo_reqheight())
+            required_height = max(required_height, self.button_bar.winfo_reqheight() + self._scroll_canvas.winfo_reqheight())
 
         # Determine final dimensions: auto-size unless a rigid dimension is explicitly provided.
         if self._rigid_width:
@@ -429,6 +573,10 @@ class BHoMWindowShell:
             final_height = max(self.min_height, int(self.fixed_height or 0))
         else:
             final_height = max(self.min_height, required_height)
+
+        # Never exceed the usable screen area (scaled windows can outgrow small displays).
+        final_width = min(final_width, self.winfo_screenwidth())
+        final_height = min(final_height, self.winfo_screenheight() - scale(40))
 
         # Fullscreen overrides normal sizing/positioning
         if self.fullscreen:
@@ -480,7 +628,7 @@ class BHoMWindowShell:
             required_height = max(required_height, self.main_container.winfo_reqheight())
 
         if self.button_bar is not None and self.button_bar.winfo_manager():
-            required_height = max(required_height, self.button_bar.winfo_reqheight() + self.content_frame.winfo_reqheight())
+            required_height = max(required_height, self.button_bar.winfo_reqheight() + self._scroll_canvas.winfo_reqheight())
 
         current_width = self.winfo_width()
         current_height = self.winfo_height()

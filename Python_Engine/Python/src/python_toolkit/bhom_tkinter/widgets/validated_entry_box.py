@@ -6,6 +6,7 @@ from python_toolkit.bhom_tkinter.widgets.label import Label
 from typing import Optional, Callable, Any, Union, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 _TkVar = Union[tk.StringVar, tk.IntVar, tk.DoubleVar, tk.BooleanVar]
 
@@ -115,7 +116,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
             width=2,
             alignment=self.alignment,
         )
-        self.success_label.pack(side="left", padx=(5, 0))
+        self.success_label.pack(side="left", padx=scale_pad((5, 0)))
         
         # Create error label below entry with fixed height to prevent layout shifts
         self.error_label = Label(
