@@ -20,7 +20,6 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.Engine.Base;
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
 using BH.oM.Python.Enums;
@@ -28,7 +27,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -36,11 +34,12 @@ namespace BH.Engine.Python
     {
         [Description("Install a Python Virtual Environment of a given version and name.")]
         [Input("version", "The version of Python to use for this environment.")]
-        [Input("name", "The name of this virtualenv.")]
+        [Input("name", "The name of this venv.")]
         [Input("reload", "Reload the virtual environment rather than recreating it, if it already exists.")]
-        [Output("env", "The exectuble for the resultant virtualenv.")]
+        [Output("env", "The executable for the resultant venv.")]
         public static PythonEnvironment VirtualEnvironment(this PythonVersion version, string name, bool reload = true)
         {
+            # TODO - how to handle package versions defined in an associated requirements.txt file
             if (!Query.IsValidEnvironmentName(name))
             {
                 BH.Engine.Base.Compute.RecordError("A BHoM Python virtual environment cannot cannot contain invalid filepath characters.");

@@ -22,12 +22,10 @@
 
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Xml.Linq;
 
 namespace BH.Engine.Python
 {
@@ -43,33 +41,38 @@ namespace BH.Engine.Python
         {
             if (!File.Exists(executable))
             {
-                BH.Engine.Base.Compute.RecordError("Python executable not found at " + executable);
+                Base.Compute.RecordError("Python executable not found at " + executable);
             }
 
             if (packages.Count == 0)
             {
-                BH.Engine.Base.Compute.RecordError("No packages to install.");
+                Base.Compute.RecordError("No packages to install.");
             }
 
+            string startDirectory = Directory.GetParent(Directory.GetParent(executable).FullName).FullName;
+
             string packagesString = string.Join(" ", packages);
-            System.Diagnostics.Process process = new System.Diagnostics.Process()
+
+            ProcessStartInfo psi = new ProcessStartInfo
             {
-                StartInfo = new System.Diagnostics.ProcessStartInfo()
-                {
-                    FileName = executable,
-                    Arguments = $"-m pip install --no-warn-script-location {packagesString}",
-                    UseShellExecute = false,
-                    RedirectStandardError = true
-                }
+                FileName = "uv",
+                Arguments = $"pip install {packagesString}",
+                WorkingDirectory = startDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
             };
-            process.StartInfo.Environment["PYTHONHOME"] = "";
-            using (Process p = Process.Start(process.StartInfo))
+            using (Process process = Process.Start(psi))
             {
-                string standardError = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{packagesString}].\n{standardError}");
-            }
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                    BH.Engine.Base.Compute.RecordError($"Error installing packages [{packagesString}].\n{error}");
+            };
         }
 
         [Description("Install a list of packages to a given Python executable.")]
@@ -93,33 +96,36 @@ namespace BH.Engine.Python
         {
             if (!File.Exists(executable))
             {
-                BH.Engine.Base.Compute.RecordError($"Python executable not found at {executable}");
+                Base.Compute.RecordError("Python executable not found at " + executable);
             }
 
             if (!File.Exists(requirements))
             {
-                BH.Engine.Base.Compute.RecordError($"requirements.txt not found at {requirements}");
+                Base.Compute.RecordError("requirements.txt not found at " + requirements);
             }
 
-            
-            System.Diagnostics.Process process = new System.Diagnostics.Process()
+            string startDirectory = Directory.GetParent(Directory.GetParent(executable).FullName).FullName;
+
+            ProcessStartInfo psi = new ProcessStartInfo
             {
-                StartInfo = new System.Diagnostics.ProcessStartInfo()
-                {
-                    FileName = executable,
-                    Arguments = $"-m pip install --no-warn-script-location -r {Modify.AddQuotesIfRequired(requirements)}",
-                    UseShellExecute = false,
-                    RedirectStandardError = true,
-                }
+                FileName = "uv",
+                Arguments = $"pip install -r {requirements}",
+                WorkingDirectory = startDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
             };
-            process.StartInfo.Environment["PYTHONHOME"] = "";
-            using (Process p = Process.Start(process.StartInfo))
+            using (Process process = Process.Start(psi))
             {
-                string standardError = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing packages from {requirements}.\n{standardError}");
-            }
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                    BH.Engine.Base.Compute.RecordError($"Error installing requirements from \"{requirements}\".\n{error}");
+            };
         }
 
         [Description("Install packages from a requirements.txt file to a given Python environment.")]
@@ -144,27 +150,36 @@ namespace BH.Engine.Python
         {
             if (!File.Exists(executable))
             {
-                BH.Engine.Base.Compute.RecordError("Python executable not found at " + executable);
+                Base.Compute.RecordError("Python executable not found at " + executable);
             }
-            
-            System.Diagnostics.Process process = new System.Diagnostics.Process()
+
+            if (!Directory.Exists(packageDirectory))
             {
-                StartInfo = new System.Diagnostics.ProcessStartInfo()
-                {
-                    FileName = executable,
-                    Arguments = $"-m pip install --no-warn-script-location -e {Modify.AddQuotesIfRequired(packageDirectory)}",
-                    UseShellExecute = false,
-                    RedirectStandardError = true,
-                }
+                Base.Compute.RecordError("packageDirectory not found at " + packageDirectory);
+            }
+
+            string startDirectory = Directory.GetParent(Directory.GetParent(executable).FullName).FullName;
+
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "uv",
+                Arguments = $"pip install --no-warn-script-location -e {Modify.AddQuotesIfRequired(packageDirectory)}",
+                WorkingDirectory = startDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
             };
-            process.StartInfo.Environment["PYTHONHOME"] = "";
-            using (Process p = Process.Start(process.StartInfo))
+            using (Process process = Process.Start(psi))
             {
-                string standardError = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error installing package from \"{packageDirectory}\".\n{standardError}");
-            }
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                    BH.Engine.Base.Compute.RecordError($"Error installing package from \"{packageDirectory}\".\n{error}");
+            };
         }
 
         [Description("Install a local Python package to a given Python environment.")]
@@ -179,6 +194,3 @@ namespace BH.Engine.Python
         }
     }
 }
-
-
-

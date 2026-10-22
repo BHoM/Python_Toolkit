@@ -23,7 +23,6 @@
 using BH.oM.Base.Attributes;
 using BH.oM.Python.Enums;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -32,7 +31,6 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-
         [Description("Remove a named BHoM Python kernel.")]
         [Input("kernelName", "The name of the kernel to remove.")]
         public static void RemoveKernel(string kernelName)
