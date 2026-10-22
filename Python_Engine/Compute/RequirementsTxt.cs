@@ -30,6 +30,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [ToBeRemoved("10.0")]
         [Description("Create a requirements.txt file from an existing Python executable.")]
         [Input("executable", "The path to the Python executable to create the requirements.txt file from.")]
         [Input("targetPath", "The path to the requirements.txt file to create. If not specified, the file will be created in the same directory as the executable.")]

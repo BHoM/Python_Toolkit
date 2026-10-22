@@ -51,7 +51,7 @@ namespace BH.Engine.Python
 
             if (!Directory.Exists(Query.DirectoryEnvironments()))
             {
-                // create PythonEnvironments directory if it doesnt already exist
+                // create PythonEnvironments directory if it doesn't already exist
                 Directory.CreateDirectory(Query.DirectoryEnvironments());
             }
 

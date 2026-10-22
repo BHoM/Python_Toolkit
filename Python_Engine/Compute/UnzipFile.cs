@@ -29,6 +29,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [ToBeRemoved("10.0")]
         //This method is no longer used by python toolkit, and perhaps should be removed or moved to the file toolkit instead.
         [Description("Extract the contents of an archive.")]
         [Input("archivePath", "The archive to extract.")]

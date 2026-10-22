@@ -36,6 +36,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [ToBeRemoved("10.0")]
         [Description("Using the environment name (and version if the environment name is the base python environment), directly install/update missing BHoM packages.")]
         [Input("environmentName", "The name of the environment to update.")]
         [Input("version", "If the environment name is the name of the base python environment, the version that needs updating.")]
@@ -66,6 +67,7 @@ namespace BH.Engine.Python
 
         /***************************************************/
 
+        [ToBeRemoved("10.0")]
         [Description("Using a PythonEnvironment, directly install/update missing BHoM packages.")]
         [Input("environment", "The python environment to update.")]
         public static void UpdateBHoMPackages(this PythonEnvironment environment)

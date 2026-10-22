@@ -33,6 +33,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [ToBeRemoved("10.0")]
         [Description("Download a file from a Url.")]
         [Input("fileUrl", "The file to download.")]
         [Input("targetDirectory", "The destination directory to download the file to.")]
@@ -89,6 +90,7 @@ namespace BH.Engine.Python
 
         /******************************************************/
 
+        [ToBeRemoved("10.0")]
         [Description("Download and install a specified version of python, and return the executable for it.")]
         [Input("version", "The version of python to download.")]
         [Output("pythonExecutable", "The executable (python.exe) for the python version that was installed.")]
