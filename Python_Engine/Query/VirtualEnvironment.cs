@@ -34,8 +34,8 @@ namespace BH.Engine.Python
         [Input("name", "The name given to the Python Environment.")]
         [Output("executable", "The path to the executable.")]
         public static string VirtualEnvironmentExecutable(string name)
-        {   
-            string exePath = Path.Combine(Query.DirectoryEnvironments(), name, "venv", "Scripts", "python.exe");
+        {
+            string exePath = Path.Combine(Query.DirectoryEnvironments(), name, ".venv", "Scripts", "python.exe");
             if (!File.Exists(exePath))
                 Base.Compute.RecordError($"{exePath} was not found.");
 
@@ -47,11 +47,11 @@ namespace BH.Engine.Python
         [Output("exists", "True if exists, False if not.")]
         public static bool VirtualEnvironmentExists(string name)
         {
-            string expectedVenvPath = Path.Combine(Query.DirectoryEnvironments(), name, "venv");
-            
+            string expectedVenvPath = Path.Combine(Query.DirectoryEnvironments(), name, ".venv");
+
             if (Directory.Exists(expectedVenvPath) & File.Exists(VirtualEnvironmentExecutable(name)))
                 return true;
-                
+
             return false;
         }
 
