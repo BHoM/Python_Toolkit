@@ -21,6 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
+using BH.oM.Python;
 using BH.oM.Python.Enums;
 using System;
 using System.Collections.Generic;
@@ -36,51 +37,23 @@ namespace BH.Engine.Python
         [Description("Gets the Python version for the requested Python executable.")]
         [Input("pythonExecutable", "Path to python.exe.")]
         [Output("version", "Python version of the requested Python executable.")]
-        public static PythonVersion Version(string pythonExecutable)
+        public static string Version(string pythonExecutable)
         {
-            if (!File.Exists(pythonExecutable)) 
+            if (!File.Exists(pythonExecutable))
             {
-                return PythonVersion.Undefined;
+                BH.Engine.Base.Compute.RecordError(new FileNotFoundException(), $"No file found at {pythonExecutable}");
             }
 
-            Process process = new Process()
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = pythonExecutable,
-                    Arguments = $"--version",
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                }
-            };
+            string result = BH.Engine.Python.Compute.RunCommandStdout(command: $"{pythonExecutable} --version");
+            return result.Replace("Python ", "");
+        }
 
-            try
-            {
-                string versionString;
-                using (Process p = Process.Start(process.StartInfo))
-                {
-                    string standardError = p.StandardError.ReadToEnd();
-                    versionString = p.StandardOutput.ReadToEnd().TrimEnd();
-                    p.WaitForExit();
-                    if (p.ExitCode != 0)
-                    {
-                        BH.Engine.Base.Compute.RecordError($"Error getting Python version.\n{standardError}");
-                        return PythonVersion.Undefined;
-                    }
-                }
-
-                List<string> strings = versionString.Replace("Python ", "").Replace(".", "_").Split('_').ToList();
-                strings.RemoveAt(strings.Count - 1);
-                string enumParseable = "v" + strings.Aggregate((a, b) => $"{a}_{b}");
-
-                return (PythonVersion)Enum.Parse(typeof(PythonVersion), enumParseable);
-            }
-            catch
-            {
-                return PythonVersion.Undefined;
-            }
-
+        [Description("Get the Python version for the installed PythonEnvironment.")]
+        [Input("venv", "The PythonEnvironment.")]
+        [Output("version", "Python version of the installed PythonEnvironment.")]
+        public static string Version(this PythonEnvironment venv)
+        {
+            return Version(venv.Executable);
         }
     }
 }

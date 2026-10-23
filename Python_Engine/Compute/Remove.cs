@@ -20,8 +20,10 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Base;
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
+using System;
 using System.ComponentModel;
 using System.IO;
 
@@ -46,7 +48,7 @@ namespace BH.Engine.Python
             {
                 RemoveKernel(name, run);
 
-                try 
+                try
                 {
                     Directory.Delete(venvDirectory, true);
                 }
@@ -63,17 +65,17 @@ namespace BH.Engine.Python
         public static void RemoveKernel(string name, bool run = false)
         {
             if (!Query.VirtualEnvironmentExists(name))
-            { 
+            {
                 Base.Compute.RecordError($"No Python environment named {name} exists.");
                 return;
             }
 
             PythonEnvironment venv = Query.VirtualEnvironment(name);
-            string cmd = $"{venv.Executable} -m jupyter kernelspec uninstall {name} -f";
+            string cmd = $"{venv.Executable} -m jupyter kernelspec uninstall {name.ToLower()} -f";
 
             if (run)
             {
-                RunCommandStdout(command: cmd, hideWindows: true);
+                RunCommandStdout(command: cmd, hideWindow: true);
             }
             else
             {

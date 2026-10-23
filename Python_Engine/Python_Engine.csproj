@@ -9,6 +9,7 @@
     <RootNamespace>BH.Engine.Python</RootNamespace>
     <FileVersion>10.0.0.0</FileVersion>
     <OutputPath>..\Build\</OutputPath>
+    <Configurations>Debug;Release;Test</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Python_oM\Python_oM.csproj" />
@@ -39,7 +40,7 @@
     <Folder Include="Convert\" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy $(TargetDir)$(TargetFileName) $(ProgramData)\BHoM\Assemblies /Y" />
+    <Exec Command="if not &quot;$(ConfigurationName)&quot; == &quot;Test&quot; (xcopy $(TargetDir)$(TargetFileName) $(ProgramData)\BHoM\Assemblies /Y)" />
   </Target>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="if not exist $(ProgramData)\BHoM\Extensions\PythonEnvironments mkdir $(ProgramData)\BHoM\Extensions\PythonEnvironments&#xD;&#xA;if not exist $(ProgramData)\BHoM\Extensions\PythonCode mkdir $(ProgramData)\BHoM\Extensions\PythonCode&#xD;&#xA;      &#xD;&#xA;if exist $(ProgramData)\BHoM\Extensions\PythonCode\$(SolutionName) rmdir $(ProgramData)\BHoM\Extensions\PythonCode\$(SolutionName) /S /Q&#xD;&#xA;mkdir $(ProgramData)\BHoM\Extensions\PythonCode\$(SolutionName)&#xD;&#xA;      &#xD;&#xA;robocopy $(ProjectDir)Python $(ProgramData)\BHoM\Extensions\PythonCode\$(SolutionName) /mir /xf &quot;*.pyc&quot; &quot;*.ipynb&quot; /xd &quot;__*__&quot; &quot;.*&quot; &gt; output.log&#xD;&#xA;del output.log&#xD;&#xA;echo $(FileVersion) &gt; $(ProgramData)\BHoM\Extensions\PythonCode\$(SolutionName)\VERSION.txt" />

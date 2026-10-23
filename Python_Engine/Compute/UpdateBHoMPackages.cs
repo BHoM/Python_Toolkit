@@ -36,7 +36,7 @@ namespace BH.Engine.Python
             string cmd = "uv sync";
             string directory = Path.Combine(Query.DirectoryEnvironments(), venv.Name);
 
-            RunCommandStdout(cmd, out int exitCode, startDirectory: directory);
+            RunCommandStdout(cmd, startDirectory: directory);
         }
     }
 }

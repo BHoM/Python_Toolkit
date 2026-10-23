@@ -21,69 +21,111 @@
  */
 
 using BH.oM.Base.Attributes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
-    {   
+    {
         [Description("Run a command via CMD and return stdout.")]
         [Input("command", "The command to be run.")]
         [Input("hideWindows", "Set to True to hide cmd windows.")]
         [Input("startDirectory", "The directory in which the command should be run.")]
         [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
-        [Output("stdout", "The StandardOutput from the command that was run. If the process failed, then StandardError will be returned here instead.")]
-        public static string RunCommandStdout(string command, bool hideWindows = true, string startDirectory = null, double timeoutMinutes = 5)
+        [Output("stdout", "The StandardOutput from the command that was run, if the process was successful.")]
+        public static string RunCommandStdout(
+            string command,
+            bool hideWindow = true,
+            string startDirectory = null,
+            double timeoutMinutes = 5
+        )
         {
-            int exitCode;
-            return RunCommandStdout(command, out exitCode, hideWindows, startDirectory, timeoutMinutes);
-        }
-
-        private static string RunCommandStdout(string command, out int exitCode, bool hideWindows = true, string startDirectory = null, double timeoutMinutes = 5)
-        {
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-
-            string commandMode = "/K";
-            if (hideWindows)
+            if (string.IsNullOrWhiteSpace(startDirectory))
             {
-                process.StartInfo.CreateNoWindow = true;
-                process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                commandMode = "/C";
+                startDirectory = Environment.CurrentDirectory;
             }
 
-            // override some commonly used user/system environment variables to avoid some potential weirdness
-            List<string> sysVariables = new List<string>() { "PYTHONHOME", "PYTHONPATH" };
-            foreach (var sysVar in sysVariables)
-                process.StartInfo.Environment[sysVar] = "";
-
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.Arguments = $"{commandMode} {command}";
-            process.Start();
-
-            // Read both streams concurrently so verbose commands cannot block on a full buffer.
-            var stdoutTask = process.StandardOutput.ReadToEndAsync();
-            var stderrTask = process.StandardError.ReadToEndAsync();
-
-            int millisecondsToWait = checked((int)(timeoutMinutes * 60 * 1000));
-            if (!process.WaitForExit(millisecondsToWait))
+            if (!Directory.Exists(startDirectory))
             {
-                process.Kill();
+                throw new DirectoryNotFoundException(
+                    string.Format("Working directory does not exist: '{0}'", startDirectory));
+            }
+
+            var process = new Process();
+
+            try
+            {
+                process.StartInfo.FileName = "cmd.exe";
+                process.StartInfo.Arguments = string.Format("/C \"{0}\"", command);
+                process.StartInfo.WorkingDirectory = startDirectory;
+
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.CreateNoWindow = hideWindow;
+                process.StartInfo.WindowStyle =
+                    hideWindow
+                        ? ProcessWindowStyle.Hidden
+                        : ProcessWindowStyle.Normal;
+
+                // Avoid environment-variable interference.
+                process.StartInfo.EnvironmentVariables["PYTHONHOME"] = string.Empty;
+                process.StartInfo.EnvironmentVariables["PYTHONPATH"] = string.Empty;
+
+                process.Start();
+
+                var stdoutTask = process.StandardOutput.ReadToEndAsync();
+                var stderrTask = process.StandardError.ReadToEndAsync();
+
+                int timeoutMs = checked((int)(timeoutMinutes * 60 * 1000));
+
+                if (!process.WaitForExit(timeoutMs))
+                {
+                    try
+                    {
+                        process.Kill();
+                    }
+                    catch
+                    {
+                        // Ignore if already exited.
+                    }
+
+                    throw new TimeoutException(
+                        string.Format(
+                            "Command exceeded timeout of {0} minutes.",
+                            timeoutMinutes));
+                }
+
+                // Ensure async reads have completed.
+                Task.WaitAll(stdoutTask, stderrTask);
+
+                string stdout = stdoutTask.Result.Trim();
+                string stderr = stderrTask.Result.Trim();
+
+                int exitCode = process.ExitCode;
+                string output = exitCode == 0 ? stdout : stderr;
+
+                if (exitCode != 0)
+                {
+                    string message = $"Failed to execute {command} (exit code {exitCode}).\n{output}";
+                    BH.Engine.Base.Compute.RecordError(
+                        exception: new InvalidOperationException(message),
+                        message: message);
+                }
+
+                return output;
+
+            }
+            finally
+            {
                 process.Dispose();
-                throw new System.TimeoutException($"Command exceeded {timeoutMinutes} minutes.");
             }
-
-            string stdout = stdoutTask.GetAwaiter().GetResult();
-            string stderr = stderrTask.GetAwaiter().GetResult();
-            exitCode = process.ExitCode;
-            process.Dispose();
-
-            return (exitCode != 0 ? stderr : stdout).Trim();
         }
 
         [Description("Run a string containing Python code and return the output. The string passed should end with a \"print\" statement, and other print statements within it should be captured within the script to ensure only a single output string is passed back to this method.")]
@@ -106,7 +148,7 @@ namespace BH.Engine.Python
 
             string cmd = $"{Modify.AddQuotesIfRequired(venv.Executable)} {scriptFile}";
 
-            return RunCommandStdout(cmd, hideWindows: true);
+            return RunCommandStdout(command: cmd);
         }
     }
 }

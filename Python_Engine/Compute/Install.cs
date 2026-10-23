@@ -38,66 +38,42 @@ namespace BH.Engine.Python
             if (!run)
                 return;
 
-            try
+            string uvBinPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "bin");
+            if (Directory.Exists(uvBinPath))
+                Environment.SetEnvironmentVariable("PATH", uvBinPath + Path.PathSeparator + Environment.GetEnvironmentVariable("PATH"));
+
+            string location = RunCommandStdout(command: "where.exe uv.exe");
+            if (!location.EndsWith("uv.exe"))
             {
-                string uvBinPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "bin");
+                Base.Compute.RecordNote("Installing UV.");
+                string output = RunCommandStdout(
+                    command: "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"$ErrorActionPreference = 'Stop'; irm https://astral.sh/uv/install.ps1 | iex\""
+                );
+
+                // The installer cannot update the environment of this already-running process.
                 if (Directory.Exists(uvBinPath))
                     Environment.SetEnvironmentVariable("PATH", uvBinPath + Path.PathSeparator + Environment.GetEnvironmentVariable("PATH"));
 
-                int exitCode;
-                string location = RunCommandStdout("where.exe uv.exe", out exitCode);
-                if (exitCode != 0)
-                {
-                    Base.Compute.RecordNote("Installing UV.");
-                    string output = RunCommandStdout(
-                        "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"$ErrorActionPreference = 'Stop'; irm https://astral.sh/uv/install.ps1 | iex\"",
-                        out exitCode);
-                    if (exitCode != 0)
-                    {
-                        Base.Compute.RecordError(exception: new Exception(), message: $"Failed to install UV (exit code {exitCode}).\n{output}");
-                        return;
-                    }
-
-                    // The installer cannot update the environment of this already-running process.
-                    if (Directory.Exists(uvBinPath))
-                        Environment.SetEnvironmentVariable("PATH", uvBinPath + Path.PathSeparator + Environment.GetEnvironmentVariable("PATH"));
-
-                    location = RunCommandStdout("where.exe uv.exe", out exitCode);
-                }
-
-                if (exitCode != 0)
-                {
-                    Base.Compute.RecordError(exception: new Exception(), message: $"Could not locate UV on PATH after installation.\n{location}");
-                    return;
-                }
-
-                string uvExecutable = location.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0];
-
-                foreach (string tool in new[] { "ruff", "jupyterlab", "sphinx" })
-                {
-                    string output = RunCommandStdout($"\"\"{uvExecutable}\" tool install {tool}\"", out exitCode);
-                    if (exitCode != 0)
-                    {
-                        Base.Compute.RecordError(exception: new Exception(), message: $"Failed to install {tool} to UV (exit code {exitCode}).\n{output}");
-                    }
-                }
+                location = RunCommandStdout("where.exe uv.exe");
             }
-            catch (System.ComponentModel.Win32Exception ex)
+
+            string uvExecutable = location.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0];
+
+            foreach (string tool in new[] { "ruff", "jupyterlab", "sphinx" })
             {
-                Base.Compute.RecordError(exception: new Exception(), message: $"Could not run the UV installation command. {ex.Message}");
-            }
-            catch (TimeoutException ex)
-            {
-                Base.Compute.RecordError(exception: new Exception(), message: $"UV installation timed out. {ex.Message}");
+                RunCommandStdout($"\"\"{uvExecutable}\" tool install {tool}\"");
             }
         }
 
         [Description("Register a Jupyer kernel for a given venv.")]
         [Input("venv", "The Python environment to install the packages to.")]
-        public static void InstallJupyterKernel(PythonEnvironment venv)
+        public static void InstallJupyterKernel(this PythonEnvironment venv)
         {
-            string cmd = $"{venv.Executable} -m ipykernel insatll --user --name {venv.Name} --display-name {venv.Name}";
-            RunCommandStdout(command: cmd, hideWindows: true);
+            venv.InstallPackages(packages: new List<string>() { "ipykernel" }, true);
+            string directory = Query.VirtualEnvironmentDirectory(venv.Name);
+
+            string cmd = $"{venv.Executable} -m ipykernel install --user --name {venv.Name} --display-name {venv.Name}";
+            RunCommandStdout(command: cmd, startDirectory: directory);
         }
 
         [Description("Install a list of packages to a given Python executable.")]
@@ -110,12 +86,15 @@ namespace BH.Engine.Python
             bool run = false
         )
         {
-            string cmd = $"uv add {string.Join(" ", packages)}";
             string directory = Query.VirtualEnvironmentDirectory(venv.Name);
+            bool isProject = File.Exists(Path.Combine(directory, "pyproject.toml"));
+
+            string uvCommand = isProject ? "add" : "pip install";
+            string cmd = $"uv {uvCommand} {string.Join(" ", packages)}";
 
             if (run)
-            { 
-                string result = RunCommandStdout(cmd, out int exitCode, startDirectory: directory);
+            {
+                RunCommandStdout(command: cmd, startDirectory: directory);
             }
             else
             {
@@ -136,14 +115,18 @@ namespace BH.Engine.Python
             if (!Directory.Exists(packageDirectory))
                 Base.Compute.RecordError($"{packageDirectory} not found.");
 
-            string cmd = $"uv add --editable {packageDirectory}";
             string directory = Query.VirtualEnvironmentDirectory(venv.Name);
+            bool isProject = File.Exists(Path.Combine(directory, "pyproject.toml"));
+
+            string uvCommand = isProject ? "add --editable" : "pip install -e";
+            string cmd = $"uv {uvCommand} {packageDirectory}";
 
             if (run)
             {
-                string result = RunCommandStdout(cmd, out int exitCode, startDirectory: directory);
+                RunCommandStdout(command: cmd, startDirectory: directory);
             }
-            else {
+            else
+            {
                 Base.Compute.RecordNote($"The following command will be executed from \"{directory}\": {cmd}");
             }
         }
