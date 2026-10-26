@@ -11,7 +11,6 @@ from typing import Callable, Iterable, List, Literal, Optional
 
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
-from python_toolkit.bhom_tkinter.widgets.button import Button
 from python_toolkit.bhom_tkinter.widgets.list_box import ScrollableListBox
 
 Scorer = Callable[[str, str], Optional[float]]  # (query, item) -> score (higher is better), or None for no match
@@ -26,7 +25,7 @@ def _load_bhom_search():
     if _BHOM_SEARCH is None:
         import clr  # pylint: disable=import-outside-toplevel,import-error
 
-        sys.path.append(os.path.expandvars("%ProgramData%\BHoM\Assemblies"))
+        sys.path.append(os.path.expandvars("%ProgramData%\\BHoM\\Assemblies"))
         clr.AddReference("Search_Engine")
         clr.AddReference("Search_oM")
         from BH.Engine.Search import Compute  # pylint: disable=import-outside-toplevel,import-error
@@ -132,10 +131,10 @@ class SearchableListBox(BHoMBaseWidget):
             controls.pack(side="top", fill=tk.X, pady=(6, 0))
             controls.columnconfigure(0, weight=1)
             controls.columnconfigure(1, weight=1)
-            select_widget = Button(controls, text="Select All", command=self.select_all)
-            select_widget.grid(row=0, column=0, sticky="ew", padx=(0, 4))
-            deselect_widget = Button(controls, text="Deselect All", command=self.deselect_all)
-            deselect_widget.grid(row=0, column=1, sticky="ew", padx=(4, 0))
+            ttk.Button(controls, text="Select All", command=self.select_all).grid(
+                row=0, column=0, sticky="ew", padx=(0, 4))
+            ttk.Button(controls, text="Deselect All", command=self.deselect_all).grid(
+                row=0, column=1, sticky="ew", padx=(4, 0))
 
         self.summary_label: Optional[ttk.Label] = None
         if self._show_summary:
