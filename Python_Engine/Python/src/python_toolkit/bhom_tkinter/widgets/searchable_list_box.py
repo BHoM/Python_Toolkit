@@ -114,6 +114,7 @@ class SearchableListBox(BHoMBaseWidget):
             raise ValueError(f"match_mode must be 'fuzzy' or 'contains', not {match_mode!r}")
         self.match_mode = match_mode
         self._all_items: List[str] = [str(item) for item in (items or [])]
+        self._shown: List[str] = list(self._all_items)
         self._multi = selectmode in (tk.MULTIPLE, tk.EXTENDED, "multiple", "extended")
         self._keep_hidden = bool(keep_hidden_selection)
         self._selected: set[str] = set()
@@ -161,9 +162,6 @@ class SearchableListBox(BHoMBaseWidget):
 
     # ------------------------------------------------------------------ internals
 
-    def _visible(self) -> List[str]:
-        return self.list_box.get_options()
-
     def _matching(self, query: str) -> List[str]:
         query = query.strip().lower()
         if not query:
@@ -176,6 +174,7 @@ class SearchableListBox(BHoMBaseWidget):
 
     def _apply_filter(self) -> None:
         shown = self._matching(self.filter_var.get())
+        self._shown = shown
         self.list_box.set_options(shown)
         if not self._keep_hidden:
             self._selected &= set(shown)
@@ -185,7 +184,7 @@ class SearchableListBox(BHoMBaseWidget):
             self._fire_on_change(self.get())
 
     def _on_list_change(self) -> None:
-        visible = set(self._visible())
+        visible = set(self.get_visible())
         chosen = set(self.list_box.get_selection())
         if self._multi:
             self._selected = (self._selected - visible) | chosen
@@ -200,7 +199,8 @@ class SearchableListBox(BHoMBaseWidget):
         if self.summary_label is None:
             return
         selected = self.get()
-        hidden = [item for item in selected if item not in set(self._visible())]
+        visible = set(self.get_visible())
+        hidden = [item for item in selected if item not in visible]
         if not selected:
             text = "None selected."
         else:
@@ -231,7 +231,7 @@ class SearchableListBox(BHoMBaseWidget):
         if not self._multi:
             wanted = wanted[:1]
         self._selected = set(wanted)
-        self.list_box.set_selections([item for item in self._visible() if item in self._selected])
+        self.list_box.set_selections([item for item in self.get_visible() if item in self._selected])
         self._update_summary()
         self._fire_on_change(self.get())
 
@@ -241,7 +241,7 @@ class SearchableListBox(BHoMBaseWidget):
 
     def get_visible(self) -> List[str]:
         """Return the items currently shown by the filter."""
-        return self._visible()
+        return list(self._shown)
 
     def set_options(self, items) -> None:
         """Replace the items. Selected items that still exist stay selected."""
@@ -264,14 +264,14 @@ class SearchableListBox(BHoMBaseWidget):
         """Select every item currently shown by the filter."""
         if not self._multi:
             return
-        self._selected |= set(self._visible())
+        self._selected |= set(self.get_visible())
         self.list_box.select_all()
         self._update_summary()
         self._fire_on_change(self.get())
 
     def deselect_all(self) -> None:
         """Deselect every item currently shown by the filter."""
-        self._selected -= set(self._visible())
+        self._selected -= set(self.get_visible())
         self.list_box.deselect_all()
         self._update_summary()
         self._fire_on_change(self.get())
