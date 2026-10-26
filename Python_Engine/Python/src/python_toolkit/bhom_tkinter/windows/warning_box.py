@@ -3,6 +3,7 @@
 from python_toolkit.bhom_tkinter.widgets.label import Label
 from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+from python_toolkit.bhom_tkinter.theming.scaling import scale
 
 
 class WarningBox(BHoMBaseChildWindow):
@@ -51,7 +52,7 @@ class WarningBox(BHoMBaseChildWindow):
                 self.content_frame,
                 text=message,
                 style="Error.TLabel",
-                wraplength=400,
+                wraplength=scale(400),
                 justify="left",
                 alignment="left",
                 build_options=PackingOptions(anchor="w", pady=(0, 5)),
@@ -62,7 +63,7 @@ class WarningBox(BHoMBaseChildWindow):
                 self.content_frame,
                 text=message,
                 style="Warning.TLabel",
-                wraplength=400,
+                wraplength=scale(400),
                 justify="left",
                 alignment="left",
                 build_options=PackingOptions(anchor="w", pady=(0, 5)),
@@ -73,7 +74,7 @@ class WarningBox(BHoMBaseChildWindow):
                 self.content_frame,
                 text=message,
                 style="Caption.TLabel",
-                wraplength=400,
+                wraplength=scale(400),
                 justify="left",
                 alignment="left",
                 build_options=PackingOptions(anchor="w", pady=(0, 5)),

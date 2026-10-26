@@ -8,6 +8,7 @@ from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 class ScrollableListBox(BHoMBaseWidget):
     """A reusable listbox widget with auto-hiding scrollbar."""
@@ -80,11 +81,11 @@ class ScrollableListBox(BHoMBaseWidget):
         if show_selection_controls:
 
             select_widget = Button(self.content_frame, text="Select All", command=self.select_all)
-            select_widget.grid(row=1, column=0, sticky="ns", padx=(0, 4), pady=(8, 0))
+            select_widget.grid(row=1, column=0, sticky="ns", padx=scale_pad((0, 4)), pady=scale_pad((8, 0)))
             self.select_all_button = select_widget.button
 
             deselect_widget = Button(self.content_frame, text="Deselect All", command=self.deselect_all)
-            deselect_widget.grid(row=1, column=1, sticky="ns", padx=(4, 0), pady=(8, 0))
+            deselect_widget.grid(row=1, column=1, sticky="ns", padx=scale_pad((4, 0)), pady=scale_pad((8, 0)))
             self.deselect_all_button = deselect_widget.button
     
     def _on_configure(self, event=None):

@@ -4,6 +4,7 @@ from dataclasses import dataclass, asdict
 from typing import Any, Literal
 
 from python_toolkit.bhom_tkinter.widgets._build_options import BuildOptions
+from python_toolkit.bhom_tkinter.theming.scaling import scale, scale_pad
 
 @dataclass
 class GridOptions(BuildOptions):
@@ -27,5 +28,13 @@ class GridOptions(BuildOptions):
         Returns:
             dict: Gridding options filtered to keys with concrete values.
         """
-        return {k: v for k, v in asdict(self).items() if v is not None}
+        options = {k: v for k, v in asdict(self).items() if v is not None}
+        # Paddings are authored in 96 DPI pixels; scale for the current display.
+        for key in ("padx", "pady"):
+            if key in options:
+                options[key] = scale_pad(options[key])
+        for key in ("ipadx", "ipady"):
+            if key in options:
+                options[key] = scale(options[key])
+        return options
     

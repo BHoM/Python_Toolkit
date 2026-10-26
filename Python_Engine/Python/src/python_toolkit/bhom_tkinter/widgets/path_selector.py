@@ -7,6 +7,7 @@ from typing import Optional, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 class PathSelector(BHoMBaseWidget):
     """A reusable path/file selector widget with a button and a readonly entry."""
@@ -41,7 +42,7 @@ class PathSelector(BHoMBaseWidget):
         self.initialdir = initialdir
         self.filetypes = filetypes if filetypes is not None else [("All Files", "*.*")]
         self.entry = ttk.Entry(self.content_frame, textvariable=self.path_var, width=entry_width)
-        self.entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
+        self.entry.pack(side=tk.LEFT, padx=scale_pad((0, 5)), fill=tk.X, expand=True)
 
         # Use Button wrapper but expose inner ttk.Button for backward compatibility
         button_widget = Button(self.content_frame, text=button_text, command=self._on_click, width=button_width)

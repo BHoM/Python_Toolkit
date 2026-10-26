@@ -6,6 +6,7 @@ from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 from python_toolkit.bhom_tkinter.widgets.button import Button
 from python_toolkit.bhom_tkinter.widgets.label import Label
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 
 class LandingPage(BHoMBaseWindow):
@@ -73,7 +74,7 @@ class LandingPage(BHoMBaseWindow):
             sub_title_label.build()
 
         self.custom_buttons_frame = ttk.Frame(self.content_frame)
-        self.custom_buttons_frame.pack(fill="x", pady=(0, 20))
+        self.custom_buttons_frame.pack(fill="x", pady=scale_pad((0, 20)))
 
         super().build()
 
@@ -91,10 +92,10 @@ class LandingPage(BHoMBaseWindow):
         """
         if self.custom_buttons_frame is None:
             self.custom_buttons_frame = ttk.Frame(self.content_frame)
-            self.custom_buttons_frame.pack(fill="x", pady=(0, 20))
+            self.custom_buttons_frame.pack(fill="x", pady=scale_pad((0, 20)))
 
         button_widget = Button(self.custom_buttons_frame, text=text, command=command, **kwargs)
-        button_widget.pack(pady=5, fill="x")
+        button_widget.pack(pady=scale_pad(5), fill="x")
         # Recalculate window size after adding button
         self.refresh_sizing()
         # Return inner ttk.Button for compatibility

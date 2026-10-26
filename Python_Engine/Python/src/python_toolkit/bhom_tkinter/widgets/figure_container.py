@@ -9,6 +9,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 import matplotlib as mpl
+from python_toolkit.bhom_tkinter.theming.scaling import scale
 
 
 class FigureContainer(BHoMBaseWidget):
@@ -37,8 +38,8 @@ class FigureContainer(BHoMBaseWidget):
         super().__init__(parent, **kwargs)
 
         self.auto_size = bool(auto_size)
-        self.rigid_width = int(rigid_width) if rigid_width is not None else None
-        self.rigid_height = int(rigid_height) if rigid_height is not None else None
+        self.rigid_width = scale(int(rigid_width)) if rigid_width is not None else None
+        self.rigid_height = scale(int(rigid_height)) if rigid_height is not None else None
 
         if self.rigid_width is not None:
             self.content_frame.config(width=self.rigid_width)

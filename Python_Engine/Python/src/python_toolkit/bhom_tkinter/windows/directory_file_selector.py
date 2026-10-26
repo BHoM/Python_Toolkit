@@ -9,6 +9,7 @@ from typing import Iterable, List, Optional
 from python_toolkit.bhom_tkinter.widgets.list_box import ScrollableListBox
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 class DirectoryFileSelector(BHoMBaseChildWindow):
     """Display matching files and return the user's multi-selection."""
@@ -50,7 +51,7 @@ class DirectoryFileSelector(BHoMBaseChildWindow):
             self.content_frame,
             text=f"Select the {self.selection_label} to analyse.",
         )
-        instruction_label.pack(anchor="w", pady=(0, 10))
+        instruction_label.pack(anchor="w", pady=scale_pad((0, 10)))
 
         if self.file_selector_listbox is None:
             self.file_selector_listbox = ScrollableListBox(

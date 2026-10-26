@@ -7,6 +7,18 @@
 # ============================================================================
 
 # Split theme file generated from bhom_style.tcl
+# DPI scaling: pixel values are authored for 96 DPI. `::bhom_scale` is set from
+# Python (see theming/scaling.py) before this file is sourced.
+if {![info exists ::bhom_scale]} { set ::bhom_scale 1.0 }
+if {![llength [info commands ::bhom_px]]} {
+    proc ::bhom_px {n} {
+        if {$n == 0} { return 0 }
+        set v [expr {int(round($n * $::bhom_scale))}]
+        if {$v == 0} { return [expr {$n > 0 ? 1 : -1}] }
+        return $v
+    }
+}
+
 namespace eval ttk::theme::bhom_light {
     variable colors
     array set colors {
@@ -76,32 +88,32 @@ namespace eval ttk::theme::bhom_light {
         ttk::style configure Display.TLabel \
             -font {{Segoe UI} 20 bold} \
             -foreground $colors(-primary) \
-            -padding {0 0}
+            -padding [list [::bhom_px 0] [::bhom_px 0]]
 
         ttk::style configure LargeTitle.TLabel \
             -font {{Segoe UI} 18 bold} \
             -foreground $colors(-fg) \
-            -padding {0 0}
+            -padding [list [::bhom_px 0] [::bhom_px 0]]
 
         ttk::style configure Title.TLabel \
             -font {{Segoe UI} 18 bold} \
             -foreground $colors(-fg) \
-            -padding {0 0}
+            -padding [list [::bhom_px 0] [::bhom_px 0]]
 
         ttk::style configure Headline.TLabel \
             -font {{Segoe UI} 14 bold} \
             -foreground $colors(-primary) \
-            -padding {0 0}
+            -padding [list [::bhom_px 0] [::bhom_px 0]]
 
         ttk::style configure Subtitle.TLabel \
             -font {{Segoe UI} 12 bold} \
             -foreground $colors(-fg) \
-            -padding {0 0}
+            -padding [list [::bhom_px 0] [::bhom_px 0]]
 
         ttk::style configure Heading.TLabel \
             -font {{Segoe UI} 12 bold} \
             -foreground $colors(-primary) \
-            -padding {0 0}
+            -padding [list [::bhom_px 0] [::bhom_px 0]]
 
         ttk::style configure Body.TLabel \
             -font {{Segoe UI} 10} \
@@ -142,19 +154,19 @@ namespace eval ttk::theme::bhom_light {
             -darkcolor $colors(-border) \
             -borderwidth 1 \
             -focuscolor "" \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -relief flat
 
         # Large Button variant
         ttk::style configure Large.TButton \
             -font {{Segoe UI} 12 bold} \
-            -padding {14 8} \
+            -padding [list [::bhom_px 14] [::bhom_px 8]] \
             -borderwidth 1
 
         # Small Button variant
         ttk::style configure Small.TButton \
             -font {{Segoe UI} 8 bold} \
-            -padding {8 4} \
+            -padding [list [::bhom_px 8] [::bhom_px 4]] \
             -borderwidth 1
 
         ttk::style map TButton \
@@ -186,7 +198,7 @@ namespace eval ttk::theme::bhom_light {
             -lightcolor $colors(-primary-light) \
             -darkcolor $colors(-primary-hover) \
             -borderwidth 1 \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -relief flat
 
         ttk::style map Primary.TButton \
@@ -215,7 +227,7 @@ namespace eval ttk::theme::bhom_light {
             -lightcolor $colors(-secondary) \
             -darkcolor $colors(-secondary-hover) \
             -borderwidth 1 \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -relief flat
 
         ttk::style map Secondary.TButton \
@@ -235,7 +247,7 @@ namespace eval ttk::theme::bhom_light {
             -lightcolor $colors(-tertiary) \
             -darkcolor "#8a8a00" \
             -borderwidth 1 \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -relief flat
 
         ttk::style map Accent.TButton \
@@ -257,7 +269,7 @@ namespace eval ttk::theme::bhom_light {
             -lightcolor $colors(-success) \
             -darkcolor "#1e9038" \
             -borderwidth 1 \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -relief flat
 
         ttk::style map Success.TButton \
@@ -274,7 +286,7 @@ namespace eval ttk::theme::bhom_light {
             -background $colors(-bg) \
             -foreground $colors(-info) \
             -borderwidth 0 \
-            -padding {10 4} \
+            -padding [list [::bhom_px 10] [::bhom_px 4]] \
             -relief flat
 
         ttk::style map Link.TButton \
@@ -292,7 +304,7 @@ namespace eval ttk::theme::bhom_light {
             -lightcolor $colors(-hover-bg) \
             -darkcolor $colors(-border) \
             -borderwidth 1 \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -relief flat
 
         ttk::style map Outline.TButton \
@@ -311,7 +323,7 @@ namespace eval ttk::theme::bhom_light {
             -background $colors(-bg) \
             -foreground $colors(-primary) \
             -borderwidth 0 \
-            -padding {10 4}
+            -padding [list [::bhom_px 10] [::bhom_px 4]]
 
         ttk::style map Text.TButton \
             -background [list \
@@ -328,7 +340,7 @@ namespace eval ttk::theme::bhom_light {
             -lightcolor $colors(-border) \
             -darkcolor $colors(-hover-bg) \
             -insertcolor $colors(-fg) \
-            -padding {8 5} \
+            -padding [list [::bhom_px 8] [::bhom_px 5]] \
             -borderwidth 1 \
             -relief sunken
 
@@ -349,7 +361,7 @@ namespace eval ttk::theme::bhom_light {
             -background $colors(-bg) \
             -bordercolor $colors(-border-light) \
             -arrowcolor $colors(-fg) \
-            -padding {8 5} \
+            -padding [list [::bhom_px 8] [::bhom_px 5]] \
             -borderwidth 1 \
             -relief sunken
 
@@ -369,10 +381,10 @@ namespace eval ttk::theme::bhom_light {
             -background $colors(-bg) \
             -foreground $colors(-fg) \
             -font {{Segoe UI} 10} \
-            -padding {6 4} \
+            -padding [list [::bhom_px 6] [::bhom_px 4]] \
             -indicatorcolor $colors(-inputbg) \
             -indicatorbackground $colors(-inputbg) \
-            -indicatormargin {0 0 6 0} \
+            -indicatormargin [list [::bhom_px 0] [::bhom_px 0] [::bhom_px 6] [::bhom_px 0]] \
             -borderwidth 0 \
             -relief flat
 
@@ -398,10 +410,10 @@ namespace eval ttk::theme::bhom_light {
 
         ttk::style configure Checkbox.TCheckbutton \
             -font {{Segoe UI} 10} \
-            -padding {4 4} \
-            -indicatormargin {0 0 6 0} \
+            -padding [list [::bhom_px 4] [::bhom_px 4]] \
+            -indicatormargin [list [::bhom_px 0] [::bhom_px 0] [::bhom_px 6] [::bhom_px 0]] \
             -indicatorrelief flat \
-            -indicatorsize 16 \
+            -indicatorsize [::bhom_px 16] \
             -borderwidth 0 \
             -relief flat \
             -focusthickness 0 \
@@ -427,10 +439,10 @@ namespace eval ttk::theme::bhom_light {
             -background $colors(-bg) \
             -foreground $colors(-fg) \
             -font {{Segoe UI} 10} \
-            -padding {6 4} \
+            -padding [list [::bhom_px 6] [::bhom_px 4]] \
             -indicatorcolor $colors(-inputbg) \
             -indicatorbackground $colors(-inputbg) \
-            -indicatormargin {0 0 6 0} \
+            -indicatormargin [list [::bhom_px 0] [::bhom_px 0] [::bhom_px 6] [::bhom_px 0]] \
             -borderwidth 0 \
             -relief flat
 
@@ -457,9 +469,9 @@ namespace eval ttk::theme::bhom_light {
 
         ttk::style configure Radio.TRadiobutton \
             -font {{Segoe UI} 10} \
-            -padding {4 4} \
-            -indicatormargin {0 0 6 0} \
-            -indicatorsize 15 \
+            -padding [list [::bhom_px 4] [::bhom_px 4]] \
+            -indicatormargin [list [::bhom_px 0] [::bhom_px 0] [::bhom_px 6] [::bhom_px 0]] \
+            -indicatorsize [::bhom_px 15] \
             -borderwidth 0 \
             -relief flat \
             -focusthickness 0 \
@@ -500,7 +512,7 @@ namespace eval ttk::theme::bhom_light {
             -arrowsize 0 \
             -borderwidth 0 \
             -relief flat \
-            -width 8
+            -width [::bhom_px 8]
 
         ttk::style map TScrollbar \
             -background [list \
@@ -513,7 +525,7 @@ namespace eval ttk::theme::bhom_light {
             -troughcolor $colors(-bg) \
             -arrowsize 0 \
             -borderwidth 0 \
-            -width 8
+            -width [::bhom_px 8]
 
         ttk::style map Vertical.TScrollbar \
             -background [list \
@@ -526,7 +538,7 @@ namespace eval ttk::theme::bhom_light {
             -troughcolor $colors(-bg) \
             -arrowsize 0 \
             -borderwidth 0 \
-            -width 8
+            -width [::bhom_px 8]
 
         ttk::style map Horizontal.TScrollbar \
             -background [list \
@@ -541,7 +553,7 @@ namespace eval ttk::theme::bhom_light {
             -slidercolor $colors(-primary) \
             -borderwidth 1 \
             -sliderrelief raised \
-            -sliderlength 20
+            -sliderlength [::bhom_px 20]
 
         ttk::style map TScale \
             -background [list \
@@ -559,7 +571,7 @@ namespace eval ttk::theme::bhom_light {
             -slidercolor $colors(-primary-light) \
             -borderwidth 1 \
             -sliderrelief raised \
-            -sliderlength 24
+            -sliderlength [::bhom_px 24]
 
         ttk::style map ColourPicker.Horizontal.TScale \
             -background [list \
@@ -577,7 +589,7 @@ namespace eval ttk::theme::bhom_light {
             -lightcolor $colors(-primary-light) \
             -darkcolor $colors(-primary-hover) \
             -borderwidth 1 \
-            -thickness 16 \
+            -thickness [::bhom_px 16] \
             -relief flat
 
         # Notebook - soft rounded tabs
@@ -592,7 +604,7 @@ namespace eval ttk::theme::bhom_light {
             -foreground $colors(-text-secondary) \
             -bordercolor $colors(-border-light) \
             -font {{Segoe UI} 10 bold} \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -borderwidth 1
 
         ttk::style map TNotebook.Tab \
@@ -615,7 +627,7 @@ namespace eval ttk::theme::bhom_light {
             -darkcolor $colors(-border) \
             -borderwidth 1 \
             -rowheight 26 \
-            -padding {4 2}
+            -padding [list [::bhom_px 4] [::bhom_px 2]]
 
         ttk::style map Treeview \
             -background [list selected $colors(-primary)] \
@@ -626,7 +638,7 @@ namespace eval ttk::theme::bhom_light {
             -foreground $colors(-fg) \
             -bordercolor $colors(-border-light) \
             -relief flat \
-            -padding {8 6} \
+            -padding [list [::bhom_px 8] [::bhom_px 6]] \
             -font {{Segoe UI} 10 bold}
 
         ttk::style map Treeview.Heading \
@@ -652,20 +664,20 @@ namespace eval ttk::theme::bhom_light {
             -darkcolor $colors(-border) \
             -borderwidth 1 \
             -relief groove \
-            -padding {10 8}
+            -padding [list [::bhom_px 10] [::bhom_px 8]]
 
         ttk::style configure TLabelframe.Label \
             -background $colors(-bg) \
             -foreground $colors(-fg) \
             -font {{Segoe UI} 10 bold} \
-            -padding {8 -6}
+            -padding [list [::bhom_px 8] [::bhom_px -6]]
 
         # Panedwindow
         ttk::style configure TPanedwindow \
             -background $colors(-bg)
 
         ttk::style configure Sash \
-            -sashthickness 6 \
+            -sashthickness [::bhom_px 6] \
             -gripcount 0 \
             -background $colors(-border)
 
@@ -679,7 +691,7 @@ namespace eval ttk::theme::bhom_light {
             -foreground $colors(-inputfg) \
             -bordercolor $colors(-border-light) \
             -arrowcolor $colors(-fg) \
-            -padding {8 5} \
+            -padding [list [::bhom_px 8] [::bhom_px 5]] \
             -borderwidth 1 \
             -relief sunken
 
@@ -698,7 +710,7 @@ namespace eval ttk::theme::bhom_light {
             -foreground $colors(-fg) \
             -bordercolor $colors(-border-light) \
             -arrowcolor $colors(-fg) \
-            -padding {12 6} \
+            -padding [list [::bhom_px 12] [::bhom_px 6]] \
             -borderwidth 1 \
             -relief flat
 
