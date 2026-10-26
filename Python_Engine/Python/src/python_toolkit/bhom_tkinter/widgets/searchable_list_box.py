@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import os
+import re
+import sys
 import tkinter as tk
 from tkinter import ttk
 from typing import Callable, Iterable, List, Literal, Optional
-
-from rapidfuzz import fuzz, utils as fuzz_utils
 
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
@@ -15,18 +16,42 @@ from python_toolkit.bhom_tkinter.widgets.list_box import ScrollableListBox
 
 Scorer = Callable[[str, str], Optional[float]]  # (query, item) -> score (higher is better), or None for no match
 
+_NON_ALNUM = re.compile(r"[\W_]+")
+_BHOM_SEARCH = None  # (Compute, Scorer) from the BHoM Search_Engine, loaded on first use
+
+
+def _load_bhom_search():
+    """Load the BHoM Search_Engine through pythonnet the first time it is needed."""
+    global _BHOM_SEARCH  # pylint: disable=global-statement
+    if _BHOM_SEARCH is None:
+        import clr  # pylint: disable=import-outside-toplevel,import-error
+
+        sys.path.append(os.path.expandvars("%ProgramData%\BHoM\Assemblies"))
+        clr.AddReference("Search_Engine")
+        clr.AddReference("Search_oM")
+        from BH.Engine.Search import Compute  # pylint: disable=import-outside-toplevel,import-error
+        from BH.oM.Search import Scorer as BHoMScorer  # pylint: disable=import-outside-toplevel,import-error
+
+        _BHOM_SEARCH = (Compute, BHoMScorer)
+    return _BHOM_SEARCH
+
 
 def default_scorer(query: str, text: str, min_score: float = 75) -> Optional[float]:
-    """Score how well `query` matches `text` using rapidfuzz (higher is better), or None if it is a weak match.
+    """Score how well `query` matches `text` using the BHoM Search_Engine fuzzy match, or None if it is a weak match.
+
+    Uses BH.Engine.Search.Compute.MatchScore with the WeightedRatio scorer. Case and punctuation are ignored.
 
     Args:
         query: The text typed into the filter.
         text: The item being tested.
-        min_score: Similarity (0-100, rapidfuzz WRatio) an item needs to be shown. To use a different value, bind it
-            with `functools.partial(default_scorer, min_score=...)` and pass that as `scorer`.
+        min_score: Similarity (0-100) an item needs to be shown. To use a different value, bind it with
+            `functools.partial(default_scorer, min_score=...)` and pass that as `scorer`.
     """
-    score = fuzz.WRatio(query, text, processor=fuzz_utils.default_process, score_cutoff=min_score)
-    return score if score >= min_score else None
+    compute, bhom_scorer = _load_bhom_search()
+    query = _NON_ALNUM.sub(" ", query.lower()).strip()
+    text = _NON_ALNUM.sub(" ", text.lower()).strip()
+    score = compute.MatchScore(query, text, bhom_scorer.WeightedRatio)
+    return float(score) if score >= min_score else None
 
 
 class SearchableListBox(BHoMBaseWidget):
@@ -34,7 +59,7 @@ class SearchableListBox(BHoMBaseWidget):
 
     The filter sits in a row under the list.
     Typing in the filter narrows the list to fuzzy matches (typo-tolerant, case-insensitive), best first.
-    Matching uses `default_scorer` (rapidfuzz); pass `scorer` to use another algorithm.
+    Matching uses `default_scorer` (BHoM Search_Engine); pass `scorer` to use another algorithm.
     By default the selection is kept for items hidden by the filter, so several searches can build up one
     selection; `get()` always returns the full selection in item order.
     """
@@ -67,7 +92,7 @@ class SearchableListBox(BHoMBaseWidget):
                 multi-select lists.
             filter_label (str): Caption shown above the filter entry.
             scorer (Callable): Called as scorer(query, item); returns a score (higher ranks first) or None to
-                hide the item. Defaults to a rapidfuzz-based scorer.
+                hide the item. Defaults to the BHoM Search_Engine fuzzy match.
             **kwargs: Additional BHoMBaseWidget / Frame options (id, item_title, helper_text, on_change, ...).
         """
         super().__init__(parent, **kwargs)
