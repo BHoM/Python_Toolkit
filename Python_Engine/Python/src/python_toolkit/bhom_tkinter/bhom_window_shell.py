@@ -141,6 +141,26 @@ class BHoMWindowShell:
 
         self.refresh_sizing()
 
+    def rebuild(self) -> None:
+        """Re-place all widgets so changes to `self.widgets` are reflected.
+
+        Every BHoM widget currently managed by the content frame is removed from
+        its geometry manager (without being destroyed), then `build()` places the
+        widgets that are still in `self.widgets`.
+        """
+        for child in self.content_frame.winfo_children():
+            if not isinstance(child, BHoMBaseWidget):
+                continue
+            manager = child.winfo_manager()
+            if manager == "pack":
+                child.pack_forget()
+            elif manager == "grid":
+                child.grid_forget()
+            elif manager == "place":
+                child.place_forget()
+
+        self.build()
+
     def _set_window_icon(self) -> None:
         """Set a custom window icon, replacing Tk's default icon."""
         icon_path = self.theme.icon_path
