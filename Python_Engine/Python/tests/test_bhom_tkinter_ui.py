@@ -425,18 +425,15 @@ def test_searchable_list_box():
 
 
 def test_searchable_list_box_fuzzy_matching():
-	"""Fuzzy mode: substrings, close letter sequences and typos match, best first; contains mode is plain."""
-	from python_toolkit.bhom_tkinter.widgets.searchable_list_box import fuzzy_score
+	"""Default scorer: substrings and typos match, best first; min_score and a custom scorer can be supplied."""
+	from functools import partial
+	from python_toolkit.bhom_tkinter.widgets.searchable_list_box import default_scorer
 
-	assert fuzzy_score("", "anything") == 0.0
-	assert fuzzy_score("lon", "London_TRY.epw") is not None
-	assert fuzzy_score("ldn try", "London_TRY.epw") is not None      # letters in order, per word
-	assert fuzzy_score("birmigham", "Birmingham_TRY.epw") is not None  # typo
-	assert fuzzy_score("xyzq", "London_TRY.epw") is None
-	assert fuzzy_score("try", "NZL_Taranaki_New_Plymouth.epw") is None  # letters too far apart
-	assert fuzzy_score("london", "LOS-ANGELES-DOWNTOWN.epw") is None    # not a close misspelling
-	# Whole-word start beats a match inside a word
-	assert fuzzy_score("try", "London_TRY.epw") > fuzzy_score("try", "Country.epw")
+	assert default_scorer("lon", "London_TRY.epw") is not None
+	assert default_scorer("birmigham", "Birmingham_TRY.epw") is not None  # typo
+	assert default_scorer("xyzq", "London_TRY.epw") is None
+	assert default_scorer("london", "LOS-ANGELES-DOWNTOWN.epw") is None
+	assert default_scorer("birmigham", "Birmingham_TRY.epw", min_score=95) is None  # stricter threshold
 
 	root = BHoMBaseWindow(title="SearchableListBox fuzzy test")
 	items = ["Country_Club.epw", "London_TRY.epw", "Birmingham_TRY.epw", "Gibraltar_TRY.epw"]
@@ -446,15 +443,21 @@ def test_searchable_list_box_fuzzy_matching():
 	fuzzy.set_filter("birmigham")
 	assert fuzzy.get_visible() == ["Birmingham_TRY.epw"]
 	fuzzy.set_filter("try")
-	# Word-start matches rank above the match inside "Country" (earlier matches rank slightly higher)
-	assert set(fuzzy.get_visible()[:3]) == {"London_TRY.epw", "Birmingham_TRY.epw", "Gibraltar_TRY.epw"}
-	assert fuzzy.get_visible()[-1] == "Country_Club.epw"
+	assert set(fuzzy.get_visible()) == set(items)  # "try" is a substring of every item; ties keep original order
+	fuzzy.set_filter("xyzq")
+	assert fuzzy.get_visible() == []
 
-	contains = SearchableListBox(root.content_frame, items=items, match_mode="contains")
-	contains.build()
-	contains.set_filter("birmigham")
-	assert contains.get_visible() == []
-	contains.set_filter("try")
-	assert contains.get_visible() == items  # "Country" contains "try"; original order kept
+	# min_score is an argument of the scorer
+	strict = SearchableListBox(root.content_frame, items=items, scorer=partial(default_scorer, min_score=95))
+	strict.build()
+	strict.set_filter("birmigham")
+	assert strict.get_visible() == []
+
+	# A custom scorer replaces the default
+	only_london = SearchableListBox(
+		root.content_frame, items=items, scorer=lambda query, item: 1.0 if item.startswith("London") else None)
+	only_london.build()
+	only_london.set_filter("anything")
+	assert only_london.get_visible() == ["London_TRY.epw"]
 
 	root.destroy_root()

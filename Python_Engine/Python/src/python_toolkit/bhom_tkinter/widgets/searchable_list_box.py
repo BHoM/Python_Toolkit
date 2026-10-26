@@ -2,80 +2,41 @@
 
 from __future__ import annotations
 
-import difflib
-import re
 import tkinter as tk
 from tkinter import ttk
-from typing import Iterable, List, Literal, Optional
+from typing import Callable, Iterable, List, Literal, Optional
+
+from rapidfuzz import fuzz, utils as fuzz_utils
 
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets.button import Button
 from python_toolkit.bhom_tkinter.widgets.list_box import ScrollableListBox
 
-_WORD_SPLIT = re.compile(r"[\s_\-\.\(\)\[\],/\\]+")
-_TYPO_MIN_LENGTH = 4       # query words shorter than this must match exactly or as a subsequence
-_TYPO_MIN_RATIO = 0.8      # difflib similarity needed to accept a misspelt word
-_TYPO_MAX_LENGTH_DIFF = 2  # a misspelling may be at most this many letters longer/shorter than the word
+Scorer = Callable[[str, str], Optional[float]]  # (query, item) -> score (higher is better), or None for no match
 
 
-def _subsequence_gaps(token: str, text: str) -> Optional[int]:
-    """Characters skipped to find token's letters in order in text, or None if they are not all there."""
-    position, gaps = 0, 0
-    for char in token:
-        found = text.find(char, position)
-        if found < 0:
-            return None
-        gaps += found - position
-        position = found + 1
-    return gaps
+def default_scorer(query: str, text: str, min_score: float = 75) -> Optional[float]:
+    """Score how well `query` matches `text` using rapidfuzz (higher is better), or None if it is a weak match.
 
-
-def fuzzy_score(query: str, text: str) -> Optional[float]:
-    """Score how well `query` matches `text` (higher is better), or None if it does not match.
-
-    Every whitespace-separated word of the query must match the text, in one of these ways (best first):
-        - contained in the text, with a bonus when it starts a word ("lon" in "London_TRY")
-        - its letters appear in order with only small gaps ("ldn" in "London"), scored down by the gaps
-        - a close misspelling of one of the text's words ("birmigham" for "Birmingham"), words of 4+ letters
-    An empty query matches everything with score 0.
+    Args:
+        query: The text typed into the filter.
+        text: The item being tested.
+        min_score: Similarity (0-100, rapidfuzz WRatio) an item needs to be shown. To use a different value, bind it
+            with `functools.partial(default_scorer, min_score=...)` and pass that as `scorer`.
     """
-    text_l = text.lower()
-    tokens = [t for t in query.lower().split() if t]
-    if not tokens:
-        return 0.0
-    words = [w for w in _WORD_SPLIT.split(text_l) if w]
-    score = 0.0
-    for token in tokens:
-        index = text_l.find(token)
-        if index >= 0:
-            starts_word = index == 0 or not text_l[index - 1].isalnum()
-            score += 100 + (20 if starts_word else 0) - min(index, 20) * 0.5
-            continue
-        gaps = _subsequence_gaps(token, text_l)
-        # Letters in order only count when they are close together, otherwise short words match almost anything.
-        if gaps is not None and gaps <= max(3, len(token)):
-            score += max(60 - gaps * 4, 20)
-            continue
-        similar = [w for w in words if abs(len(w) - len(token)) <= _TYPO_MAX_LENGTH_DIFF]
-        if len(token) >= _TYPO_MIN_LENGTH and similar:
-            ratio = max(difflib.SequenceMatcher(None, token, w).ratio() for w in similar)
-            if ratio >= _TYPO_MIN_RATIO:
-                score += ratio * 50
-                continue
-        return None
-    return score
+    score = fuzz.WRatio(query, text, processor=fuzz_utils.default_process, score_cutoff=min_score)
+    return score if score >= min_score else None
 
 
 class SearchableListBox(BHoMBaseWidget):
     """A listbox with a filter entry beneath it, for picking from long lists.
 
     The filter sits in a row under the list.
-    Typing in the filter narrows the list. With match_mode="fuzzy" (default) each typed word may match as
-    a substring, as letters in order, or as a close misspelling, and the best matches are listed first
-    (see `fuzzy_score`). With match_mode="contains" the list shows items containing the text, in order.
-    Matching is case-insensitive. By default the selection is kept for items hidden by the filter, so
-    several searches can build up one selection; `get()` always returns the full selection in item order.
+    Typing in the filter narrows the list to fuzzy matches (typo-tolerant, case-insensitive), best first.
+    Matching uses `default_scorer` (rapidfuzz); pass `scorer` to use another algorithm.
+    By default the selection is kept for items hidden by the filter, so several searches can build up one
+    selection; `get()` always returns the full selection in item order.
     """
 
     def __init__(
@@ -89,7 +50,7 @@ class SearchableListBox(BHoMBaseWidget):
             keep_hidden_selection: bool = True,
             show_summary: Optional[bool] = None,
             filter_label: str = "Filter",
-            match_mode: Literal["fuzzy", "contains"] = "fuzzy",
+            scorer: Scorer = default_scorer,
             **kwargs):
         """
         Args:
@@ -105,14 +66,13 @@ class SearchableListBox(BHoMBaseWidget):
             show_summary (bool, optional): Show a caption listing the selected items. Defaults to True for
                 multi-select lists.
             filter_label (str): Caption shown above the filter entry.
-            match_mode (str): "fuzzy" (typo-tolerant, best matches first) or "contains" (plain substring).
+            scorer (Callable): Called as scorer(query, item); returns a score (higher ranks first) or None to
+                hide the item. Defaults to a rapidfuzz-based scorer.
             **kwargs: Additional BHoMBaseWidget / Frame options (id, item_title, helper_text, on_change, ...).
         """
         super().__init__(parent, **kwargs)
 
-        if match_mode not in ("fuzzy", "contains"):
-            raise ValueError(f"match_mode must be 'fuzzy' or 'contains', not {match_mode!r}")
-        self.match_mode = match_mode
+        self.scorer = scorer
         self._all_items: List[str] = [str(item) for item in (items or [])]
         self._shown: List[str] = list(self._all_items)
         self._multi = selectmode in (tk.MULTIPLE, tk.EXTENDED, "multiple", "extended")
@@ -166,9 +126,7 @@ class SearchableListBox(BHoMBaseWidget):
         query = query.strip().lower()
         if not query:
             return list(self._all_items)
-        if self.match_mode == "contains":
-            return [item for item in self._all_items if query in item.lower()]
-        scored = [(fuzzy_score(query, item), index, item) for index, item in enumerate(self._all_items)]
+        scored = [(self.scorer(query, item), index, item) for index, item in enumerate(self._all_items)]
         return [item for score, index, item in sorted((s for s in scored if s[0] is not None),
                                                       key=lambda s: (-s[0], s[1]))]
 
