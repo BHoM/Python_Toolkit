@@ -4,6 +4,7 @@ from datetime import date
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import tkinter as tk
 
 from python_toolkit.bhom_tkinter.bhom_base_window import BHoMBaseWindow
 from python_toolkit.bhom_tkinter.widgets import (
@@ -28,6 +29,8 @@ from python_toolkit.bhom_tkinter.windows import (
 	ProcessingWindow,
 	WarningBox,
 )
+from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
+from python_toolkit.bhom_tkinter.windows.modal_window import BHoMModalWindow
 
 
 def _demo_callback(*_args, **_kwargs):
@@ -315,4 +318,33 @@ def test_rebuild():
 	assert label_a not in [w for w in root.widgets]
 
 	root.destroy_root()
+
+
+def test_modal_window_is_themed_toplevel():
+	"""Modal windows should be themed Toplevels, not tk.Tk roots."""
+	host = BHoMBaseWindow(title="Modal host", show_submit=False, show_close=False)
+	host.withdraw()
+
+	modal = BHoMModalWindow(
+		host,
+		title="Modal test",
+		width=420,
+		height=260,
+		show_close=True,
+	)
+	assert isinstance(modal, tk.Toplevel)
+	assert isinstance(modal, BHoMBaseChildWindow)
+	assert hasattr(modal, "content_frame")
+	assert not isinstance(modal, BHoMBaseWindow)
+
+	Label(
+		modal.content_frame,
+		text="Modal body",
+		build_options=PackingOptions(anchor="w"),
+	).build()
+	modal.update_idletasks()
+	assert modal.winfo_exists()
+
+	modal.close()
+	host.destroy_root()
 

@@ -37,7 +37,7 @@ namespace BH.Engine.Python
         [Input("kernelName", "The name of the kernel to remove.")]
         public static void RemoveKernel(string kernelName)
         {
-            string kernelPath = Path.Combine(Query.DirectoryKernels(), kernelName);
+            string kernelPath = Path.Combine(Query.DirectoryKernels(), kernelName.ToLower());
             if (Directory.Exists(kernelPath))
                 Directory.Delete(kernelPath, true);
         }

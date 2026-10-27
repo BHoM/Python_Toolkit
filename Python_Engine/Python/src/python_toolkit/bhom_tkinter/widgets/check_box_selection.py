@@ -5,6 +5,7 @@ from tkinter import ttk
 from typing import Optional, List, Callable, Tuple, Literal
 
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
+from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 class CheckboxSelection(BHoMBaseWidget):
 	"""A reusable checkbox selection widget built from a list of fields, allowing multiple selections."""
@@ -85,11 +86,11 @@ class CheckboxSelection(BHoMBaseWidget):
 				else:
 					row = index % self.max_per_line
 					column = index // self.max_per_line
-				button.grid(row=row, column=column, padx=(0, 10), pady=(0, 4), sticky=self._grid_sticky)
+				button.grid(row=row, column=column, padx=scale_pad((0, 10)), pady=scale_pad((0, 4)), sticky=self._grid_sticky)
 			elif self.orient == "horizontal":
-				button.grid(row=0, column=index, padx=(0, 10), pady=(0, 4), sticky=self._grid_sticky)
+				button.grid(row=0, column=index, padx=scale_pad((0, 10)), pady=scale_pad((0, 4)), sticky=self._grid_sticky)
 			else:
-				button.grid(row=index, column=0, padx=(0, 10), pady=(0, 4), sticky=self._grid_sticky)
+				button.grid(row=index, column=0, padx=scale_pad((0, 10)), pady=scale_pad((0, 4)), sticky=self._grid_sticky)
 			self._buttons.append(button)
 			self._field_buttons[field] = button
 
@@ -197,9 +198,9 @@ if __name__ == "__main__":
 
 	# Add control buttons for demonstration
 	control_frame = ttk.Frame(parent_frame)
-	control_frame.pack(padx=20, pady=10)
+	control_frame.pack(padx=scale_pad(20), pady=scale_pad(10))
 
-	Button(control_frame, text="Select All", command=widget.select_all).pack(side="left", padx=5)
-	Button(control_frame, text="Deselect All", command=widget.deselect_all).pack(side="left", padx=5)
+	Button(control_frame, text="Select All", command=widget.select_all).pack(side="left", padx=scale_pad(5))
+	Button(control_frame, text="Deselect All", command=widget.deselect_all).pack(side="left", padx=scale_pad(5))
 
 	root.mainloop()

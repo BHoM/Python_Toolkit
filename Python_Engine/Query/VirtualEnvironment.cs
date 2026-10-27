@@ -60,7 +60,7 @@ namespace BH.Engine.Python
         [Output("kernelDirectory", "The path to the kernel directory.")]
         public static string VirtualEnvironmentKernel(string envName)
         {
-            return Path.Combine(Query.DirectoryKernels(), envName);
+            return Path.Combine(Query.DirectoryKernels(), envName.ToLower());
         }
 
         [Description("Get the path to the named BHoM Python virtual environment executable.")]

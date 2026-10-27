@@ -161,3 +161,30 @@ def test_heatmap():
         plt.Axes,
     )
     plt.close("all")
+
+
+def _heatmap_cell_count(series: pd.Series) -> int:
+    ax = heatmap(series)
+    count = np.ma.getdata(ax.collections[0].get_array()).size
+    plt.close("all")
+    return count
+
+
+def test_heatmap_keeps_last_bins():
+    hourly_two_days = pd.Series(
+        np.arange(48, dtype=float),
+        index=pd.date_range("2000-01-01", periods=48, freq="h"),
+    )
+    assert _heatmap_cell_count(hourly_two_days) == 48
+
+    half_hourly_day = pd.Series(
+        np.arange(48, dtype=float),
+        index=pd.date_range("2000-01-01", periods=48, freq="30min"),
+    )
+    assert _heatmap_cell_count(half_hourly_day) == 48
+
+    hourly_one_day = pd.Series(
+        np.arange(24, dtype=float),
+        index=pd.date_range("2000-01-01", periods=24, freq="h"),
+    )
+    assert _heatmap_cell_count(hourly_one_day) == 24

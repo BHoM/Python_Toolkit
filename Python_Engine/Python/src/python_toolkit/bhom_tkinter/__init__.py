@@ -14,7 +14,9 @@ from .widgets import (
 	RadioSelection,
 	ValidatedEntryBox,
 )
+from .bhom_base_child_window import BHoMBaseChildWindow
 from .windows import (
+	BHoMModalWindow,
 	DirectoryFileSelector,
 	LandingPage,
 	ProcessingWindow,
@@ -43,6 +45,8 @@ __all__ = [
 	"PathSelector",
 	"RadioSelection",
 	"ValidatedEntryBox",
+	"BHoMBaseChildWindow",
+	"BHoMModalWindow",
 	"DirectoryFileSelector",
 	"LandingPage",
 	"ProcessingWindow",
