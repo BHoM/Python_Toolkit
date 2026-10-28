@@ -2,87 +2,95 @@ import json
 
 import numpy as np
 import pytest
+from matplotlib import colormaps
 from matplotlib.colors import to_hex
 
+from python_toolkit.plot import palettes
 from python_toolkit.plot.colour_scales import (
     ColourScale,
     ColourScaleError,
-    ColourScaleLibrary,
-    DataSummary,
-    GradientScale,
-    PALETTES,
-    ThresholdScale,
-    palette_colours,
+    load_scales,
+    save_scale,
     suggest_thresholds,
 )
 
-COMFORT = dict(thresholds=[18, 21, 24], colours=["#0000ff", "#00ffff", "#00ff00", "#ff0000"],
-               labels=["Cold", "Cool", "Comfortable", "Hot"], units="degC", group="TM59")
+COMFORT = dict(thresholds=[18, 21, 24], cmap=["#0000ff", "#00ffff", "#00ff00", "#ff0000"],
+               labels=["Cold", "Cool", "Comfortable", "Hot"], units="degC")
 
 
-def colour_of(mapping, value):
-    return to_hex(mapping.cmap(mapping.norm(value)))
+def colour_of(scale, value):
+    cmap, norm = scale.mapping()
+    return to_hex(cmap(norm(value)))
+
+
+# -- palettes ------------------------------------------------------------------
+
+def test_toolkit_palettes_are_always_registered():
+    for name, (kind, _safe, _colours) in palettes.CUSTOM.items():
+        assert name in colormaps and f"{name}_r" in colormaps
+        assert name in palettes.names(kind)
+    assert isinstance(colormaps["okabe_ito"], type(colormaps["Set1"]))  # discrete, like the other categorical maps
+    assert "okabe_ito" in palettes.names("colourblind") and "ltc_maya" not in palettes.names("colourblind")
+    assert "viridis_r" in palettes.names() and "viridis_r" not in palettes.names("continuous")
+
+
+def test_sample_takes_the_first_colours_of_a_categorical_palette():
+    assert palettes.sample("okabe_ito", 3) == ["#e69f00", "#56b4e9", "#009e73"]
+    assert palettes.sample("magma", 3)[0] == "#000004"
+    assert len(palettes.sample("traffic_light", 7)) == 7 and len(palettes.sample("viridis", 1)) == 1
 
 
 # -- thresholds hold in data units, whatever data is passed in ----------------
 
-@pytest.mark.parametrize("data", [[19, 20, 22], np.linspace(-50, 200, 30), [23.9], None])
-def test_bands_fixed_for_any_data(data):
-    mapping = ThresholdScale("Comfort", **COMFORT).mapping(data)
-    assert colour_of(mapping, 17.99) == "#0000ff"
-    assert colour_of(mapping, 18.0) == "#00ffff"  # boundary belongs to the band above
-    assert colour_of(mapping, 22.0) == "#00ff00"
-    assert colour_of(mapping, 24.0) == "#ff0000"
-    assert colour_of(mapping, -1000) == "#0000ff" and colour_of(mapping, 1000) == "#ff0000"
-    assert mapping.band_labels == ["Cold", "Cool", "Comfortable", "Hot"]
+def test_bands_hold_in_data_units():
+    scale = ColourScale("Comfort", **COMFORT)
+    assert colour_of(scale, 17.99) == "#0000ff"
+    assert colour_of(scale, 18.0) == "#00ffff"  # boundary belongs to the band above
+    assert colour_of(scale, 22.0) == "#00ff00"
+    assert colour_of(scale, 24.0) == "#ff0000"
+    assert colour_of(scale, -1000) == "#0000ff" and colour_of(scale, 1000) == "#ff0000"
 
 
-def test_auto_band_labels_and_band_of():
-    scale = ThresholdScale("Plain", [10, 20], ["red", "green", "blue"])
-    assert scale.band_labels() == ["< 10", "10 - 20", ">= 20"]
-    assert [scale.band_of(v) for v in (5, 10, 19.9, 20, 99)] == [0, 1, 1, 2, 2]
-    partly = ThresholdScale("Partly", [10, 20], ["red", "green", "blue"], labels=["Low", None, ""])
-    assert partly.band_labels() == ["Low", "10 - 20", ">= 20"]
+def test_band_labels():
+    assert ColourScale("Comfort", **COMFORT).band_labels() == ["Cold", "Cool", "Comfortable", "Hot"]
+    plain = ColourScale("Plain", [10, 20], "viridis")
+    assert plain.band_labels() == ["< 10", "10 - 20", ">= 20"]
+    assert ColourScale("Partly", [10, 20], "viridis", labels=["Low", None, ""]).band_labels() == ["Low", "10 - 20", ">= 20"]
+
+
+def test_changing_the_palette_keeps_the_breaks():
+    scale = ColourScale("Heat", [10, 20, 30], "viridis")
+    assert scale.colours() == palettes.sample("viridis", 4)
+    scale.cmap = "okabe_ito"
+    assert scale.thresholds == [10, 20, 30] and scale.colours() == palettes.sample("okabe_ito", 4)
+    scale.cmap = ["red", "green", "blue", "black"]
+    assert scale.colours()[0] == "#ff0000"
+    with pytest.raises(ColourScaleError, match="4 bands"):
+        scale.cmap = ["red", "green"]
+
+
+def test_value_range_follows_the_data_or_the_thresholds():
+    scale = ColourScale("T", [10, 20], "viridis")
+    assert scale.value_range([12, 18]) == (12, 18) and scale.value_range([5, 5]) == (4.5, 5.5)
+    lo, hi = scale.value_range()
+    assert lo < 10 and hi > 20
 
 
 @pytest.mark.parametrize("kwargs,message", [
-    (dict(thresholds=[], colours=["red"]), "at least one"),
-    (dict(thresholds=[2, 1], colours=["r", "g", "b"]), "increasing"),
-    (dict(thresholds=[1, 2], colours=["red", "green"]), "3 bands"),
-    (dict(thresholds=[1], colours=["red", "green"], labels=["a"]), "one label per band"),
-    (dict(thresholds=[1], colours=["red", "notacolour"]), "not a colour"),
+    (dict(thresholds=[]), "at least one"),
+    (dict(thresholds=[2, 1]), "increasing"),
+    (dict(thresholds=[1, 2], cmap=["red", "green"]), "3 bands"),
+    (dict(thresholds=[1], labels=["a"]), "one label per band"),
+    (dict(thresholds=[1], cmap=["red", "notacolour"]), "not a colour"),
+    (dict(thresholds=[1], cmap="no_such_map"), "Unknown colour map"),
+    (dict(thresholds=[1], name=" "), "needs a name"),
 ])
-def test_threshold_validation(kwargs, message):
+def test_validation(kwargs, message):
     with pytest.raises(ColourScaleError, match=message):
-        ThresholdScale("Bad", **kwargs)
+        ColourScale(**{"name": "Bad", **kwargs})
 
 
-def test_gradient_relative_stretches_to_data_absolute_does_not():
-    relative = GradientScale.from_palette("Rel", "Traffic light")
-    assert relative.mapping([10, 30]).norm.vmin == 10 and relative.mapping([10, 30]).norm.vmax == 30
-    absolute = GradientScale("Abs", [(0, "blue"), (100, "red")], relative=False)
-    assert (absolute.mapping([10, 30]).norm.vmin, absolute.mapping([10, 30]).norm.vmax) == (0, 100)
-    stepped = GradientScale("Steps", [(0, "blue"), (1, "red")], bins=4).mapping([0, 8])
-    assert len({colour_of(stepped, v) for v in np.linspace(0, 8, 50)}) == 4
-    with pytest.raises(ColourScaleError):
-        GradientScale("Bad", [(0, "red"), (2, "blue")], relative=True)
-
-
-def test_mapping_colours_for_handles_missing_values():
-    rgba = ThresholdScale("C", **COMFORT).mapping().colours_for([17, None, "x", 30])
-    assert np.isnan(rgba[1]).all() and np.isnan(rgba[2]).all()
-    assert to_hex(rgba[3]) == "#ff0000"
-
-
-# -- data passed in ----------------------------------------------------------
-
-def test_data_summary_ignores_unreadable_values():
-    summary = DataSummary.from_data([1, 2, None, "n/a", float("nan"), 3, 10])
-    assert summary.count == 4 and summary.minimum == 1 and summary.maximum == 10
-    assert summary.histogram[0].sum() == 4
-    with pytest.raises(ColourScaleError):
-        DataSummary.from_data([None, "x"])
-
+# -- suggesting thresholds -----------------------------------------------------
 
 def test_suggest_thresholds_methods():
     data = np.concatenate([np.full(90, 20.0), np.linspace(20, 30, 10)])
@@ -92,6 +100,20 @@ def test_suggest_thresholds_methods():
         suggest_thresholds(data, 4, "quantile")
     q = suggest_thresholds(np.arange(100), 4, "quantile")
     assert len(q) == 3 and q[0] < q[1] < q[2]
+    assert suggest_thresholds([1, None, "x", float("nan"), 3], 2, "equal") == [2]
+
+
+def test_log_thresholds_have_equal_ratios():
+    thresholds = suggest_thresholds([1, 1000], 3, "log")
+    assert thresholds == pytest.approx([10, 100])
+    spread = suggest_thresholds(np.geomspace(0.5, 4000, 50), 5, "log")
+    ratios = [b / a for a, b in zip(spread, spread[1:])]
+    assert len(spread) == 4 and ratios == pytest.approx([ratios[0]] * 3, rel=0.02)
+    for data in ([0, 10, 100], [-5, 10, 100]):
+        with pytest.raises(ColourScaleError, match="above zero"):
+            suggest_thresholds(data, 3, "log")
+    with pytest.raises(ColourScaleError, match="too narrow"):
+        suggest_thresholds([1.0, 1.001], 5, "log")
 
 
 @pytest.mark.parametrize("data,bands,expected", [
@@ -106,79 +128,61 @@ def test_nice_thresholds_fall_inside_the_data(data, bands, expected):
     assert all(min(data) < t < max(data) for t in thresholds)
 
 
-def test_threshold_scale_from_data():
-    scale = ThresholdScale.from_data("Loads", np.linspace(0, 95, 50), bands=4, method="nice",
-                                     palette="Okabe-Ito (colour-blind safe)", group="Loads")
-    assert scale.thresholds == [25, 50, 75] and scale.bands == 4 and scale.group == "Loads"
-    assert len(palette_colours("Traffic light", 7)) == 7
-
-
-# -- persistence -------------------------------------------------------------
+# -- saved scales --------------------------------------------------------------
 
 def test_round_trip_through_dict():
-    for scale in (ThresholdScale("Comfort", **COMFORT), GradientScale.from_palette("G", "LTC Maya", bins=6)):
-        rebuilt = ColourScale.from_dict(json.loads(json.dumps(scale.to_dict())))
-        assert type(rebuilt) is type(scale) and rebuilt.to_dict() == scale.to_dict()
+    for scale in (ColourScale("Comfort", **COMFORT), ColourScale("Palette", [1, 2], cmap="ltc_maya")):
+        assert ColourScale.from_dict(json.loads(json.dumps(scale.to_dict()))).to_dict() == scale.to_dict()
 
 
-def test_library_sets(tmp_path):
-    library = ColourScaleLibrary(tmp_path / "scales.json")
-    library.save(ThresholdScale("Comfort", **COMFORT))
-    library.save(GradientScale.from_palette("Heat", "LTC Heatmap", group="Loads"))
-    library.save(ThresholdScale("Overheating", [26, 28], ["green", "orange", "red"], group="TM59"))
-    reopened = ColourScaleLibrary(tmp_path / "scales.json")
-    assert reopened.groups() == ["TM59", "Loads"]
-    assert reopened.names("TM59") == ["Comfort", "Overheating"]
-    assert reopened.get("Comfort").labels[-1] == "Hot"
+def test_save_and_load(tmp_path):
+    path = tmp_path / "scales.json"
+    save_scale(ColourScale("Comfort", **COMFORT), path)
+    save_scale(ColourScale("Overheating", [26, 28], "RdYlGn_r"), path)
+    assert [s.name for s in load_scales(path)] == ["Comfort", "Overheating"]
     with pytest.raises(ColourScaleError, match="already exists"):
-        reopened.save(ThresholdScale("Comfort", **COMFORT))
-    reopened.rename_group("TM59", "Overheating checks")
-    reopened.delete_group("Loads")
-    final = ColourScaleLibrary(tmp_path / "scales.json")
-    assert final.groups() == ["Overheating checks"] and len(final) == 2
+        save_scale(ColourScale("Comfort", [1], "viridis"), path)
+    save_scale(ColourScale("Comfort", [1], "viridis"), path, overwrite=True)
+    assert load_scales(path)[-1].thresholds == [1]
 
 
-def test_unreadable_entries_reported_and_kept(tmp_path):
+def test_unreadable_entries_are_skipped_and_kept(tmp_path):
     path = tmp_path / "mixed.json"
-    path.write_text(json.dumps({"version": 2, "scales": [
-        ThresholdScale("Good", [1], ["red", "blue"]).to_dict(),
-        {"type": "thresholds", "name": "Broken", "thresholds": [2, 1], "colours": ["a"]},
+    path.write_text(json.dumps({"scales": [
+        ColourScale("Good", [1], "viridis").to_dict(),
+        {"name": "Broken", "thresholds": [2, 1], "cmap": "viridis"},
     ]}), encoding="utf-8")
-    library = ColourScaleLibrary(path)
-    assert library.names() == ["Good"] and "Broken" in library.problems[0]
-    library.save(ThresholdScale("New", [5], ["red", "blue"]))
-    names_on_disk = [e["name"] for e in json.loads(path.read_text(encoding="utf-8"))["scales"]]
-    assert "Broken" in names_on_disk  # never silently deleted
+    assert [s.name for s in load_scales(path)] == ["Good"]
+    save_scale(ColourScale("New", [5], "viridis"), path)
+    assert "Broken" in [e["name"] for e in json.loads(path.read_text(encoding="utf-8"))["scales"]]
 
 
-def test_corrupt_library_raises(tmp_path):
+def test_entries_without_thresholds_are_skipped(tmp_path):
+    path = tmp_path / "gradient.json"
+    path.write_text(json.dumps({"scales": [{"type": "gradient", "name": "Old gradient", "stops": [[0, "red"], [1, "blue"]]}]}),
+                    encoding="utf-8")
+    assert load_scales(path) == []
+
+
+def test_older_threshold_entries_still_load(tmp_path):
+    path = tmp_path / "old.json"
+    path.write_text(json.dumps({"version": 1, "scales": [
+        {"type": "thresholds", "name": "Old", "thresholds": [1], "colours": ["#000000", "#ffffff"],
+         "labels": None, "units": None, "group": "TM59"},
+    ]}), encoding="utf-8")
+    assert load_scales(path)[0].colours() == ["#000000", "#ffffff"]
+
+
+def test_corrupt_file_raises(tmp_path):
     path = tmp_path / "bad.json"
     path.write_text("{not json", encoding="utf-8")
     with pytest.raises(ColourScaleError, match="Cannot read"):
-        ColourScaleLibrary(path)
+        load_scales(path)
 
 
-def test_palettes_are_valid():
-    for name, colours in PALETTES.items():
-        assert len(colours) >= 3, name
-        GradientScale.from_palette(name, name)
-
-
-def test_palettes_registered_as_colour_maps():
-    from matplotlib import colormaps
-    from python_toolkit.plot.colour_scales import PALETTE_CMAPS, palette_names
-
-    for name in PALETTE_CMAPS.values():
-        assert name in colormaps and f"{name}_r" in colormaps
-    names = palette_names()
-    assert names[:len(PALETTES)] == list(PALETTES) and "magma" in names and "okabe_ito" not in names
-    assert palette_colours("magma", 3)[0] == "#000004"
-    with pytest.raises(ColourScaleError, match="Unknown palette"):
-        palette_colours("no such map", 3)
-
-
-def test_to_colormap_keeps_band_widths():
-    scale = ThresholdScale("T", [10, 30], ["#0000ff", "#00ff00", "#ff0000"])
-    cmap = scale.to_colormap(np.array([0, 40]))
-    colours = [to_hex(cmap(x)) for x in (0.1, 0.5, 0.9)]
-    assert colours == ["#0000ff", "#00ff00", "#ff0000"] and cmap.name == "T"
+@pytest.mark.parametrize("method", ["equal", "quantile", "nice", "log"])
+@pytest.mark.parametrize("bands", [2, 3, 4, 5, 6, 8])
+def test_suggestions_always_give_the_number_of_bands_asked_for(method, bands):
+    data = np.random.default_rng(1).normal(22, 3, 300)
+    assert len(suggest_thresholds(data, bands, method)) == bands - 1
+    assert len(suggest_thresholds([16, 30], bands, "nice")) == bands - 1

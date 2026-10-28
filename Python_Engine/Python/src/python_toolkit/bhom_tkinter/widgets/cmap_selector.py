@@ -9,8 +9,7 @@ from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-from python_toolkit.bhom_tkinter.widgets.button import Button
-from python_toolkit.plot.colour_scales import ColourScale, ColourScaleLibrary
+from python_toolkit.plot import palettes
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
@@ -29,48 +28,6 @@ class CmapSelector(BHoMBaseWidget):
     * `List[str]`: a list of colour strings (hex codes or named colours) that is auto-converted to a `ListedColormap`.
     """
 
-    CATEGORICAL_CMAPS = [
-        "Accent",
-        "Dark2",
-        "Paired",
-        "Pastel1",
-        "Pastel2",
-        "Set1",
-        "Set2",
-        "Set3",
-        "tab10",
-        "tab20",
-        "tab20b",
-        "tab20c",
-    ]
-
-    CONTINUOUS_CMAPS = [
-        "viridis",
-        "plasma",
-        "inferno",
-        "magma",
-        "cividis",
-        "turbo",
-        "Blues",
-        "Greens",
-        "Greys",
-        "Oranges",
-        "Purples",
-        "Reds",
-        "YlGn",
-        "YlGnBu",
-        "YlOrBr",
-        "YlOrRd",
-        "coolwarm",
-        "seismic",
-        "Spectral",
-        "RdYlBu",
-        "RdYlGn",
-        "twilight",
-        "twilight_shifted",
-        "hsv",
-    ]
-
     def __init__(
         self,
         parent: ttk.Frame,
@@ -80,7 +37,6 @@ class CmapSelector(BHoMBaseWidget):
         default_cmap: Optional[CmapInput] = None,
         plot_size: tuple[int, int] = (400, 50),
         dropdown_position: Literal["n", "e", "s", "w"] = "n",
-        allow_custom: bool = False,
         **kwargs
     ) -> None:
         """
@@ -93,7 +49,8 @@ class CmapSelector(BHoMBaseWidget):
                 `List[str]` of colour strings.  When provided the preset
                 `cmap_set` selection is ignored.
             cmap_set: Preset colormap set used when `colormaps` is `None`.
-                Allowed values: "all", "continuous", "categorical".
+                Allowed values: "all", "continuous", "categorical", "colourblind"
+                (see `python_toolkit.plot.palettes`).
             cmap_bins: Number of discrete gradient bands in the preview swatch.
             default_cmap: Optional default colormap to pre-select.  Accepts
                 the same input types as items in `colormaps`.
@@ -101,9 +58,6 @@ class CmapSelector(BHoMBaseWidget):
             dropdown_position: Position of the dropdown relative to the
                 preview swatch. "n" = above, "s" = below,
                 "w" = left, "e" = right.
-            allow_custom: When True, colour scales saved in the
-                `ColourScaleLibrary` are listed first, and a button opens the
-                `ColourScaleBuilder` to make a new one.
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
@@ -119,12 +73,7 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame.pack(side="top", fill="both", expand=True, anchor=self._pack_anchor)
 
         self.colormap_var = tk.StringVar(value="viridis")
-        self._all_colormaps = self._get_all_colormaps()
-        self._preset_map: Dict[str, List[str]] = {
-            "all": self._all_colormaps,
-            "continuous": self._filter_available(self.CONTINUOUS_CMAPS),
-            "categorical": self._filter_available(self.CATEGORICAL_CMAPS),
-        }
+        self._all_colormaps = palettes.names()
         self._uses_explicit_colormaps = colormaps is not None
 
         self.cmap_frame.columnconfigure(0, weight=1)
@@ -172,72 +121,11 @@ class CmapSelector(BHoMBaseWidget):
         else:
             current_colormaps = self._preset_colormaps(self.cmap_set_var.get())
 
-        if allow_custom:
-            current_colormaps = self._saved_scale_labels(current_colormaps) + current_colormaps
-
         self._populate_cmap_list(current_colormaps)
 
         # Resolve default_cmap: may itself be a Colormap object or colour list
         self._default_label = self._resolve_default_label(default_cmap, current_colormaps)
         self._select_default_cmap(current_colormaps)
-
-        if allow_custom:
-            self.new_scale_button = Button(header, text="New colour scale...", command=self._open_scale_builder)
-            self.new_scale_button.pack(side=tk.TOP, anchor=self._pack_anchor, fill="x", pady=(4, 0))
-
-    def _saved_scale_labels(self, existing: List[str]) -> List[str]:
-        """Register every saved colour scale as a custom entry and return their labels."""
-        labels: List[str] = []
-        for scale in ColourScaleLibrary().scales():
-            label = self._unique_label(scale.name, existing + labels)
-            self._custom_cmaps[label] = scale.to_colormap()
-            labels.append(label)
-        return labels
-
-    def _open_scale_builder(self) -> None:
-        """Open the colour scale builder; a saved scale is added to the list and selected."""
-        # imported here: the builder window is built from these widgets
-        from python_toolkit.bhom_tkinter.windows.colour_scale_builder import ColourScaleBuilder
-
-        ColourScaleBuilder(self.winfo_toplevel(), on_save=self._on_scale_saved).run()
-
-    def _on_scale_saved(self, scale: ColourScale) -> None:
-        existing = list(self.cmap_combobox["values"])
-        label = self._unique_label(scale.name, existing)
-        self._custom_cmaps[label] = scale.to_colormap()
-        self._populate_cmap_list([label] + existing)
-        self.colormap_var.set(label)
-        self._update_cmap_sample()
-        self._fire_on_change(self.get())
-
-    def _get_all_colormaps(self) -> List[str]:
-        """Return all registered colormap names, including reversed variants.
-
-        Returns:
-            List[str]: Sorted list of available colormap names.
-        """
-        # Base names available in this matplotlib build
-        base_names = set(mpl.colormaps())
-
-        # Include reversed variants (name_r) next to each base map
-        all_names = set(base_names)
-        for name in list(base_names):
-            if not name.endswith("_r"):
-                all_names.add(f"{name}_r")
-
-        return sorted(all_names)
-
-    def _filter_available(self, names: List[str]) -> List[str]:
-        """Filter a candidate list to names available in the current matplotlib build.
-
-        Args:
-            names: Candidate colormap names.
-
-        Returns:
-            List[str]: Candidate names available in the current environment.
-        """
-        available = set(self._all_colormaps)
-        return [name for name in names if name in available]
 
     def _with_reversed(self, names: List[str]) -> List[str]:
         """Return colormap names with reversed variants next to base maps.
@@ -269,7 +157,7 @@ class CmapSelector(BHoMBaseWidget):
             List[str]: Colormap names for the requested preset.
         """
         key = (cmap_set or "all").lower()
-        return self._with_reversed(self._preset_map.get(key, self._preset_map["all"]))
+        return self._with_reversed(palettes.names(key if key in palettes.KINDS else None))
 
     def _resolve_colormaps(self, colormaps: List[CmapInput]) -> tuple[List[str], Dict[str, Colormap]]:
         """Normalise a mixed list of colormap inputs into display labels and a custom-cmap registry.
