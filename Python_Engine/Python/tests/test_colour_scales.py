@@ -95,6 +95,18 @@ def test_suggest_thresholds_methods():
     assert len(q) == 3 and q[0] < q[1] < q[2]
 
 
+@pytest.mark.parametrize("data,bands,expected", [
+    ([16, 30], 5, [17.5, 20, 22.5, 25]),
+    ([8, 24], 4, [10, 15, 20]),
+    ([0, 95], 4, [25, 50, 75]),
+    ([1000, 250000], 5, [50000, 100000, 150000, 200000]),
+])
+def test_nice_thresholds_fall_inside_the_data(data, bands, expected):
+    thresholds = suggest_thresholds(data, bands, "nice")
+    assert thresholds == pytest.approx(expected)
+    assert all(min(data) < t < max(data) for t in thresholds)
+
+
 def test_threshold_scale_from_data():
     scale = ThresholdScale.from_data("Loads", np.linspace(0, 95, 50), bands=4, method="nice",
                                      palette="Okabe-Ito (colour-blind safe)", group="Loads")
@@ -180,3 +192,16 @@ def test_palettes_are_valid():
     for name, colours in PALETTES.items():
         assert len(colours) >= 3, name
         GradientScale.from_palette(name, name)
+
+
+def test_palettes_registered_as_colour_maps():
+    from matplotlib import colormaps
+    from python_toolkit.plot.colour_scales import PALETTE_CMAPS, palette_names
+
+    for name in PALETTE_CMAPS.values():
+        assert name in colormaps and f"{name}_r" in colormaps
+    names = palette_names()
+    assert names[:len(PALETTES)] == list(PALETTES) and "magma" in names and "okabe_ito" not in names
+    assert palette_colours("magma", 3)[0] == "#000004"
+    with pytest.raises(ColourScaleError, match="Unknown palette"):
+        palette_colours("no such map", 3)

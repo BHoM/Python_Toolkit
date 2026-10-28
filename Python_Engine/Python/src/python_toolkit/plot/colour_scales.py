@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Dict, Iterable, List, Optional, Sequence, Tuple, Type
 
 import numpy as np
+from matplotlib import colormaps
 from matplotlib.colors import (
     BoundaryNorm,
     Colormap,
@@ -50,6 +51,17 @@ PALETTES: Dict[str, List[str]] = {
     "LTC Heatmap": ["#000004", "#51127c", "#b63679", "#fb8861", "#fcffa4"],
     "LTC Maya": ["#5c8286", "#a1b18c", "#e7cca6", "#d98f79", "#b35b5a"],
     "LTC Paloma": ["#1a2a40", "#456a73", "#82a69d", "#d9ccb6", "#bf8865"],
+}
+
+# Palettes registered as matplotlib colour maps (with _r), so every colour map list offers them.
+# Viridis and Cividis are already matplotlib maps.
+PALETTE_CMAPS: Dict[str, str] = {
+    "Okabe-Ito (colour-blind safe)": "okabe_ito",
+    "Cool to warm": "cool_to_warm",
+    "Traffic light": "traffic_light",
+    "LTC Heatmap": "ltc_heatmap",
+    "LTC Maya": "ltc_maya",
+    "LTC Paloma": "ltc_paloma",
 }
 
 SUGGESTION_METHODS = ("equal", "quantile", "nice")
@@ -123,27 +135,59 @@ def suggest_thresholds(data: Iterable, bands: int, method: str = "nice") -> List
             raise ColourScaleError("Too many repeated values for that many quantile bands; use fewer bands.")
         return unique
 
-    step = _nice_step((hi - lo) / bands)
-    start = math.floor(lo / step) * step
-    thresholds = [round(start + step * i, 10) for i in range(1, bands)]
-    while thresholds and thresholds[-1] >= hi and len(thresholds) > 1:  # keep the top band populated
-        thresholds = [round(t - step, 10) for t in thresholds]
-    return thresholds
+    return _nice_thresholds(lo, hi, bands - 1)
 
 
-def _nice_step(raw: float) -> float:
-    magnitude = 10 ** math.floor(math.log10(raw))
-    for factor in (1, 2, 2.5, 5, 10):
-        if raw <= factor * magnitude:
-            return factor * magnitude
-    return 10 * magnitude
+def _nice_thresholds(lo: float, hi: float, wanted: int) -> List[float]:
+    """Rounded breaks (multiples of 1, 2, 2.5 or 5 x 10^n) strictly inside the data range.
+
+    Picks the step whose breaks come closest to `wanted`, then keeps the middle `wanted`
+    of them, so every band contains data rather than extending beyond it."""
+    raw = (hi - lo) / (wanted + 1)
+    exponent = math.floor(math.log10(raw))
+    best = None
+    for power in (exponent - 1, exponent, exponent + 1):
+        for factor in (1, 2, 2.5, 5):
+            step = factor * 10 ** power
+            first, last = math.floor(lo / step) + 1, math.ceil(hi / step) - 1
+            inner = [round(k * step, 10) for k in range(first, last + 1)]
+            if not inner:
+                continue
+            score = abs(len(inner) - wanted) + (0.5 if factor == 2.5 else 0.0)  # prefer rounder steps
+            if best is None or score < best[0]:
+                best = (score, inner)
+    if best is None:  # range too narrow for rounded breaks
+        return [float(v) for v in np.linspace(lo, hi, wanted + 2)[1:-1]]
+    inner = best[1]
+    if len(inner) > wanted:
+        start = (len(inner) - wanted) // 2
+        inner = inner[start:start + wanted]
+    return inner
+
+
+def register_palette_cmaps() -> None:
+    """Add the preset palettes to matplotlib's colour maps (idempotent)."""
+    for palette, name in PALETTE_CMAPS.items():
+        if name not in colormaps:
+            cmap = LinearSegmentedColormap.from_list(name, PALETTES[palette])
+            colormaps.register(cmap, name=name)
+            colormaps.register(cmap.reversed(), name=f"{name}_r")
+
+
+def palette_names() -> List[str]:
+    """Preset palettes first, then every matplotlib colour map (no reversed copies)."""
+    preset = set(PALETTE_CMAPS.values())
+    return list(PALETTES) + sorted((n for n in colormaps if not n.endswith("_r") and n not in preset), key=str.lower)
 
 
 def palette_colours(palette: str, count: int) -> List[str]:
-    """`count` colours sampled evenly from a preset palette (interpolated if needed)."""
-    if palette not in PALETTES:
-        raise ColourScaleError(f"Unknown palette '{palette}'.")
-    cmap = LinearSegmentedColormap.from_list(palette, PALETTES[palette])
+    """`count` colours sampled evenly from a preset palette or a matplotlib colour map."""
+    if palette in PALETTES:
+        cmap = LinearSegmentedColormap.from_list(palette, PALETTES[palette])
+    elif palette in colormaps:
+        cmap = colormaps[palette]
+    else:
+        raise ColourScaleError(f"Unknown palette or colour map '{palette}'.")
     if count == 1:
         return [to_hex(cmap(0.5))]
     return [to_hex(cmap(i / (count - 1))) for i in range(count)]
@@ -528,3 +572,4 @@ def _fmt(value: float) -> str:
     return f"{value:.4g}"
 
 
+register_palette_cmaps()
