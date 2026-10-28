@@ -1,4 +1,5 @@
 from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWindow
+from .colour_scale_builder import ColourScaleBuilder
 from .directory_file_selector import DirectoryFileSelector
 from .landing_page import LandingPage
 from .modal_window import BHoMModalWindow
@@ -8,6 +9,7 @@ from .warning_box import WarningBox
 __all__ = [
     "BHoMBaseChildWindow",
     "BHoMModalWindow",
+    "ColourScaleBuilder",
     "DirectoryFileSelector",
     "LandingPage",
     "ProcessingWindow",
