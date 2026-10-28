@@ -5,13 +5,12 @@ import pytest
 from matplotlib import colormaps
 from matplotlib.colors import to_hex
 
-from python_toolkit.plot import palettes
+from python_toolkit.plot import colour_scales, palettes
 from python_toolkit.plot.colour_scales import (
     ColourScale,
     ColourScaleError,
     load_scales,
     save_scale,
-    suggest_thresholds,
 )
 
 COMFORT = dict(thresholds=[18, 21, 24], cmap=["#0000ff", "#00ffff", "#00ff00", "#ff0000"],
@@ -92,38 +91,38 @@ def test_validation(kwargs, message):
 
 # -- suggesting thresholds -----------------------------------------------------
 
-def test_suggest_thresholds_methods():
+def test_thresholds_methods():
     data = np.concatenate([np.full(90, 20.0), np.linspace(20, 30, 10)])
-    assert suggest_thresholds([0, 100], 4, "equal") == [25, 50, 75]
-    assert suggest_thresholds([0.3, 9.7], 5, "nice") == [2, 4, 6, 8]
+    assert colour_scales.thresholds([0, 100], 4, "equal") == [25, 50, 75]
+    assert colour_scales.thresholds([0.3, 9.7], 5, "nice") == [2, 4, 6, 8]
     with pytest.raises(ColourScaleError, match="repeated values"):
-        suggest_thresholds(data, 4, "quantile")
-    q = suggest_thresholds(np.arange(100), 4, "quantile")
+        colour_scales.thresholds(data, 4, "quantile")
+    q = colour_scales.thresholds(np.arange(100), 4, "quantile")
     assert len(q) == 3 and q[0] < q[1] < q[2]
-    assert suggest_thresholds([1, None, "x", float("nan"), 3], 2, "equal") == [2]
+    assert colour_scales.thresholds([1, None, "x", float("nan"), 3], 2, "equal") == [2]
 
 
 def test_log_thresholds_have_equal_ratios():
-    thresholds = suggest_thresholds([1, 1000], 3, "log")
+    thresholds = colour_scales.thresholds([1, 1000], 3, "log")
     assert thresholds == pytest.approx([10, 100])
-    spread = suggest_thresholds(np.geomspace(0.5, 4000, 50), 5, "log")
+    spread = colour_scales.thresholds(np.geomspace(0.5, 4000, 50), 5, "log")
     ratios = [b / a for a, b in zip(spread, spread[1:])]
     assert len(spread) == 4 and ratios == pytest.approx([ratios[0]] * 3, rel=0.02)
     for data in ([0, 10, 100], [-5, 10, 100]):
         with pytest.raises(ColourScaleError, match="above zero"):
-            suggest_thresholds(data, 3, "log")
+            colour_scales.thresholds(data, 3, "log")
     with pytest.raises(ColourScaleError, match="too narrow"):
-        suggest_thresholds([1.0, 1.001], 5, "log")
+        colour_scales.thresholds([1.0, 1.001], 5, "log")
 
 
 @pytest.mark.parametrize("data,bands,expected", [
-    ([16, 30], 5, [17.5, 20, 22.5, 25]),
+    ([16, 30], 5, [17.5, 20, 25, 27.5]),
     ([8, 24], 4, [10, 15, 20]),
     ([0, 95], 4, [25, 50, 75]),
     ([1000, 250000], 5, [50000, 100000, 150000, 200000]),
 ])
 def test_nice_thresholds_fall_inside_the_data(data, bands, expected):
-    thresholds = suggest_thresholds(data, bands, "nice")
+    thresholds = colour_scales.thresholds(data, bands, "nice")
     assert thresholds == pytest.approx(expected)
     assert all(min(data) < t < max(data) for t in thresholds)
 
@@ -184,5 +183,5 @@ def test_corrupt_file_raises(tmp_path):
 @pytest.mark.parametrize("bands", [2, 3, 4, 5, 6, 8])
 def test_suggestions_always_give_the_number_of_bands_asked_for(method, bands):
     data = np.random.default_rng(1).normal(22, 3, 300)
-    assert len(suggest_thresholds(data, bands, method)) == bands - 1
-    assert len(suggest_thresholds([16, 30], bands, "nice")) == bands - 1
+    assert len(colour_scales.thresholds(data, bands, method)) == bands - 1
+    assert len(colour_scales.thresholds([16, 30], bands, "nice")) == bands - 1

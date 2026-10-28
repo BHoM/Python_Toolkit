@@ -21,15 +21,18 @@ CUSTOM = {
     "ltc_heatmap": ("continuous", False, ["#000004", "#51127c", "#b63679", "#fb8861", "#fcffa4"]),
     "ltc_maya": ("continuous", False, ["#5c8286", "#a1b18c", "#e7cca6", "#d98f79", "#b35b5a"]),
     "ltc_paloma": ("continuous", False, ["#1a2a40", "#456a73", "#82a69d", "#d9ccb6", "#bf8865"]),
+    "parula": ("continuous", False, ["#3e26a8", "#484cf0", "#337afd", "#21a3e3", "#14beb8", "#5ecd74", "#cbc128", "#fdcb32", "#f9fb15"]),
 }
 
 # matplotlib colour maps by kind; the toolkit palettes are added below.
 KINDS = {
     "categorical": ["Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3",
                     "tab10", "tab20", "tab20b", "tab20c"],
+
     "continuous": ["viridis", "plasma", "inferno", "magma", "cividis", "turbo", "Blues", "Greens", "Greys",
                    "Oranges", "Purples", "Reds", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd", "coolwarm", "seismic",
                    "Spectral", "RdYlBu", "RdYlGn", "twilight", "twilight_shifted", "hsv"],
+                   
     # perceptually uniform maps; matplotlib's own, so safe for the common colour vision deficiencies
     "colourblind": ["viridis", "cividis", "plasma", "inferno", "magma"],
 }

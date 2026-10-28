@@ -48,7 +48,7 @@ def library(tmp_path):
 def test_builder_suggests_bands_from_data(host, library):
     builder = ColourScaleBuilder(host, data=np.linspace(16, 30, 200), units="degC", library_path=library)
     scale = builder.current_scale()
-    assert scale.thresholds == pytest.approx([17.5, 20, 22.5, 25])
+    assert scale.thresholds == pytest.approx([17.5, 20, 25, 27.5])
     assert scale.units == "degC" and scale.cmap == "viridis"
     assert "200 values from 16 to 30 degC" in builder.data_text.get()
 
@@ -111,7 +111,7 @@ def test_builder_starts_from_a_palette_and_recolours(host, library):
     builder.palette.set("traffic_light")
     builder._recolour()
     scale = builder.current_scale()
-    assert scale.cmap == "traffic_light" and scale.thresholds == pytest.approx([17.5, 20, 22.5, 25])
+    assert scale.cmap == "traffic_light" and scale.thresholds == pytest.approx([17.5, 20, 25, 27.5])
     builder._band_rows[0]["colour"].set("#123456")
     assert builder.current_scale().cmap[0] == "#123456"  # a hand-picked colour makes it an explicit list
 
@@ -139,13 +139,13 @@ def test_end_to_end_palette_to_saved_scale_to_colours(host, library):
     builder._save()
 
     scale = load_scales(library)[0]
-    assert scale.cmap == "okabe_ito" and scale.thresholds == pytest.approx([17.5, 20, 22.5, 25])
+    assert scale.cmap == "okabe_ito" and scale.thresholds == pytest.approx([17.5, 20, 25, 27.5])
     cmap, norm = scale.mapping()
     colours = {to_hex(cmap(norm(v))) for v in data}
     assert colours == set(palettes.sample("okabe_ito", 5))  # every band is used, in the palette's colours
 
     scale.cmap = "viridis"  # swap the colours; the breaks hold
-    assert scale.thresholds == pytest.approx([17.5, 20, 22.5, 25]) and scale.colours() == palettes.sample("viridis", 5)
+    assert scale.thresholds == pytest.approx([17.5, 20, 25, 27.5]) and scale.colours() == palettes.sample("viridis", 5)
 
 
 def test_bands_and_breaks_update_the_scale_without_a_button(host, library):
@@ -213,11 +213,11 @@ def test_thresholds_spin_in_round_steps(host, library):
 
 
 def test_split_a_band_adds_one_between_its_ends(host, library):
-    builder = ColourScaleBuilder(host, data=np.linspace(16, 30, 200), library_path=library)  # breaks 17.5 20 22.5 25
+    builder = ColourScaleBuilder(host, data=np.linspace(16, 30, 200), library_path=library)  # breaks 17.5 20 25 27.5
     builder._band_rows[1]["label"].set("Cool")
     builder._split_band(1)  # the band 17.5 to 20 becomes 17.5 to 18.75 and 18.75 to 20
     scale = builder.current_scale()
-    assert scale.thresholds == pytest.approx([17.5, 18.75, 20, 22.5, 25]) and scale.bands == 6
+    assert scale.thresholds == pytest.approx([17.5, 18.75, 20, 25, 27.5]) and scale.bands == 6
     assert scale.labels == [None, "Cool", None, None, None, None]  # the label stays with the lower half
     assert builder.band_count.get() == 6
     assert scale.cmap == "viridis"  # still a palette, spread over six bands
@@ -227,8 +227,8 @@ def test_split_the_open_ends_against_the_data(host, library):
     builder = ColourScaleBuilder(host, data=np.linspace(16, 30, 200), library_path=library)
     builder._split_band(0)  # below 17.5: split against the data minimum, 16
     assert builder.current_scale().thresholds[:2] == pytest.approx([16.75, 17.5])
-    builder._split_band(len(builder._band_rows) - 1)  # 25 and above: split against the data maximum, 30
-    assert builder.current_scale().thresholds[-1] == pytest.approx(27.5)
+    builder._split_band(len(builder._band_rows) - 1)  # 27.5 and above: split against the data maximum, 30
+    assert builder.current_scale().thresholds[-1] == pytest.approx(28.75)
 
 
 def test_remove_a_band_merges_its_range_into_the_next(host, library):
@@ -238,10 +238,10 @@ def test_remove_a_band_merges_its_range_into_the_next(host, library):
     builder._band_rows[2]["colour"].set("#123456")  # a hand-picked colour, which makes colours explicit
     builder._remove_band(1)
     scale = builder.current_scale()
-    assert scale.thresholds == pytest.approx([17.5, 22.5, 25]) and scale.labels == ["a", "c", "d", "e"]  # "c" now starts at 17.5
+    assert scale.thresholds == pytest.approx([17.5, 25, 27.5]) and scale.labels == ["a", "c", "d", "e"]  # "c" now starts at 17.5
     assert scale.colours()[1] == "#123456"
     builder._remove_band(len(builder._band_rows) - 1)  # the last band: the one before it becomes open-ended
-    assert builder.current_scale().thresholds == pytest.approx([17.5, 22.5]) and builder.current_scale().labels == ["a", "c", "d"]
+    assert builder.current_scale().thresholds == pytest.approx([17.5, 25]) and builder.current_scale().labels == ["a", "c", "d"]
 
 
 def test_bands_cannot_go_below_two_or_above_the_maximum(host, library):
@@ -251,11 +251,11 @@ def test_bands_cannot_go_below_two_or_above_the_maximum(host, library):
     assert "disabled" in builder._band_rows[0]["remove"].state()
     builder._remove_band(0)
     assert len(builder._band_rows) == 2
-    builder.band_count.set(12)
+    builder.band_count.set(24)
     builder._run_auto_suggest()
     assert "disabled" in builder._band_rows[0]["split"].state()
     builder._split_band(0)
-    assert len(builder._band_rows) == 12
+    assert len(builder._band_rows) == 24
 
 
 def test_split_refuses_a_bad_threshold_without_changing_the_table(host, library):

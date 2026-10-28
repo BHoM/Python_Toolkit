@@ -29,7 +29,8 @@ from python_toolkit.bhom.logging import CONSOLE_LOGGER
 from python_toolkit.plot import palettes
 
 LIBRARY_FILE = Path.home() / ".bhom" / "colour_scales.json"
-SUGGESTION_METHODS = ("equal", "quantile", "nice", "log")
+SUGGESTION_METHODS = ("equal", "quantile", "jenks", "nice", "log")
+JENKS_MAX_VALUES = 2000  # larger data is thinned (evenly through its sorted values) before the search
 
 
 class ColourScaleError(ValueError):
@@ -90,9 +91,15 @@ class ColourScale:
             lo, hi = self.thresholds[0] - pad, self.thresholds[-1] + pad
         return (lo - 0.5, hi + 0.5) if lo == hi else (lo, hi)
 
-    def mapping(self) -> Tuple[Colormap, BoundaryNorm]:
-        """The colormap and normaliser to colour any data with; values beyond the ends take the end colours."""
-        edges = [self.thresholds[0] - 1] + self.thresholds + [self.thresholds[-1] + 1]
+    def mapping(self, data: Optional[Iterable] = None) -> Tuple[Colormap, BoundaryNorm]:
+        """The colormap and normaliser to colour any data with; values beyond the ends take the end colours.
+
+        Pass the data so the end bands run to its minimum and maximum: a colour bar drawn with
+        `spacing="proportional"` then shows every band at its true width, as the builder preview does."""
+        lo, hi = self.value_range(data)
+        t = self.thresholds
+        first_gap, last_gap = (t[1] - t[0], t[-1] - t[-2]) if len(t) > 1 else (1.0, 1.0)
+        edges = [lo if lo < t[0] else t[0] - first_gap] + t + [hi if hi > t[-1] else t[-1] + last_gap]
         return ListedColormap(self.colours(), name=self.name), BoundaryNorm(edges, self.bands, clip=True)
 
     def band_labels(self) -> List[str]:
@@ -120,11 +127,12 @@ class ColourScale:
 # Suggesting thresholds from data
 # ---------------------------------------------------------------------------
 
-def suggest_thresholds(data: Iterable, bands: int, method: str = "nice") -> List[float]:
+def thresholds(data: Iterable, bands: int, method: str = "nice") -> List[float]:
     """Inner boundaries splitting the data into `bands` bands.
 
     equal:    equal-width bands across the data range
     quantile: roughly the same number of values in each band
+    jenks:    natural breaks; the bands that minimise the spread of values within each band
     nice:     equal-width bands on rounded 1 / 2 / 5 x 10^n steps
     log:      bands of equal ratio (each break a fixed multiple of the last), rounded to 3 significant
               figures; needs every value above zero
@@ -148,6 +156,8 @@ def suggest_thresholds(data: Iterable, bands: int, method: str = "nice") -> List
         if len(unique) < bands - 1:
             raise ColourScaleError("Too many repeated values for that many quantile bands; use fewer bands.")
         return unique
+    if method == "jenks":
+        return _jenks_thresholds(values, bands)
     if method == "log":
         if lo <= 0:
             raise ColourScaleError("Logarithmic breaks need every value above zero; use another break method.")
@@ -158,11 +168,50 @@ def suggest_thresholds(data: Iterable, bands: int, method: str = "nice") -> List
     return _nice_thresholds(lo, hi, bands - 1)
 
 
+def _jenks_thresholds(values: np.ndarray, bands: int) -> List[float]:
+    """Fisher-Jenks natural breaks: the split into `bands` runs of sorted values with the least
+    total squared deviation from each run's mean. Each break is the lowest value of the band above it."""
+    ordered = np.sort(values)
+    if ordered.size > JENKS_MAX_VALUES:
+        ordered = ordered[np.linspace(0, ordered.size - 1, JENKS_MAX_VALUES).round().astype(int)]
+    x, counts = np.unique(ordered, return_counts=True)
+    n = x.size
+    if n < bands:
+        raise ColourScaleError("Too few distinct values for that many natural-break bands; use fewer bands.")
+
+    w = counts.astype(float)
+    cw, cwx, cwx2 = (np.concatenate([[0.0], np.cumsum(a)]) for a in (w, w * x, w * x * x))
+
+    def cost(starts: np.ndarray, end: int) -> np.ndarray:
+        """Squared deviation of x[start:end + 1] about its mean, for each start."""
+        sw, swx, swx2 = cw[end + 1] - cw[starts], cwx[end + 1] - cwx[starts], cwx2[end + 1] - cwx2[starts]
+        return swx2 - swx * swx / sw
+
+    best = np.full((bands, n), np.inf)
+    first = np.zeros((bands, n), dtype=int)  # where the last band starts, for the best split of x[:j + 1]
+    for j in range(n):
+        best[0, j] = cost(np.array([0]), j)[0]
+    for k in range(1, bands):
+        for j in range(k, n):
+            starts = np.arange(k, j + 1)
+            total = best[k - 1, starts - 1] + cost(starts, j)
+            pick = int(np.argmin(total))
+            best[k, j], first[k, j] = total[pick], starts[pick]
+
+    cuts, end = [], n - 1
+    for k in range(bands - 1, 0, -1):
+        start = int(first[k, end])
+        cuts.append(float(x[start]))
+        end = start - 1
+    return cuts[::-1]
+
+
 def _nice_thresholds(lo: float, hi: float, wanted: int) -> List[float]:
     """Rounded breaks (multiples of 1, 2, 2.5 or 5 x 10^n) strictly inside the data range.
 
-    Picks the step with the fewest breaks that is still at least `wanted`, then keeps the middle `wanted`
-    of them, so every band contains data rather than extending beyond it."""
+    Picks the step with the fewest breaks that is still at least `wanted`, then keeps `wanted` of them spread
+    evenly from the first to the last, so every band contains data and the end bands stay small. Where the
+    step does not divide evenly, some bands are two steps wide."""
     exponent = math.floor(math.log10((hi - lo) / (wanted + 1)))
     best = None
     for power in (exponent - 1, exponent, exponent + 1):
@@ -177,8 +226,7 @@ def _nice_thresholds(lo: float, hi: float, wanted: int) -> List[float]:
     if best is None:  # range too narrow for rounded breaks
         return [float(v) for v in np.linspace(lo, hi, wanted + 2)[1:-1]]
     inner = best[1]
-    start = max(len(inner) - wanted, 0) // 2
-    return inner[start:start + wanted]
+    return [inner[i] for i in np.linspace(0, len(inner) - 1, wanted).round().astype(int)]
 
 
 # ---------------------------------------------------------------------------

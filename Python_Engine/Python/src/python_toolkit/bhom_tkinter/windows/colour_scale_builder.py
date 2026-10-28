@@ -31,7 +31,7 @@ from python_toolkit.bhom_tkinter.widgets.label import Label
 from python_toolkit.bhom_tkinter.widgets.spinbox import Spinbox
 from python_toolkit.bhom_tkinter.widgets.validated_entry_box import ValidatedEntryBox
 from python_toolkit.bhom_tkinter.theming.scaling import scale as scale_px
-from python_toolkit.plot import palettes
+from python_toolkit.plot import colour_scales, palettes
 from python_toolkit.plot.colour_scales import (
     SUGGESTION_METHODS,
     ColourScale,
@@ -39,10 +39,9 @@ from python_toolkit.plot.colour_scales import (
     clean_data,
     load_scales,
     save_scale,
-    suggest_thresholds,
 )
 
-MAX_BANDS = 12
+MAX_BANDS = 24
 TYPING_DELAY = 700  # ms to wait after the last keystroke, so "22" is not read as "2" first
 PLOT_WIDTH = 560  # the plot, the controls and the band table all share this width
 ERROR_COLOUR = "#c0392b"
@@ -206,7 +205,7 @@ class ColourScaleBuilder(BHoMBaseChildWindow):
     def _suggest(self) -> None:
         try:
             bands = int(self.band_count.get())
-            thresholds = suggest_thresholds(self.values, bands, self.method.get())
+            thresholds = colour_scales.thresholds(self.values, bands, self.method.get())
         except (ColourScaleError, ValueError) as e:
             self.status.set(str(e))
             return
