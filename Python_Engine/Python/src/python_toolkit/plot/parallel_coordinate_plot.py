@@ -69,7 +69,7 @@ def set_dimensions(df: pd.DataFrame, tick_mark_count: int, dp:int) -> List[Dict[
 @bhom_analytics()
 def parallel_coordinate_plot(
 
-    df: pd.DataFrame = pd.DataFrame(),
+    df: pd.DataFrame,
     variables_to_show: list = None,
     decimal_places: int = 0,
     tick_mark_count: int = 11,

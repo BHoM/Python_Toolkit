@@ -237,19 +237,19 @@ class BHoMObject(IObject):
         self,
         _t: str, #don't make default, as subclasses of this class should set this with super().__init__
         name: str = "",
-        bhom_guid: uuid.UUID = uuid.uuid4(),
-        tags: List[str] = [],
-        fragments: List[Dict[str, object]] = [],
-        custom_data: Dict[str, object] = {},
+        bhom_guid: uuid.UUID = None,
+        tags: List[str] = None,
+        fragments: List[Dict[str, object]] = None,
+        custom_data: Dict[str, object] = None,
         _bhom_version: str = None,
         **kwargs
     ) -> 'BHoMObject':
         self._t = _t
         self.name = name
-        self.bhom_guid = bhom_guid
-        self.fragments = fragments
-        self.tags = tags
-        self.custom_data = custom_data
+        self.bhom_guid = bhom_guid or uuid.uuid4()
+        self.fragments = fragments or []
+        self.tags = tags or []
+        self.custom_data = custom_data or {}
         self._bhom_version = _bhom_version
 
         #set non-CustomData properties with reflection.
