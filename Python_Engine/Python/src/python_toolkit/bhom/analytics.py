@@ -14,7 +14,7 @@ import traceback
 import uuid
 from functools import wraps
 from typing import Any, Callable, Dict, List, Union
-from datetime import datetime
+from datetime import datetime, timezone
 
 # pylint: enable=E0401
 
@@ -107,7 +107,7 @@ def summarise_usage_logs(usage_log_entries:List[UsageLogEntry]) -> List[Dict]:
     return db_entries
 
 def convert_exc_info_to_bhom_error(exc_info):
-    time = bson_unix_ticks(datetime.now(), short=True)
+    time = bson_unix_ticks(datetime.now(timezone.utc), short=True)
     utcTime = bson_unix_ticks(short=True)
     stack_trace = traceback.extract_tb(exc_info[2])
     message = str(exc_info[1])

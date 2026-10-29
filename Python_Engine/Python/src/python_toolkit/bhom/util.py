@@ -17,7 +17,7 @@ def bson_unix_ticks(date_time: datetime = None, short: bool = False) -> int:
 
     date_time = date_time or datetime.now(timezone.utc)
 
-    _ticks = (date_time - datetime(1970, 1, 1)).total_seconds() * 10**3
+    _ticks = (date_time - datetime(1970, 1, 1, tzinfo=timezone.utc)).total_seconds() * 10**3
 
     if short:
         return int(_ticks)
