@@ -35,7 +35,7 @@ namespace BH.Engine.Python
         [Input("version", "The version of Python to use for this environment.")]
         [Input("name", "The name of this venv.")]
         [Input("reload", "Reload the virtual environment rather than recreating it, if it already exists.")]
-        [Output("venv", "The executable for the resultant venv.")]
+        [Output("venv", "The resultant venv.")]
         public static PythonEnvironment VirtualEnvironment(string version, string name, bool reload = true)
         {
             if (Query.VirtualEnvironmentExists(name))
@@ -44,16 +44,16 @@ namespace BH.Engine.Python
                 {
                     PythonEnvironment existingVenv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
                     string existingVersion = Query.Version(existingVenv);
-                    if (existingVersion != version)
+                    if (existingVersion == null || (existingVersion != version && !existingVersion.StartsWith(version + ".", StringComparison.Ordinal)))
                     {
                         BH.Engine.Base.Compute.RecordError($"The requested environment already exists using Python {existingVersion}, but is being requested with Python {version}. Either provide a different name, a matching version, or remove the existing environment.");
+                        return null;
                     }
                     return existingVenv;
                 }
                 else
                 {
                     RemoveVirtualEnvironment(name: name, run: true);
-                    RemoveKernel(name: name, run: true);
                 }
             }
 
@@ -62,8 +62,9 @@ namespace BH.Engine.Python
             string directory = Path.Combine(Query.DirectoryEnvironments(), name);
             Directory.CreateDirectory(directory);
 
-            string cmd = $"uv venv {Path.Combine(directory, ".venv")} --python {version}";
-            RunCommandStdout(command: cmd, startDirectory: directory);
+            string cmd = $"\"{Query.UVExecutable()}\" venv \"{Path.Combine(directory, ".venv")}\" --python \"{version}\"";
+            if (RunCommandStdout(command: cmd, startDirectory: directory).Item3 != 0)
+                return null;
 
             PythonEnvironment venv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
 
@@ -72,10 +73,10 @@ namespace BH.Engine.Python
             return venv;
         }
 
-        [Description("Create a Python Virtual Environment from a TOML file. This will create the venv alongside that TOML file.")]
+        [Description("Create a Python Virtual Environment from a TOML file in the named BHoM environment directory. Before installation, set the project's version to the current BHoM version.")]
         [Input("tomlFile", "The path to a TOML file containing venv configuration.")]
         [Input("reload", "Reload the virtual environment rather than recreating it, if it already exists.")]
-        [Output("venv", "The executable for the resultant venv.")]
+        [Output("venv", "The resultant venv.")]
         public static PythonEnvironment VirtualEnvironment(string tomlFile, bool reload = true)
         {
             string name = Directory.GetParent(tomlFile).Name;
@@ -95,18 +96,28 @@ namespace BH.Engine.Python
                 return null;
             }
 
-            // get the package name from the TOML file
-            string packageName = Regex.Match(
-                File.ReadAllText(tomlFile),
-                "^name\\s*=\\s*\"([^\"]+)\"",
-                RegexOptions.Multiline)
-                .Groups[1]
-                .Value;
+            string toml = File.ReadAllText(tomlFile);
+            Match project = Regex.Match(toml, @"(?ms)^[ \t]*\[project\][ \t]*(?:#[^\r\n]*)?\r?\n(?<content>.*?)(?=^[ \t]*\[|\z)");
+            string packageName = Regex.Match(project.Groups["content"].Value,
+                @"(?m)^[ \t]*name[ \t]*=[ \t]*['""](?<name>[^'""\r\n]+)['""]").Groups["name"].Value;
+            if (!project.Success || string.IsNullOrWhiteSpace(packageName))
+            {
+                Base.Compute.RecordError($"A [project] section with a package name is required in {tomlFile}.");
+                return null;
+            }
 
             string packageFile = Path.Combine(directory, "src", packageName, "__init__.py");
             if (!File.Exists(packageFile))
             {
                 Base.Compute.RecordError($"A Python package must contain a .\\src\\{packageName}\\__init__.py file.");
+                return null;
+            }
+
+            string projectContent = project.Groups["content"].Value;
+            Regex versionField = new Regex(@"(?m)^(?<prefix>[ \t]*version[ \t]*=[ \t]*)(?<quote>['""])[^'""\r\n]*\k<quote>");
+            if (!versionField.IsMatch(projectContent))
+            {
+                Base.Compute.RecordError($"A static [project] version is required in {tomlFile}.");
                 return null;
             }
 
@@ -119,16 +130,22 @@ namespace BH.Engine.Python
                 }
                 else
                 {
-                    RemoveVirtualEnvironment(name);
-                    RemoveKernel(name);
+                    RemoveJupyterKernel(name, run: true);
+                    // Retain the TOML file and package sources while recreating the environment.
+                    Directory.Delete(Path.Combine(directory, ".venv"), true);
                 }
             }
 
+            string updatedProject = versionField.Replace(projectContent,
+                match => match.Groups["prefix"].Value + $"\"{BH.Engine.Base.Query.BHoMVersion()}\"", 1);
+            Group content = project.Groups["content"];
+            File.WriteAllText(tomlFile, toml.Substring(0, content.Index) + updatedProject + toml.Substring(content.Index + content.Length));
+
             InstallUV(true); // ensure UV is installed
 
-
-            string cmd = "uv sync --all-packages";
-            RunCommandStdout(cmd, startDirectory: directory);
+            string cmd = $"\"{Query.UVExecutable()}\" sync --all-packages";
+            if (RunCommandStdout(cmd, startDirectory: directory).Item3 != 0)
+                return null;
 
             PythonEnvironment venv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
 

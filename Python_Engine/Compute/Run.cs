@@ -21,6 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
+using BH.oM.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,15 +34,17 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Run a command via CMD and return stdout.")]
+        [Description("Run a command via CMD and return both output streams and the exit code.")]
         [Input("command", "The command to be run.")]
         [Input("hideWindows", "Set to True to hide cmd windows.")]
         [Input("startDirectory", "The directory in which the command should be run.")]
         [Input("timeoutMinutes", "A number of minutes beyond which this command will timeout.")]
-        [Output("stdout", "The StandardOutput from the command that was run, if the process was successful.")]
-        public static string RunCommandStdout(
+        [MultiOutput(0, "stdout", "The command's standard output, including on failure.")]
+        [MultiOutput(1, "stderr", "The command's standard error, including on success.")]
+        [MultiOutput(2, "exitCode", "The process exit code. Zero indicates success; -1 indicates a timeout.")]
+        public static Output<string, string, int> RunCommandStdout(
             string command,
-            bool hideWindow = true,
+            bool hideWindows = true,
             string startDirectory = null,
             double timeoutMinutes = 5
         )
@@ -57,9 +60,7 @@ namespace BH.Engine.Python
                     string.Format("Working directory does not exist: '{0}'", startDirectory));
             }
 
-            var process = new Process();
-
-            try
+            using (Process process = new Process())
             {
                 process.StartInfo.FileName = "cmd.exe";
                 process.StartInfo.Arguments = string.Format("/C \"{0}\"", command);
@@ -68,11 +69,8 @@ namespace BH.Engine.Python
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
-                process.StartInfo.CreateNoWindow = hideWindow;
-                process.StartInfo.WindowStyle =
-                    hideWindow
-                        ? ProcessWindowStyle.Hidden
-                        : ProcessWindowStyle.Normal;
+                process.StartInfo.CreateNoWindow = hideWindows;
+                process.StartInfo.WindowStyle = hideWindows ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal;
 
                 // Avoid environment-variable interference.
                 process.StartInfo.EnvironmentVariables["PYTHONHOME"] = string.Empty;
@@ -80,51 +78,62 @@ namespace BH.Engine.Python
 
                 process.Start();
 
-                var stdoutTask = process.StandardOutput.ReadToEndAsync();
-                var stderrTask = process.StandardError.ReadToEndAsync();
+                StreamReader stdoutReader = process.StandardOutput;
+                StreamReader stderrReader = process.StandardError;
+
+                // Start reads without inheriting the host's UI synchronization context.
+                Task<string[]> outputTask = Task.Run(async () =>
+                {
+                    Task<string> stdoutTask = stdoutReader.ReadToEndAsync();
+                    Task<string> stderrTask = stderrReader.ReadToEndAsync();
+
+                    return await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
+                });
 
                 int timeoutMs = checked((int)(timeoutMinutes * 60 * 1000));
 
-                if (!process.WaitForExit(timeoutMs))
+                bool timedOut = !process.WaitForExit(timeoutMs);
+                if (timedOut)
                 {
-                    try
+                    // Kill descendants too, so inherited pipe handles cannot keep the reads open.
+                    using (Process terminator = Process.Start(new ProcessStartInfo
                     {
-                        process.Kill();
-                    }
-                    catch
+                        FileName = "taskkill.exe",
+                        Arguments = $"/PID {process.Id} /T /F",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }))
                     {
-                        // Ignore if already exited.
+                        Task<string> killStdout = terminator.StandardOutput.ReadToEndAsync();
+                        Task<string> killStderr = terminator.StandardError.ReadToEndAsync();
+                        terminator.WaitForExit();
+                        Task.WaitAll(killStdout, killStderr);
+                        if (terminator.ExitCode != 0 && !process.HasExited)
+                            throw new InvalidOperationException($"Could not terminate timed-out command: {killStderr.GetAwaiter().GetResult()}");
                     }
-
-                    throw new TimeoutException(
-                        string.Format(
-                            "Command exceeded timeout of {0} minutes.",
-                            timeoutMinutes));
+                    process.WaitForExit();
+                    BH.Engine.Base.Compute.RecordError(new TimeoutException(), $"Command exceeded timeout of {timeoutMinutes} minutes.\nCommand: {command}");
                 }
 
                 // Ensure async reads have completed.
-                Task.WaitAll(stdoutTask, stderrTask);
+                string[] results = outputTask.GetAwaiter().GetResult();
 
-                string stdout = stdoutTask.Result.Trim();
-                string stderr = stderrTask.Result.Trim();
+                string stdout = results[0].Trim();
+                string stderr = results[1].Trim();
 
-                int exitCode = process.ExitCode;
-                string output = exitCode == 0 ? stdout : stderr;
+                int exitCode = timedOut ? -1 : process.ExitCode;
 
-                if (exitCode != 0)
+                if (!timedOut && exitCode != 0)
                 {
-                    string message = $"Failed to execute {command} (exit code {exitCode}).\n{output}";
+                    string message = $"Failed to execute {command} (exit code {exitCode}).\n{stdout}\n{stderr}";
                     BH.Engine.Base.Compute.RecordError(
                         exception: new InvalidOperationException(message),
                         message: message);
                 }
 
-                return output;
-
-            }
-            finally
-            {
-                process.Dispose();
+                return new Output<string, string, int> { Item1 = stdout, Item2 = stderr, Item3 = exitCode };
             }
         }
 
@@ -148,7 +157,8 @@ namespace BH.Engine.Python
 
             string cmd = $"{Modify.AddQuotesIfRequired(venv.Executable)} {scriptFile}";
 
-            return RunCommandStdout(command: cmd);
+            Output<string, string, int> result = RunCommandStdout(command: cmd);
+            return result.Item3 == 0 ? result.Item1 : result.Item2;
         }
     }
 }

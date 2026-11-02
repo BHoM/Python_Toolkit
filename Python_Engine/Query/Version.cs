@@ -22,13 +22,8 @@
 
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
-using BH.oM.Python.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 
 namespace BH.Engine.Python
 {
@@ -42,10 +37,14 @@ namespace BH.Engine.Python
             if (!File.Exists(pythonExecutable))
             {
                 BH.Engine.Base.Compute.RecordError(new FileNotFoundException(), $"No file found at {pythonExecutable}");
+                return null;
             }
 
-            string result = BH.Engine.Python.Compute.RunCommandStdout(command: $"{pythonExecutable} --version");
-            return result.Replace("Python ", "");
+            var result = BH.Engine.Python.Compute.RunCommandStdout(command: $"\"{pythonExecutable}\" --version");
+            if (result.Item3 != 0)
+                return null;
+
+            return result.Item1.Replace("Python ", "");
         }
 
         [Description("Get the Python version for the installed PythonEnvironment.")]

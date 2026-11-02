@@ -33,7 +33,6 @@ There are two main events to install the toolkit:
 	- Install the python bindings of the Python_Toolkit from C:\ProgramData\BHoM\Extensions\Python\src
 	  This contains all the code that is currently developed in the toolkit in python
 
-
 ## Building the BHoM and the Toolkits from Source ##
 You will need the following to build BHoM:
 
@@ -41,6 +40,13 @@ You will need the following to build BHoM:
 - Microsoft .NET Framework 4.0 and above (included with Visual Studio 2013)
 - Note that there are no software - specific dependencies (only operating system relevant), this is specific: BHoM is a software agnostic object model.
 
+## Running commands and creating environments
+
+UV is installed at `Path.Combine(Query.DirectoryTools(), "uv.exe")`. Engine methods, tests, and PowerShell scripts invoke this BHoM-managed executable directly, never an unrelated UV on PATH. Installation prepends the tools directory to the current process PATH without changing the user or system PATH.
+
+`RunCommandStdout` returns `BH.oM.Base.Output<string, string, int>`: `Item1` is stdout, `Item2` is stderr, and `Item3` is the exit code (zero for success, -1 for timeout). Both streams are retained on success, failure, and timeout. Callers that previously consumed a string must select the appropriate output. Command failures are also recorded as BHoM errors; invalid working directories and process-start failures still throw.
+
+Creating an environment from a TOML file updates its static `[project].version` to `BH.Engine.Base.Query.BHoMVersion()` before installation. Other version fields are left unchanged. Recreating that environment preserves the TOML file and package sources.
 
 ## Want to contribute? ##
 

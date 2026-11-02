@@ -174,15 +174,20 @@ function Remove-PathIfExists {
     }
 }
 
+function Get-UVExecutable {
+    return Join-Path $env:ProgramData "BHoM\Extensions\Python\tools\uv.exe"
+}
+
 function Install-UV {
-
     $functionName = $MyInvocation.MyCommand.Name
+    $uvExecutable = Get-UVExecutable
+    $uvBinPath = Split-Path -Parent $uvExecutable
 
-    # Attempt to run UV, and if not found, install it
-    if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+    if (-not (Test-Path -LiteralPath $uvExecutable -PathType Leaf)) {
         try {
-            Write-InfoMessage -Message "Installing UV." -FunctionName $functionName
-            & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://astral.sh/uv/install.ps1 | iex"
+            Write-InfoMessage -Message "Installing UV in $uvBinPath." -FunctionName $functionName
+            $escapedDirectory = $uvBinPath.Replace("'", "''")
+            & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "`$ErrorActionPreference = 'Stop'; `$env:UV_INSTALL_DIR = '$escapedDirectory'; `$env:UV_NO_MODIFY_PATH = '1'; irm https://astral.sh/uv/install.ps1 | iex"
             if ($LASTEXITCODE -ne 0) {
                 throw "UV installer exited with code $LASTEXITCODE."
             }
@@ -193,15 +198,12 @@ function Install-UV {
     }
 
     try {
-        $uvBinPath = Join-Path $HOME ".local\bin"
-        if (Test-Path $uvBinPath -PathType Container) {
-            $env:Path = "$uvBinPath;$env:Path"
+        if (-not (Test-Path -LiteralPath $uvExecutable -PathType Leaf)) {
+            throw "The UV executable was not installed at $uvExecutable."
         }
-        $uvCommand = Get-Command uv -ErrorAction SilentlyContinue
-        if (-not $uvCommand) {
-            throw "The UV executable is not available on PATH after installation."
-        }
-        Write-InfoMessage -Message "Using UV from $($uvCommand.Source)." -FunctionName $functionName
+        $otherPaths = @($env:Path -split ';' | Where-Object { $_.Trim().Trim('"') -ine $uvBinPath })
+        $env:Path = (@($uvBinPath) + $otherPaths) -join ';'
+        Write-InfoMessage -Message "Using UV from $uvExecutable." -FunctionName $functionName
     }
     catch {
         Write-ErrorMessage -Message "Could not locate UV. $($_.Exception.Message)" -FunctionName $functionName -ThrowError
@@ -211,7 +213,7 @@ function Install-UV {
     foreach ($tool in @("ruff", "jupyterlab", "sphinx")) {
         try {
             Write-InfoMessage -Message "Installing $tool to UV." -FunctionName $functionName
-            & uv tool install $tool
+            & $uvExecutable tool install $tool
             if ($LASTEXITCODE -ne 0) {
                 throw "uv tool install exited with code $LASTEXITCODE."
             }
@@ -231,7 +233,7 @@ function Sync-PythonEnvironment {
         Push-Location $workspaceRoot
         $locationPushed = $true
         Write-InfoMessage -Message "Installing Python packages with UV." -FunctionName $functionName
-        & uv sync
+        & (Get-UVExecutable) sync
         if ($LASTEXITCODE -ne 0) {
             throw "uv sync exited with code $LASTEXITCODE."
         }

@@ -21,8 +21,6 @@
  */
 
 using BH.oM.Base.Attributes;
-using BH.oM.Python;
-using BH.oM.Python.Enums;
 using System.ComponentModel;
 using System.IO;
 
@@ -42,6 +40,16 @@ namespace BH.Engine.Python
         public static string DirectoryEnvironments()
         {
             string dir = Path.Combine(Query.DirectoryExtensions(), "Python");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
+        }
+
+        [Description("The location where any BHoM-related Python tools reside.")]
+        [Output("path", "The location where any BHoM-related Python tools reside.")]
+        public static string DirectoryTools()
+        {
+            string dir = Path.Combine(Query.DirectoryExtensions(), "Python", "tools");
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             return dir;

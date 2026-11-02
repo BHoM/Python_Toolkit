@@ -1,137 +1,139 @@
-﻿
-using NUnit;
-using NUnit.Framework;
-using FluentAssertions;
+/*
+ * This file is part of the Buildings and Habitats object Model (BHoM)
+ * Copyright (c) 2015 - 2026, the respective contributors. All rights reserved.
+ *
+ * Each contributor holds copyright over their respective contributions.
+ * The project versioning (Git) records all such contribution source information.
+ *
+ *
+ * The BHoM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3.0 of the License, or
+ * (at your option) any later version.
+ *
+ * The BHoM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
+ */
+
+using BH.oM.Base.Debugging;
 using BH.oM.Python;
+using FluentAssertions;
+using EngineCompute = BH.Engine.Python.Compute;
+using EngineQuery = BH.Engine.Python.Query;
 
 namespace BH.Tests.Engine.Python.Compute
 {
+    [NonParallelizable]
     public class VirtualEnvironmentTests
     {
-        [Test]
-        public void VirtualEnvironment_FromTOML()
+        private readonly Dictionary<string, string?> m_OriginalVariables = [];
+        private string m_TestDirectory = null!;
+        private string m_Name = null!;
+        private string m_Directory = null!;
+
+        [OneTimeSetUp]
+        public void SetUpTools()
         {
-            string envName = "test_from_toml";
-            string envDirectory = BH.Engine.Python.Query.DirectoryEnvironments();
-
-            // pre-run clean-up
-            try
+            m_TestDirectory = Path.Combine(Path.GetTempPath(), "bhom_lifecycle_" + Guid.NewGuid().ToString("N"));
+            foreach (string variable in new[] { "UV_TOOL_DIR", "UV_TOOL_BIN_DIR", "JUPYTER_DATA_DIR", "JUPYTER_PATH" })
             {
-                BH.Engine.Python.Compute.RemoveVirtualEnvironment(name: envName, true);
+                m_OriginalVariables[variable] = Environment.GetEnvironmentVariable(variable);
+                Environment.SetEnvironmentVariable(variable, Path.Combine(m_TestDirectory, variable));
             }
-            catch {
-                // do it the manual way, if there is no env to remove, it'll throw an error
-                Directory.Delete(path: Path.Combine(envDirectory, envName), recursive: true);
-            }
+        }
 
-            // create the test directory
-            string testDirectory = Path.Combine(envDirectory, envName);
-            Directory.CreateDirectory(testDirectory);
+        [SetUp]
+        public void SetUp()
+        {
+            m_Name = "bhom_lifecycle_" + Guid.NewGuid().ToString("N");
+            m_Directory = Path.Combine(EngineQuery.DirectoryEnvironments(), m_Name);
+            BH.Engine.Base.Compute.ClearCurrentEvents();
+        }
 
-            // create dummy README file
-            File.WriteAllText(Path.Combine(testDirectory, "README.md"), "");
+        [TearDown]
+        public void CleanUpEnvironment()
+        {
+            if (EngineQuery.VirtualEnvironmentExists(m_Name))
+                EngineCompute.RemoveVirtualEnvironment(m_Name, run: true);
+            if (Directory.Exists(m_Directory))
+                Directory.Delete(m_Directory, true);
+            BH.Engine.Base.Compute.ClearCurrentEvents();
+        }
 
-            // create dummy TOML file
-            List<string> lines =
-            [
-                "[project]",
-                $"name = \"{envName}\"",
-                "version = \"0.1.0\"",
-                "description = \"A test environment.\"",
-                "readme = \"README.md\"",
-                "requires-python = \">=3.10,<3.11\"",
-                "authors = [",
-                "    { name = \"BHoM\", email = \"bhombot@burohappold.com\" }",
-                "]",
-                "dependencies = [\"matplotlib\"]",
-                "[build-system]",
-                "requires = [\"hatchling\"]",
-                "build-backend = \"hatchling.build\"",
-                "",
-                "[dependency-groups]",
-                "dev = [\"ipykernel\", \"ruff\"]",
-                "[tool.hatch.build.targets.wheel]",
-                $"packages = [\"src/{envName}\"]"
-            ];
-
-            string tomlFileContent = string.Join(Environment.NewLine, lines);
-            string tomlFile = Path.Combine(testDirectory, "pyproject.toml");
-            File.WriteAllText(tomlFile, tomlFileContent);
-
-            // create a dummy Python package
-            string packageDir = Path.Combine(testDirectory, "src", envName);
-            Directory.CreateDirectory(packageDir);
-            File.WriteAllText(Path.Combine(packageDir, "__init__.py"), "");
-            
-            // run the method
-            PythonEnvironment venv = BH.Engine.Python.Compute.VirtualEnvironment(tomlFile: tomlFile, reload: false);
-
-            // ensure that ipykernel is installed
-            string result = BH.Engine.Python.Compute.RunPythonString(venv: venv, "import ipykernel");
-            result.ToLower().Should().NotContainAny(["error", "exception"]);
-
-            // assert that the virtual environment was created correctly
-            venv.Should().NotBeNull();
-            venv.Name.Should().Be(envName);
-            File.Exists(venv.Executable).Should().BeTrue();
-
-            // run again, reloading this time
-            PythonEnvironment reloadedVenv = BH.Engine.Python.Compute.VirtualEnvironment(tomlFile: tomlFile, reload: true);
-
-            // assert that the virtual environment was created correctly
-            reloadedVenv.Should().NotBeNull();
-            reloadedVenv.Name.Should().Be(envName);
-            reloadedVenv.Executable.Should().Be(Path.Combine(testDirectory, ".venv", "Scripts", "python.exe"));
-            File.Exists(reloadedVenv.Executable).Should().BeTrue();
-
-            // clean-up
-            BH.Engine.Python.Compute.RemoveVirtualEnvironment(name: envName, true);
+        [OneTimeTearDown]
+        public void CleanUpTools()
+        {
+            foreach (var variable in m_OriginalVariables)
+                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+            if (Directory.Exists(m_TestDirectory))
+                Directory.Delete(m_TestDirectory, true);
+            if (Directory.Exists(EngineQuery.DirectoryTools()))
+                Directory.Delete(EngineQuery.DirectoryTools(), true);
         }
 
         [Test]
-        public void VirtualEnvironment_FromTargetVersion()
+        public void FromTargetVersion_CreatesReloadsAndRemovesEnvironmentAndKernel()
         {
-            string targetVersion = "3.11";
-            string envName = "test_from_target_version";
-            string envDirectory = BH.Engine.Python.Query.DirectoryEnvironments();
-
-            // pre-run clean-up
-            try
-            {
-                BH.Engine.Python.Compute.RemoveVirtualEnvironment(name: envName, true);
-            }
-            catch
-            {
-                // do it the manual way, if there is no env to remove, it'll throw an error
-                Directory.Delete(path: Path.Combine(envDirectory, envName), recursive: true);
-            }
-
-            // run the method
-            PythonEnvironment venv = BH.Engine.Python.Compute.VirtualEnvironment(version: targetVersion, name: envName, reload: false);
-
-            // add a package
-            BH.Engine.Python.Compute.InstallPackages(venv, ["matplotlib"], true);
-
-            // ensure that ipykernel is installed
-            string result = BH.Engine.Python.Compute.RunPythonString(venv: venv, "import ipykernel;import matplotlib");
-            result.ToLower().Should().NotContainAny(["error", "exception"]);
-
-            // assert that the virtual environment was created correctly
+            PythonEnvironment venv = EngineCompute.VirtualEnvironment("3.11", m_Name);
             venv.Should().NotBeNull();
-            venv.Name.Should().Be(envName);
             File.Exists(venv.Executable).Should().BeTrue();
+            EngineQuery.Version(venv).Should().StartWith("3.11.");
+            EngineCompute.RunPythonString(venv, "import ipykernel; print('ready')").Should().Be("ready");
+            EngineCompute.VirtualEnvironment("3.11", m_Name, reload: true).Executable.Should().Be(venv.Executable);
+            File.Exists(KernelFile()).Should().BeTrue();
 
-            // run again, reloading this time
-            PythonEnvironment reloadedVenv = BH.Engine.Python.Compute.VirtualEnvironment(version: targetVersion, name: envName, reload: true);
+            EngineCompute.RemoveVirtualEnvironment(m_Name, run: true);
 
-            // assert that the virtual environment was created correctly
-            reloadedVenv.Should().NotBeNull();
-            reloadedVenv.Name.Should().Be(envName);
-            reloadedVenv.Executable.Should().Be(Path.Combine(envDirectory, envName,  ".venv", "Scripts", "python.exe"));
-            File.Exists(reloadedVenv.Executable).Should().BeTrue();
+            Directory.Exists(m_Directory).Should().BeFalse();
+            File.Exists(KernelFile()).Should().BeFalse();
+            AssertNoErrors();
+        }
 
-            // clean-up
-            BH.Engine.Python.Compute.RemoveVirtualEnvironment(name: envName, true);
+        [Test]
+        public void FromTOML_InstallsBHoMVersionRecreatesAndRemovesEnvironment()
+        {
+            string packageDirectory = Path.Combine(m_Directory, "src", m_Name);
+            Directory.CreateDirectory(packageDirectory);
+            File.WriteAllText(Path.Combine(packageDirectory, "__init__.py"), "");
+            File.WriteAllText(Path.Combine(m_Directory, "README.md"), "");
+            string tomlFile = Path.Combine(m_Directory, "pyproject.toml");
+            File.WriteAllText(tomlFile,
+                $"[project]\nname = '{m_Name}'\nversion = '0.1.0' # project version\nreadme = 'README.md'\n"
+                + "requires-python = '>=3.11,<3.12'\ndependencies = []\n"
+                + "[build-system]\nrequires = ['hatchling']\nbuild-backend = 'hatchling.build'\n"
+                + "[tool.bhom]\nversion = 'leave-this-alone'\n");
+
+            PythonEnvironment venv = EngineCompute.VirtualEnvironment(tomlFile, reload: false);
+            venv.Should().NotBeNull();
+            string version = BH.Engine.Base.Query.BHoMVersion();
+            File.ReadAllText(tomlFile).Should().Contain($"version = \"{version}\" # project version")
+                .And.Contain("version = 'leave-this-alone'");
+            EngineCompute.RunPythonString(venv,
+                $"import importlib.metadata; print(importlib.metadata.version('{m_Name}'))").Should().Be(version);
+
+            EngineCompute.VirtualEnvironment(tomlFile, reload: false).Should().NotBeNull();
+            File.Exists(Path.Combine(packageDirectory, "__init__.py")).Should().BeTrue();
+            EngineCompute.VirtualEnvironment(tomlFile, reload: true).Executable.Should().Be(venv.Executable);
+            EngineCompute.RemoveVirtualEnvironment(m_Name, run: true);
+
+            Directory.Exists(m_Directory).Should().BeFalse();
+            File.Exists(KernelFile()).Should().BeFalse();
+            AssertNoErrors();
+        }
+
+        private string KernelFile()
+        {
+            return Path.Combine(Environment.GetEnvironmentVariable("JUPYTER_DATA_DIR")!, "kernels", m_Name, "kernel.json");
+        }
+
+        private static void AssertNoErrors()
+        {
+            BH.Engine.Base.Query.CurrentEvents().Where(e => e.Type == EventType.Error).Select(e => e.Message).Should().BeEmpty();
         }
     }
 }

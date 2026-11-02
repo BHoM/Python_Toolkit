@@ -1,6 +1,6 @@
 [project]
 name = "python_toolkit"
-version = "0.1.0"
+version = "999.999.999"
 description = "The core BHoM Python toolkit environment, containing essential tools and utilities."
 readme = "README.md"
 requires-python = ">=3.10,<3.11"

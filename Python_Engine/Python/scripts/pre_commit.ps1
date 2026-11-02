@@ -18,9 +18,9 @@ function Format-PythonFiles {
         $pushedLocation = $true
         
         Write-InfoMessage -Message "Formatting Python files in ./src" -FunctionName $MyInvocation.MyCommand.Name
-        & uv run ruff format ./src
+        & (Get-UVExecutable) run ruff format .\src
         Write-InfoMessage -Message "Formatting Python files in ./tests" -FunctionName $MyInvocation.MyCommand.Name
-        & uv run ruff format ./tests
+        & (Get-UVExecutable) run ruff format .\tests
 
     }
     finally {

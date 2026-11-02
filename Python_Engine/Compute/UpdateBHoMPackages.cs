@@ -33,7 +33,7 @@ namespace BH.Engine.Python
         [Input("venv", "The Python environment to update.")]
         public static void UpdateBHoMPackages(this PythonEnvironment venv)
         {
-            string cmd = "uv sync";
+            string cmd = $"\"{Query.UVExecutable()}\" sync";
             string directory = Path.Combine(Query.DirectoryEnvironments(), venv.Name);
 
             RunCommandStdout(cmd, startDirectory: directory);
