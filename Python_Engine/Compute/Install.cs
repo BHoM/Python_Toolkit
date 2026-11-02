@@ -89,6 +89,7 @@ namespace BH.Engine.Python
             RunCommandStdout(command: cmd, startDirectory: directory);
         }
 
+        [PreviousVersion("9.3", "BH.Engine.Python.Compute.InstallPackages(PythonEnvironment, List<string>)")]
         [Description("Install a list of packages to a given Python executable. UV retains satisfied versions and registers project dependencies when applicable.")]
         [Input("venv", "The Python environment to install the packages to.")]
         [Input("packages", "The packages to install.")]
@@ -115,6 +116,7 @@ namespace BH.Engine.Python
             }
         }
 
+        [PreviousVersion("9.3", "BH.Engine.Python.Compute.InstallPackages(PythonEnvironment, string)")]
         [Description("Install a local editable Python package. An unchanged installation from the same directory is retained; project dependencies are still registered.")]
         [Input("venv", "The Python environment to install the packages to.")]
         [Input("packageDirectory", "The package to install.")]

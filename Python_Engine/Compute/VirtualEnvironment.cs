@@ -31,6 +31,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        [PreviousVersion("9.3", "BH.Engine.Python.Compute.VirtualEnvironment(PythonVersion, string, bool)")]
         [Description("Create a Python Virtual Environment of a given version and name.")]
         [Input("version", "The version of Python to use for this environment.")]
         [Input("name", "The name of this venv.")]

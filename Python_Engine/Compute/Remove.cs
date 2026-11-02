@@ -117,5 +117,19 @@ namespace BH.Engine.Python
                 Base.Compute.RecordNote($"UV (and all other associated tools) will be removed from {toolsDirectory}.");
             }
         }
+
+        [PreviousVersion("9.3", "BH.Engine.Python.Compute.RemoveEverything()")]
+        [Description("Completely remove all BHoM-related Python environments, kernels and tools.")]
+        public static void RemoveEverything(bool run = false)
+        {
+            if ( run )
+            {
+                foreach (string env in Directory.GetDirectories(Query.DirectoryEnvironments()))
+                {
+                    RemoveVirtualEnvironment(Path.GetDirectoryName(env), run: run);
+                }
+                RemoveUV(run: run);
+            }
+        }
     }
 }
