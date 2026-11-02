@@ -90,7 +90,7 @@ namespace BH.Engine.Python
         }
 
         [Description("Remove UV from the BHoM tools directory. Missing installations produce a warning; installations elsewhere are not removed.")]
-        [Input("run", "Run this method")]
+        [Input("run", "Run this method.")]
         public static void RemoveUV(bool run = false)
         {
             string toolsDirectory = Query.DirectoryTools();

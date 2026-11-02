@@ -138,7 +138,7 @@ namespace BH.Engine.Python
         }
 
         [Description("Run a string containing Python code and return the output. The string passed should end with a \"print\" statement, and other print statements within it should be captured within the script to ensure only a single output string is passed back to this method.")]
-        [Input("env", "The Python environment with which to run the Python script.")]
+        [Input("venv", "The Python environment with which to run the Python script.")]
         [Input("pythonString", "The string containing the Python script.")]
         [Output("result", "The stdout data from the executed Python script.")]
         public static string RunPythonString(this oM.Python.PythonEnvironment venv, string pythonString)
