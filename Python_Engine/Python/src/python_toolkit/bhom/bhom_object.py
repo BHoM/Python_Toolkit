@@ -95,6 +95,12 @@ class BHoMJSONDecoder(JSONDecoder):
 
 class BHoMJSONEncoder(JSONEncoder):
     def default(self, o):
+        """
+        default encoder for BHoMObject and other primitive types to BHoM style json.
+
+        The converter for datetime and pandas.Timestamp require timezone aware timestamps, 
+        these are automatically converted to UTC where applicable and throw an error if they are not timezone aware.
+        """
         if isinstance(o, BHoMObject):
             #initialise special BHoMObject properties
 
@@ -146,9 +152,7 @@ class BHoMJSONEncoder(JSONEncoder):
             return [date.isoformat() for date in o]
         elif isinstance(o, np.ndarray):
             return o.tolist()
-        elif isinstance(o, pd.Timestamp):
-            return {"$date": bson_unix_ticks(o.to_pydatetime(), True)}
-        elif isinstance(o, datetime):
+        elif isinstance(o, datetime) or isinstance(o, pd.Timestamp):
             return {"$date": bson_unix_ticks(o, True)}
         elif isinstance(o, pd.Series):
             return dict(zip(o.index.astype(str), o))

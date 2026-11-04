@@ -1,10 +1,12 @@
 """General utility functions."""
 # pylint: disable=E0401
 from datetime import datetime, timedelta, timezone
+import pandas as pd
+from typing import Union
 # pylint: enable=E0401
 
 
-def bson_unix_ticks(date_time: datetime = None, short: bool = False) -> int:
+def bson_unix_ticks(date_time: Union[datetime, pd.Timestamp] = None, short: bool = False) -> int:
     """Python implementation of unix ticks.
 
     Args:
@@ -14,6 +16,10 @@ def bson_unix_ticks(date_time: datetime = None, short: bool = False) -> int:
     Returns:
         int: The ticks.
     """
+
+    if isinstance(date_time, pd.Timestamp):
+        date_time = date_time.tz_convert() #This throws an error if the pandas timestamp is not timezone aware. If no error the resultant date_time will be in UTC.
+        date_time = date_time.to_pydatetime().replace(tzinfo=timezone.utc) #Convert to python datetime and ensure it is a timezone aware with timestamp set to UTC.
 
     date_time = date_time or datetime.now(timezone.utc)
 

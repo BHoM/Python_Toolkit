@@ -22,21 +22,30 @@ from .logging import ANALYTICS_LOGGER, CONSOLE_LOGGER
 from .util import bson_unix_ticks, bson_unix_ticks_to_datetime
 from . import BHOM_VERSION, TOOLKIT_NAME, BHOM_LOG_FOLDER, DISABLE_ANALYTICS
 
+def _selected_item_factory():
+    return {"MethodName": "", "Parameters": [], "TypeName": ""}
+
+def _custom_data_factory():
+    return {"interpreter", sys.executable}
+
+def _time_factory():
+    return {"$date": 0}
+
 @dataclass
 class UsageLogEntry():
     BHoMVersion:str = BHOM_VERSION
-    BHoM_Guid:uuid.UUID = uuid.uuid4()
+    BHoM_Guid:uuid.UUID = field(default_factory=uuid.uuid4)
     CallerName:str = ""
-    ComponentId:uuid.UUID = uuid.uuid4()
-    CustomData:Dict = field(default_factory = {"interpreter", sys.executable})
-    Errors:List[str] = field(default_factory = [])
+    ComponentId:uuid.UUID = field(default_factory=uuid.uuid4)
+    CustomData:Dict = field(default_factory = _custom_data_factory)
+    Errors:List[str] = field(default_factory = list)
     FileId:str = ""
     FileName:str = ""
-    Fragments:List[str] = field(default_factory = [])
+    Fragments:List[str] = field(default_factory = list)
     Name:str = ""
     ProjectID:str = ""
-    SelectedItem:Dict = field(default_factory = {"MethodName": "", "Parameters": [], "TypeName": ""})
-    Time:Dict = field(default_factory = {"$date": 0})
+    SelectedItem:Dict = field(default_factory = _selected_item_factory)
+    Time:Dict = field(default_factory = _time_factory)
     UI:str = "Python"
     UiVersion:str = sys.version
     _t:str = "BH.oM.Base.UsageLogEntry"
