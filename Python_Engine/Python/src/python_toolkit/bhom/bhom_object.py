@@ -95,6 +95,12 @@ class BHoMJSONDecoder(JSONDecoder):
 
 class BHoMJSONEncoder(JSONEncoder):
     def default(self, o):
+        """
+        default encoder for BHoMObject and other primitive types to BHoM style json.
+
+        The converter for datetime and pandas.Timestamp require timezone aware timestamps, 
+        these are automatically converted to UTC where applicable and throw an error if they are not timezone aware.
+        """
         if isinstance(o, BHoMObject):
             #initialise special BHoMObject properties
 
@@ -146,9 +152,7 @@ class BHoMJSONEncoder(JSONEncoder):
             return [date.isoformat() for date in o]
         elif isinstance(o, np.ndarray):
             return o.tolist()
-        elif isinstance(o, pd.Timestamp):
-            return {"$date": bson_unix_ticks(o.to_pydatetime(), True)}
-        elif isinstance(o, datetime):
+        elif isinstance(o, datetime) or isinstance(o, pd.Timestamp):
             return {"$date": bson_unix_ticks(o, True)}
         elif isinstance(o, pd.Series):
             return dict(zip(o.index.astype(str), o))
@@ -237,19 +241,19 @@ class BHoMObject(IObject):
         self,
         _t: str, #don't make default, as subclasses of this class should set this with super().__init__
         name: str = "",
-        bhom_guid: uuid.UUID = uuid.uuid4(),
-        tags: List[str] = [],
-        fragments: List[Dict[str, object]] = [],
-        custom_data: Dict[str, object] = {},
+        bhom_guid: uuid.UUID = None,
+        tags: List[str] = None,
+        fragments: List[Dict[str, object]] = None,
+        custom_data: Dict[str, object] = None,
         _bhom_version: str = None,
         **kwargs
     ) -> 'BHoMObject':
         self._t = _t
         self.name = name
-        self.bhom_guid = bhom_guid
-        self.fragments = fragments
-        self.tags = tags
-        self.custom_data = custom_data
+        self.bhom_guid = bhom_guid or uuid.uuid4()
+        self.fragments = fragments or []
+        self.tags = tags or []
+        self.custom_data = custom_data or {}
         self._bhom_version = _bhom_version
 
         #set non-CustomData properties with reflection.
