@@ -31,5 +31,5 @@ function Format-PythonFiles {
 }
 
 if ($Run -or $MyInvocation.InvocationName -ne '.') {
-    Format-PythonFiles
+    # Format-PythonFiles  # commented out for now to save auto-formatting the Python files that need to be left alone
 }
