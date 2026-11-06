@@ -1,0 +1,47 @@
+{
+    "Namespace": {
+        "ToNew": {},
+        "ToOld": {}
+    },
+    "Type": {
+        "ToNew": {},
+        "ToOld": {}
+    },
+    "Property": {
+        "ToNew": {},
+        "ToOld": {}
+    },
+    "MessageForDeleted": {
+        "BH.Engine.Python.Compute.BasePythonEnvironment(BH.oM.Python.Enums.PythonVersion, System.Boolean, System.Boolean)": "Python environments are now managed by UV. Use InstallPythonToolkitVenv to install the toolkit environment, or VirtualEnvironment with a Python version string to create a named environment. Reconnect inputs manually.",
+        "BH.Engine.Python.Compute.DownloadFile(System.String, System.String, System.String, System.Boolean)": "This download helper has been removed. Python installation is now handled by UV. For other downloads, use a separate file-download workflow.",
+        "BH.Engine.Python.Compute.DownloadPythonVersion(BH.oM.Python.Enums.PythonVersion)": "Python installation is now handled by UV. Use VirtualEnvironment with a Python version string, such as \"3.10\", instead.",
+        "BH.Engine.Python.Compute.InstallPackages(BH.oM.Python.PythonEnvironment, System.Collections.Generic.List<System.String>)": "Replace this component with InstallPackages(PythonEnvironment, List<String>, Boolean). Supply an environment created using the UV workflow and set run to true.",
+        "BH.Engine.Python.Compute.InstallPackages(System.String, System.Collections.Generic.List<System.String>)": "Installation using an executable path has been removed. Use InstallPackages with a PythonEnvironment created using the UV workflow and set run to true.",
+        "BH.Engine.Python.Compute.InstallRequirements(BH.oM.Python.PythonEnvironment, System.String)": "Requirements-file installation has been removed. Declare dependencies in pyproject.toml and create the environment from that file, or supply package requirements to InstallPackages with run set to true.",
+        "BH.Engine.Python.Compute.InstallRequirements(System.String, System.String)": "Requirements-file installation using an executable path has been removed. Declare dependencies in pyproject.toml and create the environment from that file, or use InstallPackages with a PythonEnvironment and run set to true.",
+        "BH.Engine.Python.Compute.InstallPackageLocal(BH.oM.Python.PythonEnvironment, System.String)": "Replace this component with InstallPackageLocal(PythonEnvironment, String, Boolean). Supply an environment created using the UV workflow and set run to true.",
+        "BH.Engine.Python.Compute.InstallPackageLocal(System.String, System.String)": "Local package installation using an executable path has been removed. Use InstallPackageLocal with a PythonEnvironment created using the UV workflow and set run to true.",
+        "BH.Engine.Python.Compute.RemoveKernel(System.String)": "Use RemoveJupyterKernel with the name of a UV-managed BHoM environment and set run to true. Legacy kernels may require manual removal using Jupyter.",
+        "BH.Engine.Python.Compute.RemoveAllKernels()": "Bulk kernel removal has been removed. Use RemoveJupyterKernel for individual UV-managed BHoM environments with run set to true. Legacy kernels may require manual removal using Jupyter.",
+        "BH.Engine.Python.Compute.RemoveVirtualEnvironment(System.String)": "Replace this component with RemoveVirtualEnvironment(String, Boolean) and set run to true. It removes environments in the new BHoM Python directory; legacy environments require separate cleanup.",
+        "BH.Engine.Python.Compute.RemoveAllVirtualEnvironments()": "Bulk environment removal has been removed. Use RemoveVirtualEnvironment for each named environment and set run to true. RemoveEverything also removes BHoM-managed UV tools, so use it only when that broader cleanup is intended.",
+        "BH.Engine.Python.Compute.RemoveBaseVersion(BH.oM.Python.Enums.PythonVersion)": "The former base Python installation workflow has been removed. Use RemoveVirtualEnvironment for named BHoM environments. Removing UV does not uninstall UV-managed Python runtimes or legacy Python installations.",
+        "BH.Engine.Python.Compute.RemoveEverything()": "Replace this component with RemoveEverything(Boolean) and set run to true. Review its scope: it targets the new BHoM Python environments and managed UV tools, not legacy installations.",
+        "BH.Engine.Python.Compute.RequirementsTxt(System.String, System.String)": "Requirements-file generation has been removed. Manage project dependencies using pyproject.toml and UV. Use UV export separately if a requirements.txt file is needed.",
+        "BH.Engine.Python.Compute.UnzipFile(System.String, System.String, System.String, System.Boolean)": "This archive-extraction helper has been removed. Use a separate archive-extraction workflow if needed.",
+        "BH.Engine.Python.Compute.UpdateBHoMPackages(System.String, BH.oM.Python.Enums.PythonVersion)": "Use UpdateBHoMPackages(PythonEnvironment) with an environment created using the UV workflow. The PythonVersion enum input is no longer supported.",
+        "BH.Engine.Python.Compute.VirtualEnvironment(BH.oM.Python.Enums.PythonVersion, System.String, System.Boolean)": "Replace this component with VirtualEnvironment(String, String, Boolean). Replace the PythonVersion enum with a version string, such as \"3.10\", and recreate the environment using UV.",
+        "BH.Engine.Python.Query.DirectoryKernels()": "The fixed kernel-directory query has been removed. Use Jupyter kernelspec discovery to locate registered kernels.",
+        "BH.Engine.Python.Query.DirectoryCode()": "The separate PythonCode directory is no longer used. Toolkit project files now reside under DirectoryEnvironments(), within the toolkit's named directory.",
+        "BH.Engine.Python.Query.DirectoryBaseEnvironment(BH.oM.Python.Enums.PythonVersion)": "Base Python environments are no longer organised by PythonVersion. Use a named UV-managed environment and query its directory or executable instead.",
+        "BH.Engine.Python.Query.EmbeddableURL(BH.oM.Python.Enums.PythonVersion)": "Python downloads are now managed by UV. Use VirtualEnvironment with a Python version string instead of retrieving an installer URL.",
+        "BH.Engine.Python.Query.IsValidEnvironmentName(System.String)": "This legacy environment-name validation method has been removed. Review names against the requirements of the UV environment and Jupyter kernel workflows.",
+        "BH.Engine.Python.Query.VirtualEnvironmentExists(System.String, BH.oM.Python.Enums.PythonVersion)": "Replace this component with VirtualEnvironmentExists(String). It checks the new UV-managed BHoM environment layout and no longer accepts a PythonVersion input.",
+        "BH.Engine.Python.Query.VirtualEnvironmentKernel(System.String)": "This kernel-path query has been removed. Use Jupyter kernelspec discovery to locate a registered kernel.",
+        "BH.oM.Python.Enums.PythonVersion": "Python versions are now specified as strings, such as \"3.10\" or \"3.11\". Replace enum inputs with the appropriate version string and recreate environments using the UV workflow."
+    },
+    "MessageForNoUpgrade": {
+        "BH.Engine.Python.Compute.RunCommandStdout(System.String, System.Boolean, System.String, System.Double)": "The output has changed from a single string to stdout, stderr and exit code. Review and reconnect downstream components manually. Exit code zero indicates success; -1 indicates timeout.",
+        "BH.Engine.Python.Query.Version(System.String)": "The output is now a Python version string instead of PythonVersion. Replace downstream enum-based comparisons and inputs with string-based equivalents."
+    }
+}

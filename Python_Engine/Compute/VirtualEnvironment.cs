@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
  * Copyright (c) 2015 - 2026, the respective contributors. All rights reserved.
  *
@@ -20,120 +20,142 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.Engine.Base;
 using BH.oM.Base.Attributes;
 using BH.oM.Python;
-using BH.oM.Python.Enums;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Install a Python Virtual Environment of a given version and name.")]
+        [PreviousVersion("9.3", "BH.Engine.Python.Compute.VirtualEnvironment(PythonVersion, string, bool)")]
+        [Description("Create a Python Virtual Environment of a given version and name.")]
         [Input("version", "The version of Python to use for this environment.")]
-        [Input("name", "The name of this virtualenv.")]
+        [Input("name", "The name of this venv.")]
         [Input("reload", "Reload the virtual environment rather than recreating it, if it already exists.")]
-        [Output("env", "The exectuble for the resultant virtualenv.")]
-        public static PythonEnvironment VirtualEnvironment(this PythonVersion version, string name, bool reload = true)
+        [Output("venv", "The resultant venv.")]
+        public static PythonEnvironment VirtualEnvironment(string version, string name, bool reload = true)
         {
-            if (!Query.IsValidEnvironmentName(name))
+            if (Query.VirtualEnvironmentExists(name))
             {
-                BH.Engine.Base.Compute.RecordError("A BHoM Python virtual environment cannot cannot contain invalid filepath characters.");
+                if (reload)
+                {
+                    PythonEnvironment existingVenv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
+                    string existingVersion = Query.Version(existingVenv);
+                    if (existingVersion == null || (existingVersion != version && !existingVersion.StartsWith(version + ".", StringComparison.Ordinal)))
+                    {
+                        BH.Engine.Base.Compute.RecordError($"The requested environment already exists using Python {existingVersion}, but is being requested with Python {version}. Either provide a different name, a matching version, or remove the existing environment.");
+                        return null;
+                    }
+                    return existingVenv;
+                }
+                else
+                {
+                    RemoveVirtualEnvironment(name: name, run: true);
+                }
+            }
+
+            InstallUV(true); // ensure UV is installed
+
+            string directory = Path.Combine(Query.DirectoryEnvironments(), name);
+            Directory.CreateDirectory(directory);
+
+            string cmd = $"\"{Query.UVExecutable()}\" venv \"{Path.Combine(directory, ".venv")}\" --python \"{version}\"";
+            if (RunCommandStdout(command: cmd, startDirectory: directory).Item3 != 0)
+                return null;
+
+            PythonEnvironment venv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
+
+            InstallJupyterKernel(venv: venv);
+
+            return venv;
+        }
+
+        [Description("Create a Python Virtual Environment from a TOML file in the named BHoM environment directory. Before installation, set the project's version to the current BHoM version.")]
+        [Input("tomlFile", "The path to a TOML file containing venv configuration.")]
+        [Input("reload", "Reload the virtual environment rather than recreating it, if it already exists.")]
+        [Output("venv", "The resultant venv.")]
+        public static PythonEnvironment VirtualEnvironment(string tomlFile, bool reload = true)
+        {
+            string name = Directory.GetParent(tomlFile).Name;
+            string directory = Path.Combine(Query.DirectoryEnvironments(), name);
+
+            // a package must have an associated TOML file, a README.md and a src/<package_name>
+            if (!File.Exists(tomlFile))
+            {
+                Base.Compute.RecordError($"TOML file not found at {tomlFile}");
                 return null;
             }
 
-            if (version == PythonVersion.Undefined)
+            string readmeFile = Path.Combine(directory, "README.md");
+            if (!File.Exists(readmeFile))
             {
-                BH.Engine.Base.Compute.RecordError("Please provide a valid Python version.");
+                Base.Compute.RecordError($"README.md file not found at {readmeFile}");
                 return null;
             }
 
-            string targetExecutable = Query.VirtualEnvironmentExecutable(name);
-            string targetDirectory = Query.VirtualEnvironmentDirectory(name);
-            string versionExecutable = Path.Combine(Query.DirectoryBaseEnvironment(version), "python.exe");
-
-            bool exists = Query.VirtualEnvironmentExists(name);
-
-            if (exists && reload)
+            string toml = File.ReadAllText(tomlFile);
+            Match project = Regex.Match(toml, @"(?ms)^[ \t]*\[project\][ \t]*(?:#[^\r\n]*)?\r?\n(?<content>.*?)(?=^[ \t]*\[|\z)");
+            string packageName = Regex.Match(project.Groups["content"].Value,
+                @"(?m)^[ \t]*name[ \t]*=[ \t]*['""](?<name>[^'""\r\n]+)['""]").Groups["name"].Value;
+            if (!project.Success || string.IsNullOrWhiteSpace(packageName))
             {
-                PythonEnvironment env = new PythonEnvironment() { Name = name, Executable = targetExecutable };
-                UpdateBHoMPackages(env);
-                return env;
+                Base.Compute.RecordError($"A [project] section with a package name is required in {tomlFile}.");
+                return null;
             }
 
-            if (exists && !reload)
+            string packageFile = Path.Combine(directory, "src", packageName, "__init__.py");
+            if (!File.Exists(packageFile))
             {
-                // remove all existing environments and kernels
-                RemoveVirtualEnvironment(name);
-                RemoveKernel(name);
+                Base.Compute.RecordError($"A Python package must contain a .\\src\\{packageName}\\__init__.py file.");
+                return null;
             }
 
-            if (!File.Exists(versionExecutable))
+            string projectContent = project.Groups["content"].Value;
+            Regex versionField = new Regex(@"(?m)^(?<prefix>[ \t]*version[ \t]*=[ \t]*)(?<quote>['""])[^'""\r\n]*\k<quote>");
+            if (!versionField.IsMatch(projectContent))
             {
-                // The output here should be the same, but to be sure replace the value.
-                BH.Engine.Base.Compute.RecordNote($"The base environment for the requested version {version} has been installed as it was not present.");
-                versionExecutable = BasePythonEnvironment(version, run: true)?.Executable;
-
-                if (versionExecutable == null) // If the executable is null, then python wasn't installed correctly, so return null - the error message for downloading the version should suffice.
-                    return null;
+                Base.Compute.RecordError($"A static [project] version is required in {tomlFile}.");
+                return null;
             }
 
-            // create the venv from the base environment
-            Process process = new Process()
+            if (Query.VirtualEnvironmentExists(name))
             {
-                StartInfo = new ProcessStartInfo()
+                if (reload)
                 {
-                    FileName = Modify.AddQuotesIfRequired(versionExecutable),
-                    Arguments = $"-m virtualenv --python={Modify.AddQuotesIfRequired(versionExecutable)} {Modify.AddQuotesIfRequired(targetDirectory)}",
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
+                    PythonEnvironment existingVenv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
+                    
+                    string updateCmd = $"\"{Query.UVExecutable()}\" sync --all-packages";
+                    if (RunCommandStdout(updateCmd, startDirectory: directory).Item3 != 0)
+                        return null;
+
+                    return existingVenv;
                 }
-            };
-
-            process.StartInfo.Environment["PYTHONHOME"] = "";
-
-            using (Process p = Process.Start(process.StartInfo))
-            {
-                string standardError = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error creating virtual environment.\n{standardError}");
-            }
-
-            // install ipykernel, pytest and black into new virtualenv
-            InstallPackages(targetExecutable, new List<string>() { "ipykernel", "pytest", "black" });
-
-            // register the virtualenv with the base environment
-            Process process2 = new Process()
-            {
-                StartInfo = new ProcessStartInfo()
+                else
                 {
-                    FileName = targetExecutable,
-                    Arguments = $"-m ipykernel install --name={name} --user", //--user adds the kernel to %appdata%/jupyter/kernels, rather than to the virtualenv/share/jupyter/kernels
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
+                    RemoveVirtualEnvironment(name: name, run: true);
                 }
-            };
-
-            process2.StartInfo.Environment["PYTHONHOME"] = "";
-
-            using (Process p = Process.Start(process2.StartInfo))
-            {
-                string standardError = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    BH.Engine.Base.Compute.RecordError($"Error registering the \"{name}\" virtual environment.\n{standardError}");
             }
 
-            return new PythonEnvironment() { Executable = targetExecutable, Name = name };
+            string updatedProject = versionField.Replace(projectContent,
+                match => match.Groups["prefix"].Value + $"\"{Base.Query.BHoMVersion()}\"", 1);
+            Group content = project.Groups["content"];
+            File.WriteAllText(tomlFile, toml.Substring(0, content.Index) + updatedProject + toml.Substring(content.Index + content.Length));
+
+            InstallUV(true); // ensure UV is installed
+
+            string cmd = $"\"{Query.UVExecutable()}\" sync --all-packages";
+            if (RunCommandStdout(cmd, startDirectory: directory).Item3 != 0)
+                return null;
+
+            PythonEnvironment venv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
+
+            InstallJupyterKernel(venv: venv);
+
+            return venv;
         }
     }
 }
-
-
-

@@ -21,123 +21,114 @@
  */
 
 using BH.oM.Base.Attributes;
-using BH.oM.Python.Enums;
-using System;
-using System.Collections.Generic;
+using BH.oM.Python;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 
 namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-
-        [Description("Remove a named BHoM Python kernel.")]
-        [Input("kernelName", "The name of the kernel to remove.")]
-        public static void RemoveKernel(string kernelName)
+        [Description("Remove the named Python virtual environment. Missing environments produce a warning instead of an error. This will retain any code within that environment directory.")]
+        [Input("name", "The name of the Python virtual environment to remove.")]
+        [Input("run", "Run this method.")]
+        public static void RemoveVirtualEnvironment(string name, bool run = false)
         {
-            string kernelPath = Path.Combine(Query.DirectoryKernels(), kernelName.ToLower());
-            if (Directory.Exists(kernelPath))
-                Directory.Delete(kernelPath, true);
-        }
-
-        [Description("Remove all BHoM Python kernels.")]
-        public static void RemoveAllKernels()
-        {
-            DirectoryInfo di = new DirectoryInfo(Query.DirectoryKernels());
-            foreach (FileInfo file in di.EnumerateFiles())
+            if (!Query.VirtualEnvironmentExists(name))
             {
-                file.Delete();
-            }
-            foreach (DirectoryInfo dir in di.EnumerateDirectories())
-            {
-                dir.Delete(true);
-            }
-        }
-
-        [Description("Remove the named BHoM Python virtual environment.")]
-        [Input("envName", "The name of the BHoM Python virtual environment to remove.")]
-        public static void RemoveVirtualEnvironment(string envName)
-        {
-            string envPath = Path.Combine(Query.DirectoryEnvironments(), envName);
-            if (Directory.Exists(envPath))
-                Directory.Delete(envPath, true);
-
-            RemoveKernel(envName);
-        }
-
-        [Description("Remove all BHoM Python virtual environments.")]
-        public static void RemoveAllVirtualEnvironments()
-        {
-            DirectoryInfo di = new DirectoryInfo(Query.DirectoryEnvironments());
-            foreach (DirectoryInfo dir in di.EnumerateDirectories())
-            {
-                if (dir.Name != Query.ToolkitName())
-                {
-                    RemoveVirtualEnvironment(dir.Name);
-                }
-                    
-            }
-        }
-
-        [Description("Remove the base install for the python version specified.")]
-        [Input("version", "The base python version to remove.")]
-        public static void RemoveBaseVersion(PythonVersion version = PythonVersion.v3_10)
-        {
-            string basePath = Path.Combine(Query.DirectoryEnvironments(), Query.ToolkitName(), version.ToString());
-            string baseInstaller = Path.Combine(basePath, "installer.exe");
-
-            // If the installer does not exist and the folder does - assume a bad/invalid install and just delete the entire folder.
-            if (!File.Exists(baseInstaller) && Directory.Exists(basePath))
-            {
-                Directory.Delete(basePath, true);
+                Base.Compute.RecordWarning($"No Python environment named {name} exists.");
                 return;
             }
-            else if (!Directory.Exists(basePath))
-                // If the base path doesn't exist there is nothing to remove.
-                return;
 
-            using (Process uninstall = new Process()
+            string venvDirectory = Path.Combine(Query.DirectoryEnvironments(), name, ".venv");
+
+            if (run)
             {
-                StartInfo = new ProcessStartInfo()
+                RemoveJupyterKernel(name, run);
+                try
                 {
-                    FileName = baseInstaller,
-                    Arguments = "/uninstall /passive",
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
+                    Directory.Delete(venvDirectory, true);
                 }
-            })
-            {
-                uninstall.StartInfo.Environment["PYTHONHOME"] = "";
-                uninstall.Start();
-                string stderr = uninstall.StandardError.ReadToEnd();
-                uninstall.WaitForExit();
-                if (uninstall.ExitCode != 0)
+                catch (IOException ex)
                 {
-                    BH.Engine.Base.Compute.RecordError($"Error uninstalling python: {stderr}");
-                    return;
+                    Base.Compute.RecordError($"Failed to remove virtual environment directory {venvDirectory}: {ex.Message}");
                 }
             }
-
-            // Finally remove base folder as the installer may have missed something.
-            Directory.Delete(basePath, true);
         }
 
-        [Description("Completely remove all BHoM-related Python environments and kernels.")]
-        public static void RemoveEverything()
+        [Description("Remove the named Jupyter kernel. Missing environments or kernels produce a warning instead of an error.")]
+        [Input("name", "The name of the Jupyer kernel to remove.")]
+        [Input("run", "Run this method.")]
+        public static void RemoveJupyterKernel(string name, bool run = false)
         {
-            RemoveAllVirtualEnvironments();
-
-            //remove all python versions installed in base directory.
-            foreach (PythonVersion e in Enum.GetValues(typeof(PythonVersion)))
+            if (!Query.VirtualEnvironmentExists(name))
             {
-                if (e != PythonVersion.Undefined)
-                    RemoveBaseVersion(e);
+                Base.Compute.RecordWarning($"No Python environment named {name} exists.");
+                return;
+            }
+
+            PythonEnvironment venv = Query.VirtualEnvironment(name);
+            bool? exists = JupyterKernelExists(venv, name);
+            if (exists != true)
+            {
+                if (exists == false)
+                    Base.Compute.RecordWarning($"No Jupyter kernel named {name} exists.");
+                return;
+            }
+
+            string cmd = $"\"{venv.Executable}\" -m jupyter kernelspec uninstall \"{name.ToLowerInvariant()}\" -f";
+
+            if (run)
+            {
+                RunCommandStdout(command: cmd, hideWindows: true);
+            }
+            else
+            {
+                Base.Compute.RecordNote($"The following command will be executed: {cmd}");
+            }
+        }
+
+        [Description("Remove UV from the BHoM tools directory. Missing installations produce a warning; installations elsewhere are not removed.")]
+        [Input("run", "Run this method.")]
+        public static void RemoveUV(bool run = false)
+        {
+            string toolsDirectory = Query.DirectoryTools();
+
+            if (!File.Exists(Query.UVExecutable()))
+            {
+                Base.Compute.RecordWarning($"UV is not currently installed in {toolsDirectory}.");
+                return;
+            }
+
+            if (run)
+            {
+                try
+                {
+                    Directory.Delete(toolsDirectory, true);
+                }
+                catch (IOException ex)
+                {
+                    Base.Compute.RecordError($"Failed to remove UV from {toolsDirectory}: {ex.Message}");
+                }
+            }
+            else
+            {
+                Base.Compute.RecordNote($"UV (and all other associated tools) will be removed from {toolsDirectory}.");
+            }
+        }
+
+        [PreviousVersion("9.3", "BH.Engine.Python.Compute.RemoveEverything()")]
+        [Description("Completely remove all BHoM-related Python environments, kernels and tools.")]
+        public static void RemoveEverything(bool run = false)
+        {
+            if ( run )
+            {
+                foreach (string env in Directory.GetDirectories(Query.DirectoryEnvironments()))
+                {
+                    RemoveVirtualEnvironment(Path.GetDirectoryName(env), run: run);
+                }
+                RemoveUV(run: run);
             }
         }
     }
 }
-
-
-
