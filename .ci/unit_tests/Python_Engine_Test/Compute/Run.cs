@@ -23,12 +23,14 @@
 using BH.oM.Base.Debugging;
 using FluentAssertions;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using EngineCompute = BH.Engine.Python.Compute;
+using EngineQuery = BH.Engine.Python.Query;
 
 namespace BH.Tests.Engine.Python.Compute
 {
     [NonParallelizable]
-    public class RunTests
+    public class Run
     {
         [SetUp]
         [TearDown]

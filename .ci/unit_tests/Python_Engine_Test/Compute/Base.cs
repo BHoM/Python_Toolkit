@@ -29,7 +29,7 @@ using EngineQuery = BH.Engine.Python.Query;
 
 namespace BH.Tests.Engine.Python.Compute
 {
-    public abstract class InstallRemoveTestBase
+    public abstract class Base
     {
         protected string m_Root = null!;
         protected PythonEnvironment m_Environment = null!;

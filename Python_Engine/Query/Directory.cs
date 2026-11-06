@@ -32,14 +32,14 @@ namespace BH.Engine.Python
         [Output("path", "The location where BHoM extensions reside.")]
         public static string DirectoryExtensions()
         {
-            return Path.Combine(System.IO.Directory.GetParent(BH.Engine.Base.Query.BHoMFolder()).FullName, "Extensions");
+            return Path.Combine(Directory.GetParent(Base.Query.BHoMFolder()).FullName, "Extensions");
         }
 
         [Description("The location where any BHoM-related Python environment (or virtualenv) resides.")]
         [Output("path", "The location where any BHoM-related Python environment (or virtualenv) resides.")]
         public static string DirectoryEnvironments()
         {
-            string dir = Path.Combine(Query.DirectoryExtensions(), "Python");
+            string dir = Path.Combine(DirectoryExtensions(), "Python");
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             return dir;
@@ -49,7 +49,7 @@ namespace BH.Engine.Python
         [Output("path", "The location where any BHoM-related Python tools reside.")]
         public static string DirectoryTools()
         {
-            string dir = Path.Combine(Query.DirectoryExtensions(), "Python", "tools");
+            string dir = Path.Combine(DirectoryExtensions(), "Python", "tools");
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             return dir;

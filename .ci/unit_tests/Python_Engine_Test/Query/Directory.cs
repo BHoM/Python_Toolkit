@@ -21,6 +21,7 @@
  */
 
 using FluentAssertions;
+using EngineQuery = BH.Engine.Python.Query;
 
 namespace BH.Tests.Engine.Python.Query
 {
@@ -30,7 +31,7 @@ namespace BH.Tests.Engine.Python.Query
         public void DirectoryExtension()
         {
             string extensionsDirectory = "C:\\ProgramData\\BHoM\\Extensions";
-            var result = new DirectoryInfo(BH.Engine.Python.Query.DirectoryExtensions());
+            var result = new DirectoryInfo(EngineQuery.DirectoryExtensions());
 
             Assert.That(result, Is.Not.Null);
             result.FullName.Should().Be(extensionsDirectory);
@@ -41,7 +42,7 @@ namespace BH.Tests.Engine.Python.Query
         public void DirectoryEnvironments()
         {
             string environmentsDirectory = "C:\\ProgramData\\BHoM\\Extensions\\Python";
-            var result = new DirectoryInfo(BH.Engine.Python.Query.DirectoryEnvironments());
+            var result = new DirectoryInfo(EngineQuery.DirectoryEnvironments());
 
             Assert.That(result, Is.Not.Null);
             result.FullName.Should().Be(environmentsDirectory);

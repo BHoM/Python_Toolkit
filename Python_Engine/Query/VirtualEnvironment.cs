@@ -35,7 +35,7 @@ namespace BH.Engine.Python
         [Output("executable", "The path to the executable.")]
         public static string VirtualEnvironmentExecutable(string name)
         {
-            string exePath = Path.Combine(Query.DirectoryEnvironments(), name, ".venv", "Scripts", "python.exe");
+            string exePath = Path.Combine(DirectoryEnvironments(), name, ".venv", "Scripts", "python.exe");
             if (!File.Exists(exePath))
             {
                 Base.Compute.RecordError($"{exePath} was not found.");
@@ -50,7 +50,7 @@ namespace BH.Engine.Python
         [Output("exists", "True if exists, False if not.")]
         public static bool VirtualEnvironmentExists(string name)
         {
-            string expectedVenvPath = Path.Combine(Query.DirectoryEnvironments(), name, ".venv");
+            string expectedVenvPath = Path.Combine(DirectoryEnvironments(), name, ".venv");
 
             if (Directory.Exists(expectedVenvPath) && File.Exists(Path.Combine(expectedVenvPath, "Scripts", "python.exe")))
                 return true;
@@ -65,7 +65,7 @@ namespace BH.Engine.Python
         {
             if (!VirtualEnvironmentExists(name))
             {
-                Base.Compute.RecordError($"{name} was not found in {Query.DirectoryEnvironments()}");
+                Base.Compute.RecordError($"{name} was not found in {DirectoryEnvironments()}");
                 return null;
             }
 
@@ -83,11 +83,11 @@ namespace BH.Engine.Python
         {
             if (!VirtualEnvironmentExists(name))
             {
-                Base.Compute.RecordError($"{name} was not found in {Query.DirectoryEnvironments()}");
+                Base.Compute.RecordError($"{name} was not found in {DirectoryEnvironments()}");
                 return null;
             }
 
-            return Path.Combine(Query.DirectoryEnvironments(), name);
+            return Path.Combine(DirectoryEnvironments(), name);
         }
     }
 }

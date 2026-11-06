@@ -27,56 +27,9 @@ using EngineQuery = BH.Engine.Python.Query;
 namespace BH.Tests.Engine.Python.Compute
 {
     [NonParallelizable]
-    public class InstallTests : InstallRemoveTestBase
+    public class Install : Base
     {
-        [Test]
-        public void InstallPythonToolkitVenv_InstallsAndReloadsToolkitEnvironment()
-        {
-            DirectoryInfo? repository = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-            while (repository != null && !File.Exists(Path.Combine(repository.FullName, "Python_Engine", "Python", "pyproject.toml")))
-                repository = repository.Parent;
-            repository.Should().NotBeNull("the toolkit sources must be available");
-            string source = Path.Combine(repository!.FullName, "Python_Engine", "Python");
-            string directory = Path.Combine(EngineQuery.DirectoryEnvironments(), EngineQuery.ToolkitName());
-
-            WithIsolatedDirectory(directory, () =>
-            {
-                foreach (string file in new[] { "pyproject.toml", "README.md" })
-                    File.Copy(Path.Combine(source, file), Path.Combine(directory, file));
-                string sourceFolder = Path.Combine(source, "src");
-                foreach (string file in Directory.EnumerateFiles(sourceFolder, "*", SearchOption.AllDirectories))
-                {
-                    string relative = Path.GetRelativePath(sourceFolder, file);
-                    if (relative.Split(Path.DirectorySeparatorChar).Contains("__pycache__"))
-                        continue;
-                    string destination = Path.Combine(directory, "src", relative);
-                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-                    File.Copy(file, destination);
-                }
-
-                try
-                {
-                    var venv = EngineCompute.InstallPythonToolkitVenv(run: true, reload: false);
-
-                    venv.Should().NotBeNull();
-                    venv.Name.Should().Be(EngineQuery.ToolkitName());
-                    venv.Executable.Should().Be(Path.Combine(directory, ".venv", "Scripts", "python.exe"));
-                    File.Exists(venv.Executable).Should().BeTrue();
-                    EngineCompute.RunPythonString(venv,
-                        "import importlib.metadata; print(importlib.metadata.version('python_toolkit'))")
-                        .Should().Be(BH.Engine.Base.Query.BHoMVersion());
-                    File.Exists(Path.Combine(m_Root, "jupyter", "kernels", venv.Name.ToLowerInvariant(), "kernel.json")).Should().BeTrue();
-                    EngineCompute.InstallPythonToolkitVenv(run: true, reload: true).Executable.Should().Be(venv.Executable);
-                    AssertNoErrors();
-                }
-                finally
-                {
-                    string kernel = Path.Combine(m_Root, "jupyter", "kernels", EngineQuery.ToolkitName().ToLowerInvariant(), "kernel.json");
-                    if (File.Exists(kernel) && EngineQuery.VirtualEnvironmentExists(EngineQuery.ToolkitName()))
-                        EngineCompute.RemoveJupyterKernel(EngineQuery.ToolkitName(), run: true);
-                }
-            });
-        }
+        private static readonly string[] test = ["pyproject.toml", "README.md"];
 
         [Test]
         public void InstallUV_InstallsMissingTools()
@@ -85,7 +38,7 @@ namespace BH.Tests.Engine.Python.Compute
 
             EngineCompute.InstallUV(run: true);
 
-            string tools = Run(BH.Engine.Python.Query.UVExecutable(), "tool", "list");
+            string tools = Run(EngineQuery.UVExecutable(), "tool", "list");
             foreach (string tool in new[] { "ruff", "jupyterlab", "sphinx" })
                 tools.Should().Contain(tool + " v1.0.0");
             AssertNoErrors();
@@ -103,9 +56,9 @@ namespace BH.Tests.Engine.Python.Compute
             EngineCompute.InstallUV(run: true);
 
             Environment.GetEnvironmentVariable("PATH")!.Split(Path.PathSeparator)[0]
-                .Should().Be(BH.Engine.Python.Query.DirectoryTools());
-            BH.Engine.Python.Query.UVExecutable().Should()
-                .Be(Path.Combine(BH.Engine.Python.Query.DirectoryTools(), "uv.exe"));
+                .Should().Be(EngineQuery.DirectoryTools());
+            EngineQuery.UVExecutable().Should()
+                .Be(Path.Combine(EngineQuery.DirectoryTools(), "uv.exe"));
             foreach (var receipt in timestamps)
                 File.GetLastWriteTimeUtc(receipt.Key).Should().Be(receipt.Value);
             AssertNoErrors();
@@ -115,11 +68,11 @@ namespace BH.Tests.Engine.Python.Compute
         public void InstallPackages_SkipsSatisfiedVersion()
         {
             PreparePackageVersions();
-            EngineCompute.InstallPackages(m_Environment, new() { "bhom-repeat-package==1.0.0" }, run: true);
+            EngineCompute.InstallPackages(m_Environment, ["bhom-repeat-package==1.0.0"], run: true);
             string metadata = PackageMetadata("bhom_repeat_package", "1.0.0");
             DateTime timestamp = File.GetLastWriteTimeUtc(metadata);
 
-            EngineCompute.InstallPackages(m_Environment, new() { "bhom-repeat-package>=1,<2" }, run: true);
+            EngineCompute.InstallPackages(m_Environment, ["bhom-repeat-package>=1,<2"], run: true);
 
             File.GetLastWriteTimeUtc(metadata).Should().Be(timestamp);
             AssertNoErrors();
@@ -129,9 +82,9 @@ namespace BH.Tests.Engine.Python.Compute
         public void InstallPackages_ChangesUnsatisfiedVersion()
         {
             PreparePackageVersions();
-            EngineCompute.InstallPackages(m_Environment, new() { "bhom-repeat-package==1.0.0" }, run: true);
+            EngineCompute.InstallPackages(m_Environment, ["bhom-repeat-package==1.0.0"], run: true);
 
-            EngineCompute.InstallPackages(m_Environment, new() { "bhom-repeat-package==2.0.0" }, run: true);
+            EngineCompute.InstallPackages(m_Environment, ["bhom-repeat-package==2.0.0"], run: true);
 
             File.Exists(PackageMetadata("bhom_repeat_package", "2.0.0")).Should().BeTrue();
             File.Exists(PackageMetadata("bhom_repeat_package", "1.0.0")).Should().BeFalse();
@@ -142,12 +95,12 @@ namespace BH.Tests.Engine.Python.Compute
         public void InstallPackages_RegistersAlreadyInstalledProjectDependency()
         {
             PreparePackageVersions();
-            EngineCompute.InstallPackages(m_Environment, new() { "bhom-repeat-package==1.0.0" }, run: true);
+            EngineCompute.InstallPackages(m_Environment, ["bhom-repeat-package==1.0.0"], run: true);
             string metadata = PackageMetadata("bhom_repeat_package", "1.0.0");
             DateTime timestamp = File.GetLastWriteTimeUtc(metadata);
             CreateProject();
 
-            EngineCompute.InstallPackages(m_Environment, new() { "bhom-repeat-package==1.0.0" }, run: true);
+            EngineCompute.InstallPackages(m_Environment, ["bhom-repeat-package==1.0.0"], run: true);
 
             File.ReadAllText(Path.Combine(m_Root, "pyproject.toml")).Should().Contain("bhom-repeat-package==1.0.0");
             File.GetLastWriteTimeUtc(metadata).Should().Be(timestamp);

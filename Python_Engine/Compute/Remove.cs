@@ -29,7 +29,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        [Description("Remove the named Python virtual environment. Missing environments produce a warning instead of an error.")]
+        [Description("Remove the named Python virtual environment. Missing environments produce a warning instead of an error. This will retain any code within that environment directory.")]
         [Input("name", "The name of the Python virtual environment to remove.")]
         [Input("run", "Run this method.")]
         public static void RemoveVirtualEnvironment(string name, bool run = false)
@@ -40,12 +40,11 @@ namespace BH.Engine.Python
                 return;
             }
 
-            string venvDirectory = Path.Combine(Query.DirectoryEnvironments(), name);
+            string venvDirectory = Path.Combine(Query.DirectoryEnvironments(), name, ".venv");
 
             if (run)
             {
                 RemoveJupyterKernel(name, run);
-
                 try
                 {
                     Directory.Delete(venvDirectory, true);
@@ -109,7 +108,7 @@ namespace BH.Engine.Python
                 }
                 catch (IOException ex)
                 {
-                    Base.Compute.RecordError($"Failed to remove UV tools directory {toolsDirectory}: {ex.Message}");
+                    Base.Compute.RecordError($"Failed to remove UV from {toolsDirectory}: {ex.Message}");
                 }
             }
             else

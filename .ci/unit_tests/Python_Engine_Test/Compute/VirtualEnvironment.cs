@@ -29,7 +29,7 @@ using EngineQuery = BH.Engine.Python.Query;
 namespace BH.Tests.Engine.Python.Compute
 {
     [NonParallelizable]
-    public class VirtualEnvironmentTests
+    public class VirtualEnvironment
     {
         private readonly Dictionary<string, string?> m_OriginalVariables = [];
         private string m_TestDirectory = null!;
@@ -77,7 +77,7 @@ namespace BH.Tests.Engine.Python.Compute
         }
 
         [Test]
-        public void FromTargetVersion_CreatesReloadsAndRemovesEnvironmentAndKernel()
+        public void VirtualEnvironment_FromTargetVersion_CreatesReloadsAndRemovesEnvironmentAndKernel()
         {
             PythonEnvironment venv = EngineCompute.VirtualEnvironment("3.11", m_Name);
             venv.Should().NotBeNull();
@@ -89,13 +89,13 @@ namespace BH.Tests.Engine.Python.Compute
 
             EngineCompute.RemoveVirtualEnvironment(m_Name, run: true);
 
-            Directory.Exists(m_Directory).Should().BeFalse();
+            Directory.Exists(Path.Combine(m_Directory, ".venv")).Should().BeFalse();
             File.Exists(KernelFile()).Should().BeFalse();
             AssertNoErrors();
         }
 
         [Test]
-        public void FromTOML_InstallsBHoMVersionRecreatesAndRemovesEnvironment()
+        public void VirtualEnvironment_FromTOML_CreatesReloadsAndRemovesEnvironmentAndKernel()
         {
             string packageDirectory = Path.Combine(m_Directory, "src", m_Name);
             Directory.CreateDirectory(packageDirectory);
@@ -121,7 +121,7 @@ namespace BH.Tests.Engine.Python.Compute
             EngineCompute.VirtualEnvironment(tomlFile, reload: true).Executable.Should().Be(venv.Executable);
             EngineCompute.RemoveVirtualEnvironment(m_Name, run: true);
 
-            Directory.Exists(m_Directory).Should().BeFalse();
+            Directory.Exists(Path.Combine(m_Directory, ".venv")).Should().BeFalse();
             File.Exists(KernelFile()).Should().BeFalse();
             AssertNoErrors();
         }

@@ -21,13 +21,14 @@
  */
 
 using FluentAssertions;
+using System.IO;
 using EngineCompute = BH.Engine.Python.Compute;
 using EngineQuery = BH.Engine.Python.Query;
 
 namespace BH.Tests.Engine.Python.Compute
 {
     [NonParallelizable]
-    public class RemoveTests : InstallRemoveTestBase
+    public class Remove : Base
     {
         [Test]
         public void RemoveKernel_WarnsWhenEnvironmentDoesNotExist()
@@ -73,7 +74,7 @@ namespace BH.Tests.Engine.Python.Compute
         {
             EngineCompute.RemoveVirtualEnvironment(m_Environment.Name, run: true);
 
-            Directory.Exists(m_Root).Should().BeFalse();
+            Directory.Exists(Path.Combine(m_Root, ".venv")).Should().BeFalse();
             AssertWarningWithoutErrors();
             BH.Engine.Base.Compute.ClearCurrentEvents();
             EngineCompute.RemoveVirtualEnvironment(m_Environment.Name, run: true);

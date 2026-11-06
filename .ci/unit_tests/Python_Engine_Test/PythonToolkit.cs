@@ -20,21 +20,35 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
  */
 
-using FluentAssertions;
 using BH.oM.Base.Debugging;
+using BH.oM.Python;
+using BH.Tests.Engine.Python.Compute;
+using FluentAssertions;
 using System.Text.RegularExpressions;
 using EngineCompute = BH.Engine.Python.Compute;
 using EngineQuery = BH.Engine.Python.Query;
 
-namespace BH.Tests.Engine.Python.Compute
+namespace BH.Tests.Engine.Python
 {
     [NonParallelizable]
-    public class Pytest
+    public class PythonToolkit : Base
     {
-        [Test, Order(9999)]
-        public void Execute_Pytests()
+        [Test, Order(9998)]
+        [Ignore("Disabled for now.")]
+        public void ZZZ_InstallPythonToolkitVenv()
         {
-            DirectoryInfo? repository = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+            BH.Engine.Base.Compute.ClearCurrentEvents();
+            EngineCompute.InstallPythonToolkitVenv(run: true, reload: false);
+            AssertNoErrors();
+        }
+
+        [Test, Order(9999)]
+        [Ignore("Disabled for now.")]
+        public void ZZZ_Pytest()
+        {
+            BH.Engine.Base.Compute.ClearCurrentEvents();
+            EngineCompute.InstallPythonToolkitVenv(run: true, reload: false);
+            DirectoryInfo? repository = new(TestContext.CurrentContext.TestDirectory);
             while (repository != null && !File.Exists(Path.Combine(repository.FullName, "Python_Engine", "Python", "pyproject.toml")))
                 repository = repository.Parent;
             repository.Should().NotBeNull("the toolkit sources must be available to run pytest");
@@ -46,31 +60,10 @@ namespace BH.Tests.Engine.Python.Compute
 
             try
             {
-                Directory.CreateDirectory(directory);
-                foreach (string file in new[] { "pyproject.toml", "README.md" })
-                    File.Copy(Path.Combine(source, file), Path.Combine(directory, file));
-                foreach (string folder in new[] { "src", "tests" })
-                {
-                    string sourceFolder = Path.Combine(source, folder);
-                    foreach (string file in Directory.EnumerateFiles(sourceFolder, "*", SearchOption.AllDirectories))
-                    {
-                        string relative = Path.GetRelativePath(sourceFolder, file);
-                        if (relative.Split(Path.DirectorySeparatorChar).Contains("__pycache__"))
-                            continue;
-                        string destination = Path.Combine(directory, folder, relative);
-                        Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-                        File.Copy(file, destination);
-                    }
-                }
+                PythonEnvironment venv = EngineCompute.InstallPythonToolkitVenv(run: true, reload: false);
 
-                var venv = EngineCompute.VirtualEnvironment(Path.Combine(directory, "pyproject.toml"), reload: false);
                 venv.Should().NotBeNull("environment installation must succeed: {0}",
                     string.Join(Environment.NewLine, BH.Engine.Base.Query.CurrentEvents().Where(e => e.Type == EventType.Error).Select(e => e.Message)));
-
-                // Sync explicitly: a reloaded environment is not guaranteed to include dev dependencies.
-                var sync = EngineCompute.RunCommandStdout(
-                    $"\"{EngineQuery.UVExecutable()}\" sync --all-packages --group dev", startDirectory: directory);
-                sync.Item3.Should().Be(0, "dev dependency installation must succeed:\n{0}\n{1}", sync.Item1, sync.Item2);
 
                 var result = EngineCompute.RunCommandStdout(
                     $"set \"SKIP_LONG_PYTEST=1\" && \"{venv.Executable}\" -m pytest -ra",

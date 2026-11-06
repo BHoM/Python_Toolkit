@@ -127,18 +127,21 @@ namespace BH.Engine.Python
                 if (reload)
                 {
                     PythonEnvironment existingVenv = new PythonEnvironment() { Executable = Query.VirtualEnvironmentExecutable(name), Name = name };
+                    
+                    string updateCmd = $"\"{Query.UVExecutable()}\" sync --all-packages";
+                    if (RunCommandStdout(updateCmd, startDirectory: directory).Item3 != 0)
+                        return null;
+
                     return existingVenv;
                 }
                 else
                 {
-                    RemoveJupyterKernel(name, run: true);
-                    // Retain the TOML file and package sources while recreating the environment.
-                    Directory.Delete(Path.Combine(directory, ".venv"), true);
+                    RemoveVirtualEnvironment(name: name, run: true);
                 }
             }
 
             string updatedProject = versionField.Replace(projectContent,
-                match => match.Groups["prefix"].Value + $"\"{BH.Engine.Base.Query.BHoMVersion()}\"", 1);
+                match => match.Groups["prefix"].Value + $"\"{Base.Query.BHoMVersion()}\"", 1);
             Group content = project.Groups["content"];
             File.WriteAllText(tomlFile, toml.Substring(0, content.Index) + updatedProject + toml.Substring(content.Index + content.Length));
 

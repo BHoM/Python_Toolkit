@@ -36,11 +36,11 @@ namespace BH.Engine.Python
         {
             if (!File.Exists(pythonExecutable))
             {
-                BH.Engine.Base.Compute.RecordError(new FileNotFoundException(), $"No file found at {pythonExecutable}");
+                Base.Compute.RecordError(new FileNotFoundException(), $"No file found at {pythonExecutable}");
                 return null;
             }
 
-            var result = BH.Engine.Python.Compute.RunCommandStdout(command: $"\"{pythonExecutable}\" --version");
+            var result = Compute.RunCommandStdout(command: $"\"{pythonExecutable}\" --version");
             if (result.Item3 != 0)
                 return null;
 
