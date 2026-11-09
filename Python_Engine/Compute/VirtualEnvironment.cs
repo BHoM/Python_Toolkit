@@ -31,7 +31,7 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
-        private static readonly Regex m_VersionField = new Regex(@"(?m)^(?<prefix>[ \t]*version[ \t]*=[ \t]*)(?<quote>['""])[^'""\r\n]*\k<quote>");
+        private static readonly Regex m_VersionField = new Regex(@"(?m)^(?<prefix>[ \t]*version[ \t]*=[ \t]*)(?<quote>['""])[^'""\r\n]*\k<quote>(?:[ \t]*#.*)?$");
 
         [PreviousVersion("9.3", "BH.Engine.Python.Compute.VirtualEnvironment(PythonVersion, string, bool)")]
         [Description("Create a Python Virtual Environment of a given version and name.")]
