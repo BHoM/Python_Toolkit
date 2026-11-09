@@ -31,6 +31,8 @@ namespace BH.Engine.Python
 {
     public static partial class Compute
     {
+        private static readonly Regex m_VersionField = new Regex(@"(?m)^(?<prefix>[ \t]*version[ \t]*=[ \t]*)(?<quote>['""])[^'""\r\n]*\k<quote>");
+
         [PreviousVersion("9.3", "BH.Engine.Python.Compute.VirtualEnvironment(PythonVersion, string, bool)")]
         [Description("Create a Python Virtual Environment of a given version and name.")]
         [Input("version", "The version of Python to use for this environment.")]
@@ -115,8 +117,7 @@ namespace BH.Engine.Python
             }
 
             string projectContent = project.Groups["content"].Value;
-            Regex versionField = new Regex(@"(?m)^(?<prefix>[ \t]*version[ \t]*=[ \t]*)(?<quote>['""])[^'""\r\n]*\k<quote>");
-            if (!versionField.IsMatch(projectContent))
+            if (!m_VersionField.IsMatch(projectContent))
             {
                 Base.Compute.RecordError($"A static [project] version is required in {tomlFile}.");
                 return null;
@@ -140,7 +141,7 @@ namespace BH.Engine.Python
                 }
             }
 
-            string updatedProject = versionField.Replace(projectContent,
+            string updatedProject = m_VersionField.Replace(projectContent,
                 match => match.Groups["prefix"].Value + $"\"{Base.Query.BHoMVersion()}\"", 1);
             Group content = project.Groups["content"];
             File.WriteAllText(tomlFile, toml.Substring(0, content.Index) + updatedProject + toml.Substring(content.Index + content.Length));
