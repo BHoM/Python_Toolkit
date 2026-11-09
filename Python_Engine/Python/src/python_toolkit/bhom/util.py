@@ -18,7 +18,7 @@ def bson_unix_ticks(date_time: Union[datetime, pd.Timestamp] = None, short: bool
     """
 
     if isinstance(date_time, pd.Timestamp):
-        date_time = date_time.tz_convert() #This throws an error if the pandas timestamp is not timezone aware. If no error the resultant date_time will be in UTC.
+        date_time = date_time.tz_convert(None) #This throws an error if the pandas timestamp is not timezone aware. If no error the resultant date_time will be in UTC.
         date_time = date_time.to_pydatetime().replace(tzinfo=timezone.utc) #Convert to python datetime and ensure it is a timezone aware with timestamp set to UTC.
 
     date_time = date_time or datetime.now(timezone.utc)
