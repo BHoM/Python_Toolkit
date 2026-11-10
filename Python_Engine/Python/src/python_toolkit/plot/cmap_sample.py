@@ -9,7 +9,7 @@ plt.rcParams["figure.max_open_warning"] = 0
 def cmap_sample_plot(
     cmap: Union[str, Colormap],
     bounds: Optional[tuple] = None,
-    figsize: tuple = (9, 1),
+    figsize: Optional[tuple] = None,
     bins: int = 256
 ) -> Figure:
 
@@ -19,11 +19,13 @@ def cmap_sample_plot(
     Args:
         cmap: Either a colormap string (e.g., 'viridis') or a custom Colormap object
         bounds: Optional tuple of (vmin, vmax) for normalization. If None, uses (0, 1)
-        figsize: Figure size as (width, height)
+        figsize: Figure size as (width, height). If None, defaults to (9, 1)
         bins: Number of discrete bins for the gradient. Defaults to 256.
     Returns:
         Matplotlib Figure object
     """
+
+    figsize = figsize or (9, 1)
 
     # Set bounds
     if bounds is None:

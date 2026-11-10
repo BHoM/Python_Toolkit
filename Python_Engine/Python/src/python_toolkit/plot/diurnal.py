@@ -99,7 +99,7 @@ def diurnal(
             minor_ticks = target_idx
             major_ticklabels = [f"{i:02d}:00" for i in major_ticks]
         elif period == "weekly":
-            group = series.groupby([series.index.dayofweek, series.index.hour])
+            group = series.groupby([series.index.day_of_week, series.index.hour])
             target_idx = pd.MultiIndex.from_product([range(7), range(24)])
             major_ticks = range(len(target_idx))[::12]
             minor_ticks = range(len(target_idx))[::3]
