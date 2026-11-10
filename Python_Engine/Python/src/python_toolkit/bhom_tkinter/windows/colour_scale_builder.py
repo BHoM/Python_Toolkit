@@ -356,7 +356,11 @@ class ColourScaleBuilder(BHoMBaseChildWindow):
         return ColourScale(name, thresholds, cmap, labels if any(labels) else None, self.units)
 
     def _unused_name(self, base: str) -> str:
-        names = {s.name for s in load_scales(self.library_path)}
+        try:
+            names = {s.name for s in load_scales(self.library_path)}
+        except ColourScaleError as e:  # an unreadable library must not stop the window opening; saving reports it
+            CONSOLE_LOGGER.warning(str(e))
+            names = set()
         n = 1
         name = base
         while name in names:
@@ -368,7 +372,7 @@ class ColourScaleBuilder(BHoMBaseChildWindow):
         """Validate, save to the library and close; errors are shown in a pop-up and stay in the window."""
         try:
             scale = self.current_scale()
-            save_scale(scale, self.library_path, overwrite=self.editing is not None and self.editing.name == scale.name)
+            save_scale(scale, self.library_path, replaces=self.editing.name if self.editing else None)
         except (ColourScaleError, OSError) as e:
             message = str(e)
             if "already exists" in message:

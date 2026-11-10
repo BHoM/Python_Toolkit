@@ -244,16 +244,36 @@ def load_scales(path: Optional[Path] = None) -> List[ColourScale]:
     return scales
 
 
-def save_scale(scale: ColourScale, path: Optional[Path] = None, overwrite: bool = False) -> None:
-    """Add a scale to the saved file; an existing name is only replaced with `overwrite`."""
+def save_scale(scale: ColourScale, path: Optional[Path] = None, overwrite: bool = False,
+               replaces: Optional[str] = None) -> None:
+    """Add a scale to the saved file; an existing name is only replaced with `overwrite`.
+
+    `replaces` is the saved name this scale is an edit of: that entry is replaced (so a renamed
+    scale does not leave its old name behind) without needing `overwrite`."""
     path = Path(path or LIBRARY_FILE)
     entries = _read(path)
-    others = [e for e in entries if e.get("name") != scale.name]
-    if len(others) < len(entries) and not overwrite:
+    others = [e for e in entries if e.get("name") not in (scale.name, replaces)]
+    clash = scale.name != replaces and any(e.get("name") == scale.name for e in entries)
+    if clash and not overwrite:
         raise ColourScaleError(f"A scale named '{scale.name}' already exists.")
+    _write(path, others + [scale.to_dict()])
+
+
+def delete_scale(name: str, path: Optional[Path] = None) -> bool:
+    """Remove a saved scale by name; False if there was none of that name."""
+    path = Path(path or LIBRARY_FILE)
+    entries = _read(path)
+    others = [e for e in entries if e.get("name") != name]
+    if len(others) == len(entries):
+        return False
+    _write(path, others)
+    return True
+
+
+def _write(path: Path, entries: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps({"version": 1, "scales": others + [scale.to_dict()]}, indent=2), encoding="utf-8")
+    tmp.write_text(json.dumps({"version": 1, "scales": entries}, indent=2), encoding="utf-8")
     tmp.replace(path)
 
 
@@ -279,7 +299,10 @@ def clean_data(data: Optional[Iterable]) -> np.ndarray:
     """Finite float values from any iterable; None, NaN and non-numbers are dropped."""
     if data is None:
         return np.empty(0)
-    numbers = np.array([_to_float(v) for v in np.ravel(np.asarray(list(data), dtype=object))], dtype=float)
+    try:  # fast path: already numeric (or numeric strings)
+        numbers = np.ravel(np.asarray(data if hasattr(data, "__len__") else list(data), dtype=float))
+    except (TypeError, ValueError):  # mixed input: keep the numbers, drop the rest
+        numbers = np.array([_to_float(v) for v in np.ravel(np.asarray(list(data), dtype=object))], dtype=float)
     return numbers[np.isfinite(numbers)]
 
 

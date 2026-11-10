@@ -32,7 +32,7 @@ KINDS = {
     "continuous": ["viridis", "plasma", "inferno", "magma", "cividis", "turbo", "Blues", "Greens", "Greys",
                    "Oranges", "Purples", "Reds", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd", "coolwarm", "seismic",
                    "Spectral", "RdYlBu", "RdYlGn", "twilight", "twilight_shifted", "hsv"],
-                   
+
     # perceptually uniform maps; matplotlib's own, so safe for the common colour vision deficiencies
     "colourblind": ["viridis", "cividis", "plasma", "inferno", "magma"],
 }

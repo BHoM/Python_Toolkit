@@ -185,3 +185,26 @@ def test_suggestions_always_give_the_number_of_bands_asked_for(method, bands):
     data = np.random.default_rng(1).normal(22, 3, 300)
     assert len(colour_scales.thresholds(data, bands, method)) == bands - 1
     assert len(colour_scales.thresholds([16, 30], bands, "nice")) == bands - 1
+
+
+def test_clean_data_handles_numeric_and_mixed_input():
+    from python_toolkit.plot.colour_scales import clean_data
+
+    assert clean_data(np.array([[1, 2], [3, np.nan]])).tolist() == [1.0, 2.0, 3.0]
+    assert clean_data([1, None, "x", float("inf"), "4"]).tolist() == [1.0, 4.0]
+    assert clean_data(v for v in (1, 2)).tolist() == [1.0, 2.0]
+
+
+def test_save_scale_replaces_the_scale_it_edits_even_when_renamed(tmp_path):
+    from python_toolkit.plot.colour_scales import ColourScaleError, delete_scale
+
+    path = tmp_path / "scales.json"
+    save_scale(ColourScale("A", [1, 2], "viridis"), path)
+    save_scale(ColourScale("B", [1, 2], "viridis"), path)
+    save_scale(ColourScale("C", [5, 6], "viridis"), path, replaces="A")  # A renamed to C
+    assert sorted(s.name for s in load_scales(path)) == ["B", "C"]
+    with pytest.raises(ColourScaleError):  # renaming onto another saved scale is still refused
+        save_scale(ColourScale("B", [5, 6], "viridis"), path, replaces="C")
+    save_scale(ColourScale("B", [5, 6], "viridis"), path, replaces="B")  # same name: a plain edit
+    assert delete_scale("B", path) and not delete_scale("B", path)
+    assert [s.name for s in load_scales(path)] == ["C"]

@@ -263,3 +263,74 @@ def test_split_refuses_a_bad_threshold_without_changing_the_table(host, library)
     builder._band_rows[0]["upper"].set("warm")
     builder._split_band(1)
     assert len(builder._band_rows) == 5 and "not a number" in builder.status.get()
+
+
+def test_builder_opens_with_an_unreadable_library(host, tmp_path):
+    path = tmp_path / "scales.json"
+    path.write_text("{not json", encoding="utf-8")
+    builder = ColourScaleBuilder(host, data=[18, 21, 24, 27], library_path=path)
+    assert builder.name.get() == "New scale"
+
+
+def _scales_selector(host, library, data=None):
+    return CmapSelector(host.content_frame, include_scales=True, scales_path=library, data=data, units="degC")
+
+
+def test_selector_lists_saved_scales_with_their_norm(host, library):
+    save_scale(ColourScale("Comfort", [18, 21, 24], "coolwarm"), library)
+    data = np.linspace(10, 30, 50)
+    selector = _scales_selector(host, library, data)
+    assert "Comfort (scale)" in selector.cmap_combobox["values"]
+    assert selector.get_scale() is None and selector.get_norm() is None  # a plain palette is selected
+    selector.set("Comfort (scale)")
+    assert selector.get_scale().name == "Comfort"
+    norm = selector.get_norm()
+    assert list(norm.boundaries[1:-1]) == [18, 21, 24] and norm.boundaries[0] == 10 and norm.boundaries[-1] == 30
+    assert len(selector.get_cmap().colors) == 4
+
+
+def test_selector_scale_buttons_follow_the_selection(host, library):
+    save_scale(ColourScale("Comfort", [18, 21, 24], "coolwarm"), library)
+    selector = _scales_selector(host, library)
+    assert selector.edit_scale_button.instate(["disabled"]) and selector.delete_scale_button.instate(["disabled"])
+    selector.set("Comfort (scale)")
+    assert selector.edit_scale_button.instate(["!disabled"]) and selector.delete_scale_button.instate(["!disabled"])
+    selector.set("viridis")
+    assert selector.edit_scale_button.instate(["disabled"])
+
+
+def test_selector_builds_edits_and_deletes_scales(host, library, monkeypatch):
+    from python_toolkit.bhom_tkinter.widgets import cmap_selector
+
+    data = np.linspace(16, 30, 100)
+    selector = _scales_selector(host, library, data)
+    changes = []
+    selector.on_change = changes.append
+
+    # a new scale made in the builder is listed and selected
+    def new_scale(self):
+        self.name.set("Mine")
+        self._save()
+
+    monkeypatch.setattr(ColourScaleBuilder, "run", new_scale)
+    selector.new_scale_button.invoke()
+    assert selector.get_scale().name == "Mine"
+
+    # editing it and renaming it replaces the entry
+    def rename(self):
+        self.name.set("Renamed")
+        self._save()
+
+    monkeypatch.setattr(ColourScaleBuilder, "run", rename)
+    selector.edit_scale_button.invoke()
+    assert selector.get_scale().name == "Renamed"
+    assert [s.name for s in load_scales(library)] == ["Renamed"]
+    assert "Mine (scale)" not in selector.cmap_combobox["values"]
+
+    # deleting asks first, then falls back to a palette
+    monkeypatch.setattr(cmap_selector.messagebox, "askyesno", lambda *a, **k: False)
+    selector.delete_scale_button.invoke()
+    assert selector.get_scale() is not None
+    monkeypatch.setattr(cmap_selector.messagebox, "askyesno", lambda *a, **k: True)
+    selector.delete_scale_button.invoke()
+    assert selector.get_scale() is None and selector.get() and load_scales(library) == []
