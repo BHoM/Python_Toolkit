@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_oM", "Python_oM\Pyth
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_Engine", "Python_Engine\Python_Engine.csproj", "{D24A2970-618D-4149-B123-99F406D867D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python_Engine_Test", ".ci\unit_tests\Python_Engine_Test\Python_Engine_Test.csproj", "{E654D8C0-C9A3-C0D9-F687-4A0CA64CA548}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D24A2970-618D-4149-B123-99F406D867D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D24A2970-618D-4149-B123-99F406D867D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D24A2970-618D-4149-B123-99F406D867D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E654D8C0-C9A3-C0D9-F687-4A0CA64CA548}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E654D8C0-C9A3-C0D9-F687-4A0CA64CA548}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E654D8C0-C9A3-C0D9-F687-4A0CA64CA548}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E654D8C0-C9A3-C0D9-F687-4A0CA64CA548}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
