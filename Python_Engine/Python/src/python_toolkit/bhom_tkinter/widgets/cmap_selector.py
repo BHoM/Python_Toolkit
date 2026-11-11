@@ -10,8 +10,8 @@ from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-from python_toolkit.plot import palettes
-from python_toolkit.plot.colour_scales import ColourScale, ColourScaleError, clean_data, delete_scale, load_scales
+from python_toolkit.palettes import PaletteGroup, palette_names
+from python_toolkit.colour_scales import ColourScale, ColourScaleError, delete_scale, finite_values, load_scales
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
@@ -56,7 +56,7 @@ class CmapSelector(BHoMBaseWidget):
                 `cmap_set` selection is ignored.
             cmap_set: Preset colormap set used when `colormaps` is `None`.
                 Allowed values: "all", "continuous", "categorical", "colourblind"
-                (see `python_toolkit.plot.palettes`).
+                (see `python_toolkit.palettes.PaletteGroup`).
             cmap_bins: Number of discrete gradient bands in the preview swatch.
             default_cmap: Optional default colormap to pre-select.  Accepts
                 the same input types as items in `colormaps`.
@@ -64,7 +64,7 @@ class CmapSelector(BHoMBaseWidget):
             dropdown_position: Position of the dropdown relative to the
                 preview swatch. "n" = above, "s" = below,
                 "w" = left, "e" = right.
-            include_scales: List the saved colour scales (see `python_toolkit.plot.colour_scales`)
+            include_scales: List the saved colour scales (see `python_toolkit.colour_scales`)
                 as "Name (scale)" entries, with buttons to build, edit and delete them.
                 Use `get_scale()` and `get_norm()` to colour data with the selected scale.
             data: Values the scales will colour; passed to the scale builder for its
@@ -78,7 +78,7 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_bins = cmap_bins
         self.plot_size = plot_size
         self.include_scales = include_scales
-        self.data = None if data is None else clean_data(data)
+        self.data = None if data is None else finite_values(data)
         self.units = units
         self.scales_path = scales_path
         self._scales: Dict[str, ColourScale] = {}  # combobox label -> saved scale
@@ -91,7 +91,7 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame.pack(side="top", fill="both", expand=True, anchor=self._pack_anchor)
 
         self.colormap_var = tk.StringVar(value="viridis")
-        self._all_colormaps = palettes.names()
+        self._all_colormaps = palette_names()
         self._uses_explicit_colormaps = colormaps is not None
 
         self.cmap_frame.columnconfigure(0, weight=1)
@@ -182,7 +182,8 @@ class CmapSelector(BHoMBaseWidget):
             List[str]: Colormap names for the requested preset.
         """
         key = (cmap_set or "all").lower()
-        return self._with_reversed(palettes.names(key if key in palettes.KINDS else None))
+        group = key if key in {g.value for g in PaletteGroup} else None  # "all", or anything unknown, lists every map
+        return self._with_reversed(palette_names(group))
 
     def _resolve_colormaps(self, colormaps: List[CmapInput]) -> tuple[List[str], Dict[str, Colormap]]:
         """Normalise a mixed list of colormap inputs into display labels and a custom-cmap registry.
@@ -359,9 +360,11 @@ class CmapSelector(BHoMBaseWidget):
 
     @staticmethod
     def _scale_label(name: str) -> str:
+        """The dropdown label of a saved scale, which sets it apart from palettes of the same name."""
         return f"{name} (scale)"
 
     def _build_scale_buttons(self, parent: ttk.Frame) -> None:
+        """Add the New / Edit / Delete scale buttons below the dropdown."""
         row = ttk.Frame(parent)
         row.pack(side=tk.TOP, anchor=self._pack_anchor, pady=(4, 0))
         self.new_scale_button = ttk.Button(row, text="New scale…", command=lambda: self._open_builder(None))
@@ -372,6 +375,7 @@ class CmapSelector(BHoMBaseWidget):
         self._update_scale_buttons()
 
     def _update_scale_buttons(self) -> None:
+        """Enable Edit and Delete only while a saved scale is selected."""
         state = ["!disabled"] if self.get_scale() is not None else ["disabled"]
         self.edit_scale_button.state(state)
         self.delete_scale_button.state(state)
@@ -389,7 +393,7 @@ class CmapSelector(BHoMBaseWidget):
         palette_values = [v for v in self.cmap_combobox["values"] if v not in self._scales]
         self._scales = {self._scale_label(s.name): s for s in scales}
         for label, scale in self._scales.items():
-            self._custom_cmaps[label] = scale.mapping(self.data)[0]
+            self._custom_cmaps[label] = scale.cmap_and_norm(self.data)[0]
         self._populate_cmap_list(palette_values + list(self._scales))
         target = self._scale_label(select) if select else previous
         if target in self.cmap_combobox["values"]:
@@ -407,19 +411,22 @@ class CmapSelector(BHoMBaseWidget):
         current = self.colormap_var.get()
         builder = ColourScaleBuilder(
             self.winfo_toplevel(), data=self.data, units=self.units, scale=scale, library_path=self.scales_path,
-            palette=current if current in palettes.names() else None, on_save=self._on_scale_saved)
+            palette=current if current in self._all_colormaps else None, on_save=self._on_scale_saved)
         builder.run()
 
     def _on_scale_saved(self, scale: ColourScale) -> None:
+        """Reload the saved scales and select the one just saved."""
         self._refresh_scales(select=scale.name)
         self._fire_on_change(self.get())
 
     def _edit_scale(self) -> None:
+        """Open the builder on the selected scale."""
         scale = self.get_scale()
         if scale is not None:
             self._open_builder(scale)
 
     def _delete_scale(self) -> None:
+        """Delete the selected scale from the saved scales file, after the user confirms."""
         scale = self.get_scale()
         if scale is None or not messagebox.askyesno("Delete colour scale", f"Delete the saved scale '{scale.name}'?"):
             return
@@ -432,15 +439,23 @@ class CmapSelector(BHoMBaseWidget):
         self._fire_on_change(self.get())
 
     def get_scale(self) -> Optional[ColourScale]:
-        """The selected saved colour scale, or None when a plain palette is selected."""
+        """Return the selected saved colour scale.
+
+        Returns:
+            Optional[ColourScale]: The scale, or None when a plain palette is selected.
+        """
         return self._scales.get(self.colormap_var.get())
 
     def get_norm(self) -> Optional[BoundaryNorm]:
-        """The normaliser for the selected scale (thresholds in data units), or None for a plain palette.
+        """Return the normaliser for the selected scale, with its thresholds in data units.
 
-        Colour data with `get_cmap()` and `get_norm()` together; the end bands run to the `data` given."""
+        Colour data with `get_cmap()` and `get_norm()` together; the end bands run to the `data` given.
+
+        Returns:
+            Optional[BoundaryNorm]: The normaliser, or None when a plain palette is selected.
+        """
         scale = self.get_scale()
-        return scale.mapping(self.data)[1] if scale is not None else None
+        return scale.cmap_and_norm(self.data)[1] if scale is not None else None
 
     def add_cmap(self, cmap: CmapInput, label: Optional[str] = None) -> Optional[str]:
         """Dynamically add a new colormap entry to the selector.

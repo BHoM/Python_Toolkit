@@ -5,38 +5,53 @@ import pytest
 from matplotlib import colormaps
 from matplotlib.colors import to_hex
 
-from python_toolkit.plot import colour_scales, palettes
-from python_toolkit.plot.colour_scales import (
+from python_toolkit.colour_scales import (
+    BreakMethod,
     ColourScale,
     ColourScaleError,
+    delete_scale,
+    finite_values,
     load_scales,
     save_scale,
+    suggest_thresholds,
 )
+from python_toolkit.palettes import TOOLKIT_PALETTES, palette_names, sample_colours
 
 COMFORT = dict(thresholds=[18, 21, 24], cmap=["#0000ff", "#00ffff", "#00ff00", "#ff0000"],
                labels=["Cold", "Cool", "Comfortable", "Hot"], units="degC")
 
 
 def colour_of(scale, value):
-    cmap, norm = scale.mapping()
+    cmap, norm = scale.cmap_and_norm()
     return to_hex(cmap(norm(value)))
 
 
 # -- palettes ------------------------------------------------------------------
 
 def test_toolkit_palettes_are_always_registered():
-    for name, (kind, _safe, _colours) in palettes.CUSTOM.items():
-        assert name in colormaps and f"{name}_r" in colormaps
-        assert name in palettes.names(kind)
+    for palette in TOOLKIT_PALETTES:
+        assert palette.name in colormaps and f"{palette.name}_r" in colormaps
+        assert palette.name in palette_names("categorical" if palette.categorical else "continuous")
     assert isinstance(colormaps["okabe_ito"], type(colormaps["Set1"]))  # discrete, like the other categorical maps
-    assert "okabe_ito" in palettes.names("colourblind") and "ltc_maya" not in palettes.names("colourblind")
-    assert "viridis_r" in palettes.names() and "viridis_r" not in palettes.names("continuous")
+    assert "okabe_ito" in palette_names("colourblind") and "ltc_maya" not in palette_names("colourblind")
+    assert "viridis_r" in palette_names() and "viridis_r" not in palette_names("continuous")
+
+
+def test_a_palette_matplotlib_already_has_is_not_replaced(monkeypatch):
+    from python_toolkit.palettes import Palette, registry
+
+    matplotlib_viridis = colormaps["viridis"]
+    monkeypatch.setattr(registry, "TOOLKIT_PALETTES", (Palette("viridis", ("#000000", "#ffffff")),))
+    registry.register_toolkit_palettes()
+    assert colormaps["viridis"].colors == matplotlib_viridis.colors
 
 
 def test_sample_takes_the_first_colours_of_a_categorical_palette():
-    assert palettes.sample("okabe_ito", 3) == ["#e69f00", "#56b4e9", "#009e73"]
-    assert palettes.sample("magma", 3)[0] == "#000004"
-    assert len(palettes.sample("traffic_light", 7)) == 7 and len(palettes.sample("viridis", 1)) == 1
+    # okabe_ito is matplotlib's from 3.11 (8 colours, black first), else the toolkit's 7
+    okabe_ito = [to_hex(c) for c in colormaps["okabe_ito"].colors]
+    assert sample_colours("okabe_ito", 3) == okabe_ito[:3]
+    assert sample_colours("magma", 3)[0] == "#000004"
+    assert len(sample_colours("traffic_light", 7)) == 7 and len(sample_colours("viridis", 1)) == 1
 
 
 # -- thresholds hold in data units, whatever data is passed in ----------------
@@ -59,9 +74,9 @@ def test_band_labels():
 
 def test_changing_the_palette_keeps_the_breaks():
     scale = ColourScale("Heat", [10, 20, 30], "viridis")
-    assert scale.colours() == palettes.sample("viridis", 4)
+    assert scale.colours() == sample_colours("viridis", 4)
     scale.cmap = "okabe_ito"
-    assert scale.thresholds == [10, 20, 30] and scale.colours() == palettes.sample("okabe_ito", 4)
+    assert scale.thresholds == [10, 20, 30] and scale.colours() == sample_colours("okabe_ito", 4)
     scale.cmap = ["red", "green", "blue", "black"]
     assert scale.colours()[0] == "#ff0000"
     with pytest.raises(ColourScaleError, match="4 bands"):
@@ -93,26 +108,26 @@ def test_validation(kwargs, message):
 
 def test_thresholds_methods():
     data = np.concatenate([np.full(90, 20.0), np.linspace(20, 30, 10)])
-    assert colour_scales.thresholds([0, 100], 4, "equal") == [25, 50, 75]
-    assert colour_scales.thresholds([0.3, 9.7], 5, "nice") == [2, 4, 6, 8]
+    assert suggest_thresholds([0, 100], 4, "equal") == [25, 50, 75]
+    assert suggest_thresholds([0.3, 9.7], 5, "nice") == [2, 4, 6, 8]
     with pytest.raises(ColourScaleError, match="repeated values"):
-        colour_scales.thresholds(data, 4, "quantile")
-    q = colour_scales.thresholds(np.arange(100), 4, "quantile")
+        suggest_thresholds(data, 4, "quantile")
+    q = suggest_thresholds(np.arange(100), 4, "quantile")
     assert len(q) == 3 and q[0] < q[1] < q[2]
-    assert colour_scales.thresholds([1, None, "x", float("nan"), 3], 2, "equal") == [2]
+    assert suggest_thresholds([1, None, "x", float("nan"), 3], 2, "equal") == [2]
 
 
 def test_log_thresholds_have_equal_ratios():
-    thresholds = colour_scales.thresholds([1, 1000], 3, "log")
+    thresholds = suggest_thresholds([1, 1000], 3, "log")
     assert thresholds == pytest.approx([10, 100])
-    spread = colour_scales.thresholds(np.geomspace(0.5, 4000, 50), 5, "log")
+    spread = suggest_thresholds(np.geomspace(0.5, 4000, 50), 5, "log")
     ratios = [b / a for a, b in zip(spread, spread[1:])]
     assert len(spread) == 4 and ratios == pytest.approx([ratios[0]] * 3, rel=0.02)
     for data in ([0, 10, 100], [-5, 10, 100]):
         with pytest.raises(ColourScaleError, match="above zero"):
-            colour_scales.thresholds(data, 3, "log")
+            suggest_thresholds(data, 3, "log")
     with pytest.raises(ColourScaleError, match="too narrow"):
-        colour_scales.thresholds([1.0, 1.001], 5, "log")
+        suggest_thresholds([1.0, 1.001], 5, "log")
 
 
 @pytest.mark.parametrize("data,bands,expected", [
@@ -122,7 +137,7 @@ def test_log_thresholds_have_equal_ratios():
     ([1000, 250000], 5, [50000, 100000, 150000, 200000]),
 ])
 def test_nice_thresholds_fall_inside_the_data(data, bands, expected):
-    thresholds = colour_scales.thresholds(data, bands, "nice")
+    thresholds = suggest_thresholds(data, bands, "nice")
     assert thresholds == pytest.approx(expected)
     assert all(min(data) < t < max(data) for t in thresholds)
 
@@ -183,21 +198,17 @@ def test_corrupt_file_raises(tmp_path):
 @pytest.mark.parametrize("bands", [2, 3, 4, 5, 6, 8])
 def test_suggestions_always_give_the_number_of_bands_asked_for(method, bands):
     data = np.random.default_rng(1).normal(22, 3, 300)
-    assert len(colour_scales.thresholds(data, bands, method)) == bands - 1
-    assert len(colour_scales.thresholds([16, 30], bands, "nice")) == bands - 1
+    assert len(suggest_thresholds(data, bands, method)) == bands - 1
+    assert len(suggest_thresholds([16, 30], bands, "nice")) == bands - 1
 
 
-def test_clean_data_handles_numeric_and_mixed_input():
-    from python_toolkit.plot.colour_scales import clean_data
-
-    assert clean_data(np.array([[1, 2], [3, np.nan]])).tolist() == [1.0, 2.0, 3.0]
-    assert clean_data([1, None, "x", float("inf"), "4"]).tolist() == [1.0, 4.0]
-    assert clean_data(v for v in (1, 2)).tolist() == [1.0, 2.0]
+def test_finite_values_handles_numeric_and_mixed_input():
+    assert finite_values(np.array([[1, 2], [3, np.nan]])).tolist() == [1.0, 2.0, 3.0]
+    assert finite_values([1, None, "x", float("inf"), "4"]).tolist() == [1.0, 4.0]
+    assert finite_values(v for v in (1, 2)).tolist() == [1.0, 2.0]
 
 
 def test_save_scale_replaces_the_scale_it_edits_even_when_renamed(tmp_path):
-    from python_toolkit.plot.colour_scales import ColourScaleError, delete_scale
-
     path = tmp_path / "scales.json"
     save_scale(ColourScale("A", [1, 2], "viridis"), path)
     save_scale(ColourScale("B", [1, 2], "viridis"), path)
@@ -208,3 +219,9 @@ def test_save_scale_replaces_the_scale_it_edits_even_when_renamed(tmp_path):
     save_scale(ColourScale("B", [5, 6], "viridis"), path, replaces="B")  # same name: a plain edit
     assert delete_scale("B", path) and not delete_scale("B", path)
     assert [s.name for s in load_scales(path)] == ["C"]
+
+
+def test_suggest_thresholds_accepts_a_break_method_or_its_name():
+    assert suggest_thresholds([0, 100], 4, BreakMethod.EQUAL) == suggest_thresholds([0, 100], 4, "equal")
+    with pytest.raises(ColourScaleError, match="Method must be one of"):
+        suggest_thresholds([0, 100], 4, "wobbly")
