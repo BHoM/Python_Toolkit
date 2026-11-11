@@ -1,14 +1,17 @@
 """Colormap selector widget with embedded matplotlib preview."""
 
-from typing import Dict, List, Optional, Literal, Union
-from tkinter import ttk
+from pathlib import Path
+from typing import Dict, Iterable, List, Optional, Literal, Union
+from tkinter import messagebox, ttk
 import tkinter as tk
 import matplotlib as mpl
-from matplotlib.colors import Colormap, ListedColormap
+from matplotlib.colors import BoundaryNorm, Colormap, ListedColormap
 from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
+from python_toolkit.palettes import PaletteGroup, palette_names
+from python_toolkit.colour_scales import ColourScale, ColourScaleError, delete_scale, finite_values, load_scales
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
@@ -27,48 +30,6 @@ class CmapSelector(BHoMBaseWidget):
     * `List[str]`: a list of colour strings (hex codes or named colours) that is auto-converted to a `ListedColormap`.
     """
 
-    CATEGORICAL_CMAPS = [
-        "Accent",
-        "Dark2",
-        "Paired",
-        "Pastel1",
-        "Pastel2",
-        "Set1",
-        "Set2",
-        "Set3",
-        "tab10",
-        "tab20",
-        "tab20b",
-        "tab20c",
-    ]
-
-    CONTINUOUS_CMAPS = [
-        "viridis",
-        "plasma",
-        "inferno",
-        "magma",
-        "cividis",
-        "turbo",
-        "Blues",
-        "Greens",
-        "Greys",
-        "Oranges",
-        "Purples",
-        "Reds",
-        "YlGn",
-        "YlGnBu",
-        "YlOrBr",
-        "YlOrRd",
-        "coolwarm",
-        "seismic",
-        "Spectral",
-        "RdYlBu",
-        "RdYlGn",
-        "twilight",
-        "twilight_shifted",
-        "hsv",
-    ]
-
     def __init__(
         self,
         parent: ttk.Frame,
@@ -78,6 +39,10 @@ class CmapSelector(BHoMBaseWidget):
         default_cmap: Optional[CmapInput] = None,
         plot_size: tuple[int, int] = (400, 50),
         dropdown_position: Literal["n", "e", "s", "w"] = "n",
+        include_scales: bool = False,
+        data: Optional[Iterable] = None,
+        units: Optional[str] = None,
+        scales_path: Optional[Path] = None,
         **kwargs
     ) -> None:
         """
@@ -90,7 +55,8 @@ class CmapSelector(BHoMBaseWidget):
                 `List[str]` of colour strings.  When provided the preset
                 `cmap_set` selection is ignored.
             cmap_set: Preset colormap set used when `colormaps` is `None`.
-                Allowed values: "all", "continuous", "categorical".
+                Allowed values: "all", "continuous", "categorical", "colourblind"
+                (see `python_toolkit.palettes.PaletteGroup`).
             cmap_bins: Number of discrete gradient bands in the preview swatch.
             default_cmap: Optional default colormap to pre-select.  Accepts
                 the same input types as items in `colormaps`.
@@ -98,12 +64,24 @@ class CmapSelector(BHoMBaseWidget):
             dropdown_position: Position of the dropdown relative to the
                 preview swatch. "n" = above, "s" = below,
                 "w" = left, "e" = right.
+            include_scales: List the saved colour scales (see `python_toolkit.colour_scales`)
+                as "Name (scale)" entries, with buttons to build, edit and delete them.
+                Use `get_scale()` and `get_norm()` to colour data with the selected scale.
+            data: Values the scales will colour; passed to the scale builder for its
+                histogram and break suggestions, and used to stretch the end bands.
+            units: Units of `data`, stored with new scales.
+            scales_path: Saved scales file (defaults to the user's saved scales).
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
 
         self.cmap_bins = cmap_bins
         self.plot_size = plot_size
+        self.include_scales = include_scales
+        self.data = None if data is None else finite_values(data)
+        self.units = units
+        self.scales_path = scales_path
+        self._scales: Dict[str, ColourScale] = {}  # combobox label -> saved scale
 
         # Registry of custom (non-matplotlib-named) colormaps: label → Colormap
         self._custom_cmaps: Dict[str, Colormap] = {}
@@ -113,18 +91,14 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame.pack(side="top", fill="both", expand=True, anchor=self._pack_anchor)
 
         self.colormap_var = tk.StringVar(value="viridis")
-        self._all_colormaps = self._get_all_colormaps()
-        self._preset_map: Dict[str, List[str]] = {
-            "all": self._all_colormaps,
-            "continuous": self._filter_available(self.CONTINUOUS_CMAPS),
-            "categorical": self._filter_available(self.CATEGORICAL_CMAPS),
-        }
+        self._all_colormaps = palette_names()
         self._uses_explicit_colormaps = colormaps is not None
 
         self.cmap_frame.columnconfigure(0, weight=1)
         self.cmap_frame.rowconfigure(0, weight=1)
 
-        content = ttk.Frame(self.cmap_frame, width=plot_size[0], height=plot_size[1])
+        content = ttk.Frame(self.cmap_frame, width=plot_size[0],
+                            height=plot_size[1] + (scale_pad(34) if include_scales else 0))
         content.grid(row=0, column=0, padx=scale_pad(0), pady=scale_pad(4), sticky=self._grid_sticky)
         content.grid_propagate(False)
 
@@ -149,6 +123,9 @@ class CmapSelector(BHoMBaseWidget):
         )
         self.cmap_combobox.pack(side=tk.TOP, anchor=self._pack_anchor, padx=scale_pad(0))
         self.cmap_combobox.bind("<<ComboboxSelected>>", self._on_cmap_selected)
+        if include_scales:
+            self._build_scale_buttons(header)
+            self.colormap_var.trace_add("write", lambda *_: self._update_scale_buttons())
 
         fill_mode: Literal["x", "y"] = "y" if is_horizontal else "x"
         self.figure_widget = FigureContainer(
@@ -167,39 +144,13 @@ class CmapSelector(BHoMBaseWidget):
             current_colormaps = self._preset_colormaps(self.cmap_set_var.get())
 
         self._populate_cmap_list(current_colormaps)
+        if include_scales:
+            self._refresh_scales()
+            current_colormaps = list(self.cmap_combobox["values"])
 
         # Resolve default_cmap: may itself be a Colormap object or colour list
         self._default_label = self._resolve_default_label(default_cmap, current_colormaps)
         self._select_default_cmap(current_colormaps)
-
-    def _get_all_colormaps(self) -> List[str]:
-        """Return all registered colormap names, including reversed variants.
-
-        Returns:
-            List[str]: Sorted list of available colormap names.
-        """
-        # Base names available in this matplotlib build
-        base_names = set(mpl.colormaps())
-
-        # Include reversed variants (name_r) next to each base map
-        all_names = set(base_names)
-        for name in list(base_names):
-            if not name.endswith("_r"):
-                all_names.add(f"{name}_r")
-
-        return sorted(all_names)
-
-    def _filter_available(self, names: List[str]) -> List[str]:
-        """Filter a candidate list to names available in the current matplotlib build.
-
-        Args:
-            names: Candidate colormap names.
-
-        Returns:
-            List[str]: Candidate names available in the current environment.
-        """
-        available = set(self._all_colormaps)
-        return [name for name in names if name in available]
 
     def _with_reversed(self, names: List[str]) -> List[str]:
         """Return colormap names with reversed variants next to base maps.
@@ -231,7 +182,8 @@ class CmapSelector(BHoMBaseWidget):
             List[str]: Colormap names for the requested preset.
         """
         key = (cmap_set or "all").lower()
-        return self._with_reversed(self._preset_map.get(key, self._preset_map["all"]))
+        group = key if key in {g.value for g in PaletteGroup} else None  # "all", or anything unknown, lists every map
+        return self._with_reversed(palette_names(group))
 
     def _resolve_colormaps(self, colormaps: List[CmapInput]) -> tuple[List[str], Dict[str, Colormap]]:
         """Normalise a mixed list of colormap inputs into display labels and a custom-cmap registry.
@@ -404,6 +356,107 @@ class CmapSelector(BHoMBaseWidget):
 
         return mpl.colormaps.get(name)
 
+    # ── saved colour scales ────────────────────────────────────────────────
+
+    @staticmethod
+    def _scale_label(name: str) -> str:
+        """The dropdown label of a saved scale, which sets it apart from palettes of the same name."""
+        return f"{name} (scale)"
+
+    def _build_scale_buttons(self, parent: ttk.Frame) -> None:
+        """Add the New / Edit / Delete scale buttons below the dropdown."""
+        row = ttk.Frame(parent)
+        row.pack(side=tk.TOP, anchor=self._pack_anchor, pady=(4, 0))
+        self.new_scale_button = ttk.Button(row, text="New scale…", command=lambda: self._open_builder(None))
+        self.edit_scale_button = ttk.Button(row, text="Edit…", command=self._edit_scale)
+        self.delete_scale_button = ttk.Button(row, text="Delete", command=self._delete_scale)
+        for button in (self.new_scale_button, self.edit_scale_button, self.delete_scale_button):
+            button.pack(side=tk.LEFT, padx=(0, 4))
+        self._update_scale_buttons()
+
+    def _update_scale_buttons(self) -> None:
+        """Enable Edit and Delete only while a saved scale is selected."""
+        state = ["!disabled"] if self.get_scale() is not None else ["disabled"]
+        self.edit_scale_button.state(state)
+        self.delete_scale_button.state(state)
+
+    def _refresh_scales(self, select: Optional[str] = None) -> None:
+        """Reload the saved scales into the dropdown, keeping the selection (or selecting the scale named `select`)."""
+        previous = self.colormap_var.get()
+        for label in self._scales:
+            self._custom_cmaps.pop(label, None)
+        try:
+            scales = load_scales(self.scales_path)
+        except ColourScaleError as e:  # an unreadable file must not break the selector
+            CONSOLE_LOGGER.warning(str(e))
+            scales = []
+        palette_values = [v for v in self.cmap_combobox["values"] if v not in self._scales]
+        self._scales = {self._scale_label(s.name): s for s in scales}
+        for label, scale in self._scales.items():
+            self._custom_cmaps[label] = scale.cmap_and_norm(self.data)[0]
+        self._populate_cmap_list(palette_values + list(self._scales))
+        target = self._scale_label(select) if select else previous
+        if target in self.cmap_combobox["values"]:
+            self.colormap_var.set(target)
+            self._update_cmap_sample()
+        elif previous:  # the selected scale was deleted
+            self.colormap_var.set(palette_values[0] if palette_values else "")
+            self._update_cmap_sample()
+
+    def _open_builder(self, scale: Optional[ColourScale]) -> None:
+        """Open the scale builder to make a new scale, or edit `scale`; the saved scale is then selected."""
+        # imported here: the window imports the widgets package, so a top-level import would be circular
+        from python_toolkit.bhom_tkinter.windows.colour_scale_builder import ColourScaleBuilder
+
+        current = self.colormap_var.get()
+        builder = ColourScaleBuilder(
+            self.winfo_toplevel(), data=self.data, units=self.units, scale=scale, library_path=self.scales_path,
+            palette=current if current in self._all_colormaps else None, on_save=self._on_scale_saved)
+        builder.run()
+
+    def _on_scale_saved(self, scale: ColourScale) -> None:
+        """Reload the saved scales and select the one just saved."""
+        self._refresh_scales(select=scale.name)
+        self._fire_on_change(self.get())
+
+    def _edit_scale(self) -> None:
+        """Open the builder on the selected scale."""
+        scale = self.get_scale()
+        if scale is not None:
+            self._open_builder(scale)
+
+    def _delete_scale(self) -> None:
+        """Delete the selected scale from the saved scales file, after the user confirms."""
+        scale = self.get_scale()
+        if scale is None or not messagebox.askyesno("Delete colour scale", f"Delete the saved scale '{scale.name}'?"):
+            return
+        try:
+            delete_scale(scale.name, self.scales_path)
+        except (ColourScaleError, OSError) as e:
+            messagebox.showerror("Delete colour scale", str(e))
+            return
+        self._refresh_scales()
+        self._fire_on_change(self.get())
+
+    def get_scale(self) -> Optional[ColourScale]:
+        """Return the selected saved colour scale.
+
+        Returns:
+            Optional[ColourScale]: The scale, or None when a plain palette is selected.
+        """
+        return self._scales.get(self.colormap_var.get())
+
+    def get_norm(self) -> Optional[BoundaryNorm]:
+        """Return the normaliser for the selected scale, with its thresholds in data units.
+
+        Colour data with `get_cmap()` and `get_norm()` together; the end bands run to the `data` given.
+
+        Returns:
+            Optional[BoundaryNorm]: The normaliser, or None when a plain palette is selected.
+        """
+        scale = self.get_scale()
+        return scale.cmap_and_norm(self.data)[1] if scale is not None else None
+
     def add_cmap(self, cmap: CmapInput, label: Optional[str] = None) -> Optional[str]:
         """Dynamically add a new colormap entry to the selector.
 
@@ -467,6 +520,9 @@ class CmapSelector(BHoMBaseWidget):
             self.figure_widget.clear()
             self.colormap_var.set("")
             return
+
+        if isinstance(value, ColourScale):
+            value = self._scale_label(value.name)
 
         if isinstance(value, str):
             if value in self.cmap_combobox["values"]:
@@ -598,6 +654,24 @@ if __name__ == "__main__":
     selector_dynamic.build()
     selector_dynamic.add_cmap(["#003366", "#0066cc", "#99ccff"], label="brand_blue")
     selector_dynamic.add_cmap(custom_listed)
+
+    # Example 6 — saved colour scales: build, edit and delete scales from sample data
+    import numpy as np
+    import tempfile
+
+    selector_scales = CmapSelector(
+        parent_container,
+        cmap_set="colourblind",
+        include_scales=True,
+        data=np.random.default_rng(1).normal(22, 3, 300),
+        units="degC",
+        scales_path=Path(tempfile.gettempdir()) / "cmap_selector_demo_scales.json",  # not your saved scales
+        item_title="6. Colour scales",
+        helper_text="New scale... opens the builder; saved scales appear as 'Name (scale)'.",
+        build_options=PackingOptions(fill="both", expand=True),
+        plot_size=(400, 40),
+    )
+    selector_scales.build()
 
     root.mainloop()
 

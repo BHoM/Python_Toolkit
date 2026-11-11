@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable, List, Literal
 
+from python_toolkit.bhom.logging import CONSOLE_LOGGER
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
 class DropDownSelection(BHoMBaseWidget):
