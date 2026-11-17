@@ -64,6 +64,18 @@ def is_categorical(name: str) -> bool:
     return name.removesuffix("_r") in _group_members(PaletteGroup.CATEGORICAL)
 
 
+def is_colourblind_safe(name: str) -> bool:
+    """Whether a palette, or its reversed copy, is tagged as colour-blind safe.
+
+    Args:
+        name: Palette name.
+
+    Returns:
+        bool: True if the palette is distinguishable with the common colour vision deficiencies.
+    """
+    return name.removesuffix("_r") in _group_members(PaletteGroup.COLOURBLIND)
+
+
 def sample_colours(name: str, count: int) -> list[str]:
     """Pick colours from a palette.
 

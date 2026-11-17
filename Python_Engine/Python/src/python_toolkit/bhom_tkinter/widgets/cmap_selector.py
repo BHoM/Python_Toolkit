@@ -10,11 +10,14 @@ from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-from python_toolkit.palettes import PaletteGroup, palette_names
+from python_toolkit.palettes import PaletteGroup, is_colourblind_safe, palette_names
 from python_toolkit.colour_scales import ColourScale, ColourScaleError, delete_scale, finite_values, load_scales
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
+
+# Shown after the name of a colour-blind safe palette in the dropdown; display only, never part of the name
+COLOURBLIND_SAFE_TAG = " [colour blind safe]"
 
 # Accepted colormap input types for colormaps parameter and set()/add_cmap()
 CmapInput = Union[str, Colormap, List[str]]
@@ -43,6 +46,7 @@ class CmapSelector(BHoMBaseWidget):
         data: Optional[Iterable] = None,
         units: Optional[str] = None,
         scales_path: Optional[Path] = None,
+        show_tags: bool = True,
         **kwargs
     ) -> None:
         """
@@ -71,6 +75,8 @@ class CmapSelector(BHoMBaseWidget):
                 histogram and break suggestions, and used to stretch the end bands.
             units: Units of `data`, stored with new scales.
             scales_path: Saved scales file (defaults to the user's saved scales).
+            show_tags: Show tags such as "[colour blind safe]" after palette names in the dropdown. Display only:
+                `get()`, `set()` and the palette names themselves never include the tag.
             **kwargs: Additional Frame options.
         """
         super().__init__(parent, **kwargs)
@@ -81,6 +87,9 @@ class CmapSelector(BHoMBaseWidget):
         self.data = None if data is None else finite_values(data)
         self.units = units
         self.scales_path = scales_path
+        self.show_tags = show_tags
+        self._names: List[str] = []  # the names behind the dropdown entries, in order
+        self._display_to_name: Dict[str, str] = {}
         self._scales: Dict[str, ColourScale] = {}  # combobox label -> saved scale
 
         # Registry of custom (non-matplotlib-named) colormaps: label → Colormap
@@ -90,7 +99,9 @@ class CmapSelector(BHoMBaseWidget):
         self.cmap_frame = ttk.Frame(self.content_frame)
         self.cmap_frame.pack(side="top", fill="both", expand=True, anchor=self._pack_anchor)
 
-        self.colormap_var = tk.StringVar(value="viridis")
+        self.colormap_var = tk.StringVar(master=self, value="viridis")  # the selected name; the dropdown shows `cmap_display_var`
+        self.cmap_display_var = tk.StringVar(master=self)
+        self.colormap_var.trace_add("write", lambda *_: self.cmap_display_var.set(self._display_name(self.colormap_var.get())))
         self._all_colormaps = palette_names()
         self._uses_explicit_colormaps = colormaps is not None
 
@@ -102,7 +113,7 @@ class CmapSelector(BHoMBaseWidget):
         content.grid(row=0, column=0, padx=scale_pad(0), pady=scale_pad(4), sticky=self._grid_sticky)
         content.grid_propagate(False)
 
-        self.cmap_set_var = tk.StringVar(value=cmap_set.lower())
+        self.cmap_set_var = tk.StringVar(master=self, value=cmap_set.lower())
 
         pos = dropdown_position.lower()
         is_horizontal = pos in ("w", "e")
@@ -117,7 +128,7 @@ class CmapSelector(BHoMBaseWidget):
 
         self.cmap_combobox = ttk.Combobox(
             header,
-            textvariable=self.colormap_var,
+            textvariable=self.cmap_display_var,
             state="readonly",
             justify=self._text_justify,
         )
@@ -146,7 +157,7 @@ class CmapSelector(BHoMBaseWidget):
         self._populate_cmap_list(current_colormaps)
         if include_scales:
             self._refresh_scales()
-            current_colormaps = list(self.cmap_combobox["values"])
+            current_colormaps = list(self._names)
 
         # Resolve default_cmap: may itself be a Colormap object or colour list
         self._default_label = self._resolve_default_label(default_cmap, current_colormaps)
@@ -269,9 +280,24 @@ class CmapSelector(BHoMBaseWidget):
 
         return None
 
+    def _display_name(self, name: str) -> str:
+        """The dropdown text for a name: the name, plus its tags when `show_tags` is on."""
+        if self.show_tags and name not in self._custom_cmaps and is_colourblind_safe(name):
+            return f"{name}{COLOURBLIND_SAFE_TAG}"
+        return name
+
+    @property
+    def cmap_names(self) -> List[str]:
+        """The names the dropdown offers, without display tags."""
+        return list(self._names)
+
     def _populate_cmap_list(self, colormaps: List[str]) -> None:
         """Replace the combobox options with the provided colormap names."""
-        self.cmap_combobox["values"] = tuple(colormaps)
+        self._names = list(colormaps)
+        self._display_to_name = {self._display_name(name): name for name in self._names}
+        self.cmap_combobox["values"] = tuple(self._display_to_name)
+        self.cmap_combobox.configure(width=max([20, *(len(d) for d in self._display_to_name)]) + 1)  # wide enough for the tags
+        self.cmap_display_var.set(self._display_name(self.colormap_var.get()))
 
     def _select_default_cmap(self, colormaps: List[str]) -> None:
         """Select an initial colormap and render its preview."""
@@ -286,6 +312,7 @@ class CmapSelector(BHoMBaseWidget):
 
     def _on_cmap_selected(self, event=None) -> None:
         """Handle combobox selection changes."""
+        self.colormap_var.set(self._display_to_name.get(self.cmap_display_var.get(), self.cmap_display_var.get()))
         self._update_cmap_sample()
         self._fire_on_change(self.get())
 
@@ -390,13 +417,13 @@ class CmapSelector(BHoMBaseWidget):
         except ColourScaleError as e:  # an unreadable file must not break the selector
             CONSOLE_LOGGER.warning(str(e))
             scales = []
-        palette_values = [v for v in self.cmap_combobox["values"] if v not in self._scales]
+        palette_values = [v for v in self._names if v not in self._scales]
         self._scales = {self._scale_label(s.name): s for s in scales}
         for label, scale in self._scales.items():
             self._custom_cmaps[label] = scale.cmap_and_norm(self.data)[0]
         self._populate_cmap_list(palette_values + list(self._scales))
         target = self._scale_label(select) if select else previous
-        if target in self.cmap_combobox["values"]:
+        if target in self._names:
             self.colormap_var.set(target)
             self._update_cmap_sample()
         elif previous:  # the selected scale was deleted
@@ -473,7 +500,7 @@ class CmapSelector(BHoMBaseWidget):
             Optional[str]: The display label used for the new entry, or
                 `None` if the input was invalid or already present.
         """
-        existing = list(self.cmap_combobox["values"])
+        existing = list(self._names)
 
         if isinstance(cmap, str):
             if cmap not in self._all_colormaps or cmap in existing:
@@ -525,7 +552,7 @@ class CmapSelector(BHoMBaseWidget):
             value = self._scale_label(value.name)
 
         if isinstance(value, str):
-            if value in self.cmap_combobox["values"]:
+            if value in self._names:
                 self.colormap_var.set(value)
                 self._update_cmap_sample()
             else:
@@ -568,7 +595,7 @@ class CmapSelector(BHoMBaseWidget):
         name = self.colormap_var.get()
         if not name:
             return self.apply_validation((False, "No colormap selected.", "error"))
-        if name not in self.cmap_combobox["values"]:
+        if name not in self._names:
             return self.apply_validation((False, f"Selected colormap '{name}' is not available.", "error"))
         return self.apply_validation((True, None, None))
             

@@ -118,14 +118,16 @@ def test_builder_starts_from_a_palette_and_recolours(host, library):
 
 def test_cmap_selector_lists_palette_sets(host):
     for cmap_set, expected in (("categorical", "okabe_ito"), ("colourblind", "okabe_ito"), ("continuous", "ltc_maya")):
-        values = list(CmapSelector(host.content_frame, cmap_set=cmap_set).cmap_combobox["values"])
+        values = list(CmapSelector(host.content_frame, cmap_set=cmap_set).cmap_names)
         assert expected in values and f"{expected}_r" in values
-    assert "okabe_ito" not in CmapSelector(host.content_frame, cmap_set="continuous").cmap_combobox["values"]
+    assert "okabe_ito" not in CmapSelector(host.content_frame, cmap_set="continuous").cmap_names
 
 
 def test_cmap_selector_lists_what_it_is_given(host):
     selector = CmapSelector(host.content_frame, colormaps=["viridis"])
-    assert list(selector.cmap_combobox["values"]) == ["viridis"]
+    assert selector.cmap_names == ["viridis"]
+    assert list(selector.cmap_combobox["values"]) == ["viridis [colour blind safe]"]  # the tag is display only
+    assert selector.get() == "viridis"
 
 
 def test_end_to_end_palette_to_saved_scale_to_colours(host, library):

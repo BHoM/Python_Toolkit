@@ -11,6 +11,7 @@ from python_toolkit.palettes.palette import Palette
 from python_toolkit.palettes.registry import (
     PaletteGroup,
     is_categorical,
+    is_colourblind_safe,
     palette_names,
     register_toolkit_palettes,
     sample_colours,
@@ -24,6 +25,7 @@ __all__ = [
     "PaletteGroup",
     "TOOLKIT_PALETTES",
     "is_categorical",
+    "is_colourblind_safe",
     "palette_names",
     "register_toolkit_palettes",
     "sample_colours",
