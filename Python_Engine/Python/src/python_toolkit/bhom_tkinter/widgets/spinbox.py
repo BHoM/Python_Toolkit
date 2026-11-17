@@ -41,7 +41,9 @@ class Spinbox(BHoMBaseWidget):
 		super().__init__(parent, **kwargs)
 
 		self.command = command
-		self._value_var = tk.StringVar()
+		# Bind to this widget's own interpreter: an unbound variable uses tkinter's default
+		# root, which can be a different (or stale) Tk instance once several roots exist.
+		self._value_var = tk.StringVar(master=self)
 
 		# Store range/list constraints for validation
 		self._from = from_
