@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.5
+version: 0.2.6
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, structure, style, packaging]
@@ -210,7 +210,7 @@ README: errors are handled gracefully; the user is told **what went wrong and ho
 BHoM priority order: **performance, security, maintainability, readability** ([bhom-coding-standards](../bhom-coding-standards/SKILL.md#priority-order)).
 
 - Vectorise with numpy/pandas; no Python loops over 8760-row series where an array operation exists.
-- Do not mutate inputs (`df = df.copy()` first) unless the function is documented as in-place.
+- Do not mutate inputs (`df = df.copy()` first) unless the function is documented as in-place. Wrapped methods in `bhom/wrapped/` are the exception (see [SKILL-FRAMEWORK.md](./SKILL-FRAMEWORK.md#c-callable-methods-bhom_callable--run_wrapped)).
 - Return plain Python types at public and C# boundaries where practical (`float(x)`, not `numpy.float64`).
 - `with` for files; `plt.close(fig)` for figures created in non-interactive code.
 - `functools.lru_cache` only for pure functions with hashable, immutable inputs.

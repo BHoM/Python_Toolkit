@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.5
+version: 0.2.6
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,23 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL.md (v0.2.0 → v0.2.1)
+- SKILL-FRAMEWORK.md (v0.2.1 → v0.2.2)
+- SKILL-IMPLEMENTATION.md (v0.2.5 → v0.2.6)
+- SKILL-REVIEW.md (v0.2.2 → v0.2.3)
+- CHANGELOG.md (v0.2.5 → v0.2.6)
+
+**Changes:**
+- Methods in `bhom/wrapped/` may modify their inputs (they receive copies deserialised from C# JSON): exception added to PY-C04, the input-mutation guidance, golden rule 7 and the wrapped-method guidance.
+- `"test"` wrapped-method defect no longer lists input mutation.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL-IMPLEMENTATION.md (v0.2.4 → v0.2.5)
 - SKILL-REVIEW.md (v0.2.1 → v0.2.2)

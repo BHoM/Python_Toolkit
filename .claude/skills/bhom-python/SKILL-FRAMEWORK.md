@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Framework
 description: How to use the python_toolkit BHoM framework - C#-callable methods (bhom_callable + run_wrapped), BHoMObject/IObject and BHoM JSON, bhom_analytics, logging and pythonnet.
-version: 0.2.1
+version: 0.2.2
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, framework, serialisation, logging, pythonnet]
@@ -110,6 +110,7 @@ Points to copy:
 - **Decorator order:** `bhom_callable` outermost (it registers what it wraps), `bhom_analytics()` inside it, so analytics records the real function name.
 - **Light imports.** Every module in `bhom/wrapped/` is imported on *every* `run_wrapped` call, whichever method is requested. Keep module-level imports cheap and side-effect free; import heavy optional libraries inside the function.
 - **Input types C# can produce.** Use JSON-native types (`float`, `str`, `list`, `dict`) or BHoM objects. A `pd.Series` or `datetime` cannot arrive from C# directly.
+- **Inputs are the method's to modify.** From C#, a wrapped method receives copies deserialised from JSON and returns a copy as JSON, so it may change its inputs in place - the usual "don't mutate inputs" rule does not apply here. A Python caller calling a wrapped method directly should not rely on its arguments being left unchanged.
 
 ### Identifiers
 
@@ -333,7 +334,7 @@ On `develop` at `d9d1edd`. Until fixed, write code that does not depend on the b
 | `_bhom_callable_decorator.py` | Bare `except:`; on invalid JSON it logs, then fails with `UnboundLocalError: json_kwargs` (verified) | Validate JSON on the C# side; fix: raise a `ValueError` with the parse error |
 | `_bhom_callable_decorator.py` | Input not starting with `{` is assumed to be a path - leading whitespace/BOM or a JSON array gives `FileNotFoundError` | Send compact JSON or a file path; fix: `lstrip()` and check `Path.exists()` |
 | `_bhom_callable_decorator.py` | `argument_types={}` mutable default (read-only today, but violates PY-C01) | - |
-| `wrapped/_test_wrapped.py` | Ships a `"test"` method that `print`s and mutates its input - and it is registered in every environment that imports `python_toolkit.bhom.wrapped` | Move to `tests/` |
+| `wrapped/_test_wrapped.py` | Ships a `"test"` method that `print`s to stdout - and it is registered in every environment that imports `python_toolkit.bhom.wrapped` | Move to `tests/` |
 | `logging/console.py` | Console logger writes to **stdout**, the same stream C# deserialises | Keep wrapped paths quiet until the UV environment management update (#253), where the C# run method returns stdout and stderr separately |
 | `analytics.py` wrapper | `Errors.extend(<dict>)` adds the dict's *keys*, not the error event | - (fix: `append`) |
 | `bhom_object.py` `IObject.from_dict` | Catches `ctypes.ArgumentError`, but bad kwargs raise `TypeError` | - |

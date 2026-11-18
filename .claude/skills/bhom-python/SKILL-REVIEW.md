@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Compliance Review
 description: Rule catalogue, severities, automated checks and report format for reviewing Python in Python_Toolkit.
-version: 0.2.2
+version: 0.2.3
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, review, compliance, CI]
@@ -88,7 +88,7 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 | PY-C01 | Blocker | No mutable or call-evaluated defaults (`[]`, `{}`, `uuid.uuid4()`, `datetime.now()`) in signatures or dataclass fields |
 | PY-C02 | Blocker | Logic does what its name/docstring says - check boolean conditions for always-true/false (e.g. `validate_timeseries` `is_annual`) |
 | PY-C03 | Major | `dataclasses.field(default_factory=...)` is given a callable |
-| PY-C04 | Major | Inputs not mutated unless documented in-place (the shipped `"test"` wrapped method mutates its input) |
+| PY-C04 | Major | Inputs not mutated unless documented in-place. **Exception:** methods in `bhom/wrapped/` may modify their inputs, which are copies deserialised from C# JSON |
 | PY-C05 | Major | Floats compared with tolerance |
 | PY-C06 | Major | Annotations match what is accepted/returned (`-> str` returning a dict; `x: str = None`) |
 | PY-C07 | Minor | `is None` / `is not None`, never `== None` |
