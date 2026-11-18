@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Compliance Review
 description: Rule catalogue, severities, automated checks and report format for reviewing Python in Python_Toolkit.
-version: 0.2.4
+version: 0.2.5
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, review, compliance, CI]
@@ -58,6 +58,7 @@ grep -rnE --include=*.py '(^|[^A-Za-z])[A-Z]:[/\\][^/\\]' src               # PY
 grep -rnE --include=*.py 'shell=True|os\.system|eval\(|exec\(' src          # PY-S02
 grep -rn  --include=*.py 'bhom_callable' src | grep -v 'bhom/wrapped/\|bhom/decorators/'   # PY-W02
 python -c "import pathlib,sys; [print(p) for p in pathlib.Path(sys.argv[1]).rglob('*.py') if p.read_bytes()[:3]==b'\xef\xbb\xbf']" src   # PY-F04 BOM
+grep -rL --include=*.py 'Buildings and Habitats object Model (BHoM)' src tests   # PY-F06 files missing the header
 ```
 
 pylint `W0102 dangerous-default-value` catches `[]`/`{}` defaults but **not** call defaults (`uuid.uuid4()`, `datetime.now()`) - check those by eye.
@@ -135,6 +136,7 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 | PY-F03 | Minor | One public function/class per file; snake_case file names |
 | PY-F04 | Minor | UTF-8 without BOM |
 | PY-F05 | Info | No commented-out code; `TODO` has an issue link |
+| PY-F06 | Major | BHoM copyright header at the top of every new or changed `.py` file (source and tests), with the current end year ([template](#copyright-for-python-files)) |
 
 ### Tests
 
@@ -179,11 +181,14 @@ Request changes | Approve with comments | Approve
 
 ## Copyright for Python Files
 
-**Current state:** no `.py` file in Python_Toolkit has a copyright header, and CI does not check Python. [bhom-copyright](../bhom-copyright/SKILL.md) says the header is required for "all files in BHoM projects".
+**Every `.py` file - source and tests - carries the BHoM copyright header**, as [bhom-copyright](../bhom-copyright/SKILL.md) requires for all BHoM files (PY-F06).
 
-> **Decision needed (QA):** require the header on new `.py` files, or state that Python is exempt. Until decided, report missing headers as **Info**.
+- **Form:** the C# header text verbatim, as `#` comments, at the very top of the file, above the module docstring (and so above any `from __future__` import).
+- **Year:** `2015 - <current year>`. When you modify a file, update the end year to the current year, exactly as bhom-copyright describes.
+- **Existing files:** no `.py` file in Python_Toolkit has the header yet. Add it to every new file and to every existing file a PR changes. Missing headers on untouched files go under "Existing issues", not as blockers.
+- **CI:** the BHoM copyright check does not cover Python, so this review is what enforces it.
 
-If required, the Python form keeps the C# text verbatim as `#` comments, above the module docstring:
+Template (use the current year):
 
 ```python
 #

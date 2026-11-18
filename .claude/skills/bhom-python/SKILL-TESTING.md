@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Testing
 description: How to write, organise and run pytest tests for Python_Toolkit, including serialisation round trips, wrapped (C#-callable) methods, plots, UI and pythonnet.
-version: 0.2.2
+version: 0.2.3
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, testing, pytest]
@@ -229,5 +229,6 @@ def test_file_settings_round_trips_through_bhom_json():
 - [ ] BHoM objects: round trip and C#-generated golden JSON
 - [ ] Plots use `Agg` and close figures; UI tests skip without a display
 - [ ] No absolute paths, network paths, project data or secrets in tests or assets
+- [ ] Test files carry the BHoM copyright header
 - [ ] Analytics disabled for the test run
 - [ ] `python -m pytest` passes in the Python_Toolkit environment

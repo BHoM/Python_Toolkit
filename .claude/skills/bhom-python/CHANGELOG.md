@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.7
+version: 0.2.8
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,23 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL.md (v0.2.2 → v0.2.3)
+- SKILL-IMPLEMENTATION.md (v0.2.6 → v0.2.7)
+- SKILL-REVIEW.md (v0.2.4 → v0.2.5)
+- SKILL-TESTING.md (v0.2.2 → v0.2.3)
+- CHANGELOG.md (v0.2.7 → v0.2.8)
+- QA-NOTES.md
+
+**Changes:**
+- The BHoM copyright header is now required on every `.py` file, source and tests: new review rule PY-F06 with an automated check, style rule S21, checklist items, and the "Copyright for Python Files" section rewritten from an open decision into the rule.
+
+**Rationale:**
+PR #265 review feedback (decision D1).
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL.md (v0.2.1 → v0.2.2)
 - SKILL-REVIEW.md (v0.2.3 → v0.2.4)

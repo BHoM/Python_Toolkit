@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.6
+version: 0.2.7
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, structure, style, packaging]
@@ -69,6 +69,8 @@ def heating_degree_days(air_temperature: pd.Series, base_temperature: float = 15
     deficit = (base_temperature - air_temperature).clip(lower=0)
     return float(deficit.sum() / 24)
 ```
+
+The BHoM copyright header goes above the module docstring (S21); it is left out of the examples in this skill for length.
 
 What this shows: one public function per file, file named after it, module docstring, absolute imports grouped stdlib / third-party / python_toolkit, full type hints, Google docstring with units and `Raises`, validation at entry, a specific exception with a fix-it message, a warning via `CONSOLE_LOGGER`, analytics on the public entry point, vectorised pandas, a plain `float` return (not `numpy.float64`).
 
@@ -162,6 +164,7 @@ Formatting is mechanical: **black** (installed in every BHoM environment). Do no
 | S18 | `# pylint: disable=...` only with the specific code and a reason; no blanket disables around import blocks. |
 | S19 | UTF-8 **without BOM** (24 files in `src` currently start with a BOM). |
 | S20 | No work at import time in package modules: no network, `atexit`, environment-variable changes, or `sys.path` edits. Modules in `bhom/wrapped/` are imported on every `run_wrapped` call - keep them especially light. |
+| S21 | **BHoM copyright header** at the very top of every `.py` file, source and tests, as `#` comments above the module docstring; end year = current year, updated whenever the file is modified. Template: [SKILL-REVIEW.md](./SKILL-REVIEW.md#copyright-for-python-files). |
 
 ### Docstring template (Google)
 
@@ -230,6 +233,7 @@ BHoM priority order: **performance, security, maintainability, readability** ([b
 ## Checklist
 
 - [ ] Right sub-package; one public function/class per file; snake_case file name
+- [ ] BHoM copyright header with the current end year
 - [ ] Module docstring; Google docstrings with units and `Raises`
 - [ ] Type hints on all parameters and returns; 3.10-compatible
 - [ ] Absolute imports, grouped stdlib / third-party / python_toolkit

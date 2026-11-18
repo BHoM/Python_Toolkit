@@ -4,7 +4,7 @@
 
 | # | Question | Draft position | Where |
 |---|----------|----------------|-------|
-| D1 | Copyright header on `.py` files? None in Python_Toolkit; CI does not check Python. | Report as Info until decided; Python form drafted | SKILL-REVIEW "Copyright for Python Files" |
+| D1 | Copyright header on `.py` files? | **Decided (PR #265 review): required** on every `.py` file, source and tests (PY-F06, S21) | SKILL-REVIEW "Copyright for Python Files" |
 | D2 | Test location: `Python_Engine/Python/tests/` (practice) vs `.ci/unit_tests/python/` (README) | Practice; update the README | SKILL-TESTING "Where Tests Live" |
 | D3 | Wrapped identifier convention | `python_toolkit.<area>.<function>` | SKILL-FRAMEWORK "Identifiers" |
 | D4 | Give python_toolkit's `run_wrapped.py` a `-command`/`-in` CLI and add `BH.Engine.Python.Compute.RunWrapped` | Proposed | SKILL-FRAMEWORK "The C# Side" |

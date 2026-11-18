@@ -1,7 +1,7 @@
 ---
 name: bhom-python
 description: Write, test and compliance-review Python in Python_Toolkit, the BHoM Python base package. Covers package layout and packaging, C#-callable methods (bhom_wrapper.bhom_callable + run_wrapped, BHoM JSON outputs), BHoMObject/IObject serialisation, bhom_analytics, CONSOLE_LOGGER, pythonnet, pytest standards and a review rule catalogue. Use for any .py work in Python_Toolkit or when asked to review/audit its Python. Toolkit-specific Python skills build on this one.
-version: 0.2.2
+version: 0.2.3
 author: DRAFT - for QA
 tags: [BHoM, Python, standards, testing, review]
 ---
@@ -97,7 +97,7 @@ Then ─► tests (SKILL-TESTING) ─► self-review with the SKILL-REVIEW check
 ## Related Skills
 
 - [bhom-coding-standards](../bhom-coding-standards/SKILL.md) - AI behaviour, priority order (performance > security > maintainability > readability), error-recording semantics. This skill maps those to Python and does not repeat the C# formatting rules.
-- [bhom-copyright](../bhom-copyright/SKILL.md) - C# header; Python header status is an open decision ([SKILL-REVIEW.md](./SKILL-REVIEW.md#copyright-for-python-files)).
+- [bhom-copyright](../bhom-copyright/SKILL.md) - the header text and year rules. Python files carry the same header as `#` comments ([SKILL-REVIEW.md](./SKILL-REVIEW.md#copyright-for-python-files)).
 - [bhom-develop](../bhom-develop/SKILL.md) - overall assess / plan / implement / review workflow; use this skill for the Python steps.
 - **Toolkit-specific Python skills** (one per toolkit) build on this skill and add only that toolkit's conventions. Where they are stricter, they win.
 
