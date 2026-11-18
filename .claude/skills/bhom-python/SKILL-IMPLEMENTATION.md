@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.3
+version: 0.2.4
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, structure, style, packaging]
@@ -125,7 +125,7 @@ Rules:
 | Package data | Non-`.py` files (`.mplstyle`, `.tcl`, `.png`) must be listed in `[tool.setuptools.package-data]` or they are missing after install. Currently only `*.mplstyle` is listed - check `.tcl` theme files and `bhom/assets/*.png` are covered. |
 | Paths | C# side: `BH.Engine.Python.Query.*`. Python side: `BHOM_LOG_FOLDER`, `os.environ["PROGRAMDATA"]`, `Path(__file__)` - never literal `C:\...` paths. |
 | Deploying | Build `Python_Engine` (post-build copy to `%ProgramData%\BHoM\Extensions\PythonCode\Python_Toolkit`), then `UpdateBHoMPackages`. `run_tests.bat` tests that deployed copy. |
-| Notebooks | Fine for exploration (`%load_ext autoreload` / `%autoreload 2`); excluded from the deployed copy; never the only home of logic; outputs cleared before commit. |
+| Notebooks | Fine for local exploration (`%load_ext autoreload` / `%autoreload 2`), but **never committed** - `*.ipynb` is in `.gitignore`. Anything worth keeping moves into the package or a pytest test. |
 
 ---
 
@@ -220,7 +220,7 @@ BHoM priority order: **performance, security, maintainability, readability** ([b
 ## Security and Privacy
 
 - No credentials, tokens, connection strings or API keys in code, tests or notebooks.
-- No project names, client names, job numbers or personal data in code, test assets, log messages or committed notebook outputs (PR template warning).
+- No project names, client names, job numbers or personal data in code, test assets or log messages (PR template warning).
 - `subprocess` with an argument list - never `shell=True` with interpolated input.
 - No `eval`/`exec` on external input; `pickle` only for trusted local files.
 - Validate paths received from C# or the UI before deleting or overwriting.

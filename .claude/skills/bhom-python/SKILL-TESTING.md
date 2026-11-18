@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Testing
 description: How to write, organise and run pytest tests for Python_Toolkit, including serialisation round trips, wrapped (C#-callable) methods, plots, UI and pythonnet.
-version: 0.2.0
+version: 0.2.1
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, testing, pytest]
@@ -216,7 +216,7 @@ def test_file_settings_round_trips_through_bhom_json():
 - **Deterministic:** seed randomness (`np.random.default_rng(0)`); pass times explicitly.
 - **Meaningful assertions:** "it didn't crash" is not sufficient except for labelled smoke tests. No placeholder docstrings (`"""_"""`).
 - **Clear failures:** assertion messages where the cause would otherwise be unclear, as in `test_bhom_serialiser.py`.
-- **No notebooks as tests:** `.ipynb` files in `tests/` are demos, not coverage.
+- **No notebooks:** notebooks are never committed and never count as tests; turn checks into pytest tests.
 
 ---
 

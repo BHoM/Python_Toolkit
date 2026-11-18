@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Compliance Review
 description: Rule catalogue, severities, automated checks and report format for reviewing Python in Python_Toolkit.
-version: 0.2.0
+version: 0.2.1
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, review, compliance, CI]
@@ -117,10 +117,10 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 
 | ID | Sev | Rule |
 |----|-----|------|
-| PY-S01 | Blocker | No secrets, tokens, connection strings, personal data, or project/client names in code, tests, assets, logs or notebook outputs |
+| PY-S01 | Blocker | No secrets, tokens, connection strings, personal data, or project/client names in code, tests, assets or logs |
 | PY-S02 | Blocker | No `eval`/`exec` on external input; no `shell=True`/`os.system` with interpolated values |
 | PY-S03 | Major | No machine-specific absolute paths (`C:/Users/...`, network shares) |
-| PY-S04 | Major | No committed artefacts: `.venv`, `__pycache__`, `.pytest_cache`, `.coverage`, `cov_html/`, data dumps |
+| PY-S04 | Major | No committed artefacts: notebooks (`*.ipynb`), `.venv`, `__pycache__`, `.pytest_cache`, `.coverage`, `cov_html/`, data dumps |
 
 ### Documentation and style
 

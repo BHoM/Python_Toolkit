@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.3
+version: 0.2.4
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,21 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL-IMPLEMENTATION.md (v0.2.3 → v0.2.4)
+- SKILL-REVIEW.md (v0.2.0 → v0.2.1)
+- SKILL-TESTING.md (v0.2.0 → v0.2.1)
+- CHANGELOG.md (v0.2.3 → v0.2.4)
+
+**Changes:**
+- Notebooks are never committed (`*.ipynb` is in `.gitignore`): replaced "clear outputs before commit" guidance, added notebooks to PY-S04 committed artefacts, removed "notebook outputs" from privacy rules.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL-IMPLEMENTATION.md (v0.2.2 → v0.2.3)
 - CHANGELOG.md (v0.2.2 → v0.2.3)
