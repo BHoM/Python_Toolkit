@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Compliance Review
 description: Rule catalogue, severities, automated checks and report format for reviewing Python in Python_Toolkit.
-version: 0.2.3
+version: 0.2.4
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, review, compliance, CI]
@@ -140,7 +140,7 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 
 | ID | Sev | Rule |
 |----|-----|------|
-| PY-T01 | Major | New/changed public behaviour has happy-path and failure-path tests |
+| PY-T01 | Major | New/changed public behaviour has success-path and failure-path tests |
 | PY-T02 | Major | Bug fixes ship with a regression test |
 | PY-T03 | Major | Wrapped methods tested on both faces (Python call and `__input_json__`) and registration |
 | PY-T04 | Major | Tests independent, deterministic, no absolute paths or network; external tools skipped cleanly |

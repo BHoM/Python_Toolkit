@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Testing
 description: How to write, organise and run pytest tests for Python_Toolkit, including serialisation round trips, wrapped (C#-callable) methods, plots, UI and pythonnet.
-version: 0.2.1
+version: 0.2.2
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, testing, pytest]
@@ -121,7 +121,7 @@ def _close_figures():
 
 Minimum per change (README policy, made explicit):
 
-1. **Happy path** returns the predefined expected result.
+1. **Success path** returns the predefined expected result.
 2. **Each raised error** is raised with the expected type and message fragment.
 3. **Lowest-level functions first** in multi-step processes, so errors do not cascade untested.
 4. **External programs** - assert availability first and `pytest.skip` with a reason if absent.
@@ -222,7 +222,7 @@ def test_file_settings_round_trips_through_bhom_json():
 
 ## Checklist
 
-- [ ] Every new/changed public function has a happy-path and a failure-path test
+- [ ] Every new/changed public function has a success-path and a failure-path test
 - [ ] Bug fixes include a regression test
 - [ ] Floats compared with `pytest.approx`
 - [ ] Wrapped methods: registered, Python face, C# face (`__input_json__`), stdout clean, golden C# input

@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.6
+version: 0.2.7
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,21 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL.md (v0.2.1 → v0.2.2)
+- SKILL-REVIEW.md (v0.2.3 → v0.2.4)
+- SKILL-TESTING.md (v0.2.1 → v0.2.2)
+- CHANGELOG.md (v0.2.6 → v0.2.7)
+
+**Changes:**
+- "Happy path" renamed to "success path" throughout.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL.md (v0.2.0 → v0.2.1)
 - SKILL-FRAMEWORK.md (v0.2.1 → v0.2.2)

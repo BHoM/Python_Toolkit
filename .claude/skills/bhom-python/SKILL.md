@@ -1,7 +1,7 @@
 ---
 name: bhom-python
 description: Write, test and compliance-review Python in Python_Toolkit, the BHoM Python base package. Covers package layout and packaging, C#-callable methods (bhom_wrapper.bhom_callable + run_wrapped, BHoM JSON outputs), BHoMObject/IObject serialisation, bhom_analytics, CONSOLE_LOGGER, pythonnet, pytest standards and a review rule catalogue. Use for any .py work in Python_Toolkit or when asked to review/audit its Python. Toolkit-specific Python skills build on this one.
-version: 0.2.1
+version: 0.2.2
 author: DRAFT - for QA
 tags: [BHoM, Python, standards, testing, review]
 ---
@@ -76,7 +76,7 @@ Each maps to rule IDs in [SKILL-REVIEW.md](./SKILL-REVIEW.md#rule-catalogue).
 5. **Errors are shown, never swallowed.** No bare `except`; specific exceptions with what-and-how-to-fix messages. (PY-E01-E04)
 6. **Typed and documented.** Type hints on every signature; Google docstrings with units and `Raises`. (PY-D01, PY-D02)
 7. **No hidden state.** No mutable or call-evaluated defaults, no import-time side effects, no input mutation outside `bhom/wrapped/`. (PY-C01, PY-B08, PY-C04)
-8. **Tested.** Happy-path and failure-path pytest tests; wrapped methods tested from both the Python and the C# side. (PY-T01-T03)
+8. **Tested.** Success-path and failure-path pytest tests; wrapped methods tested from both the Python and the C# side. (PY-T01-T03)
 9. **No machine or project specifics.** No hard-coded user/drive paths, secrets, or project/client data. (PY-S01, PY-S03)
 
 ---
