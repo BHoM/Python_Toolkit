@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.8
+version: 0.2.9
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,19 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL-TESTING.md (v0.2.3 → v0.2.4)
+- CHANGELOG.md (v0.2.8 → v0.2.9)
+
+**Changes:**
+- "Golden JSON string" renamed to "BHoM JSON string" throughout.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL.md (v0.2.2 → v0.2.3)
 - SKILL-IMPLEMENTATION.md (v0.2.6 → v0.2.7)

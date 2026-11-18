@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Testing
 description: How to write, organise and run pytest tests for Python_Toolkit, including serialisation round trips, wrapped (C#-callable) methods, plots, UI and pythonnet.
-version: 0.2.3
+version: 0.2.4
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, testing, pytest]
@@ -166,7 +166,7 @@ def test_heatmap_png_csharp_call_returns_bhom_json(tmp_path):
 - **Python face:** called normally, returns Python objects.
 - **C# face:** called with `__input_json__` (a JSON string, and a file path via `tmp_path`), returns valid BHoM JSON with the expected `_t`.
 - **Through `run_wrapped`:** with `capsys`, stdout is **exactly** one valid JSON document - C# deserialises the whole of stdout, so any extra output is a failure.
-- **Inputs from C#:** include at least one argument shaped exactly as the BHoM serialiser produces it (a golden JSON string), including any `argument_types` upgrade to your subclass.
+- **Inputs from C#:** include at least one argument given as a BHoM JSON string, exactly as the BHoM serialiser produces it, including any `argument_types` upgrade to your subclass.
 - **Failure:** invalid input raises a clear exception (the process must exit non-zero, not print a traceback as the result).
 
 ### BHoM serialisation
@@ -180,7 +180,7 @@ def test_file_settings_round_trips_through_bhom_json():
     assert restored == obj  # __eq__ ignores bhom_guid and _bhom_version
 ```
 
-- **Python -> JSON -> Python**, and **C# JSON -> Python** from a golden string produced by the BHoM serialiser - the second catches PascalCase/snake_case drift (acronyms).
+- **Python -> JSON -> Python**, and **C# JSON -> Python** from a BHoM JSON string produced by the BHoM serialiser - the second catches PascalCase/snake_case drift (acronyms).
 - Assert `_t` is the exact C# type name (or `BH.oM.Base.CustomObject` for objects with no C# type).
 - `test_bhom_serialiser.py` is the reference; its TODOs (use real BHoM-serialiser output) are worth closing.
 
@@ -225,8 +225,8 @@ def test_file_settings_round_trips_through_bhom_json():
 - [ ] Every new/changed public function has a success-path and a failure-path test
 - [ ] Bug fixes include a regression test
 - [ ] Floats compared with `pytest.approx`
-- [ ] Wrapped methods: registered, Python face, C# face (`__input_json__`), stdout clean, golden C# input
-- [ ] BHoM objects: round trip and C#-generated golden JSON
+- [ ] Wrapped methods: registered, Python face, C# face (`__input_json__`), stdout clean, BHoM JSON input
+- [ ] BHoM objects: round trip and a BHoM JSON string from the C# serialiser
 - [ ] Plots use `Agg` and close figures; UI tests skip without a display
 - [ ] No absolute paths, network paths, project data or secrets in tests or assets
 - [ ] Test files carry the BHoM copyright header
