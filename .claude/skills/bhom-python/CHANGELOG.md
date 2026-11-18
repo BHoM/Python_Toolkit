@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.1
+version: 0.2.2
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,19 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL-IMPLEMENTATION.md (v0.2.1 → v0.2.2)
+- CHANGELOG.md (v0.2.1 → v0.2.2)
+
+**Changes:**
+- `__init__.py` guidance is no longer a hard "constants and re-exports only" rule: keep them light, with nothing heavy or surprising on import.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL-FRAMEWORK.md (v0.2.0 → v0.2.1)
 - SKILL-IMPLEMENTATION.md (v0.2.0 → v0.2.1)

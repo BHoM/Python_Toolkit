@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.1
+version: 0.2.2
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, structure, style, packaging]
@@ -108,7 +108,7 @@ Rules:
 - **One public function or class per file**, file named in snake_case after it (`AThing` -> `a_thing.py`, `do_stuff` -> `do_stuff.py`). Private helpers used only by that function may sit in the same file with a leading `_` (README).
 - Organise by domain into sub-packages; general helpers go in `helpers/` (README).
 - **C#-callable methods live in `bhom/wrapped/` and nowhere else; `bhom/wrapped/` holds only C#-callable methods** - thin wrappers calling into the domain sub-packages.
-- **(proposed)** `__init__.py` files hold constants and re-exports only - no I/O, network, `clr`, or environment changes at import.
+- Keep `__init__.py` files light: constants, re-exports and small setup are fine, but nothing heavy or surprising happens on import (see S20).
 - New sub-packages need an `__init__.py` and, if they ship non-`.py` files, an entry in `[tool.setuptools.package-data]`.
 
 ---
