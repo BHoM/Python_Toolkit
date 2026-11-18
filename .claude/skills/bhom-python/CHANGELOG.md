@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.4
+version: 0.2.5
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,21 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL-IMPLEMENTATION.md (v0.2.4 → v0.2.5)
+- SKILL-REVIEW.md (v0.2.1 → v0.2.2)
+- CHANGELOG.md (v0.2.4 → v0.2.5)
+
+**Changes:**
+- S5 reworded: give sensible defaults where a user would not know what to enter; omit them only for inputs the user must supply; document every default in the docstring.
+- PY-D02 now requires default values to be documented.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL-IMPLEMENTATION.md (v0.2.3 → v0.2.4)
 - SKILL-REVIEW.md (v0.2.0 → v0.2.1)

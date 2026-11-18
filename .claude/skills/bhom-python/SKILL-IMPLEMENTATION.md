@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.4
+version: 0.2.5
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, structure, style, packaging]
@@ -141,7 +141,7 @@ Formatting is mechanical: **black** (installed in every BHoM environment). Do no
 | S2 | **Absolute imports** - `from python_toolkit.plot.heatmap import heatmap`, not `from ..plot import heatmap`. (Much of `bhom/` still uses relative imports - fix when touched.) |
 | S3 | **Type hints on every function and method** - all parameters and the return (`-> None` included). |
 | S4 | **Google-style docstrings** on every module, class and function/method (dunders excepted). Methods of a documented class need at least a one-line description. |
-| S5 | Defaults only where a typical user expects that value. If in doubt, no default. |
+| S5 | Give a sensible default wherever a typical user would not know what to enter (settings, tolerances, styling). Leave the default off only for inputs the user must supply (e.g. the data being processed). **Document every default in the docstring** ("Defaults to 15.5."). The README words this more strictly ("If in doubt do not include a default"); this is the agreed reading. |
 | S6 | Real defaults in the signature, not `x=None` then `if x is None: x = ...` - **except mutable or call-evaluated defaults**, which must use `None` (S10). |
 | S7 | One public function/class per file; snake_case file names. |
 

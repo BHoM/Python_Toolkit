@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Compliance Review
 description: Rule catalogue, severities, automated checks and report format for reviewing Python in Python_Toolkit.
-version: 0.2.1
+version: 0.2.2
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, review, compliance, CI]
@@ -127,7 +127,7 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 | ID | Sev | Rule |
 |----|-----|------|
 | PY-D01 | Major | Type hints on every parameter and return of public functions/methods |
-| PY-D02 | Major | Google-style docstrings on public modules, classes, functions; units for physical quantities; `Raises:` when it raises |
+| PY-D02 | Major | Google-style docstrings on public modules, classes, functions; units for physical quantities; every default value documented ("Defaults to ..."); `Raises:` when it raises |
 | PY-D03 | Minor | British English (third-party API names exempt) |
 | PY-D04 | Minor | Docstrings match the signature; no placeholders or copy-paste |
 | PY-F01 | Minor | `black`-clean (one finding, not per line) |
