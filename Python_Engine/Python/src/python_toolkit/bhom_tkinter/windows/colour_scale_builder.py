@@ -38,7 +38,7 @@ from python_toolkit.colour_scales import (
     save_scale,
     suggest_thresholds,
 )
-from python_toolkit.palettes import palette_names, sample_colours
+from python_toolkit.palettes import palette_label, palette_names, sample_colours
 from python_toolkit.plot.colour_scale_histogram import colour_scale_histogram
 
 MAX_BANDS = 24
@@ -157,7 +157,7 @@ class ColourScaleBuilder(BHoMBaseChildWindow):
         options = palette_names()
         self.palette = DropDownSelection(controls, id="palette", helper_text="Palette / colour map", options=options,
                                          default=self._start_palette if self._start_palette in options else "viridis",
-                                         state="readonly", width=6, command=lambda _v: self._recolour(),
+                                         state="readonly", width=6, command=lambda _v: self._recolour(), display=palette_label,
                                          build_options=GridOptions(row=0, column=2, sticky="ew"))
         for widget in (self.band_count, self.method, self.palette):
             widget.build()

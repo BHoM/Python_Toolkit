@@ -76,6 +76,23 @@ def is_colourblind_safe(name: str) -> bool:
     return name.removesuffix("_r") in _group_members(PaletteGroup.COLOURBLIND)
 
 
+COLOURBLIND_SAFE_TAG = " [colour blind safe]"
+
+
+def palette_label(name: str) -> str:
+    """The text to show for a palette in a list: its name, plus a tag where one applies.
+
+    The tag is for display only and is never part of the palette's name.
+
+    Args:
+        name: Palette name.
+
+    Returns:
+        str: The name, followed by " [colour blind safe]" for a colour-blind safe palette.
+    """
+    return f"{name}{COLOURBLIND_SAFE_TAG}" if is_colourblind_safe(name) else name
+
+
 def sample_colours(name: str, count: int) -> list[str]:
     """Pick colours from a palette.
 

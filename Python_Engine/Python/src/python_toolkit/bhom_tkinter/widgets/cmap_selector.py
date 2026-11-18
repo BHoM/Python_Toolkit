@@ -10,14 +10,11 @@ from python_toolkit.plot.cmap_sample import cmap_sample_plot
 from python_toolkit.bhom_tkinter.widgets.figure_container import FigureContainer
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 from python_toolkit.bhom_tkinter.widgets._packing_options import PackingOptions
-from python_toolkit.palettes import PaletteGroup, is_colourblind_safe, palette_names
+from python_toolkit.palettes import PaletteGroup, palette_label, palette_names
 from python_toolkit.colour_scales import ColourScale, ColourScaleError, delete_scale, finite_values, load_scales
 
 from python_toolkit.bhom.analytics import CONSOLE_LOGGER
 from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
-
-# Shown after the name of a colour-blind safe palette in the dropdown; display only, never part of the name
-COLOURBLIND_SAFE_TAG = " [colour blind safe]"
 
 # Accepted colormap input types for colormaps parameter and set()/add_cmap()
 CmapInput = Union[str, Colormap, List[str]]
@@ -282,8 +279,8 @@ class CmapSelector(BHoMBaseWidget):
 
     def _display_name(self, name: str) -> str:
         """The dropdown text for a name: the name, plus its tags when `show_tags` is on."""
-        if self.show_tags and name not in self._custom_cmaps and is_colourblind_safe(name):
-            return f"{name}{COLOURBLIND_SAFE_TAG}"
+        if self.show_tags and name not in self._custom_cmaps:
+            return palette_label(name)
         return name
 
     @property
