@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.2
+version: 0.2.3
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, structure, style, packaging]
@@ -121,7 +121,7 @@ Rules:
 | `requires-python` | **(proposed)** Add `requires-python = ">=3.10"` to `pyproject.toml` (currently absent). |
 | Version number | Never hard-code. `setup.py` reads `VERSION.txt`, written by the `Python_Engine.csproj` build step from the assembly `FileVersion`. |
 | Dependencies | `[project] dependencies` in `pyproject.toml`. Pin a package only with a stated reason (comment) - every BHoM toolkit environment installs python_toolkit first, so tight pins here constrain all of them. |
-| Test/dev tools | `[dependency-groups] dev`. **(proposed)** `pytest`, `pytest-cov`, `pytest-order` and `jupyterlab` are currently runtime dependencies - move them. |
+| Test/dev tools | `[dependency-groups] dev`. **(proposed)** `pytest`, `pytest-cov` and `pytest-order` are currently runtime dependencies - move them. `jupyterlab` stays a runtime dependency: notebooks are expected to work in non-dev environments. |
 | Package data | Non-`.py` files (`.mplstyle`, `.tcl`, `.png`) must be listed in `[tool.setuptools.package-data]` or they are missing after install. Currently only `*.mplstyle` is listed - check `.tcl` theme files and `bhom/assets/*.png` are covered. |
 | Paths | C# side: `BH.Engine.Python.Query.*`. Python side: `BHOM_LOG_FOLDER`, `os.environ["PROGRAMDATA"]`, `Path(__file__)` - never literal `C:\...` paths. |
 | Deploying | Build `Python_Engine` (post-build copy to `%ProgramData%\BHoM\Extensions\PythonCode\Python_Toolkit`), then `UpdateBHoMPackages`. `run_tests.bat` tests that deployed copy. |

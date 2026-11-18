@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.2
+version: 0.2.3
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,19 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL-IMPLEMENTATION.md (v0.2.2 → v0.2.3)
+- CHANGELOG.md (v0.2.2 → v0.2.3)
+
+**Changes:**
+- `jupyterlab` stays a runtime dependency (notebooks must work in non-dev environments); only the pytest packages are proposed for the dev group.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL-IMPLEMENTATION.md (v0.2.1 → v0.2.2)
 - CHANGELOG.md (v0.2.1 → v0.2.2)
