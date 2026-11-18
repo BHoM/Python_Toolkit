@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.0
+version: 0.2.1
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, structure, style, packaging]
@@ -151,7 +151,7 @@ Formatting is mechanical: **black** (installed in every BHoM environment). Do no
 |---|------|
 | S8 | **British English** in names, docstrings, messages and comments (`colour`, `normalise`, `analyse`) - as [bhom-coding-standards](../bhom-coding-standards/SKILL.md). Third-party API names keep their spelling (`cmap`, `color=`). Existing exports such as `lighten_color` stay for compatibility. |
 | S9 | `snake_case` functions/variables/modules, `PascalCase` classes, `UPPER_SNAKE` module constants, `_leading` for private. No single-letter names outside comprehensions and maths. |
-| S10 | **No mutable or call-evaluated defaults** - not `[]`, `{}`, `uuid.uuid4()`, `datetime.now()`, `pd.Series()` in a signature or dataclass field. Use `None` or `field(default_factory=...)`. (#263 fixed the last of these in `bhom/`.) |
+| S10 | **No mutable or call-evaluated defaults** - not `[]`, `{}`, `uuid.uuid4()`, `datetime.now()`, `pd.Series()` in a signature or dataclass field. Use `None` or `field(default_factory=...)`. |
 | S11 | `pathlib.Path` for paths; accept `str | Path` and convert once at entry. Text files opened with explicit `encoding="utf-8"`. |
 | S12 | f-strings for message text. |
 | S13 | No `print()` - use `CONSOLE_LOGGER` ([SKILL-FRAMEWORK.md](./SKILL-FRAMEWORK.md#logging)). |

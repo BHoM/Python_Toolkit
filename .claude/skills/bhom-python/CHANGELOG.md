@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.0
+version: 0.2.1
 author: DRAFT - for QA
 tags: [BHoM, Python, changelog]
 ---
@@ -11,6 +11,22 @@ tags: [BHoM, Python, changelog]
 ## Change History
 
 ### 2026-11-18 (Latest)
+**Files modified**:
+- SKILL-FRAMEWORK.md (v0.2.0 → v0.2.1)
+- SKILL-IMPLEMENTATION.md (v0.2.0 → v0.2.1)
+- CHANGELOG.md (v0.2.0 → v0.2.1)
+- QA-NOTES.md
+
+**Changes:**
+- Console-logger-on-stdout defect: points to the UV environment management update (#253) as the fix, instead of an open question about moving logging to stderr.
+- Removed references to defects that are already fixed.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL.md (v0.1.0 → v0.2.0)
 - SKILL-IMPLEMENTATION.md (v0.1.0 → v0.2.0)

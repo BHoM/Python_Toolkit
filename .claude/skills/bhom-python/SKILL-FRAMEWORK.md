@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Framework
 description: How to use the python_toolkit BHoM framework - C#-callable methods (bhom_callable + run_wrapped), BHoMObject/IObject and BHoM JSON, bhom_analytics, logging and pythonnet.
-version: 0.2.0
+version: 0.2.1
 parent_skill: bhom-python
 author: DRAFT - for QA
 tags: [BHoM, Python, framework, serialisation, logging, pythonnet]
@@ -156,7 +156,7 @@ Limits: it upgrades **top-level arguments only**, only when the decoded value is
   {"Name": "", "BHoM_Guid": "f428e614-...", "_t": "BH.oM.Base.CustomObject", "_bhomVersion": "9.3", "X": 20}
   ```
 
-  The established C# callers deserialise the **whole** of stdout, so anything printed before the result breaks the call. **No `print` in wrapped code**, and keep `CONSOLE_LOGGER` to warnings/errors on wrapped code paths (see the open question in [Known Framework Defects](#known-framework-defects)).
+  The established C# callers deserialise the **whole** of stdout, so anything printed before the result breaks the call. **No `print` in wrapped code**, and keep `CONSOLE_LOGGER` to warnings/errors on wrapped code paths (see [Known Framework Defects](#known-framework-defects)).
 - Exceptions propagate: the process exits non-zero with the traceback on stderr, and `Compute.RunCommandStdout` returns **stderr instead of stdout** on a non-zero exit. The established C# callers treat output containing `Traceback (most recent call last):` as a failure, so raising is the correct way to fail - no need (and no reason) to return `traceback.format_exc()` yourself.
 
 ---
@@ -334,10 +334,8 @@ On `develop` at `d9d1edd`. Until fixed, write code that does not depend on the b
 | `_bhom_callable_decorator.py` | Input not starting with `{` is assumed to be a path - leading whitespace/BOM or a JSON array gives `FileNotFoundError` | Send compact JSON or a file path; fix: `lstrip()` and check `Path.exists()` |
 | `_bhom_callable_decorator.py` | `argument_types={}` mutable default (read-only today, but violates PY-C01) | - |
 | `wrapped/_test_wrapped.py` | Ships a `"test"` method that `print`s and mutates its input - and it is registered in every environment that imports `python_toolkit.bhom.wrapped` | Move to `tests/` |
-| `logging/console.py` | Console logger writes to **stdout**, the same stream C# deserialises | Keep wrapped paths quiet; **(open question)** move console logging to stderr |
+| `logging/console.py` | Console logger writes to **stdout**, the same stream C# deserialises | Keep wrapped paths quiet until the UV environment management update (#253), where the C# run method returns stdout and stderr separately |
 | `analytics.py` wrapper | `Errors.extend(<dict>)` adds the dict's *keys*, not the error event | - (fix: `append`) |
 | `bhom_object.py` `IObject.from_dict` | Catches `ctypes.ArgumentError`, but bad kwargs raise `TypeError` | - |
 | `helpers/timeseries.py` `validate_timeseries` | `is_annual` check `(n != 365) or (n != 366)` is always true (verified) | Do not use `is_annual=True` |
 | `python_toolkit/__init__.py` | On Windows, overwrites `os.environ["HOME"]` with `C:/Users/<user>` at import | Do not rely on `HOME` after import |
-
-Fixed in #263 (`d9d1edd`): shared `bhom_guid` / list defaults in `BHoMObject.__init__`, frozen `datetime.utcnow()` default in `bson_unix_ticks`, non-callable `default_factory` in `UsageLogEntry`.

@@ -8,7 +8,7 @@
 | D2 | Test location: `Python_Engine/Python/tests/` (practice) vs `.ci/unit_tests/python/` (README) | Practice; update the README | SKILL-TESTING "Where Tests Live" |
 | D3 | Wrapped identifier convention | `python_toolkit.<area>.<function>` | SKILL-FRAMEWORK "Identifiers" |
 | D4 | Give python_toolkit's `run_wrapped.py` a `-command`/`-in` CLI and add `BH.Engine.Python.Compute.RunWrapped` | Proposed | SKILL-FRAMEWORK "The C# Side" |
-| D5 | Move `CONSOLE_LOGGER` to stderr so logging cannot corrupt wrapped results | Open | SKILL-FRAMEWORK "Known Framework Defects" |
+| D5 | Logging output mixed into wrapped results on stdout | To be resolved by the UV update (#253): the C# run method returns stdout and stderr separately | SKILL-FRAMEWORK "Known Framework Defects" |
 | D6 | Lint/format config (black + pylint, 120 columns) and a Python CI job in `BHoM/CI_Toolkit` | Proposed | SKILL-REVIEW "Proposed Tool Configuration" |
 | D7 | `requires-python = ">=3.10"`; dev tools out of runtime dependencies | Proposed | SKILL-IMPLEMENTATION "Packaging" |
 | D8 | British English for new identifiers (third-party names exempt) | Yes | SKILL-IMPLEMENTATION S8 |
@@ -25,7 +25,7 @@
 
 ## 3. Defects to raise as issues
 
-See SKILL-FRAMEWORK "Known Framework Defects" - nine items, three of them (input root, invalid JSON, `"test"` method) in the wrapper.
+See SKILL-FRAMEWORK "Known Framework Defects" - ten items, five of them in the wrapper code (input root, invalid JSON, path detection, mutable default, `"test"` method).
 
 ## 4. Placement
 
