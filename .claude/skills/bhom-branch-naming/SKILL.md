@@ -1,8 +1,8 @@
 ---
 name: bhom-branch-naming
 description: Name git branches for BHoM repositories as <Project>-#<IssueNumber>-<PascalCaseDescription>. Use whenever creating, renaming or reviewing a branch in any BHoM or BHoM toolkit repo - including before committing on develop/main - and when a task has no issue number yet.
-version: 0.1.0
-author: DRAFT - for QA
+version: 0.1.1
+author: BHoM
 tags: [BHoM, git, branches, workflow]
 ---
 

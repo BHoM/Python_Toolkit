@@ -1,9 +1,9 @@
 ---
 name: BHoM Python Framework
 description: How to use the python_toolkit BHoM framework - C#-callable methods (bhom_callable + run_wrapped), BHoMObject/IObject and BHoM JSON, bhom_analytics, logging and pythonnet.
-version: 0.2.2
+version: 0.2.3
 parent_skill: bhom-python
-author: DRAFT - for QA
+author: BHoM
 tags: [BHoM, Python, framework, serialisation, logging, pythonnet]
 ---
 

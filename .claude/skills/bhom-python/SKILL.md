@@ -1,8 +1,8 @@
 ---
 name: bhom-python
 description: Write, test and compliance-review Python in Python_Toolkit, the BHoM Python base package. Covers package layout and packaging, C#-callable methods (bhom_wrapper.bhom_callable + run_wrapped, BHoM JSON outputs), BHoMObject/IObject serialisation, bhom_analytics, CONSOLE_LOGGER, pythonnet, pytest standards and a review rule catalogue. Use for any .py work in Python_Toolkit or when asked to review/audit its Python. Toolkit-specific Python skills build on this one.
-version: 0.2.3
-author: DRAFT - for QA
+version: 0.2.4
+author: BHoM
 tags: [BHoM, Python, standards, testing, review]
 ---
 

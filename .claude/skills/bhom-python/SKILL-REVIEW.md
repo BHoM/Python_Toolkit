@@ -1,9 +1,9 @@
 ---
 name: BHoM Python Compliance Review
 description: Rule catalogue, severities, automated checks and report format for reviewing Python in Python_Toolkit.
-version: 0.2.5
+version: 0.2.6
 parent_skill: bhom-python
-author: DRAFT - for QA
+author: BHoM
 tags: [BHoM, Python, review, compliance, CI]
 ---
 
@@ -220,7 +220,7 @@ Template (use the current year):
 
 ## Proposed Tool Configuration
 
-Python_Toolkit has no lint or format config. **Proposal for QA** - add to `pyproject.toml` so people, Claude and a future CI job run the same checks:
+Python_Toolkit has no lint or format config. **Proposal** - add to `pyproject.toml` so people, Claude and a future CI job run the same checks:
 
 ```toml
 [tool.black]

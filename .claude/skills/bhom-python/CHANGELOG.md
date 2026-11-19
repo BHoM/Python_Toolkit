@@ -1,8 +1,8 @@
 ---
 name: BHoM Python Skill Changelog
 description: Version history for all files in the bhom-python skill folder
-version: 0.2.9
-author: DRAFT - for QA
+version: 0.2.10
+author: BHoM
 tags: [BHoM, Python, changelog]
 ---
 
@@ -10,7 +10,29 @@ tags: [BHoM, Python, changelog]
 
 ## Change History
 
-### 2026-11-18 (Latest)
+### 2026-11-19 (Latest)
+**Files modified**:
+- SKILL.md (v0.2.3 → v0.2.4)
+- SKILL-FRAMEWORK.md (v0.2.2 → v0.2.3)
+- SKILL-IMPLEMENTATION.md (v0.2.7 → v0.2.8)
+- SKILL-REVIEW.md (v0.2.5 → v0.2.6)
+- SKILL-TESTING.md (v0.2.4 → v0.2.5)
+- CHANGELOG.md (v0.2.9 → v0.2.10)
+
+**Files removed**:
+- QA-NOTES.md
+
+**Changes:**
+- Removed the reviewer-only QA notes; remaining open decisions are tracked in issue #264.
+- Frontmatter `author` set to `BHoM` in every file.
+- Removed "for QA" wording from the skill text.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files modified**:
 - SKILL-TESTING.md (v0.2.3 → v0.2.4)
 - CHANGELOG.md (v0.2.8 → v0.2.9)

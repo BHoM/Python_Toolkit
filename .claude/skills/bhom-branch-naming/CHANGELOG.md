@@ -1,8 +1,8 @@
 ---
 name: BHoM Branch Naming Skill Changelog
 description: Version history for all files in the bhom-branch-naming skill folder
-version: 0.1.0
-author: DRAFT - for QA
+version: 0.1.1
+author: BHoM
 tags: [BHoM, git, changelog]
 ---
 
@@ -10,7 +10,20 @@ tags: [BHoM, git, changelog]
 
 ## Change History
 
-### 2026-11-18 (Latest)
+### 2026-11-19 (Latest)
+**Files modified**:
+- SKILL.md (v0.1.0 → v0.1.1)
+- CHANGELOG.md (v0.1.0 → v0.1.1)
+
+**Changes:**
+- Frontmatter `author` set to `BHoM`.
+
+**Rationale:**
+PR #265 review feedback.
+
+---
+
+### 2026-11-18
 **Files created**:
 - SKILL.md (v0.1.0)
 - CHANGELOG.md (v0.1.0)

@@ -1,9 +1,9 @@
 ---
 name: BHoM Python Testing
 description: How to write, organise and run pytest tests for Python_Toolkit, including serialisation round trips, wrapped (C#-callable) methods, plots, UI and pythonnet.
-version: 0.2.4
+version: 0.2.5
 parent_skill: bhom-python
-author: DRAFT - for QA
+author: BHoM
 tags: [BHoM, Python, testing, pytest]
 ---
 
@@ -77,7 +77,7 @@ tests/
 
 - Sample data in `tests/assets/`, loaded via `Path(__file__).parent / "assets" / ...` - never absolute, user or network paths.
 - No project or client data in assets - public or synthetic only.
-- **Open question for QA:** the README says tests go in `.ci/unit_tests/python/`, which holds only an empty, misspelt `__init_.py`. Practice is `Python_Engine/Python/tests/`; this skill follows practice and the README should be updated.
+- **Open question:** the README says tests go in `.ci/unit_tests/python/`, which holds only an empty, misspelt `__init_.py`. Practice is `Python_Engine/Python/tests/`; this skill follows practice and the README should be updated.
 
 ---
 

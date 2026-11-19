@@ -1,16 +1,16 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.7
+version: 0.2.8
 parent_skill: bhom-python
-author: DRAFT - for QA
+author: BHoM
 tags: [BHoM, Python, structure, style, packaging]
 ---
 
 # BHoM Python Implementation
 
 > **Use when:** adding or changing Python in Python_Toolkit - a new module, function or class, or packaging/environment changes.
-> **Authority:** `Python_Engine/Python/README.md` ("BHoM/Python specific style guidance") is the published standard. Where it is silent, PEP 8 applies. Rules stricter than the README are marked **(proposed)** for QA.
+> **Authority:** `Python_Engine/Python/README.md` ("BHoM/Python specific style guidance") is the published standard. Where it is silent, PEP 8 applies. Rules stricter than the README are marked **(proposed)**.
 
 ---
 
