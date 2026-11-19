@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Callable, List, Literal
 
+from python_toolkit.bhom.logging import CONSOLE_LOGGER
 from python_toolkit.bhom_tkinter.widgets._widgets_base import BHoMBaseWidget
 
 class DropDownSelection(BHoMBaseWidget):
@@ -18,6 +19,7 @@ class DropDownSelection(BHoMBaseWidget):
 			width: int = 20,
 			state: str = "normal",
 			value_var: Optional[tk.StringVar] = None,
+			display: Optional[Callable[[str], str]] = None,
 			**kwargs):
 		"""
 		Args:
@@ -27,6 +29,8 @@ class DropDownSelection(BHoMBaseWidget):
 			default (str, optional): Default selected value.
 			width (int): Width of the dropdown widget in characters.
 			state (str): Combobox state ("normal", "readonly", or "disabled").
+			display (callable, optional): Maps an option to the text the dropdown shows for it. Display only:
+				`get()`, `set()` and `command` always use the plain option.
 			item_title (str, optional): Optional header text shown at the top of the widget frame.
 			helper_text (str, optional): Optional helper text shown above the dropdown.
 			**kwargs: Additional Frame options.
@@ -35,13 +39,19 @@ class DropDownSelection(BHoMBaseWidget):
 
 		self.options = [str(option) for option in (options or [])]
 		self.command = command
-		self.value_var = value_var or tk.StringVar()
+		self.value_var = value_var or tk.StringVar(master=self)
+		self._display = display
+		self._display_to_option = {}
+		# With a display function the combobox shows its own text variable, kept in step with `value_var`
+		self._shown_var = tk.StringVar(master=self) if display else self.value_var
+		if display:
+			self.value_var.trace_add("write", lambda *_: self._shown_var.set(self._shown(self.value_var.get())))
 
 		# Create the combobox in the content frame
 		self.combobox = ttk.Combobox(
 			self.content_frame,
-			textvariable=self.value_var,
-			values=self.options,
+			textvariable=self._shown_var,
+			values=self._shown_options(),
 			width=width,
 			state=state,
 			justify=self._text_justify,
@@ -57,12 +67,24 @@ class DropDownSelection(BHoMBaseWidget):
 		elif self.options:
 			self.value_var.set(self.options[0])
 
+	def _shown(self, option: str) -> str:
+		"""The text the dropdown shows for an option."""
+		return self._display(option) if self._display and option in self.options else option
+
+	def _shown_options(self) -> List[str]:
+		"""The dropdown entries: the options as shown, remembering which option each one is."""
+		self._display_to_option = {self._shown(option): option for option in self.options}
+		return list(self._display_to_option) if self._display else list(self.options)
+
 	def _on_select(self, event=None):
 		"""Handle selection change event.
 
 		Args:
 			event: Tkinter event (optional).
 		"""
+		if self._display:
+			shown = self._shown_var.get()
+			self.value_var.set(self._display_to_option.get(shown, shown))
 		if self.command:
 			self.command(self.get())
 		self._fire_on_change(self.get())
@@ -94,7 +116,7 @@ class DropDownSelection(BHoMBaseWidget):
 			default: Optional value to select after updating options.
 		"""
 		self.options = [str(option) for option in (options or [])]
-		self.combobox['values'] = self.options
+		self.combobox['values'] = self._shown_options()
 
 		if default is not None and default in self.options:
 			self.set(default)
