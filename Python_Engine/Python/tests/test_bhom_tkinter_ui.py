@@ -291,6 +291,24 @@ def test_widget_validation():
 	ok, msg, sev = custom_box.validate()
 	assert ok is False and msg == "Custom failed"
 
+	# Validation runs as the value changes: an invalid value loses the success mark without focus out
+	live_box = ValidatedEntryBox(parent, value_type=float, min_value=0.0, max_value=100.0, required=False)
+	live_box.build()
+	live_box.set("50")
+	assert live_box.success_label.get() == "✓"
+	live_box.set("test")
+	assert live_box.success_label.get().strip() == "" and live_box.error_label.get() == "Must be a valid number"
+	live_box.set("150")
+	assert live_box.error_label.get().startswith("Must be between")
+	live_box.set("")
+	assert live_box.success_label.get().strip() == "" and live_box.error_label.get().strip() == ""
+
+	# validate_on_change=False keeps the old behaviour: no mark until validate() is called
+	lazy_box = ValidatedEntryBox(parent, value_type=float, required=False, validate_on_change=False)
+	lazy_box.build()
+	lazy_box.set("test")
+	assert lazy_box.error_label.get().strip() == ""
+
 
 def test_rebuild():
 	"""Verify that rebuild() re-places widgets and reflects mutations to self.widgets."""
