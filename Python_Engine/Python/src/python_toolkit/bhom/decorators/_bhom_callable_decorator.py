@@ -1,4 +1,26 @@
-﻿import json
+﻿#
+# This file is part of the Buildings and Habitats object Model (BHoM)
+# Copyright (c) 2015 - 2026, the respective contributors. All rights reserved.
+#
+# Each contributor holds copyright over their respective contributions.
+# The project versioning (Git) records all such contribution source information.
+#
+#
+# The BHoM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3.0 of the License, or
+# (at your option) any later version.
+#
+# The BHoM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
+#
+
+import json
 from typing import Any, Callable, Union, Dict
 from functools import wraps
 from ..bhom_object import CONSOLE_LOGGER, BHoMJSONDecoder, BHoMJSONEncoder, BHoMObject, IObject
@@ -14,6 +36,8 @@ class _BHoMWrapper:
         when __input_json__ is set, this will cause the method to always output BHoM style json (using the encoder_cls provided to this decorator)
     
         Args:
+            identifier (str): The unique name C# uses to call the method through run_wrapped.
+
             argument_types (dict[str, type]): this is a dictionary that is used to map the argument names to types (specifically BHoMObject types) to subclasses of BHoMObjects.
                 For example, if you have a class that is a subclass of BHoMObject, the default serialiser will only deserialise json to a BHoMObject.
                 To go the extra step to get your class, you must provide the type in this dictionary to allow the wrapper to convert the BHoMObject type to your desired type.

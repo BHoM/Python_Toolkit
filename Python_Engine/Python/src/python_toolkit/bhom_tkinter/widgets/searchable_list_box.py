@@ -1,3 +1,25 @@
+#
+# This file is part of the Buildings and Habitats object Model (BHoM)
+# Copyright (c) 2015 - 2026, the respective contributors. All rights reserved.
+#
+# Each contributor holds copyright over their respective contributions.
+# The project versioning (Git) records all such contribution source information.
+#
+#
+# The BHoM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3.0 of the License, or
+# (at your option) any later version.
+#
+# The BHoM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
+#
+
 """Scrollable listbox with a search filter that keeps selections while items are filtered out."""
 
 from __future__ import annotations
@@ -51,6 +73,9 @@ def fuzzy_scorer(query: str, text: str, min_score: float = 75) -> Optional[float
         text: The item being tested.
         min_score: Similarity (0-100) an item needs to be shown. To use a different value, bind it with
             `functools.partial(fuzzy_scorer, min_score=...)` and pass that as `scorer`.
+
+    Returns:
+        The match score (0-100), or None if it is below `min_score`.
     """
     compute, bhom_scorer = _load_bhom_search()
     query = _NON_ALNUM.sub(" ", query.lower()).strip()
@@ -70,6 +95,10 @@ def default_scorer(query: str, text: str, min_score: float = 75) -> Optional[flo
         query: The text typed into the filter.
         text: The item being tested.
         min_score: Similarity (0-100) a fuzzy match needs to be shown.
+
+    Returns:
+        A score (higher is better) if the item matches, or None to hide it. Items containing the query score
+        200, above any fuzzy score (0-100).
     """
     words = _NON_ALNUM.sub(" ", query.lower()).split()
     if not words:
