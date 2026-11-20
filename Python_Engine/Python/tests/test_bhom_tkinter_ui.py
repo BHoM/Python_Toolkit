@@ -435,6 +435,13 @@ def test_searchable_list_box_fuzzy_matching():
 	assert default_scorer("london", "LOS-ANGELES-DOWNTOWN.epw") is None
 	assert default_scorer("birmigham", "Birmingham_TRY.epw", min_score=95) is None  # stricter threshold
 
+	# Long items and short queries: the fuzzy WeightedRatio alone scales these below the threshold
+	long_name = "GBR_London.Gatwick_2050_ASHRAE_RCP8.5.epw"
+	for query in [".epw", "a", "lo", "205", "gatwick 2050"]:
+		assert default_scorer(query, long_name) is not None, query
+	assert default_scorer("205", "LondonGatwick_2030_DSY1.epw") is None
+	assert default_scorer("zz", "London_TRY.epw") is None  # short queries are never fuzzy-matched
+
 	root = BHoMBaseWindow(title="SearchableListBox fuzzy test")
 	items = ["Country_Club.epw", "London_TRY.epw", "Birmingham_TRY.epw", "Gibraltar_TRY.epw"]
 
