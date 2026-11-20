@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Compliance Review
 description: Rule catalogue, severities, automated checks and report format for reviewing Python in Python_Toolkit.
-version: 0.2.6
+version: 0.3.0
 parent_skill: bhom-python
 author: BHoM
 tags: [BHoM, Python, review, compliance, CI]
@@ -10,7 +10,7 @@ tags: [BHoM, Python, review, compliance, CI]
 # BHoM Python Compliance Review
 
 > **Use when:** asked to review, audit or compliance-check Python - a PR diff, a folder, or the whole package.
-> **Scope:** BHoM CI (`.github/workflows/ci-beta.yml`, via `BHoM/CI_Toolkit`) runs build and compliance checks aimed at C#; **no Python linting, tests or copyright checks run in CI.** This review is currently the only gate for Python.
+> **Scope:** BHoM CI (`.github/workflows/ci-beta.yml`, via `BHoM/CI_Toolkit`) runs its code, copyright and documentation compliance on `*.cs` files only; **no Python linting, tests or copyright checks run in CI.** This review is currently the only gate for Python. One BHoMBot check does reach Python: the **installer** check on dependent toolkits fails when a Python file name contains "error" ([#266](https://github.com/BHoM/Python_Toolkit/issues/266)), which PY-F07 catches before the bot does.
 
 ---
 
@@ -19,6 +19,7 @@ tags: [BHoM, Python, review, compliance, CI]
 - [Review Workflow](#review-workflow)
 - [Automated Pass](#automated-pass)
 - [Rule Catalogue](#rule-catalogue)
+- [BHoM Compliance Mapping](#bhom-compliance-mapping)
 - [Report Format](#report-format)
 - [Copyright for Python Files](#copyright-for-python-files)
 - [Proposed Tool Configuration](#proposed-tool-configuration)
@@ -59,7 +60,19 @@ grep -rnE --include=*.py 'shell=True|os\.system|eval\(|exec\(' src          # PY
 grep -rn  --include=*.py 'bhom_callable' src | grep -v 'bhom/wrapped/\|bhom/decorators/'   # PY-W02
 python -c "import pathlib,sys; [print(p) for p in pathlib.Path(sys.argv[1]).rglob('*.py') if p.read_bytes()[:3]==b'\xef\xbb\xbf']" src   # PY-F04 BOM
 grep -rL --include=*.py 'Buildings and Habitats object Model (BHoM)' src tests   # PY-F06 files missing the header
+find . -iname '*error*' -not -path '*/__pycache__/*'                          # PY-F07 any file or folder named "error"
 ```
+
+BHoM compliance scripts shipped with this skill (paths relative to the repo root; exit status 1 on any finding). Pass folders for a full audit, or only the changed files for a PR review:
+
+```bash
+SKILL=.claude/skills/bhom-python/scripts
+python $SKILL/check_file_names.py Python_Engine/Python/src Python_Engine/Python/tests   # PY-F03, PY-F07
+python $SKILL/check_docstrings.py Python_Engine/Python/src                             # PY-D05
+python $SKILL/check_file_names.py $(git diff --name-only develop...HEAD -- '*.py')      # changed files only
+```
+
+Calibration on `develop` at `45d527b`: PY-F07 none (fixed by #267), PY-F03 34 existing, PY-D05 9 existing. Before #267 the file-name check flagged `colour_scales/errors.py` under both PY-F07 and PY-F03. Use relative paths: PY-F07 inspects every folder in the path you pass.
 
 pylint `W0102 dangerous-default-value` catches `[]`/`{}` defaults but **not** call defaults (`uuid.uuid4()`, `datetime.now()`) - check those by eye.
 
@@ -113,6 +126,7 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 | PY-B08 | Major | No import-time side effects (network, `atexit`, environment variables such as `HOME`, `sys.path`) |
 | PY-B09 | Minor | Dependencies declared; pins justified; dev tools not in runtime dependencies |
 | PY-B10 | Minor | Runs on the base environment's Python (3.10) |
+| PY-B11 | Major | `BHoMObject` subclasses declare real attributes for their data; `custom_data` is not used as a substitute for properties (C# `IsUsingCustomData`) |
 
 ### Security and privacy
 
@@ -130,13 +144,15 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 | PY-D01 | Major | Type hints on every parameter and return of public functions/methods |
 | PY-D02 | Major | Google-style docstrings on public modules, classes, functions; units for physical quantities; every default value documented ("Defaults to ..."); `Raises:` when it raises |
 | PY-D03 | Minor | British English (third-party API names exempt) |
-| PY-D04 | Minor | Docstrings match the signature; no placeholders or copy-paste |
+| PY-D04 | Minor | No placeholder (`"""_"""`) or copy-pasted docstrings |
+| PY-D05 | Major | `Args:` documents every parameter, only real parameters (unless `**kwargs`), in signature order; each description ends with punctuation; a function that returns a value has `Returns:` (`check_docstrings.py`) |
 | PY-F01 | Minor | `black`-clean (one finding, not per line) |
 | PY-F02 | Minor | Absolute imports; no `import *`; no unused imports |
-| PY-F03 | Minor | One public function/class per file; snake_case file names |
+| PY-F03 | Major | One public function/class per file, and the file is named after it in snake_case: `BHoMBaseWindow` -> `bhom_base_window.py`, `ColourScaleError` -> `colour_scale_err.py` (see PY-F07). Grab-bag names (`errors.py`, `utils.py`, `misc.py`, `common.py`) are not allowed for new files (`check_file_names.py`) |
 | PY-F04 | Minor | UTF-8 without BOM |
 | PY-F05 | Info | No commented-out code; `TODO` has an issue link |
 | PY-F06 | Major | BHoM copyright header at the top of every new or changed `.py` file (source and tests), with the current end year ([template](#copyright-for-python-files)) |
+| PY-F07 | Blocker | No file or folder under `Python_Engine/Python` (source, tests or assets) has "error" in its name, in any case. It fails the BHoMBot installer check on dependent toolkits ([#266](https://github.com/BHoM/Python_Toolkit/issues/266), fixed by renaming `errors.py` to `colour_scale_err.py` in #267). Use `err` or a specific name (`check_file_names.py`, `find`) |
 
 ### Tests
 
@@ -147,6 +163,25 @@ Severity: **Blocker** (fix before merge) / **Major** (fix in this PR unless the 
 | PY-T03 | Major | Wrapped methods tested on both faces (Python call and `__input_json__`) and registration |
 | PY-T04 | Major | Tests independent, deterministic, no absolute paths or network; external tools skipped cleanly |
 | PY-T05 | Minor | Meaningful assertions with clear messages |
+
+---
+
+## BHoM Compliance Mapping
+
+BHoM's code compliance (`CodeComplianceTest_Engine` in `BHoM/Test_Toolkit`) is a set of C# checks. These are their Python equivalents in this skill. C# checks with no Python meaning (attributes, `static` classes, `virtual` properties, constructors, Convert/Create naming) are left out.
+
+| BHoM check | Python rule | Automated by |
+|------------|-------------|--------------|
+| BHoMBot installer check (file names) | PY-F07 | `check_file_names.py`, `find` |
+| `ObjectNameMatchesFileName`, `MethodNameContainsFileName` | PY-F03 | `check_file_names.py` |
+| `HasValidCopyright` | PY-F06 | `grep -rL` |
+| `IsInputAttributePresent`, `InputAttributeHasMatchingParameter`, `InputAttributesAreInOrder` | PY-D05 | `check_docstrings.py` |
+| `AttributeHasEndingPunctuation` | PY-D05 | `check_docstrings.py` |
+| `HasOutputAttribute` | PY-D05 | `check_docstrings.py` |
+| `HasDescriptionAttribute` | PY-D02 | pylint `docparams` |
+| `InputParameterStartsLower` | S9 (snake_case parameters) | pylint `invalid-name` |
+| `IsUsingCustomData` | PY-B11 | manual |
+| `HasValidPreviousVersionAttribute` (versioning) | PY-W06 (stable wrapped identifiers) | manual |
 
 ---
 

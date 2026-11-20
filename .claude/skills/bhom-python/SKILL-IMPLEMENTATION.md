@@ -1,7 +1,7 @@
 ---
 name: BHoM Python Implementation
 description: Package layout, packaging, environments and code style for writing Python in Python_Toolkit.
-version: 0.2.8
+version: 0.2.9
 parent_skill: bhom-python
 author: BHoM
 tags: [BHoM, Python, structure, style, packaging]
@@ -107,7 +107,8 @@ Python_Toolkit/
 
 Rules:
 
-- **One public function or class per file**, file named in snake_case after it (`AThing` -> `a_thing.py`, `do_stuff` -> `do_stuff.py`). Private helpers used only by that function may sit in the same file with a leading `_` (README).
+- **One public function or class per file**, file named in snake_case after it (`AThing` -> `a_thing.py`, `do_stuff` -> `do_stuff.py`, `BHoMBaseWindow` -> `bhom_base_window.py`). Private helpers used only by that function may sit in the same file with a leading `_` (README). No grab-bag modules (`errors.py`, `utils.py`, `misc.py`, `common.py`).
+- **No file or folder name contains "error"**, in any case: it breaks the BHoMBot installer check on dependent toolkits ([#266](https://github.com/BHoM/Python_Toolkit/issues/266)). Shorten to `err` - `ColourScaleError` lives in `colour_scale_err.py` (S22).
 - Organise by domain into sub-packages; general helpers go in `helpers/` (README).
 - **C#-callable methods live in `bhom/wrapped/` and nowhere else; `bhom/wrapped/` holds only C#-callable methods** - thin wrappers calling into the domain sub-packages.
 - Keep `__init__.py` files light: constants, re-exports and small setup are fine, but nothing heavy or surprising happens on import (see S20).
@@ -142,10 +143,10 @@ Formatting is mechanical: **black** (installed in every BHoM environment). Do no
 | S1 | PEP 8, formatted with `black`. |
 | S2 | **Absolute imports** - `from python_toolkit.plot.heatmap import heatmap`, not `from ..plot import heatmap`. (Much of `bhom/` still uses relative imports - fix when touched.) |
 | S3 | **Type hints on every function and method** - all parameters and the return (`-> None` included). |
-| S4 | **Google-style docstrings** on every module, class and function/method (dunders excepted). Methods of a documented class need at least a one-line description. |
+| S4 | **Google-style docstrings** on every module, class and function/method (dunders excepted). Methods of a documented class need at least a one-line description. `Args:` lists every parameter in signature order, each description ends with a full stop, and anything that returns a value has `Returns:` - the Python form of BHoM's input/output attribute checks. |
 | S5 | Give a sensible default wherever a typical user would not know what to enter (settings, tolerances, styling). Leave the default off only for inputs the user must supply (e.g. the data being processed). **Document every default in the docstring** ("Defaults to 15.5."). The README words this more strictly ("If in doubt do not include a default"); this is the agreed reading. |
 | S6 | Real defaults in the signature, not `x=None` then `if x is None: x = ...` - **except mutable or call-evaluated defaults**, which must use `None` (S10). |
-| S7 | One public function/class per file; snake_case file names. |
+| S7 | One public function/class per file; the file is named after it in snake_case. |
 
 ### Required (proposed)
 
@@ -165,6 +166,9 @@ Formatting is mechanical: **black** (installed in every BHoM environment). Do no
 | S19 | UTF-8 **without BOM** (24 files in `src` currently start with a BOM). |
 | S20 | No work at import time in package modules: no network, `atexit`, environment-variable changes, or `sys.path` edits. Modules in `bhom/wrapped/` are imported on every `run_wrapped` call - keep them especially light. |
 | S21 | **BHoM copyright header** at the very top of every `.py` file, source and tests, as `#` comments above the module docstring; end year = current year, updated whenever the file is modified. Template: [SKILL-REVIEW.md](./SKILL-REVIEW.md#copyright-for-python-files). |
+| S22 | **No "error" in any file or folder name** under `Python_Engine/Python` (source, tests, assets), in any case - it fails the BHoMBot installer check on dependent toolkits. Use `err` (`colour_scale_err.py`) or a more specific name. |
+
+Check S4, S7 and S22 before committing with the scripts in [`scripts/`](./scripts/) (see [SKILL-REVIEW.md](./SKILL-REVIEW.md#automated-pass)).
 
 ### Docstring template (Google)
 
@@ -198,7 +202,7 @@ def function_name(param_a: int, param_b: str | None = None) -> list[str]:
 README: errors are handled gracefully; the user is told **what went wrong and how to fix it**; specific exceptions are preferred; errors are captured at the lowest possible level.
 
 - Validate inputs at public entry points (types, ranges, lengths, index alignment), as C# BHoM does.
-- Raise specific built-ins (`ValueError`, `TypeError`, `FileNotFoundError`, `KeyError`), or a package exception that subclasses one (`class TimeseriesError(ValueError)`), so callers can catch either.
+- Raise specific built-ins (`ValueError`, `TypeError`, `FileNotFoundError`, `KeyError`), or a package exception that subclasses one (`class TimeseriesError(ValueError)` in `timeseries_err.py` - never `errors.py`, see S22), so callers can catch either.
 - Message = what + how to fix: `f"EPW file not found: {path}. Check the path exists."`.
 - **No bare `except:`.** `except Exception` only at a boundary (UI callback, analytics wrapper), logged with `exc_info=True`, then re-raised or turned into an explicit error - never `pass`, never a silent `None`.
 - Chain causes: `raise ValueError("...") from exc`.
@@ -232,9 +236,9 @@ BHoM priority order: **performance, security, maintainability, readability** ([b
 
 ## Checklist
 
-- [ ] Right sub-package; one public function/class per file; snake_case file name
+- [ ] Right sub-package; one public function/class per file, named after it; no "error" in any file or folder name (`check_file_names.py` passes)
 - [ ] BHoM copyright header with the current end year
-- [ ] Module docstring; Google docstrings with units and `Raises`
+- [ ] Module docstring; Google docstrings with units and `Raises`; every parameter documented in order, ending with a full stop (`check_docstrings.py` passes)
 - [ ] Type hints on all parameters and returns; 3.10-compatible
 - [ ] Absolute imports, grouped stdlib / third-party / python_toolkit
 - [ ] No mutable or call-evaluated defaults

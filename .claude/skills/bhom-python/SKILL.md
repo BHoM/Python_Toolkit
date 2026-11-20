@@ -1,7 +1,7 @@
 ---
 name: bhom-python
-description: Write, test and compliance-review Python in Python_Toolkit, the BHoM Python base package. Covers package layout and packaging, C#-callable methods (bhom_wrapper.bhom_callable + run_wrapped, BHoM JSON outputs), BHoMObject/IObject serialisation, bhom_analytics, CONSOLE_LOGGER, pythonnet, pytest standards and a review rule catalogue. Use for any .py work in Python_Toolkit or when asked to review/audit its Python. Toolkit-specific Python skills build on this one.
-version: 0.2.4
+description: Write, test and compliance-review Python in Python_Toolkit, the BHoM Python base package. Covers package layout and packaging, C#-callable methods (bhom_wrapper.bhom_callable + run_wrapped, BHoM JSON outputs), BHoMObject/IObject serialisation, bhom_analytics, CONSOLE_LOGGER, pythonnet, pytest standards, a review rule catalogue and BHoM compliance check scripts (file names, no "error" in names, docstrings). Use for any .py work in Python_Toolkit or when asked to review/audit its Python. Toolkit-specific Python skills build on this one.
+version: 0.3.0
 author: BHoM
 tags: [BHoM, Python, standards, testing, review]
 ---
@@ -78,6 +78,7 @@ Each maps to rule IDs in [SKILL-REVIEW.md](./SKILL-REVIEW.md#rule-catalogue).
 7. **No hidden state.** No mutable or call-evaluated defaults, no import-time side effects, no input mutation outside `bhom/wrapped/`. (PY-C01, PY-B08, PY-C04)
 8. **Tested.** Success-path and failure-path pytest tests; wrapped methods tested from both the Python and the C# side. (PY-T01-T03)
 9. **No machine or project specifics.** No hard-coded user/drive paths, secrets, or project/client data. (PY-S01, PY-S03)
+10. **Pass BHoM compliance.** One public class or function per file, named after it; never "error" in a file or folder name (it breaks the BHoMBot installer check); copyright header; docstrings that document every parameter in order. `scripts/check_file_names.py` and `scripts/check_docstrings.py` check these. (PY-F03, PY-F06, PY-F07, PY-D05)
 
 ---
 
