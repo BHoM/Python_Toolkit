@@ -6,7 +6,7 @@ from typing import Callable, Iterable, Union
 
 import numpy as np
 
-from python_toolkit.colour_scales.errors import ColourScaleError
+from python_toolkit.colour_scales.colour_scale_err import ColourScaleError
 from python_toolkit.colour_scales.jenks import jenks_breaks
 from python_toolkit.colour_scales.values import finite_values
 

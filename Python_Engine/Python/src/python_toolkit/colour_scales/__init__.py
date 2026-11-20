@@ -9,7 +9,7 @@
 
 from python_toolkit.colour_scales.breaks import BreakMethod, suggest_thresholds
 from python_toolkit.colour_scales.colour_scale import ColourScale
-from python_toolkit.colour_scales.errors import ColourScaleError
+from python_toolkit.colour_scales.colour_scale_err import ColourScaleError
 from python_toolkit.colour_scales.library import DEFAULT_LIBRARY_PATH, delete_scale, load_scales, save_scale
 from python_toolkit.colour_scales.values import finite_values
 

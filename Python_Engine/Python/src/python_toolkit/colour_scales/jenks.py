@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from python_toolkit.colour_scales.errors import ColourScaleError
+from python_toolkit.colour_scales.colour_scale_err import ColourScaleError
 
 MAX_VALUES = 2000  # larger data is thinned, evenly through its sorted values, before the search
 

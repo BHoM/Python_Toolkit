@@ -5,7 +5,7 @@ from typing import Any, Iterable, Optional, Sequence, Union
 from matplotlib import colormaps
 from matplotlib.colors import BoundaryNorm, ListedColormap, to_hex, to_rgba
 
-from python_toolkit.colour_scales.errors import ColourScaleError
+from python_toolkit.colour_scales.colour_scale_err import ColourScaleError
 from python_toolkit.colour_scales.values import finite_values
 from python_toolkit.palettes import sample_colours
 
