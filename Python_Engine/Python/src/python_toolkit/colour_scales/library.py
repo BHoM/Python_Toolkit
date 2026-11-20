@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from python_toolkit.bhom.logging import CONSOLE_LOGGER
 from python_toolkit.colour_scales.colour_scale import ColourScale
-from python_toolkit.colour_scales.errors import ColourScaleError
+from python_toolkit.colour_scales.colour_scale_err import ColourScaleError
 
 DEFAULT_LIBRARY_PATH = Path.home() / ".bhom" / "colour_scales.json"
 
