@@ -1,22 +1,26 @@
-﻿FROM python:3.10-slim
-COPY . /Python_Toolkit
+﻿# syntax=docker/dockerfile:1
 
-#requires build argument --build-context bhom-assemblies C:/ProgramData/BHoM/Assemblies
-COPY --from=bhom-assemblies . /bin/BHoM/Assemblies
+FROM ghcr.io/astral-sh/uv:latest AS uv
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-bookworm-slim AS dotnet
 
-#install .net core 8.0, and set the pythonnet runtime to the .net core CLR
-RUN apt-get update \
-	&& apt-get install -y wget
-	
-RUN wget https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-RUN dpkg -i packages-microsoft-prod.deb
-RUN rm packages-microsoft-prod.deb
+FROM python:3.10-slim-bookworm
 
-RUN apt-get update \
-	&& apt-get install -y aspnetcore-runtime-10.0
+COPY --from=uv /uv /opt/BHoM/Extensions/Python/tools/uv
+COPY --from=dotnet /usr/share/dotnet /usr/share/dotnet
 
-ENV PYTHONNET_RUNTIME="coreclr"
+ENV DOTNET_ROOT=/usr/share/dotnet \
+    PYTHONNET_RUNTIME=coreclr \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_LINK_MODE=copy \
+    PATH="/opt/BHoM/Extensions/Python/Python_Toolkit/.venv/bin:/opt/BHoM/Extensions/Python/tools:/usr/share/dotnet:${PATH}" \
+    PYTHONPATH="/opt/BHoM/Assemblies"
 
-RUN pip3 install ./Python_Toolkit
+WORKDIR /opt/BHoM/Extensions/Python/Python_Toolkit
 
-RUN rm ./Python_Toolkit -rf
+# Requires the bhom-assemblies named build context.
+COPY --from=bhom-assemblies . /opt/BHoM/Assemblies
+
+COPY pyproject.toml README.md ./
+COPY src ./src
+
+RUN /opt/BHoM/Extensions/Python/tools/uv sync --no-dev --no-editable

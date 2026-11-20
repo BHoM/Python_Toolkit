@@ -21,12 +21,7 @@
  */
 
 using BH.oM.Base.Attributes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BH.Engine.Python
 {
@@ -38,14 +33,9 @@ namespace BH.Engine.Python
         public static string AddQuotesIfRequired(this string path)
         {
             return !string.IsNullOrWhiteSpace(path) ?
-                path.Contains(" ") && (!path.StartsWith("\"") && !path.EndsWith("\"")) ?
+                path.Contains(" ") && !path.StartsWith("\"") && !path.EndsWith("\"") ?
                     "\"" + path + "\"" : path :
                     string.Empty;
         }
     }
 }
-
-
-
-
-

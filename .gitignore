@@ -147,7 +147,9 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+**/docs/_build/
+**/docs/index.rst
+**/docs/autoapi
 
 # PyBuilder
 .pybuilder/
@@ -216,5 +218,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# unignored files
-!example.sql
+# Additional directories to ignore
+.benchmarks/
+
+# UV
+uv.lock
