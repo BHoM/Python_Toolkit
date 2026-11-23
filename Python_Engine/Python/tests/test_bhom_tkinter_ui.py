@@ -461,3 +461,23 @@ def test_searchable_list_box_fuzzy_matching():
 	assert only_london.get_visible() == ["London_TRY.epw"]
 
 	root.destroy_root()
+
+
+def test_directory_file_selector_single_select(tmp_path):
+	"""multi_select=False allows one file only and hides Select All / Deselect All."""
+	for name in ("a.aps", "b.aps"):
+		(tmp_path / name).write_text("")
+
+	multi = DirectoryFileSelector(directory=tmp_path, file_types=[".aps"])
+	assert multi.file_selector_listbox.listbox.cget("selectmode") == tk.MULTIPLE
+	assert hasattr(multi.file_selector_listbox, "select_all_button")
+	multi.destroy_root()
+
+	single = DirectoryFileSelector(directory=tmp_path, file_types=[".aps"], multi_select=False)
+	listbox = single.file_selector_listbox
+	assert listbox.listbox.cget("selectmode") == tk.BROWSE
+	assert not hasattr(listbox, "select_all_button")
+
+	listbox.listbox.selection_set(0)
+	single._on_submit()
+	assert single.selected_files == [tmp_path / "a.aps"]

@@ -12,18 +12,20 @@ from python_toolkit.bhom_tkinter.bhom_base_child_window import BHoMBaseChildWind
 from python_toolkit.bhom_tkinter.theming.scaling import scale_pad
 
 class DirectoryFileSelector(BHoMBaseChildWindow):
-    """Display matching files and return the user's multi-selection."""
+    """Display matching files and return the user's selection (one file when multi_select is False)."""
 
     def __init__(
         self,
         directory: Path,
         file_types: Iterable[str],
         selection_label: str = "file(s)",
+        multi_select: bool = True,
         **kwargs,
     ) -> None:
         self.directory = Path(directory)
         self.file_types = self._normalise_file_types(file_types)
         self.selection_label = selection_label
+        self.multi_select = multi_select
         self._cancelled = False
         self.selected_files: List[Path] = []
 
@@ -58,9 +60,9 @@ class DirectoryFileSelector(BHoMBaseChildWindow):
                 id="file_selector_listbox",
                 parent=self.content_frame,
                 items=self.display_items,
-                selectmode=tk.MULTIPLE,
+                selectmode=tk.MULTIPLE if self.multi_select else tk.BROWSE,
                 height=12,
-                show_selection_controls=True,
+                show_selection_controls=self.multi_select,
                 build_options=PackingOptions(fill='both', expand=True),
             )
             self.widgets.append(self.file_selector_listbox)
