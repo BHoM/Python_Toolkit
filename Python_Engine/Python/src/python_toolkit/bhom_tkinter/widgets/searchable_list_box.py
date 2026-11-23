@@ -35,16 +35,22 @@ def _load_bhom_search():
     return _BHOM_SEARCH
 
 
-def default_scorer(query: str, text: str, min_score: float = 75) -> Optional[float]:
+_CONTAINS_SCORE = 200.0  # above any fuzzy score (0-100), so items containing the query list first
+_FUZZY_MIN_LENGTH = 4  # shorter queries only match as substrings; fuzzy matches on 1-3 characters are noise
+
+
+def fuzzy_scorer(query: str, text: str, min_score: float = 75) -> Optional[float]:
     """Score how well `query` matches `text` using the BHoM Search_Engine fuzzy match, or None if it is a weak match.
 
     Uses BH.Engine.Search.Compute.MatchScore with the WeightedRatio scorer. Case and punctuation are ignored.
+    WeightedRatio scales the score down when `text` is much longer than `query`, so on its own it hides long
+    items and matches nothing for short queries. `default_scorer` uses it only as a fallback for typos.
 
     Args:
         query: The text typed into the filter.
         text: The item being tested.
         min_score: Similarity (0-100) an item needs to be shown. To use a different value, bind it with
-            `functools.partial(default_scorer, min_score=...)` and pass that as `scorer`.
+            `functools.partial(fuzzy_scorer, min_score=...)` and pass that as `scorer`.
     """
     compute, bhom_scorer = _load_bhom_search()
     query = _NON_ALNUM.sub(" ", query.lower()).strip()
@@ -53,12 +59,36 @@ def default_scorer(query: str, text: str, min_score: float = 75) -> Optional[flo
     return float(score) if score >= min_score else None
 
 
+def default_scorer(query: str, text: str, min_score: float = 75) -> Optional[float]:
+    """Score how well `query` matches `text`, or None to hide the item.
+
+    An item matches when it contains every word of the query (case and punctuation ignored), so ".epw",
+    "a" or "205" show every item containing them. These score above any fuzzy match and keep their item order.
+    For queries of 4 or more characters, other items are then tested with `fuzzy_scorer` to allow for typos.
+
+    Args:
+        query: The text typed into the filter.
+        text: The item being tested.
+        min_score: Similarity (0-100) a fuzzy match needs to be shown.
+    """
+    words = _NON_ALNUM.sub(" ", query.lower()).split()
+    if not words:
+        return None
+    item = _NON_ALNUM.sub(" ", text.lower())
+    if all(word in item for word in words):
+        return _CONTAINS_SCORE
+    if len("".join(words)) < _FUZZY_MIN_LENGTH:
+        return None
+    return fuzzy_scorer(query, text, min_score)
+
+
 class SearchableListBox(BHoMBaseWidget):
     """A listbox with a filter entry beneath it, for picking from long lists.
 
     The filter sits in a row under the list.
-    Typing in the filter narrows the list to fuzzy matches (typo-tolerant, case-insensitive), best first.
-    Matching uses `default_scorer` (BHoM Search_Engine); pass `scorer` to use another algorithm.
+    Typing in the filter narrows the list to items containing every word typed (case-insensitive), then
+    close fuzzy matches for longer queries (typo-tolerant, BHoM Search_Engine).
+    Matching uses `default_scorer`; pass `scorer` to use another algorithm (e.g. `fuzzy_scorer` alone).
     By default the selection is kept for items hidden by the filter, so several searches can build up one
     selection; `get()` always returns the full selection in item order.
     """
@@ -91,7 +121,7 @@ class SearchableListBox(BHoMBaseWidget):
                 multi-select lists.
             filter_label (str): Caption shown above the filter entry.
             scorer (Callable): Called as scorer(query, item); returns a score (higher ranks first) or None to
-                hide the item. Defaults to the BHoM Search_Engine fuzzy match.
+                hide the item. Defaults to `default_scorer` (contains every word, then fuzzy for typos).
             **kwargs: Additional BHoMBaseWidget / Frame options (id, item_title, helper_text, on_change, ...).
         """
         super().__init__(parent, **kwargs)
