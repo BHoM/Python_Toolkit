@@ -1,6 +1,7 @@
 """Window for selecting one or more files by extension from a directory tree.
 
-By default the user can select multiple files; with ``multi_select=False`` only one file can be selected."""
+By default the user can select multiple files; with ``multi_select=False`` only one file can be selected.
+"""
 
 import tkinter as tk
 from tkinter import ttk
@@ -29,7 +30,7 @@ class DirectoryFileSelector(BHoMBaseChildWindow):
         Args:
             directory: Directory to search for matching files.
             file_types: File extensions to list.
-            selection_label: Label describing what is being selected.
+            selection_label: Label describing what is being selected. Defaults to "file(s)".
             multi_select: Defaults to True. When False, the list keeps a single
                 file and hides Select All / Deselect All.
             **kwargs: Passed to BHoMBaseChildWindow.
