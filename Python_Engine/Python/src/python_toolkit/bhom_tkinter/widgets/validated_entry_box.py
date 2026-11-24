@@ -35,6 +35,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         required: bool = True,
         custom_validator: Optional[Callable[[Any], tuple[bool, str]]] = None,
         on_validate: Optional[Callable[[bool], None]] = None,
+        validate_on_change: bool = True,
         **kwargs
     ) -> None:
         """
@@ -56,6 +57,10 @@ class ValidatedEntryBox(BHoMBaseWidget):
             required: Whether the field is required
             custom_validator: Custom validation function that returns (is_valid, error_message)
             on_validate: Callback function called after validation with validation result
+            validate_on_change: Validate as the user types, so a stale success mark is removed straight away
+                and `on_validate` follows the value. Errors are not shown while typing, only on focus out
+                and Return. If False, validation runs only on focus out and Return.
+                An empty optional entry shows neither mark.
         """
         super().__init__(parent, **kwargs)
 
@@ -76,6 +81,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self.required = required
         self.custom_validator = custom_validator
         self.on_validate = on_validate
+        self.validate_on_change = validate_on_change
         self.default_value = default_value
 
         # Store the external variable (any tkinter var type)
@@ -139,7 +145,12 @@ class ValidatedEntryBox(BHoMBaseWidget):
         self.variable.trace_add("write", self._on_value_change)
 
     def _on_value_change(self, *_) -> None:
-        """Fire the on_change callback when the entry value changes."""
+        """Validate (if enabled), then fire the on_change callback when the entry value changes."""
+        if self.validate_on_change:
+            is_valid = self.validate()[0]
+            if not is_valid:
+                # Keep the error for focus out / Return: the value may just be partly typed.
+                self.clear_error()
         self._fire_on_change(self.get())
 
     def _sync_to_external(self, *_) -> None:
@@ -221,7 +232,7 @@ class ValidatedEntryBox(BHoMBaseWidget):
         
         # If not required and empty, it's valid
         if not self.required and not value_str:
-            self._show_success()
+            self.clear_error()
             self._call_validate_callback(True)
             base_result = (True, None, None)
             return self.apply_validation(base_result)

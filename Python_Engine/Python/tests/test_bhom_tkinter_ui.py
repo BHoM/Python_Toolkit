@@ -291,6 +291,34 @@ def test_widget_validation():
 	ok, msg, sev = custom_box.validate()
 	assert ok is False and msg == "Custom failed"
 
+	# Validation runs as the value changes: an invalid value loses the success mark without focus out
+	results = []
+	live_box = ValidatedEntryBox(
+		parent, value_type=float, min_value=100.0, max_value=500.0, required=False, on_validate=results.append
+	)
+	live_box.build()
+	live_box.set("300")
+	assert live_box.success_label.get() == "✓"
+	# Partly typed / invalid values lose the tick but do not show an error while typing
+	live_box.set("3")
+	assert live_box.success_label.get().strip() == "" and live_box.error_label.get().strip() == ""
+	assert results[-1] is False
+	# The error shows once the user commits the value (focus out / Return)
+	live_box.validate()
+	assert live_box.error_label.get().startswith("Must be between")
+	# Clearing an optional entry shows no marks and reports valid, so callers can re-enable Submit
+	live_box.set("")
+	assert live_box.success_label.get().strip() == "" and live_box.error_label.get().strip() == ""
+	assert results[-1] is True
+	live_box.validate()
+	assert live_box.success_label.get().strip() == "" and results[-1] is True
+
+	# validate_on_change=False keeps the old behaviour: no mark until validate() is called
+	lazy_box = ValidatedEntryBox(parent, value_type=float, required=False, validate_on_change=False)
+	lazy_box.build()
+	lazy_box.set("test")
+	assert lazy_box.error_label.get().strip() == ""
+
 
 def test_rebuild():
 	"""Verify that rebuild() re-places widgets and reflects mutations to self.widgets."""
